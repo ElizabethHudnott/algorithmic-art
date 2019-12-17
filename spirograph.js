@@ -1,5 +1,6 @@
 let animationSpeed = 30;
 let maxIncrement = Math.PI / 96;
+let timer;
 
 function drawSpirograph(stator, rotor, startDistance, penX, penY) {
 	const endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
@@ -16,7 +17,7 @@ function drawSpirograph(stator, rotor, startDistance, penX, penY) {
 	let statorState = stator.calc(distance);
 	spiroContext.beginPath();
 	let begin = true;
-	const timer = setInterval(function () {
+	timer = setInterval(function () {
 		if (distance < endDistance) {
 			distance += increment;
 			statorState = stator.calc(distance);
@@ -136,11 +137,35 @@ let stator = new InnerCircleStator(96, 1);
 let rotor = new CircleRotor(stator, 52);
 drawSpirograph(stator, rotor, 0, 0.7, 0);
 
+function queryChecked(ancestor, name) {
+	return ancestor.querySelector(`:checked[name=${name}]`);
+}
+
+function checkInput(ancestor, name, value) {
+	ancestor.querySelector(`[name=${name}][value=${value}]`).checked = true;
+}
+
 document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
 	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
 	if (invisible) {
-		this.innerHTML = 'Show Tools';
+		this.innerHTML = 'Show Gears';
 	} else {
-		this.innerHTML = 'Hide Tools';
+		this.innerHTML = 'Hide Gears';
 	}
+});
+
+document.getElementById('paper-color').addEventListener('input', function (event) {
+	checkInput(document.getElementById('erase-form'), 'paper-type', 'color');
+});
+
+document.getElementById('erase-form').addEventListener('submit', function(event) {
+	event.preventDefault();
+	clearInterval(timer);
+	spiroContext.clearRect(-1, -1, width, height);
+	const option = queryChecked(this, 'paper-type').value;
+	if (option === 'color') {
+		spiroContext.fillStyle = document.getElementById('paper-color').value;
+		spiroContext.fillRect(-1, -1, width, height);
+	}
+	$('#erase-modal').modal('hide');
 });

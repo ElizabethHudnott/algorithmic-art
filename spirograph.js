@@ -1,4 +1,4 @@
-let animationSpeed = 100;
+let animationSpeed = 30;
 let maxIncrement = Math.PI / 96;
 
 function drawSpirograph(stator, rotor, startDistance, penX, penY) {
@@ -135,3 +135,12 @@ toolContext.lineWidth = 2 / scale;
 let stator = new InnerCircleStator(96, 1);
 let rotor = new CircleRotor(stator, 52);
 drawSpirograph(stator, rotor, 0, 0.7, 0);
+
+document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
+	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
+	if (invisible) {
+		this.innerHTML = 'Show Tools';
+	} else {
+		this.innerHTML = 'Hide Tools';
+	}
+});

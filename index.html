@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Spirograph</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+	<div class="container">
+		<div class="jumbotron">
+			<h1 class="display-4">Elizabeth's Spirograph Lab</h1>
+			<p class="lead">A childhood toy digitally resurrected.</p>
+		</div>
+		<div class="position-relative w-100">
+			<canvas id="spirograph-canvas" width="640" height="640"></canvas>
+			<canvas class="position-absolute" style="left: 0" id="tool-canvas" width="640" height="640"></canvas>
+		</div>
+	</div>
+	<script src="spirograph.js"></script>
+</body>
+</html>

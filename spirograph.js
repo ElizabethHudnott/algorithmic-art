@@ -106,7 +106,6 @@ class CircleRotor {
 	draw(context) {
 		context.beginPath();
 		context.arc(0, 0, this.radiusA, 0, 2 * Math.PI);
-		//context.fill();
 	}
 
 	contactPoint(distance) {
@@ -147,6 +146,19 @@ function checkInput(ancestor, name, value) {
 	ancestor.querySelector(`[name=${name}][value=${value}]`).checked = true;
 }
 
+document.getElementById('btn-fill').addEventListener('click', function (event) {
+	spiroContext.fill('evenodd');
+});
+
+document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
+	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
+	if (invisible) {
+		this.innerText = 'Show Gears';
+	} else {
+		this.innerText = 'Hide Gears';
+	}
+});
+
 document.getElementById('pen-x').addEventListener('input', function (event) {
 	document.getElementById('pen-x-readout').innerText = Math.round(parseFloat(this.value) * 100) + '%';
 });
@@ -157,15 +169,6 @@ document.getElementById('pen-y').addEventListener('input', function (event) {
 
 document.getElementById('paper-color').addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
-});
-
-document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
-	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
-	if (invisible) {
-		this.innerText = 'Show Gears';
-	} else {
-		this.innerText = 'Hide Gears';
-	}
 });
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {

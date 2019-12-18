@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Spirograph</title>
+	<title>Spirograph Lab</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="site.css">
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	<script src="spirograph.js" defer></script>
 </head>
@@ -15,6 +16,75 @@
 			<h1 class="display-4">Elizabeth's Spirograph Lab</h1>
 			<p class="lead">A childhood toy digitally resurrected.</p>
 		</div>
+
+		<form>
+			<div class="row mb-3">
+				<div class="col-6">
+					<label for="rotor-teeth">Number of rotor teeth</label>
+					<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-size-list" placeholder="Number of teeth on the moving part">
+					<datalist id="rotor-size-list">
+						<option>24</option>
+						<option>30</option>
+						<option>32</option>
+						<option>36</option>
+						<option>40</option>
+						<option>42</option>
+						<option>45</option>
+						<option>48</option>
+						<option>50</option>
+						<option>52</option>
+						<option>56</option>
+						<option>60</option>
+						<option>63</option>
+						<option>64</option>
+						<option>72</option>
+						<option>75</option>
+						<option>80</option>
+						<option>84</option>
+					</datalist>
+				</div>
+				<div class="col-6">
+					<label for="stator-teeth">Number of stator teeth</label>
+					<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-size-list" placeholder="Number of teeth on the stationary part">
+					<datalist id="stator-size-list">
+						<option>96</option>
+						<option>105</option>
+					</datalist>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-12 col-md-6">
+					<label for="pen-x">Distance from pen to rotor centre</label>
+					<output id="pen-x-readout" class="float-right">99%</output>
+					<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.99" aria-described-by="pen-x-readout">
+				</div>
+				<div class="col-12 col-md-6">
+					<label for="start-tooth">Starting tooth</label>
+					<input type="number" class="form-control" min="1" value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-12 col-md-6">
+					<label for="pen-y">Perpendicular pen offset</label>
+					<output id="pen-y-readout" class="float-right">0%</output>
+					<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-described-by="pen-y-readout">
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-3">
+					<label for="pen-color">Pen colour</label>
+	      			<input class="form-control" type="color" id="pen-color">
+				</div>
+				<div class="col-3">
+					<label for="line-width">Line width</label>
+					<input class="form-control" type="number" min="1" value="1" placeholder="Pen thickness">
+				</div>
+				<div class="col-3">
+					<label for="paper-color">Paper colour</label>
+	      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
+				</div>
+			</div>
+		</form>
 
 		<button type="button" class="btn btn-secondary" id="btn-toggle-tools" style="width: 7rem;">
 			Hide Gears
@@ -38,27 +108,9 @@
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<div class="modal-body">
-					<div class="alert alert-danger" role="alert">
-						This action will erase the current design.
-					</div>
-					<div class="form-row">
-						<div class="col-1"></div>
-						<div class="col-11">
-			  				<div class="form-check pb-2">
-				      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent" checked>
-				      			<label class="form-check-label" for="paper-type-transparent">Transparent background</label>
-				      		</div>
-				      		<div class="d-flex pb-2 align-items-center">
-				  				<div class="form-check mr-3">
-					      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color">
-					      			<label class="form-check-label" for="paper-type-color">Coloured paper</label>
-					      		</div>
-				      			<input class="form-control" type="color" id="paper-color" value="#ffffff" aria-label="Select paper colour">
-					      	</div>
-				      	</div>
-			      	</div>
-		      	</div>
+				<p class="modal-body">
+					Sure you want to erase the current design?
+		      	</p>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-danger">Erase</button>
@@ -67,5 +119,34 @@
 		</div>
 	</div>
 
+	<div class="modal fade" id="export-modal" tabindex="-1" role="dialog" aria-labelledby="export-modal-label" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<form id="export-form" class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="export-modal-label">Export Options</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body form-row">
+					<div class="col-1"></div>
+					<div class="col-11">
+		  				<div class="form-check pb-2">
+			      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent" checked>
+			      			<label class="form-check-label" for="paper-type-transparent">Transparent background</label>
+			      		</div>
+		  				<div class="form-check">
+			      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color">
+			      			<label class="form-check-label" for="paper-type-color">Coloured paper</label>
+			      		</div>
+			      	</div>
+		      	</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary">Export</button>
+				</div>
+			</form>
+		</div>
+	</div>
 </body>
 </html>

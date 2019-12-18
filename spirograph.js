@@ -2,8 +2,10 @@ let animationSpeed = 30;
 let maxIncrement = Math.PI / 96;
 let timer;
 
-function drawSpirograph(stator, rotor, startDistance, penX, penY) {
-	const endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
+function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
+	if (endDistance === undefined) {
+		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
+	}
 	let increment = stator.toothSize;
 	if (increment > maxIncrement) {
 		const multiple = Math.ceil(increment / maxIncrement);
@@ -135,7 +137,7 @@ toolContext.lineWidth = 2 / scale;
 
 let stator = new InnerCircleStator(96, 1);
 let rotor = new CircleRotor(stator, 52);
-drawSpirograph(stator, rotor, 0, 0.7, 0);
+drawSpirograph(stator, rotor, 0, undefined, 0.7, 0);
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -145,27 +147,34 @@ function checkInput(ancestor, name, value) {
 	ancestor.querySelector(`[name=${name}][value=${value}]`).checked = true;
 }
 
-document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
-	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
-	if (invisible) {
-		this.innerHTML = 'Show Gears';
-	} else {
-		this.innerHTML = 'Hide Gears';
-	}
+document.getElementById('pen-x').addEventListener('input', function (event) {
+	document.getElementById('pen-x-readout').innerText = Math.round(parseFloat(this.value) * 100) + '%';
+});
+
+document.getElementById('pen-y').addEventListener('input', function (event) {
+	document.getElementById('pen-y-readout').innerText = Math.round(parseFloat(this.value) * 100) + '%';
 });
 
 document.getElementById('paper-color').addEventListener('input', function (event) {
-	checkInput(document.getElementById('erase-form'), 'paper-type', 'color');
+	spiroCanvas.style.backgroundColor = this.value;
+});
+
+document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
+	const invisible = document.getElementById('tool-canvas').classList.toggle('invisible');
+	if (invisible) {
+		this.innerText = 'Show Gears';
+	} else {
+		this.innerText = 'Hide Gears';
+	}
 });
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
 	clearInterval(timer);
 	spiroContext.clearRect(-1, -1, width, height);
-	const option = queryChecked(this, 'paper-type').value;
-	if (option === 'color') {
-		spiroContext.fillStyle = document.getElementById('paper-color').value;
-		spiroContext.fillRect(-1, -1, width, height);
-	}
 	$('#erase-modal').modal('hide');
+});
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
 });

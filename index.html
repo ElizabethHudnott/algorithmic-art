@@ -18,8 +18,8 @@
 		</div>
 
 		<form>
-			<div class="row mb-3">
-				<div class="col-6">
+			<div class="row">
+				<div class="col-6 mb-3">
 					<label for="rotor-teeth">Number of rotor teeth</label>
 					<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-size-list" placeholder="Number of teeth on the moving part">
 					<datalist id="rotor-size-list">
@@ -43,7 +43,7 @@
 						<option>84</option>
 					</datalist>
 				</div>
-				<div class="col-6">
+				<div class="col-6 mb-3">
 					<label for="stator-teeth">Number of stator teeth</label>
 					<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-size-list" placeholder="Number of teeth on the stationary part">
 					<datalist id="stator-size-list">
@@ -52,24 +52,24 @@
 					</datalist>
 				</div>
 			</div>
-			<div class="row mb-3">
-				<div class="col-12 col-md-6">
+			<div class="row">
+				<div class="col-12 col-md-6 mb-3">
 					<label for="pen-x">Distance from pen to rotor centre</label>
 					<output id="pen-x-readout" class="float-right">99%</output>
 					<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.99" aria-described-by="pen-x-readout">
 				</div>
-				<div class="col-12 col-md-6">
+				<div class="col-12 col-md-6 mb-3">
 					<label for="start-tooth">Starting tooth</label>
 					<input type="number" class="form-control" min="1" required value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
 				</div>
 			</div>
-			<div class="row mb-3">
-				<div class="col-12 col-lg-6">
+			<div class="row">
+				<div class="col-12 col-lg-6 mb-3">
 					<label for="pen-y">Perpendicular pen offset</label>
 					<output id="pen-y-readout" class="float-right">0%</output>
 					<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-described-by="pen-y-readout">
 				</div>
-				<div class="col-12 col-lg-6">
+				<div class="col-12 col-lg-6 mb-3">
 					<label class="d-block">End position</label>
 					<div class="input-group mb-2">
 						<div class="input-group-prepend">
@@ -90,23 +90,23 @@
 						<div class="input-group-prepend input-group-append">
 							<span class="input-group-text">&amp;</span>
 						</div>
-						<input type="number" id="turns" class="form-control" aria-label="Number of revolutions around the stator" min="0" required value="1">
+						<input type="number" id="turns" class="form-control text-right" aria-label="Number of revolutions around the stator" min="0" required value="1">
 						<div class="input-group-append">
 							<span class="input-group-text">full turns</span>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="row mb-3">
-				<div class="col-3">
+			<div class="row">
+				<div class="col-3 mb-3">
 					<label for="pen-color">Pen colour</label>
 	      			<input class="form-control" type="color" id="pen-color">
 				</div>
-				<div class="col-3">
+				<div class="col-3 mb-3">
 					<label for="line-width">Line width</label>
 					<input class="form-control" type="number" min="1" value="1" placeholder="Pen thickness">
 				</div>
-				<div class="col-3">
+				<div class="col-3 mb-3">
 					<label for="paper-color">Paper colour</label>
 	      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
 				</div>

@@ -83,8 +83,8 @@ class InnerCircleStator {
 		const radius = this.radius;
 		return [
 			radius * Math.cos(distance),	// x-coordinate
-			radius * Math.sin(distance), // y-coordinate
-			distance + Math.PI								// angle of the normal in radians
+			radius * Math.sin(distance), 	// y-coordinate
+			distance + Math.PI				// angle of the normal in radians
 		];
 	}
 

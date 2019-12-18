@@ -1,0 +1,45 @@
+.noresize {
+	resize: none;
+}
+
+/* Colors
+ *************
+ */
+
+:root {
+	--complement-color: #ffb0c8;
+}
+
+.bg-complement {
+	background-color: var(--complement-color);
+}
+
+/* Positioning
+ *************
+ */
+
+.left {
+	left: 0;
+}
+
+.top {
+	top: 0;
+}
+
+/* Bootstrap overrides
+ *********************
+ */
+
+.btn-group-round>.btn:not(:last-child):not(.dropdown-toggle) {
+	border-radius: 0.25rem;
+	margin-right: 0.25rem;
+}
+
+.btn-group-round>.btn:not(:first-child) {
+	border-radius: 0.25rem;
+}
+
+.jumbotron {
+	margin-left: -15px;
+	margin-right: -15px;
+}

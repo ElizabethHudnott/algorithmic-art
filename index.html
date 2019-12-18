@@ -10,120 +10,164 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	<script src="spirograph.js" defer></script>
 </head>
-<body>
-	<div class="container">
-		<div class="jumbotron">
+<body class="bg-dark">
+	<div class="container bg-white">
+		<div class="jumbotron bg-complement">
 			<h1 class="display-4">Elizabeth's Spirograph Lab</h1>
 			<p class="lead">A childhood toy digitally resurrected.</p>
 		</div>
 
-		<form>
-			<div class="row">
-				<div class="col-6 mb-3">
-					<label for="rotor-teeth">Number of rotor teeth</label>
-					<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-size-list" placeholder="Number of teeth on the moving part">
-					<datalist id="rotor-size-list">
-						<option>24</option>
-						<option>30</option>
-						<option>32</option>
-						<option>36</option>
-						<option>40</option>
-						<option>42</option>
-						<option>45</option>
-						<option>48</option>
-						<option>50</option>
-						<option>52</option>
-						<option>56</option>
-						<option>60</option>
-						<option>63</option>
-						<option>64</option>
-						<option>72</option>
-						<option>75</option>
-						<option>80</option>
-						<option>84</option>
-					</datalist>
-				</div>
-				<div class="col-6 mb-3">
-					<label for="stator-teeth">Number of stator teeth</label>
-					<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-size-list" placeholder="Number of teeth on the stationary part">
-					<datalist id="stator-size-list">
-						<option>96</option>
-						<option>105</option>
-					</datalist>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-12 col-md-6 mb-3">
-					<label for="pen-x">Distance from pen to rotor centre</label>
-					<output id="pen-x-readout" class="float-right">99%</output>
-					<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.99" aria-described-by="pen-x-readout">
-				</div>
-				<div class="col-12 col-md-6 mb-3">
-					<label for="start-tooth">Starting tooth</label>
-					<input type="number" class="form-control" min="1" required value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-12 col-lg-6 mb-3">
-					<label for="pen-y">Perpendicular pen offset</label>
-					<output id="pen-y-readout" class="float-right">0%</output>
-					<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-described-by="pen-y-readout">
-				</div>
-				<div class="col-12 col-lg-6 mb-3">
-					<label class="d-block">End position</label>
-					<div class="input-group mb-2">
-						<div class="input-group-prepend">
-							<div class="input-group-text">
-								<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
-							</div>
-						</div>
-						<label class="form-control" for="end-point-auto">Complete shape</label>
-					</div>
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<div class="input-group-text">
-								<input type="radio" name="end-point" value="fixed" aria-label="Turn through a specific angle">
-							</div>
-							<div class="input-group-text">Tooth</div>
-						</div>
-						<input type="number" id="end-tooth" class="form-control" aria-label="Tooth number to end on" placeholder="Tooth number">
-						<div class="input-group-prepend input-group-append">
-							<span class="input-group-text">&amp;</span>
-						</div>
-						<input type="number" id="turns" class="form-control text-right" aria-label="Number of revolutions around the stator" min="0" required value="1">
-						<div class="input-group-append">
-							<span class="input-group-text">full turns</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-3 mb-3">
-					<label for="pen-color">Pen colour</label>
-	      			<input class="form-control" type="color" id="pen-color">
-				</div>
-				<div class="col-3 mb-3">
-					<label for="line-width">Line width</label>
-					<input class="form-control" type="number" min="1" value="1" placeholder="Pen thickness">
-				</div>
-				<div class="col-3 mb-3">
-					<label for="paper-color">Paper colour</label>
-	      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
-				</div>
-			</div>
-		</form>
-
-		<button type="button" class="btn btn-secondary" id="btn-toggle-tools" style="width: 7rem;">
-			Hide Gears
-		</button>
-		<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#erase-modal">
-			Erase
-		</button>
-
 		<div class="position-relative w-100 my-2">
 			<canvas id="spirograph-canvas" width="640" height="640"></canvas>
-			<canvas class="position-absolute" style="left: 0" id="tool-canvas" width="640" height="640"></canvas>
+			<canvas class="position-absolute top left" id="tool-canvas" width="640" height="640"></canvas>
 		</div>
+
+		<form>
+			<div class="btn-toolbar my-3" role="toolbar" aria-label="Drawing tools">
+				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Spirograph plotting tools">
+					<button type="submit" class="btn btn-primary" id="btn-draw">Draw Shape</button>
+					<button type="button" class="btn btn-secondary" id="btn-fill">Fill Shape</button>
+				</div>
+				<div class="btn-group btn-group-toggle mr-3 mb-2" data-toggle="buttons" aria-label="Selected tool">
+					<label class="btn btn-secondary active">
+						<input type="radio" name="tool" value="line" checked>Ruler
+					</label>
+					<label class="btn btn-secondary">
+						<input type="radio" name="tool" value="fill">Fill Tool
+					</label>
+				</div>
+				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="History">
+					<button type="button" class="btn btn-secondary" id="btn-undo" disabled>Undo</button>
+					<button type="button" class="btn btn-secondary" id="btn-redo" disabled>Redo</button>
+				</div>
+				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Information">
+					<button type="button" class="btn btn-info" id="btn-toggle-tools" style="width: 7rem">Hide Gears</button>
+				</div>
+				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="File">
+					<button type="button" class="btn btn-secondary" id="btn-export" data-toggle="modal" data-target="#export-modal">Export</button>
+					<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#erase-modal">Erase All</button>
+				</div>
+			</div>
+
+			<table>
+				<thead>
+					<tr class="row d-lg-none">
+						<th colspan="4" class="col-12">Configuration</th>
+					</tr>
+					<tr class="row d-none d-lg-flex">
+						<th colspan="2" class="col-6">Configuration of Moving Parts</th>
+						<th colspan="2" class="col-6">Configuration of Still Parts</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="row">
+						<td colspan="2" class="col-6 mb-3">
+							<label for="rotor-teeth">Number of rotor teeth</label>
+							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-size-list" placeholder="Number of teeth on the moving part">
+							<datalist id="rotor-size-list">
+								<option>24</option>
+								<option>30</option>
+								<option>32</option>
+								<option>36</option>
+								<option>40</option>
+								<option>42</option>
+								<option>45</option>
+								<option>48</option>
+								<option>50</option>
+								<option>52</option>
+								<option>56</option>
+								<option>60</option>
+								<option>63</option>
+								<option>64</option>
+								<option>72</option>
+								<option>75</option>
+								<option>80</option>
+								<option>84</option>
+							</datalist>
+						</td>
+						<td colspan="2" class="col-6 mb-3">
+							<label for="stator-teeth">Number of stator teeth</label>
+							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-size-list" placeholder="Number of teeth on the stationary part">
+							<datalist id="stator-size-list">
+								<option>96</option>
+								<option>105</option>
+							</datalist>
+						</td>
+					</tr>
+					<tr class="row">
+						<td colspan="2" class="col-12 col-md-6 mb-3">
+							<label for="pen-x">Distance from pen to rotor centre</label>
+							<output id="pen-x-readout" class="float-right">99%</output>
+							<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.99" aria-describedby="pen-x-readout">
+						</td>
+						<td colspan="2" class="col-12 col-md-6 mb-3">
+							<label for="start-tooth">Starting tooth</label>
+							<input type="number" class="form-control" min="1" required value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
+						</td>
+					</tr>
+					<tr class="row">
+						<td colspan="2" class="col-12 col-lg-6">
+							<fieldset class="form-group">
+								<label for="pen-y">Perpendicular pen offset</label>
+								<output id="pen-y-readout" class="float-right">0%</output>
+								<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-describedby="pen-y-readout">
+							</fieldset>
+							<fieldset class="form-group">
+								<label for="anim-speed">Animation speed</label>
+								<input type="range" class="form-control-range mt-2" id="anim-speed" min="1" max="100" value="30">
+							</fieldset>
+						</td>
+						<td colspan="2" class="col-12 col-lg-6 mb-3">
+							<label class="d-block">End position</label>
+							<div class="input-group mb-2">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
+									</div>
+								</div>
+								<label class="form-control input-group-text" for="end-point-auto">Complete shape</label>
+							</div>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="end-point" value="fixed" aria-label="Turn through a specific angle">
+									</div>
+									<div class="input-group-text">Tooth</div>
+								</div>
+								<input type="number" id="end-tooth" class="form-control" aria-label="Tooth number to end on" aria-describedby="end-tooth-help" placeholder="Number">
+								<div class="input-group-prepend input-group-append">
+									<span class="input-group-text">&amp;</span>
+								</div>
+								<input type="number" id="turns" class="form-control text-right" aria-label="Number of revolutions around the stator" min="0" required value="1">
+								<div class="input-group-append">
+									<span class="input-group-text">full turns</span>
+								</div>
+							</div>
+							<small class="form-text text-muted" id="end-tooth-help">
+								Leave the tooth number empty to draw a whole number of turns.
+							</small>
+						</td>
+					</tr>
+					<tr class="row">
+						<td class="col-3 mb-3">
+							<label for="pen-color">Pen colour</label>
+			      			<input class="form-control" type="color" id="pen-color">
+						</td>
+						<td class="col-3 mb-3">
+							<label for="line-width">Line width</label>
+							<input class="form-control" type="number" min="1" value="1" placeholder="Pen thickness">
+						</td>
+						<td class="col-3 mb-3">
+							<label for="paper-color">Paper colour</label>
+			      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+
+		<h5>Your Spirograph Recipe</h5>
+		<textarea class="w-100 noresize" readonly></textarea>
 	</div>
 
 	<div class="modal fade" id="erase-modal" tabindex="-1" role="dialog" aria-labelledby="erase-modal-label" aria-hidden="true">

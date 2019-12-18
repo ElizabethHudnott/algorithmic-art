@@ -60,14 +60,41 @@
 				</div>
 				<div class="col-12 col-md-6">
 					<label for="start-tooth">Starting tooth</label>
-					<input type="number" class="form-control" min="1" value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
+					<input type="number" class="form-control" min="1" required value="1" id="start-tooth" placeholder="Tooth number to begin plotting from">
 				</div>
 			</div>
 			<div class="row mb-3">
-				<div class="col-12 col-md-6">
+				<div class="col-12 col-lg-6">
 					<label for="pen-y">Perpendicular pen offset</label>
 					<output id="pen-y-readout" class="float-right">0%</output>
 					<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-described-by="pen-y-readout">
+				</div>
+				<div class="col-12 col-lg-6">
+					<label class="d-block">End position</label>
+					<div class="input-group mb-2">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
+							</div>
+						</div>
+						<label class="form-control" for="end-point-auto">Complete shape</label>
+					</div>
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">
+								<input type="radio" name="end-point" value="fixed" aria-label="Turn through a specific angle">
+							</div>
+							<div class="input-group-text">Tooth</div>
+						</div>
+						<input type="number" id="end-tooth" class="form-control" aria-label="Tooth number to end on" placeholder="Tooth number">
+						<div class="input-group-prepend input-group-append">
+							<span class="input-group-text">&amp;</span>
+						</div>
+						<input type="number" id="turns" class="form-control" aria-label="Number of revolutions around the stator" min="0" required value="1">
+						<div class="input-group-append">
+							<span class="input-group-text">full turns</span>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="row mb-3">

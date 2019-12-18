@@ -1,6 +1,8 @@
-let animationSpeed = 30;
 let maxIncrement = Math.PI / 96;
-let timer;
+let animating = false;
+
+const animSpeedSlider = document.getElementById('anim-speed');
+let animationSpeed = parseInt(animSpeedSlider.value);
 
 function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	if (endDistance === undefined) {
@@ -11,30 +13,55 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 		const multiple = Math.ceil(increment / maxIncrement);
 		increment = increment / multiple;
 	}
-	let delay = Math.round(50 * (100 - animationSpeed) / (2 * Math.PI / increment));
+	const numSteps = Math.ceil((endDistance - startDistance) / increment);
+	const stepsPerRotation = 2 * Math.PI / increment;
+	let stepNumber = 0;
 	penX = penX * rotor.radiusA;
 	penY = penY * rotor.radiusB;
 
-	let distance = startDistance - increment;
-	let statorState = stator.calc(distance);
 	spiroContext.beginPath();
-	let begin = true;
-	timer = setInterval(function () {
-		if (distance < endDistance) {
-			distance += increment;
-			statorState = stator.calc(distance);
+	const beginTime = performance.now();
+
+	function animate(time) {
+		if (!animating) {
+			return;
+		}
+		let maxStep;
+		if (animationSpeed < 100) {
+			const stepsPerMilli = stepsPerRotation / (50 * (100 - animationSpeed));
+			maxStep = (time - beginTime) * stepsPerMilli;
+			if (maxStep > numSteps) {
+				maxStep = numSteps;
+			}
+		} else {
+			maxStep = numSteps;
+		}
+
+		let rotorX, rotorY, rotorAngle;
+		while (stepNumber <= maxStep) {
+			const distance = startDistance + stepNumber * increment;
+			const statorState = stator.calc(distance);
 			const statorAngle = statorState[2];
 			const contactPoint = rotor.contactPoint(-distance);
-			const rotorAngle = Math.atan2(contactPoint[1], contactPoint[0]) + statorAngle + Math.PI;
 			const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
-			const rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle);
-			const rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle);
+			rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle);
+			rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle);
+			rotorAngle = Math.atan2(contactPoint[1], contactPoint[0]) + statorAngle + Math.PI;
 			const cos = Math.cos(rotorAngle);
 			const sin = Math.sin(rotorAngle);
 			const plotX = rotorX + penX * cos - penY * sin;
 			const plotY = rotorY + penX * sin + penY * cos;
 
-			toolContext.save();
+			if (stepNumber === 0) {
+				spiroContext.moveTo(plotX, plotY);
+			} else {
+				spiroContext.lineTo(plotX, plotY);
+			}
+			stepNumber++;
+		}
+
+		if (rotorX !== undefined) {
+			toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 			toolContext.clearRect(-1, -1, width, height);
 			stator.draw(toolContext);
 			toolContext.translate(rotorX, rotorY);
@@ -42,20 +69,16 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			rotor.draw(toolContext);
 			toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
 			toolContext.fill('evenodd');
-
 			spiroContext.clearRect(-1, -1, width, height);
-			if (begin) {
-				spiroContext.moveTo(plotX, plotY);
-				begin = false;
-			} else {
-				spiroContext.lineTo(plotX, plotY);
-			}
 			spiroContext.stroke();
-			toolContext.restore();
-		} else {
-			clearInterval(timer);
 		}
-	}, delay);
+
+		if (stepNumber <= numSteps) {
+			requestAnimationFrame(animate);
+		}
+	}
+	animating = true;
+	requestAnimationFrame(animate);
 }
 
 function gcd(a, b) {
@@ -173,7 +196,7 @@ document.getElementById('paper-color').addEventListener('input', function (event
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
-	clearInterval(timer);
+	animating = false;
 	spiroContext.clearRect(-1, -1, width, height);
 	$('#erase-modal').modal('hide');
 });

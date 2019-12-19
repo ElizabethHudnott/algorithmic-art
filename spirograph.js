@@ -1,8 +1,8 @@
 let maxIncrement = Math.PI / 96;
-let animating = false;
+let animFunction;
 
 const animSpeedSlider = document.getElementById('anim-speed');
-let animationSpeed = parseInt(animSpeedSlider.value);
+let animSpeed = parseInt(animSpeedSlider.value);
 
 function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	if (endDistance === undefined) {
@@ -22,13 +22,13 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	spiroContext.beginPath();
 	const beginTime = performance.now();
 
-	function animate(time) {
-		if (!animating) {
+	animFunction = function animate(time) {
+		if (animFunction !== animate || animSpeed === 0) {
 			return;
 		}
 		let maxStep;
-		if (animationSpeed < 100) {
-			const stepsPerMilli = stepsPerRotation / (50 * (100 - animationSpeed));
+		if (animSpeed < 100) {
+			const stepsPerMilli = stepsPerRotation / (50 * (100 - animSpeed));
 			maxStep = (time - beginTime) * stepsPerMilli;
 			if (maxStep > numSteps) {
 				maxStep = numSteps;
@@ -77,8 +77,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			requestAnimationFrame(animate);
 		}
 	}
-	animating = true;
-	requestAnimationFrame(animate);
+	requestAnimationFrame(animFunction);
 }
 
 function gcd(a, b) {
@@ -200,7 +199,7 @@ document.getElementById('paper-color').addEventListener('input', function (event
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
-	animating = false;
+	animFunction = undefined;
 	spiroContext.clearRect(-1, -1, width, height);
 	$('#erase-modal').modal('hide');
 });

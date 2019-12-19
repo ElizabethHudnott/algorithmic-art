@@ -114,7 +114,7 @@
 							</fieldset>
 							<fieldset class="form-group">
 								<label for="anim-speed">Animation speed</label>
-								<input type="range" class="form-control-range mt-2" id="anim-speed" min="1" max="100" value="30">
+								<input type="range" class="form-control-range mt-2" id="anim-speed" min="1" max="100" value="60">
 							</fieldset>
 						</td>
 						<td colspan="2" class="col-12 col-lg-6 mb-3">
@@ -145,7 +145,7 @@
 						</td>
 						<td class="col-3 mb-3">
 							<label for="line-width">Line width</label>
-							<input class="form-control" type="number" min="1" value="1" placeholder="Pen thickness">
+							<input class="form-control" type="number" id="pen-width" min="1" value="2" placeholder="Pen thickness">
 						</td>
 						<td class="col-3 mb-3">
 							<label for="paper-color">Paper colour</label>
@@ -157,7 +157,6 @@
 		</form>
 
 		<h5>Your Spirograph Recipe</h5>
-		<textarea class="w-100 noresize" readonly></textarea>
 	</div>
 
 	<div class="modal fade" id="erase-modal" tabindex="-1" role="dialog" aria-labelledby="erase-modal-label" aria-hidden="true">

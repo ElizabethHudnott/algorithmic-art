@@ -1,8 +1,20 @@
+let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 96;
 let animFunction;
 
+
+const penXSlider = document.getElementById('pen-x');
+const penYSlider = document.getElementById('pen-y');
 const animSpeedSlider = document.getElementById('anim-speed');
-let animSpeed = parseInt(animSpeedSlider.value);
+setAnimSpeed(parseInt(animSpeedSlider.value));
+const penWidthInput = document.getElementById('pen-width');
+
+function setAnimSpeed(newSpeed) {
+	animSpeed = newSpeed;
+	if (animFunction) {
+		requestAnimationFrame(animFunction);
+	}
+}
 
 function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	if (endDistance === undefined) {
@@ -28,7 +40,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 		}
 		let maxStep;
 		if (animSpeed < 100) {
-			const stepsPerMilli = stepsPerRotation / (50 * (100 - animSpeed));
+			const stepsPerMilli = stepsPerRotation / (maxRotationTime / 100 * (101 - animSpeed));
 			maxStep = (time - beginTime) * stepsPerMilli;
 			if (maxStep > numSteps) {
 				maxStep = numSteps;
@@ -75,6 +87,8 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 
 		if (stepNumber <= numSteps) {
 			requestAnimationFrame(animate);
+		} else {
+			animFunction = undefined;
 		}
 	}
 	requestAnimationFrame(animFunction);
@@ -151,7 +165,7 @@ let width = spiroCanvas.width / scale;
 let height = spiroCanvas.height / scale;
 spiroContext.scale(scale, scale);
 spiroContext.translate(1, 1);
-spiroContext.lineWidth = 2 / scale;
+spiroContext.lineWidth = parseInt(penWidthInput.value) / scale;
 toolContext.scale(scale, scale);
 toolContext.translate(1, 1);
 toolContext.lineWidth = 2 / scale;
@@ -173,6 +187,7 @@ document.getElementById('spirograph-form').addEventListener('submit', function (
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
+	spiroContext.fillStyle = spiroContext.strokeStyle;
 	spiroContext.fill('evenodd');
 });
 
@@ -185,12 +200,24 @@ document.getElementById('btn-toggle-tools').addEventListener('click', function (
 	}
 });
 
-document.getElementById('pen-x').addEventListener('input', function (event) {
+penXSlider.addEventListener('input', function (event) {
 	document.getElementById('pen-x-readout').innerText = Math.round(parseFloat(this.value) * 100) + '%';
 });
 
-document.getElementById('pen-y').addEventListener('input', function (event) {
+penYSlider.addEventListener('input', function (event) {
 	document.getElementById('pen-y-readout').innerText = Math.round(parseFloat(this.value) * 100) + '%';
+});
+
+animSpeedSlider.addEventListener('input', function (event) {
+	setAnimSpeed(parseInt(this.value));
+});
+
+document.getElementById('pen-color').addEventListener('input', function (event) {
+	spiroContext.strokeStyle = this.value;
+});
+
+penWidthInput.addEventListener('input', function (event) {
+	spiroContext.lineWidth = parseInt(this.value) / scale;
 });
 
 document.getElementById('paper-color').addEventListener('input', function (event) {

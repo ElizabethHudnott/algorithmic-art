@@ -49,7 +49,7 @@
 				</div>
 			</div>
 
-			<table>
+			<table style="min-width: 75%">
 				<thead>
 					<tr class="row d-lg-none">
 						<th colspan="4" class="col-12">Configuration</th>
@@ -130,22 +130,12 @@
 							<div class="input-group">
 								<div class="input-group-prepend">
 									<div class="input-group-text">
-										<input type="radio" name="end-point" value="fixed" aria-label="Turn through a specific angle">
+										<input type="radio" name="end-point" value="fixed" aria-label="Turn until lined up in a specific place">
 									</div>
-									<div class="input-group-text">Tooth</div>
+									<div class="input-group-text">Line up with tooth</div>
 								</div>
-								<input type="number" id="end-tooth" class="form-control" aria-label="Tooth number to end on" aria-describedby="end-tooth-help" placeholder="Number">
-								<div class="input-group-prepend input-group-append">
-									<span class="input-group-text">&amp;</span>
-								</div>
-								<input type="number" id="turns" class="form-control text-right" aria-label="Number of revolutions around the stator" min="0" required value="1">
-								<div class="input-group-append">
-									<span class="input-group-text">full turns</span>
-								</div>
+								<input type="number" id="end-tooth" min="1" value="1" required class="form-control" aria-label="Tooth number to end at" placeholder="Tooth number">
 							</div>
-							<small class="form-text text-muted" id="end-tooth-help">
-								Leave the tooth number empty to draw a whole number of turns.
-							</small>
 						</td>
 					</tr>
 					<tr class="row">

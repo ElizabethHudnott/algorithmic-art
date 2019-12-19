@@ -3,6 +3,8 @@ let maxIncrement = Math.PI / 96;
 let animFunction;
 
 
+const statorTeethInput = document.getElementById('stator-teeth');
+const rotorTeethInput = document.getElementById('rotor-teeth');
 const penXSlider = document.getElementById('pen-x');
 const penYSlider = document.getElementById('pen-y');
 const animSpeedSlider = document.getElementById('anim-speed');
@@ -170,9 +172,13 @@ toolContext.scale(scale, scale);
 toolContext.translate(1, 1);
 toolContext.lineWidth = 2 / scale;
 
-let stator = new InnerCircleStator(96, 1);
-let rotor = new CircleRotor(stator, 52);
-drawSpirograph(stator, rotor, 0, undefined, 0.7, 0);
+function drawSpirographFromForm() {
+	const stator = new InnerCircleStator(parseInt(statorTeethInput.value), 1);
+	const rotor = new CircleRotor(stator, parseInt(rotorTeethInput.value));
+	drawSpirograph(stator, rotor, 0, undefined, 0.7, 0);
+}
+
+drawSpirographFromForm();
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -184,6 +190,7 @@ function checkInput(ancestor, name, value) {
 
 document.getElementById('spirograph-form').addEventListener('submit', function (event) {
 	event.preventDefault();
+	drawSpirographFromForm();
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {

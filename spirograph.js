@@ -169,6 +169,10 @@ function checkInput(ancestor, name, value) {
 	ancestor.querySelector(`[name=${name}][value=${value}]`).checked = true;
 }
 
+document.getElementById('spirograph-form').addEventListener('submit', function (event) {
+	event.preventDefault();
+});
+
 document.getElementById('btn-fill').addEventListener('click', function (event) {
 	spiroContext.fill('evenodd');
 });

@@ -10,6 +10,10 @@
 	--complement-color: #ffb0c8;
 }
 
+.bg-form {
+	background-color: #e9ecef;
+}
+
 .bg-complement {
 	background-color: var(--complement-color);
 }

@@ -139,17 +139,38 @@
 						</td>
 					</tr>
 					<tr class="row">
-						<td class="col-3 mb-3">
-							<label for="pen-color">Pen colour</label>
-			      			<input class="form-control" type="color" id="pen-color">
+						<td colspan="2" class="col-12 col-md-6 mb-3">
+							<label class="d-block">Pen colour</label>
+							<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+								<div class="btn active" style="background-color: black">
+									<input type="radio" name="pen-color" value="black" checked>
+								</div>
+								<div class="btn" style="background-color: hsl(2, 80%, 45%)">
+									<input type="radio" name="pen-color" value="hsl(2, 80%, 45%)">
+								</div>
+								<div class="btn" style="background-color: hsl(140, 85%, 28%)">
+									<input type="radio" name="pen-color" value="hsl(140, 85%, 28%)">
+								</div>
+								<div class="btn" style="background-color: hsl(230, 95%, 30%)">
+									<input type="radio" name="pen-color" value="hsl(230, 95%, 30%)">
+								</div>
+								<div class="btn" style="background-color: hsl(9, 85%, 45%)">
+									<input type="radio" name="pen-color" value="hsl(9, 85%, 45%)">
+								</div>
+								<div class="btn bg-form p-0">
+					      			<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#6005ba">
+								</div>
+				      		</div>
 						</td>
+						<td class="col-2 mb-3">
+							<label for="paper-color">Paper colour</label>
+			      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
+						</td>
+					</tr>
+					<tr class="row">
 						<td class="col-3 mb-3">
 							<label for="line-width">Line width</label>
 							<input class="form-control" type="number" id="pen-width" min="1" value="2" placeholder="Pen thickness">
-						</td>
-						<td class="col-3 mb-3">
-							<label for="paper-color">Paper colour</label>
-			      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
 						</td>
 					</tr>
 				</tbody>

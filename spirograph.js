@@ -18,6 +18,16 @@ function setAnimSpeed(newSpeed) {
 	}
 }
 
+function saveCanvas() {
+	saveContext.clearRect(0, 0, savedCanvas.width, savedCanvas.height);
+	saveContext.drawImage(spiroCanvas, 0, 0);
+}
+
+function restoreCanvas() {
+	spiroContext.clearRect(-1, -1, width, height);
+	spiroContext.drawImage(savedCanvas, -1, -1, width, height);
+}
+
 function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
@@ -33,6 +43,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	penX = penX * rotor.radiusA;
 	penY = penY * rotor.radiusB;
 
+	saveCanvas();
 	spiroContext.beginPath();
 	const beginTime = performance.now();
 
@@ -84,6 +95,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
 			toolContext.fill('evenodd');
 			spiroContext.clearRect(-1, -1, width, height);
+			spiroContext.drawImage(savedCanvas, -1, -1, width, height);
 			spiroContext.stroke();
 		}
 
@@ -157,8 +169,13 @@ class CircleRotor {
 
 const spiroCanvas = document.getElementById('spirograph-canvas');
 const spiroContext = spiroCanvas.getContext('2d');
+spiroContext.globalCompositeOperation = 'hue';
 const toolCanvas = document.getElementById('tool-canvas');
 const toolContext = toolCanvas.getContext('2d');
+const savedCanvas = document.createElement('canvas');
+savedCanvas.width = spiroCanvas.width;
+savedCanvas.height = spiroCanvas.height;
+const saveContext = savedCanvas.getContext('2d');
 const toolColor = 'rgba(0, 64, 255, 0.5)';
 toolContext.strokeStyle = toolColor;
 toolContext.fillStyle = toolColor;
@@ -172,12 +189,24 @@ toolContext.scale(scale, scale);
 toolContext.translate(1, 1);
 toolContext.lineWidth = 2 / scale;
 
+function randomizeSpirographForm() {
+	const rotors = document.getElementById('rotor-size-list').children;
+	const rotorIndex = Math.trunc(Math.random() * rotors.length);
+	const rotorTeeth = rotors[rotorIndex].innerText;
+	document.getElementById('rotor-teeth').value = rotorTeeth;
+	const stators = document.getElementById('stator-size-list').children;
+	const statorIndex = Math.trunc(Math.random() * stators.length);
+	const statorTeeth = stators[statorIndex].innerText;
+	document.getElementById('stator-teeth').value = statorTeeth;
+}
+
 function drawSpirographFromForm() {
 	const stator = new InnerCircleStator(parseInt(statorTeethInput.value), 1);
 	const rotor = new CircleRotor(stator, parseInt(rotorTeethInput.value));
 	drawSpirograph(stator, rotor, 0, undefined, 0.7, 0);
 }
 
+randomizeSpirographForm();
 drawSpirographFromForm();
 
 function queryChecked(ancestor, name) {
@@ -219,7 +248,7 @@ animSpeedSlider.addEventListener('input', function (event) {
 	setAnimSpeed(parseInt(this.value));
 });
 
-document.getElementById('pen-color').addEventListener('input', function (event) {
+document.getElementById('custom-pen-color').addEventListener('input', function (event) {
 	spiroContext.strokeStyle = this.value;
 });
 

@@ -1,10 +1,11 @@
 let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 96;
-let animFunction;
 
+let animFunction;
 
 const statorTeethInput = document.getElementById('stator-teeth');
 const rotorTeethInput = document.getElementById('rotor-teeth');
+const startToothInput = document.getElementById('start-tooth');
 const penXSlider = document.getElementById('pen-x');
 const penYSlider = document.getElementById('pen-y');
 const animSpeedSlider = document.getElementById('anim-speed');
@@ -67,7 +68,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			const distance = startDistance + stepNumber * increment;
 			const statorState = stator.calc(distance);
 			const statorAngle = statorState[2];
-			const contactPoint = rotor.contactPoint(-distance);
+			const contactPoint = rotor.contactPoint(startDistance - distance);
 			const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
 			rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle);
 			rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle);
@@ -94,8 +95,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			rotor.draw(toolContext);
 			toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
 			toolContext.fill('evenodd');
-			spiroContext.clearRect(-1, -1, width, height);
-			spiroContext.drawImage(savedCanvas, -1, -1, width, height);
+			restoreCanvas();
 			spiroContext.stroke();
 		}
 
@@ -201,9 +201,12 @@ function randomizeSpirographForm() {
 }
 
 function drawSpirographFromForm() {
-	const stator = new InnerCircleStator(parseInt(statorTeethInput.value), 1);
+	const numStatorTeeth = parseInt(statorTeethInput.value);
+	const stator = new InnerCircleStator(numStatorTeeth, 1);
 	const rotor = new CircleRotor(stator, parseInt(rotorTeethInput.value));
-	drawSpirograph(stator, rotor, 0, undefined, 0.7, 0);
+	const startTooth = parseInt(startToothInput.value);
+	const startAngle = startTooth * 2 * Math.PI / numStatorTeeth;
+	drawSpirograph(stator, rotor, startAngle, undefined, 0.7, 0);
 }
 
 randomizeSpirographForm();

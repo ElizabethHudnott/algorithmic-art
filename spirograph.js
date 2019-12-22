@@ -1,6 +1,11 @@
 let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 96;
 
+let rotorX = 0;
+let rotorY = 0;
+let rotorAngle = 0;
+let penX = 0;
+let penY = 0;
 let animFunction;
 
 const statorTeethInput = document.getElementById('stator-teeth');
@@ -11,6 +16,11 @@ const penYSlider = document.getElementById('pen-y');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
+
+function setPenOffset(rotor, offsetX, offsetY) {
+	penX = offsetX * rotor.radiusA;
+	penY = offsetY * rotor.radiusB;
+}
 
 function setAnimSpeed(newSpeed) {
 	animSpeed = newSpeed;
@@ -41,8 +51,6 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 	const numSteps = Math.ceil((endDistance - startDistance) / increment);
 	const stepsPerRotation = 2 * Math.PI / increment;
 	let stepNumber = 0;
-	penX = penX * rotor.radiusA;
-	penY = penY * rotor.radiusB;
 
 	saveCanvas();
 	spiroContext.beginPath();
@@ -63,7 +71,6 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			maxStep = numSteps;
 		}
 
-		let rotorX, rotorY, rotorAngle;
 		while (stepNumber <= maxStep) {
 			const distance = startDistance + stepNumber * increment;
 			const statorState = stator.calc(distance);
@@ -86,18 +93,16 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY) {
 			stepNumber++;
 		}
 
-		if (rotorX !== undefined) {
-			toolContext.setTransform(scale, 0, 0, scale, scale, scale);
-			toolContext.clearRect(-1, -1, width, height);
-			stator.draw(toolContext);
-			toolContext.translate(rotorX, rotorY);
-			toolContext.rotate(rotorAngle);
-			rotor.draw(toolContext);
-			toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
-			toolContext.fill('evenodd');
-			restoreCanvas();
-			spiroContext.stroke();
-		}
+		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+		toolContext.clearRect(-1, -1, width, height);
+		stator.draw(toolContext);
+		toolContext.translate(rotorX, rotorY);
+		toolContext.rotate(rotorAngle);
+		rotor.draw(toolContext);
+		toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
+		toolContext.fill('evenodd');
+		restoreCanvas();
+		spiroContext.stroke();
 
 		if (stepNumber <= numSteps) {
 			requestAnimationFrame(animate);
@@ -206,7 +211,10 @@ function drawSpirographFromForm() {
 	const rotor = new CircleRotor(stator, parseInt(rotorTeethInput.value));
 	const startTooth = parseInt(startToothInput.value);
 	const startAngle = startTooth * 2 * Math.PI / numStatorTeeth;
-	drawSpirograph(stator, rotor, startAngle, undefined, 0.7, 0);
+	const penOffsetX = parseFloat(penXSlider.value);
+	const penOffsetY = parseFloat(penYSlider.value);
+	setPenOffset(rotor, penOffsetX, penOffsetY);
+	drawSpirograph(stator, rotor, startAngle, undefined, penX, penY);
 }
 
 randomizeSpirographForm();

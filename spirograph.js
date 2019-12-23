@@ -226,7 +226,7 @@ class CircleRotor {
 
 const spiroCanvas = document.getElementById('spirograph-canvas');
 const spiroContext = spiroCanvas.getContext('2d');
-spiroContext.globalCompositeOperation = 'hue';
+spiroContext.globalCompositeOperation = 'multiply';
 const toolCanvas = document.getElementById('tool-canvas');
 const toolContext = toolCanvas.getContext('2d');
 const savedCanvas = document.createElement('canvas');

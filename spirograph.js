@@ -1,3 +1,5 @@
+'use strict';
+
 let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 96;
 
@@ -10,7 +12,7 @@ let rotorY = 0;
 let rotorAngle = 0;
 let penX = 0;
 let penY = 0;
-let animController;
+let animSpeed, animController;
 
 const drawButton = document.getElementById('btn-draw');
 const statorTeethInput = document.getElementById('stator-teeth');
@@ -257,8 +259,17 @@ function randomizeSpirographForm() {
 
 function cancelDrawing() {
 	initialRotationDist = animController.startDistance - currentDistance + initialRotationDist;
+	const startTooth = parseFloat(startToothInput.value);
+	if (startTooth >= 1) {
+		const startDistance = (startTooth - 1) * stator.toothSize;
+		if (startDistance !== animController.startDistance) {
+			initialRotationDist = 0;
+		}
+	}
+	if (initialRotationDist !== 0) {
+		startToothInput.value = ((currentDistance / stator.toothSize) % stator.numTeeth) + 1;
+	}
 	drawingEnded();
-	startToothInput.value = (currentDistance / stator.toothSize + 1) % stator.numTeeth;
 	// TODO revise end distance
 }
 
@@ -322,16 +333,38 @@ document.getElementById('btn-toggle-tools').addEventListener('click', function (
 });
 
 rotorTeethInput.addEventListener('change', function (event) {
-	if (toolsVisible) {
-		const numRotorTeeth = parseInt(rotorTeethInput.value);
-		if (numRotorTeeth > 0) {
+	const numRotorTeeth = parseInt(rotorTeethInput.value);
+	if (numRotorTeeth >= 2) {
+		let startDistance = currentDistance;
+		let startTooth = parseFloat(startToothInput.value);
+		if (startTooth >= 1) {
+			startTooth = Math.trunc(startTooth);
+			startToothInput.value = startTooth;
+			startDistance = (startTooth - 1) * stator.toothSize;
+		}
+		initialRotationDist = 0;
+		if (toolsVisible) {
 			rotor = new CircleRotor(stator, parseInt(rotorTeethInput.value));
-			let startDistance = currentDistance;
-			const startTooth = parseFloat(startToothInput.value);
-			if (startTooth > 0) {
-				startDistance = (startTooth - 1) * stator.toothSize;
-			}
-			initialRotationDist = 0;
+			placeRotor(stator, rotor, startDistance, startDistance, 0);
+			changePenPosition(rotor, penOffsetX, penOffsetY);
+			drawTools(stator, rotor, penX, penY);
+		}
+	}
+});
+
+statorTeethInput.addEventListener('change', function (event) {
+	const numStatorTeeth = parseInt(this.value);
+	if (numStatorTeeth >= 3) {
+		stator = new InnerCircleStator(numStatorTeeth, 1);
+		let startDistance = currentDistance;
+		let startTooth = parseFloat(startToothInput.value);
+		if (startTooth >= 1) {
+			startTooth = Math.trunc(startTooth);
+			startToothInput.value = startTooth;
+			startDistance = (startTooth - 1) * stator.toothSize;
+		}
+		initialRotationDist = 0;
+		if (toolsVisible) {
 			placeRotor(stator, rotor, startDistance, startDistance, 0);
 			changePenPosition(rotor, penOffsetX, penOffsetY);
 			drawTools(stator, rotor, penX, penY);
@@ -341,11 +374,13 @@ rotorTeethInput.addEventListener('change', function (event) {
 
 startToothInput.addEventListener('change', function (event) {
 	const startTooth = parseFloat(this.value);
-	if (startTooth > 0) {
-		startDistance = (startTooth - 1) * stator.toothSize;
+	if (startTooth >= 1) {
 		initialRotationDist = 0;
-		placeRotor(stator, rotor, startDistance, startDistance, 0);
-		drawTools(stator, rotor, penX, penY);
+		if (toolsVisible) {
+			const startDistance = (startTooth - 1) * stator.toothSize;
+			placeRotor(stator, rotor, startDistance, startDistance, 0);
+			drawTools(stator, rotor, penX, penY);
+		}
 	}
 });
 

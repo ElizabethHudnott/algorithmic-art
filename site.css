@@ -1,7 +1,3 @@
-.noresize {
-	resize: none;
-}
-
 /* Colors
  *************
  */
@@ -12,6 +8,10 @@
 
 input:invalid {
 	background-color: #f4bec3;
+}
+
+.bg-info.bg-light {
+	background-color: #8ee4f1 !important;
 }
 
 .bg-form {

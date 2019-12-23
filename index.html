@@ -23,7 +23,7 @@
 		</div>
 
 		<form id="spirograph-form">
-			<div class="btn-toolbar my-3" role="toolbar" aria-label="Drawing tools">
+			<div class="btn-toolbar mt-3 mb-2" role="toolbar" aria-label="Drawing tools">
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Spirograph plotting tools">
 					<button id="btn-draw" type="submit" class="btn btn-primary" style="width: 7rem">Draw Shape</button>
 					<button type="button" class="btn btn-secondary" id="btn-fill">Fill Shape</button>
@@ -41,13 +41,24 @@
 					<button type="button" class="btn btn-secondary" id="btn-redo" disabled>Redo</button>
 				</div>
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Information">
-					<button type="button" class="btn btn-info" id="btn-toggle-tools" style="width: 7rem">Hide Gears</button>
+					<button type="button" class="btn btn-info" id="btn-toggle-tools" style="width: 7rem">
+						Hide Gears
+					</button>
+					<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+						Toggle Info
+					</button>
 				</div>
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="File">
 					<button type="button" class="btn btn-secondary" id="btn-export" data-toggle="modal" data-target="#export-modal">Export</button>
 					<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#erase-modal">Erase All</button>
 				</div>
 			</div>
+			<div colspan="4" id="info" class="mb-4 collapse">
+				<span class="bg-info bg-light p-2">
+					This spirograph will have <span id="num-points"></span> points.
+				</span>
+			</div>
+
 
 			<table style="min-width: 75%">
 				<thead>

@@ -25,6 +25,7 @@ let penOffsetY = parseFloat(penYSlider.value);
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
+const opacityInput = document.getElementById('opacity');
 
 function changePenPosition(rotor, offsetX, offsetY) {
 	penX = offsetX * rotor.radiusA;
@@ -288,8 +289,7 @@ function drawSpirographFromForm() {
 	changePenPosition(rotor, penOffsetX, penOffsetY);
 	const startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
-	drawButton.classList.add('btn-warning');
-	drawButton.innerText = 'Stop';
+	spiroContext.globalAlpha = 1;
 	animController = drawSpirograph(stator, rotor, startDistance, undefined, penX, penY, initialRotationDist);
 	animController.promise.catch(cancelDrawing).then(drawingEnded);
 }
@@ -319,6 +319,7 @@ document.getElementById('spirograph-form').addEventListener('submit', function (
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
 	spiroContext.fillStyle = spiroContext.strokeStyle;
+	spiroContext.globalAlpha = parseFloat(opacityInput.value);
 	spiroContext.fill('evenodd');
 });
 
@@ -416,6 +417,11 @@ penWidthInput.addEventListener('input', function (event) {
 
 document.getElementById('paper-color').addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
+});
+
+opacityInput.addEventListener('input', function (event) {
+	const opacity = parseFloat(this.value);
+	document.getElementById('opacity-readout').innerText = Math.round(opacity * 100) + '%';
 });
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {

@@ -162,15 +162,22 @@
 								</div>
 				      		</div>
 						</td>
-						<td class="col-2 mb-3">
+						<td class="col-auto mb-3">
 							<label for="paper-color">Paper colour</label>
 			      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
 						</td>
 					</tr>
 					<tr class="row">
-						<td class="col-3 mb-3">
+						<td class="col-3 col-md-2 mb-3">
 							<label for="line-width">Line width</label>
 							<input class="form-control" type="number" id="pen-width" min="1" value="2" placeholder="Pen thickness">
+						</td>
+					</tr>
+					<tr class="row">
+						<td colspan="2" class="col-12 col-md-6 mb-3">
+							<label for="opacity">Fill Opacity</label>
+							<output id="opacity-readout" class="float-right">100%</output>
+							<input type="range" class="form-control-range mt-2" id="opacity" min="0.05" max="1" value="1" step="0.01" aria-describedby="opacity-readout">
 						</td>
 					</tr>
 				</tbody>

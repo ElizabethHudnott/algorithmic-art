@@ -424,7 +424,7 @@ penWidthInput.addEventListener('input', function (event) {
 	spiroContext.lineWidth = parseInt(this.value) / scale;
 });
 
-document.getElementById('paper-color').addEventListener('input', function (event) {
+document.getElementById('custom-paper-color').addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
 });
 

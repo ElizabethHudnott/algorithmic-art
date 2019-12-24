@@ -34,6 +34,15 @@ input:invalid {
 	top: 0;
 }
 
+/* Components
+ ************
+ */
+
+.palette {
+	height: 1.5rem;
+	margin-bottom: 0.25rem;
+}
+
 /* Bootstrap overrides
  *********************
  */

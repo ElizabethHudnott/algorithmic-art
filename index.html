@@ -55,7 +55,7 @@
 			</div>
 			<div colspan="4" id="info" class="mb-4 collapse">
 				<span class="bg-info bg-light p-2">
-					This spirograph will have <span id="num-points"></span> points.
+					This spirograph has <span id="num-points"></span> points.
 				</span>
 			</div>
 
@@ -152,7 +152,7 @@
 					<tr class="row">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label class="d-block">Pen colour</label>
-							<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+							<div class="btn-group btn-group-toggle w-100 palette" data-toggle="buttons">
 								<div class="btn active" style="background-color: black">
 									<input type="radio" name="pen-color" value="black" checked>
 								</div>
@@ -168,14 +168,43 @@
 								<div class="btn" style="background-color: hsl(9, 85%, 45%)">
 									<input type="radio" name="pen-color" value="hsl(9, 85%, 45%)">
 								</div>
+				      		</div>
+							<div class="btn-group btn-group-toggle w-100 palette" data-toggle="buttons">
+								<div class="btn" style="background-color: white">
+									<input type="radio" name="pen-color" value="">
+								</div>
+								<div class="btn" style="background-color: white">
+									<input type="radio" name="pen-color" value="">
+								</div>
+								<div class="btn" style="background-color: white">
+									<input type="radio" name="pen-color" value="">
+								</div>
+								<div class="btn" style="background-color: white">
+									<input type="radio" name="pen-color" value="">
+								</div>
 								<div class="btn bg-form p-0">
 					      			<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#6005ba">
 								</div>
-				      		</div>
+							</div>
 						</td>
-						<td class="col-auto mb-3">
-							<label for="paper-color">Paper colour</label>
-			      			<input class="form-control" type="color" id="paper-color" value="#ffffff">
+						<td class="col-12 col-md-6 mb-3">
+							<label class="d-block">Paper colour</label>
+							<div class="btn-group btn-group-toggle w-100 border palette" data-toggle="buttons">
+								<div class="btn" style="background-color: white">
+									<input type="radio" name="paper-color" value="white">
+								</div>
+								<div class="btn" style="background-color: #ffccd0">
+									<input type="radio" name="paper-color" value="#ffccd0">
+								</div>
+								<div class="btn" style="background-color: #ffffb0">
+									<input type="radio" name="paper-color" value="#ffffb0">
+								</div>
+								<div class="btn" style="background-color: #ccffff">
+									<input type="radio" name="paper-color" value="#ccffff">
+								</div>
+								<div class="btn bg-form p-0">
+					      			<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#ffffff">
+								</div>
 						</td>
 					</tr>
 					<tr class="row">
@@ -187,8 +216,8 @@
 					<tr class="row">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="opacity">Fill Opacity</label>
-							<output id="opacity-readout" class="float-right">100%</output>
-							<input type="range" class="form-control-range mt-2" id="opacity" min="0.05" max="1" value="1" step="0.01" aria-describedby="opacity-readout">
+							<output id="opacity-readout" class="float-right">75%</output>
+							<input type="range" class="form-control-range mt-2" id="opacity" min="0.05" max="1" value="0.75" step="0.01" aria-describedby="opacity-readout">
 						</td>
 					</tr>
 				</tbody>
@@ -236,7 +265,7 @@
 			      		</div>
 		  				<div class="form-check">
 			      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color">
-			      			<label class="form-check-label" for="paper-type-color">Coloured paper</label>
+			      			<label class="form-check-label" for="paper-type-color">Include background colour</label>
 			      		</div>
 			      	</div>
 		      	</div>

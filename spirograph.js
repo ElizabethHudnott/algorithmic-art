@@ -1,7 +1,7 @@
 'use strict';
 
 let maxRotationTime = 10000;
-let maxIncrement = Math.PI / 96;
+let maxIncrement = Math.PI / 48;
 
 let toolsVisible = true;
 let stator, rotor;
@@ -229,6 +229,8 @@ class CircleRotor {
 const spiroCanvas = document.getElementById('spirograph-canvas');
 const spiroContext = spiroCanvas.getContext('2d');
 spiroContext.globalCompositeOperation = 'multiply';
+spiroContext.lineCap = 'round';
+spiroContext.lineJoin = 'round';
 const toolCanvas = document.getElementById('tool-canvas');
 const toolContext = toolCanvas.getContext('2d');
 const savedCanvas = document.createElement('canvas');

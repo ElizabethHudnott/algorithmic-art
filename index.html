@@ -74,8 +74,8 @@
 					<tr class="row">
 						<td colspan="2" class="col-6 mb-3">
 							<label for="rotor-teeth">Number of rotor teeth</label>
-							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-size-list" placeholder="Number of teeth on the moving part">
-							<datalist id="rotor-size-list">
+							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part">
+							<datalist id="rotor-teeth-list">
 								<option>24</option>
 								<option>30</option>
 								<option>32</option>
@@ -98,17 +98,41 @@
 						</td>
 						<td colspan="2" class="col-6 mb-3">
 							<label for="stator-teeth">Number of stator teeth</label>
-							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-size-list" placeholder="Number of teeth on the stationary part">
-							<datalist id="stator-size-list">
+							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part">
+							<datalist id="stator-teeth-list">
 								<option>96</option>
 								<option>105</option>
+								<option>144</option>
+								<option>150</option>
+							</datalist>
+						</td>
+					</tr>
+					<tr class="row">
+						<td colspan="2" class="col-6 mb-3">
+							<label class="d-block mb-3">Rotor position</label>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-inside" value="inside" checked>
+								<label class="form-check-label" for="rotor-position-inside">Inside</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-outside" value="outside">
+								<label class="form-check-label" for="rotor-position-outside">Outside</label>
+							</div>
+						</td>
+						<td colspan="2" class="col-6 mb-3">
+							<label for="stator-radius">Stator radius</label>
+							<input class="form-control" type="number" min="0.1" required id="stator-radius" step="any" value="1" list="stator-radius-list" placeholder="Stator radius">
+							<datalist id="stator-radius-list">
+								<option>1</option>
+								<option value="0.6666666666666667">96&thinsp;/&thinsp;144</option>
+								<option value="0.7">105&thinsp;/&thinsp;150</option>
 							</datalist>
 						</td>
 					</tr>
 					<tr class="row">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="pen-x">Distance from pen to rotor centre</label>
-							<output id="pen-x-readout" class="float-right">75%</output>
+							<output id="pen-x-readout" class="float-right"></output>
 							<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.75" aria-describedby="pen-x-readout">
 						</td>
 						<td colspan="2" class="col-12 col-md-6 mb-3">
@@ -120,7 +144,7 @@
 						<td colspan="2" class="col-12 col-md-6">
 							<fieldset class="form-group">
 								<label for="pen-y">Perpendicular pen offset</label>
-								<output id="pen-y-readout" class="float-right">0%</output>
+								<output id="pen-y-readout" class="float-right"></output>
 								<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-describedby="pen-y-readout">
 							</fieldset>
 							<fieldset class="form-group">
@@ -216,7 +240,7 @@
 					<tr class="row">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="opacity">Fill Opacity</label>
-							<output id="opacity-readout" class="float-right">75%</output>
+							<output id="opacity-readout" class="float-right"></output>
 							<input type="range" class="form-control-range mt-2" id="opacity" min="0.05" max="1" value="0.75" step="0.01" aria-describedby="opacity-readout">
 						</td>
 					</tr>

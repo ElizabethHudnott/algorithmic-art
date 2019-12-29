@@ -375,8 +375,8 @@ rotorTeethInput.addEventListener('change', function (event) {
 			startDistance = (startTooth - 1) * stator.toothSize;
 		}
 		initialRotationDist = 0;
+		rotor = new CircleRotor(stator, numRotorTeeth);
 		if (toolsVisible) {
-			rotor = new CircleRotor(stator, numRotorTeeth);
 			placeRotor(stator, rotor, startDistance, startDistance, 0);
 			changePenPosition(rotor, penOffsetX, penOffsetY);
 			drawTools(stator, rotor, penX, penY);

@@ -4,7 +4,7 @@ let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 48;
 
 let toolsVisible = true;
-let stator, rotor, numStatorTeeth, numRotorTeeth;
+let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth;
 let currentDistance = 0;
 let initialRotationDist = 0;
 let rotorX = 0;
@@ -114,7 +114,6 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, i
 				return;
 			}
 			if (animSpeed === 0) {
-				debugger;
 				return;
 			}
 
@@ -167,7 +166,10 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, i
 	};
 
 	function cancelAnim() {
-		animFunction = undefined;
+		if (animFunction) {
+			requestAnimationFrame(animFunction);
+			animFunction = undefined;
+		}
 	};
 
 	return new AnimationController(promise, continueAnim, cancelAnim, startDistance);
@@ -275,6 +277,7 @@ function cancelDrawing() {
 	initialRotationDist = animController.startDistance - currentDistance + initialRotationDist;
 	const startTooth = parseFloat(startToothInput.value);
 	if (startTooth >= 1) {
+		// Check if start tooth has been changed since drawing began
 		const startDistance = (startTooth - 1) * stator.toothSize;
 		if (startDistance !== animController.startDistance) {
 			initialRotationDist = 0;
@@ -306,7 +309,7 @@ function drawSpirographFromForm() {
 	const startDistance = (startTooth - 1) * stator.toothSize;
 	spiroContext.globalAlpha = 1;
 	animController = drawSpirograph(stator, rotor, startDistance, undefined, penX, penY, initialRotationDist);
-	animController.promise.catch(cancelDrawing).then(drawingEnded);
+	animController.promise = animController.promise.catch(cancelDrawing).then(drawingEnded);
 	updateNumberOfPoints();
 }
 
@@ -354,7 +357,13 @@ rotorTeethInput.addEventListener('change', function (event) {
 	if (numRotorTeethEntered >= 2) {
 		numRotorTeeth = numRotorTeethEntered;
 		let startDistance = currentDistance;
-		let startTooth = parseFloat(startToothInput.value);
+		let startTooth;	// Here can be a fraction less than one or an integer
+		if (savedStartTooth) {
+			startTooth = savedStartTooth;
+			startToothInput.value = startTooth;
+		} else {
+			startTooth = parseFloat(startToothInput.value);
+		}
 		if (startTooth >= 1) {
 			startTooth = Math.trunc(startTooth);
 			startToothInput.value = startTooth;
@@ -393,6 +402,8 @@ statorTeethInput.addEventListener('change', function (event) {
 	const numStatorTeethEntered = parseInt(this.value);
 	if (numStatorTeethEntered >= 3) {
 		numStatorTeeth = numStatorTeethEntered;
+		startToothInput.value = 1;
+		savedStartTooth = undefined;
 		makeNewStator();
 		updateNumberOfPoints();
 	}
@@ -409,6 +420,7 @@ statorRadiusInput.addEventListener('change', function (event) {
 startToothInput.addEventListener('change', function (event) {
 	const startTooth = parseFloat(this.value);
 	if (startTooth >= 1) {
+		savedStartTooth = startTooth;
 		initialRotationDist = 0;
 		if (toolsVisible) {
 			const startDistance = (startTooth - 1) * stator.toothSize;
@@ -465,10 +477,21 @@ opacityInput.addEventListener('input', updateOpacityReadout);
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
-	if (animController) {
-		animController.cancel();
+	function reset() {
+		spiroContext.clearRect(-1, -1, width, height);
+		if (toolsVisible) {
+			placeRotor(stator, rotor, 0, 0, 0);
+			drawTools(stator, rotor, penX, penY);
+		}
+		startToothInput.value = 1;
+		savedStartTooth = undefined;
 	}
-	spiroContext.clearRect(-1, -1, width, height);
+	if (animController) {
+		animController.promise.then(reset);
+		animController.cancel();
+	} else {
+		reset();
+	}
 	$('#erase-modal').modal('hide');
 });
 

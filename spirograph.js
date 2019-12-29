@@ -30,6 +30,11 @@ let penOffsetY = parseFloat(penYSlider.value);
 const startToothInput = document.getElementById('start-tooth');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
+const penSwatches = document.getElementsByName('pen-color');
+const customPenInput = document.getElementById('custom-pen-color');
+let customColor = customPenInput.value;
+const paperSwatches = document.getElementsByName('paper-color');
+const customPaperInput = document.getElementById('custom-paper-color');
 const penWidthInput = document.getElementById('pen-width');
 const opacityInput = document.getElementById('opacity');
 
@@ -456,16 +461,64 @@ animSpeedSlider.addEventListener('input', function (event) {
 	setAnimSpeed(parseInt(this.value));
 });
 
-document.getElementById('custom-pen-color').addEventListener('input', function (event) {
+function setPenColor() {
+	const input = this.children[0];
+	spiroContext.strokeStyle = input.value;
+
+	for (let swatch of penSwatches) {
+		if (swatch !== input) {
+			swatch.parentElement.classList.remove('active');
+		}
+	}
+	customPenInput.parentElement.classList.remove('active');
+	this.classList.add('active');
+}
+
+penSwatches.forEach(function (item) {
+	item.parentElement.addEventListener('click', setPenColor);
+});
+
+customPenInput.addEventListener('input', function (event) {
 	spiroContext.strokeStyle = this.value;
+	for (let swatch of penSwatches) {
+		swatch.parentElement.classList.remove('active');
+	}
+	this.parentElement.classList.add('active');
+	const customColorBoxes = this.parentElement.parentElement.children;
+	const count = customColorBoxes.length - 2;
+	let colorBox;
+	for (let i = 0; i < count; i++) {
+		colorBox = customColorBoxes[i];
+		const color = customColorBoxes[i + 1].style.backgroundColor;
+		colorBox.style.backgroundColor = color;
+		colorBox.children[0].value = color;
+	}
+	colorBox = customColorBoxes[count];
+	colorBox.style.backgroundColor = customColor;
+	colorBox.children[0].value = customColor;
+	customColor = this.value;
+});
+
+
+function setPaperColor() {
+	spiroCanvas.style.backgroundColor = this.children[0].value;
+	customPaperInput.parentElement.classList.remove('active');
+}
+
+paperSwatches.forEach(function (item) {
+	item.parentElement.addEventListener('click', setPaperColor);
 });
 
 penWidthInput.addEventListener('input', function (event) {
 	spiroContext.lineWidth = parseInt(this.value) / scale;
 });
 
-document.getElementById('custom-paper-color').addEventListener('input', function (event) {
+customPaperInput.addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
+	for (let swatch of paperSwatches) {
+		swatch.parentElement.classList.remove('active');
+	}
+	this.parentElement.classList.add('active');
 });
 
 function updateOpacityReadout(event) {

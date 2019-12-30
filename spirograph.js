@@ -53,19 +53,44 @@ function changePenPosition(rotor, offsetX, offsetY) {
 	penY = offsetY * rotor.radiusB;
 }
 
+function isAnimating() {
+	return animController && animController.status === 'running';
+}
+
 function setAnimSpeed(newSpeed) {
 	animSpeed = newSpeed;
-	if (animController) {
+	if (isAnimating()) {
 		animController.continue();
 	}
 }
 
 class AnimationController {
-	constructor(promise, continueFunc, cancelFunc, startDistance) {
-		this.promise = promise;
-		this.continue = continueFunc;
-		this.cancel = cancelFunc;
+	constructor(startDistance) {
 		this.startDistance = startDistance;
+		this.status = 'running';
+	}
+
+	setAbort(f) {
+		const me = this;
+		this.abort = function () {
+			if (me.status === 'running') {
+				me.status = 'aborted';
+				f.call(me);
+			}
+		}
+	}
+
+	setContinue(f) {
+		const me = this;
+		this.continue = function () {
+			if (me.status === 'running') {
+				f.call(me);
+			}
+		}
+	}
+
+	finish() {
+		this.status = 'finished';
 	}
 }
 
@@ -123,10 +148,12 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, i
 	spiroContext.beginPath();
 	const beginTime = performance.now();
 
+	const newAnimController = new AnimationController(startDistance);
 	let animFunction;
+
 	const promise = new Promise(function (resolve, reject) {
-		animFunction = function (time) {
-			if (animFunction === undefined) {
+		animFunction = function animate(time) {
+			if (newAnimController.status === 'aborted') {
 				reject();
 				return;
 			}
@@ -166,28 +193,25 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, i
 			spiroContext.stroke();
 
 			if (stepNumber <= numSteps) {
-				requestAnimationFrame(animFunction);
+				requestAnimationFrame(animate);
 			} else {
+				newAnimController.finish();
 				resolve();
 			}
 		};
 		requestAnimationFrame(animFunction);
 	}); // end of Promise definition
 
-	function continueAnim() {
-		if (stepNumber <= numSteps) {
-			requestAnimationFrame(animFunction);
-		}
-	};
+	newAnimController.promise = promise;
 
-	function cancelAnim() {
-		if (animFunction) {
-			requestAnimationFrame(animFunction);
-			animFunction = undefined;
-		}
-	};
+	function requestAnim() {
+		requestAnimationFrame(animFunction);
+	}
 
-	return new AnimationController(promise, continueAnim, cancelAnim, startDistance);
+	newAnimController.setContinue(requestAnim);
+	newAnimController.setAbort(requestAnim);
+
+	return newAnimController;
 }
 
 function gcd(a, b) {
@@ -288,7 +312,7 @@ function randomizeSpirographForm() {
 	document.getElementById('stator-teeth').value = statorTeeth;
 }
 
-function cancelDrawing() {
+function abortDrawing() {
 	initialRotationDist = animController.startDistance - currentDistance + initialRotationDist;
 	const startTooth = parseFloat(startToothInput.value);
 	if (startTooth >= 1) {
@@ -308,7 +332,6 @@ function cancelDrawing() {
 function drawingEnded() {
 	drawButton.classList.remove('btn-warning');
 	drawButton.innerText = 'Draw Shape';
-	animController = undefined;
 }
 
 function drawSpirographAction() {
@@ -323,16 +346,18 @@ function drawSpirographAction() {
 	const startDistance = (startTooth - 1) * stator.toothSize;
 	spiroContext.globalAlpha = 1;
 	animController = drawSpirograph(stator, rotor, startDistance, undefined, penX, penY, initialRotationDist);
-	animController.promise = animController.promise.catch(cancelDrawing).then(drawingEnded);
+	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
 	updateNumberOfPoints();
 }
 
 randomizeSpirographForm();
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
-	document.getElementById('tool-canvas').classList.add('invisible');
-	toolsVisible = false;
-	document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
+	if (animController.status === 'finished') {
+		document.getElementById('tool-canvas').classList.add('invisible');
+		toolsVisible = false;
+		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
+	}
 });
 
 function queryChecked(ancestor, name) {
@@ -344,9 +369,9 @@ function checkInput(ancestor, name, value) {
 }
 
 drawButton.addEventListener('click', function (event) {
-	if (animController) {
+	if (isAnimating()) {
 		event.preventDefault();
-		animController.cancel();
+		animController.abort();
 	}
 });
 
@@ -544,9 +569,9 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
 	}
-	if (animController) {
+	if (isAnimating()) {
 		animController.promise.then(reset);
-		animController.cancel();
+		animController.abort();
 	} else {
 		reset();
 	}

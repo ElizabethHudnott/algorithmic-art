@@ -91,14 +91,16 @@ function placeRotor(stator, rotor, startDistance, distance, initialRotationDist)
 }
 
 function drawTools(stator, rotor, penX, penY) {
-	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
-	toolContext.clearRect(-1, -1, width, height);
-	stator.draw(toolContext);
-	toolContext.translate(rotorX, rotorY);
-	toolContext.rotate(rotorAngle);
-	rotor.draw(toolContext);
-	toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
-	toolContext.fill('evenodd');
+	if (toolsVisible) {
+		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+		toolContext.clearRect(-1, -1, width, height);
+		stator.draw(toolContext);
+		toolContext.translate(rotorX, rotorY);
+		toolContext.rotate(rotorAngle);
+		rotor.draw(toolContext);
+		toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
+		toolContext.fill('evenodd');
+	}
 }
 
 function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, initialRotationDist) {
@@ -159,9 +161,7 @@ function drawSpirograph(stator, rotor, startDistance, endDistance, penX, penY, i
 				stepNumber++;
 			}
 
-			if (toolsVisible) {
-				drawTools(stator, rotor, penX, penY);
-			}
+			drawTools(stator, rotor, penX, penY);
 			restoreCanvas();
 			spiroContext.stroke();
 
@@ -311,11 +311,10 @@ function drawingEnded() {
 	animController = undefined;
 }
 
-function drawSpirographFromForm() {
+function drawSpirographAction() {
 	drawButton.classList.add('btn-warning');
 	drawButton.innerText = 'Stop';
 	numStatorTeeth = parseInt(statorTeethInput.value);
-	statorRadius = parseFraction(statorRadiusInput.value);
 	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
 	numRotorTeeth = parseInt(rotorTeethInput.value);
 	rotor = new CircleRotor(stator, numRotorTeeth);
@@ -329,7 +328,7 @@ function drawSpirographFromForm() {
 }
 
 randomizeSpirographForm();
-drawSpirographFromForm();
+drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
 	document.getElementById('tool-canvas').classList.add('invisible');
 	toolsVisible = false;
@@ -353,7 +352,7 @@ drawButton.addEventListener('click', function (event) {
 
 document.getElementById('spirograph-form').addEventListener('submit', function (event) {
 	event.preventDefault();
-	drawSpirographFromForm();
+	drawSpirographAction();
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
@@ -391,11 +390,9 @@ rotorTeethInput.addEventListener('change', function (event) {
 		}
 		initialRotationDist = 0;
 		rotor = new CircleRotor(stator, numRotorTeeth);
-		if (toolsVisible) {
-			placeRotor(stator, rotor, startDistance, startDistance, 0);
-			changePenPosition(rotor, penOffsetX, penOffsetY);
-			drawTools(stator, rotor, penX, penY);
-		}
+		placeRotor(stator, rotor, startDistance, startDistance, 0);
+		changePenPosition(rotor, penOffsetX, penOffsetY);
+		drawTools(stator, rotor, penX, penY);
 		updateNumberOfPoints();
 	}
 });
@@ -411,11 +408,9 @@ function makeNewStator() {
 		startDistance = (startTooth - 1) * stator.toothSize;
 	}
 	initialRotationDist = 0;
-	if (toolsVisible) {
-		placeRotor(stator, rotor, startDistance, startDistance, 0);
-		changePenPosition(rotor, penOffsetX, penOffsetY);
-		drawTools(stator, rotor, penX, penY);
-	}
+	placeRotor(stator, rotor, startDistance, startDistance, 0);
+	changePenPosition(rotor, penOffsetX, penOffsetY);
+	drawTools(stator, rotor, penX, penY);
 }
 
 statorTeethInput.addEventListener('change', function (event) {
@@ -445,11 +440,9 @@ startToothInput.addEventListener('change', function (event) {
 	if (startTooth >= 1) {
 		savedStartTooth = startTooth;
 		initialRotationDist = 0;
-		if (toolsVisible) {
-			const startDistance = (startTooth - 1) * stator.toothSize;
-			placeRotor(stator, rotor, startDistance, startDistance, 0);
-			drawTools(stator, rotor, penX, penY);
-		}
+		const startDistance = (startTooth - 1) * stator.toothSize;
+		placeRotor(stator, rotor, startDistance, startDistance, 0);
+		drawTools(stator, rotor, penX, penY);
 	}
 });
 
@@ -457,9 +450,7 @@ function updatePenXReadout(event) {
 	penOffsetX = parseFloat(penXSlider.value);
 	document.getElementById('pen-x-readout').innerText = Math.round(penOffsetX * 100) + '%';
 	changePenPosition(rotor, penOffsetX, penOffsetY);
-	if (toolsVisible) {
-		drawTools(stator, rotor, penX, penY);
-	}
+	drawTools(stator, rotor, penX, penY);
 }
 updatePenXReadout();
 penXSlider.addEventListener('input', updatePenXReadout);
@@ -468,9 +459,7 @@ function updatePenYReadout(event) {
 	penOffsetY = -parseFloat(penYSlider.value);
 	document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
 	changePenPosition(rotor, penOffsetX, penOffsetY);
-	if (toolsVisible) {
-		drawTools(stator, rotor, penX, penY);
-	}
+	drawTools(stator, rotor, penX, penY);
 }
 updatePenYReadout()
 penYSlider.addEventListener('input', updatePenYReadout);
@@ -550,10 +539,8 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 	event.preventDefault();
 	function reset() {
 		spiroContext.clearRect(-1, -1, width, height);
-		if (toolsVisible) {
-			placeRotor(stator, rotor, 0, 0, 0);
-			drawTools(stator, rotor, penX, penY);
-		}
+		placeRotor(stator, rotor, 0, 0, 0);
+		drawTools(stator, rotor, penX, penY);
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
 	}

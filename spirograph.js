@@ -14,12 +14,22 @@ let penX = 0;
 let penY = 0;
 let animSpeed, animController;
 
+function parseFraction(text) {
+	const numerator = parseFloat(text);
+	let denominator = 1;
+	const slashPosition = text.indexOf('/');
+	if (slashPosition !== -1) {
+		denominator = parseInt(text.slice(slashPosition + 1));
+	}
+	return numerator / denominator;
+}
+
 const drawButton = document.getElementById('btn-draw');
 const numPointsSpan = document.getElementById('num-points');
 const statorTeethInput = document.getElementById('stator-teeth');
 const rotorTeethInput = document.getElementById('rotor-teeth');
 const statorRadiusInput = document.getElementById('stator-radius');
-let statorRadius = parseFloat(statorRadiusInput.value);
+let statorRadius = parseFraction(statorRadiusInput.value);
 if (!(statorRadius > 0)) {
 	statorRadius = 1;
 }
@@ -305,7 +315,7 @@ function drawSpirographFromForm() {
 	drawButton.classList.add('btn-warning');
 	drawButton.innerText = 'Stop';
 	numStatorTeeth = parseInt(statorTeethInput.value);
-	statorRadius = parseFloat(statorRadiusInput.value);
+	statorRadius = parseFraction(statorRadiusInput.value);
 	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
 	numRotorTeeth = parseInt(rotorTeethInput.value);
 	rotor = new CircleRotor(stator, numRotorTeeth);
@@ -320,6 +330,11 @@ function drawSpirographFromForm() {
 
 randomizeSpirographForm();
 drawSpirographFromForm();
+animController.promise = animController.promise.then(function (event) {
+	document.getElementById('tool-canvas').classList.add('invisible');
+	toolsVisible = false;
+	document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
+});
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -415,10 +430,13 @@ statorTeethInput.addEventListener('change', function (event) {
 });
 
 statorRadiusInput.addEventListener('change', function (event) {
-	const statorRadiusEntered = parseFloat(this.value);
+	const statorRadiusEntered = parseFraction(this.value);
 	if (statorRadiusEntered > 0) {
+		this.setCustomValidity('');
 		statorRadius = statorRadiusEntered;
 		makeNewStator();
+	} else {
+		this.setCustomValidity('Please enter a positive number.');
 	}
 });
 

@@ -74,7 +74,7 @@
 					<tr class="row">
 						<td colspan="2" class="col-6 mb-3">
 							<label for="rotor-teeth">Number of rotor teeth</label>
-							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part">
+							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part" title="Number of teeth on the moving part">
 							<datalist id="rotor-teeth-list">
 								<option>24</option>
 								<option>30</option>
@@ -98,7 +98,7 @@
 						</td>
 						<td colspan="2" class="col-6 mb-3">
 							<label for="stator-teeth">Number of stator teeth</label>
-							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part">
+							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part" title="Number of teeth on the stationary part">
 							<datalist id="stator-teeth-list">
 								<option>96</option>
 								<option>105</option>
@@ -121,11 +121,13 @@
 						</td>
 						<td colspan="2" class="col-6 mb-3">
 							<label for="stator-radius">Stator radius</label>
-							<input class="form-control" type="number" min="0.1" required id="stator-radius" step="any" value="1" list="stator-radius-list" placeholder="Stator radius">
+							<input class="form-control" required id="stator-radius" value="1" list="stator-radius-list" pattern="\d+(\.\d*)?(/[1-9]\d*)?" placeholder="Stator radius">
 							<datalist id="stator-radius-list">
 								<option>1</option>
-								<option value="0.6666666666666667">96&thinsp;/&thinsp;144</option>
-								<option value="0.7">105&thinsp;/&thinsp;150</option>
+								<option>96/105</option>
+								<option>96/144</option>
+								<option>96/150</option>
+								<option>105/150</option>
 							</datalist>
 						</td>
 					</tr>
@@ -137,7 +139,7 @@
 						</td>
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="start-tooth">Starting tooth</label>
-							<input type="number" class="form-control" min="1" required value="1" step="any" id="start-tooth" placeholder="Tooth number to begin plotting from">
+							<input type="number" class="form-control" min="1" required value="1" step="any" id="start-tooth" placeholder="Tooth number to begin plotting from" title="Tooth number to begin plotting from">
 						</td>
 					</tr>
 					<tr class="row">
@@ -171,6 +173,18 @@
 								</div>
 								<input type="number" id="end-tooth" min="1" value="1" required class="form-control" aria-label="Tooth number to end at" placeholder="Tooth number">
 							</div>
+						</td>
+					</tr>
+					<tr class="row">
+						<td class="col-3 col-md-2 mb-3">
+							<label for="line-width">Line width</label>
+							<input class="form-control" type="number" id="pen-width" min="1" value="2" placeholder="Pen width" title="Pen thickness in pixels">
+						</td>
+						<td class="col-3 col-md-4 mb-3">
+						</td>
+						<td colspan="2" class="col-6 mb-3">
+							<label for="stator-translation">Translate stator</label>
+							<input id="stator-translation" class="form-control" type="number" required value="0" placeholder="Number of teeth to shift stator by" title="Number of teeth to shift stator by">
 						</td>
 					</tr>
 					<tr class="row">
@@ -229,12 +243,6 @@
 								<div class="btn bg-form p-0">
 					      			<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#ffffff">
 								</div>
-						</td>
-					</tr>
-					<tr class="row">
-						<td class="col-3 col-md-2 mb-3">
-							<label for="line-width">Line width</label>
-							<input class="form-control" type="number" id="pen-width" min="1" value="2" placeholder="Pen thickness">
 						</td>
 					</tr>
 					<tr class="row">

@@ -6,7 +6,7 @@
 	--complement-color: #ffb0c8;
 }
 
-input:invalid {
+.form-control:invalid {
 	background-color: #f4bec3;
 }
 

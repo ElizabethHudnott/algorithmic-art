@@ -5,6 +5,7 @@ let maxIncrement = Math.PI / 48;
 
 let toolsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth;
+let translationSteps = 0, translateX = 0, translateY = 0;
 let currentDistance = 0;
 let initialRotationDist = 0;
 let rotorX = 0;
@@ -40,12 +41,17 @@ let penOffsetY = parseFloat(penYSlider.value);
 const startToothInput = document.getElementById('start-tooth');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
+const penWidthInput = document.getElementById('pen-width');
+const translationInput = document.getElementById('translation');
+translationSteps = parseFloat(translationInput.value);
+if (!Number.isFinite(translationSteps)) {
+	translationSteps = 0;
+}
 const penSwatches = document.getElementsByName('pen-color');
 const customPenInput = document.getElementById('custom-pen-color');
 let customColor = customPenInput.value;
 const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
-const penWidthInput = document.getElementById('pen-width');
 const opacityInput = document.getElementById('opacity');
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -106,11 +112,11 @@ function restoreCanvas() {
 
 function placeRotor(stator, rotor, startDistance, distance, initialRotationDist) {
 	const statorState = stator.calc(distance);
-	const statorAngle = statorState[2];
+	const statorAngle = statorState[2];	// Angle of the normal
 	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
-	rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle);
-	rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle);
+	rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle) + translateX;
+	rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle) + translateY;
 	rotorAngle = Math.atan2(contactPoint[1], contactPoint[0]) + statorAngle + Math.PI;
 	currentDistance = distance;
 }
@@ -119,7 +125,7 @@ function drawTools(stator, rotor, penX, penY) {
 	if (toolsVisible) {
 		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 		toolContext.clearRect(-1, -1, width, height);
-		stator.draw(toolContext);
+		stator.draw(toolContext, translateX, translateY);
 		toolContext.translate(rotorX, rotorY);
 		toolContext.rotate(rotorAngle);
 		rotor.draw(toolContext);
@@ -245,9 +251,9 @@ class InnerCircleStator {
 		];
 	}
 
-	draw(context) {
+	draw(context, x, y) {
 		context.beginPath();
-		context.arc(0, 0, this.radius, 0, 2 * Math.PI);
+		context.arc(x, y, this.radius, 0, 2 * Math.PI);
 		context.stroke();
 	}
 
@@ -334,6 +340,17 @@ function drawingEnded() {
 	drawButton.innerText = 'Draw Shape';
 }
 
+function calcTransform() {
+	const length = translationSteps * stator.toothSize;
+	if (width >= height) {
+		translateX = length;
+		translateY = 0;
+	} else {
+		translateX = 0;
+		translateY = length;
+	}
+}
+
 function drawSpirographAction() {
 	drawButton.classList.add('btn-warning');
 	drawButton.innerText = 'Stop';
@@ -341,6 +358,7 @@ function drawSpirographAction() {
 	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
 	numRotorTeeth = parseInt(rotorTeethInput.value);
 	rotor = new CircleRotor(stator, numRotorTeeth);
+	calcTransform();
 	changePenPosition(rotor, penOffsetX, penOffsetY);
 	const startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
@@ -493,6 +511,24 @@ animSpeedSlider.addEventListener('input', function (event) {
 	setAnimSpeed(parseInt(this.value));
 });
 
+penWidthInput.addEventListener('input', function (event) {
+	spiroContext.lineWidth = parseInt(this.value) / scale;
+});
+
+translationInput.addEventListener('change', function (event) {
+	const amount = parseFloat(this.value);
+	if (Number.isFinite(amount)) {
+		translationSteps = amount;
+		calcTransform();
+		let startDistance = 0;
+		if (animController) {
+			startDistance = animController.startDistance;
+		}
+		placeRotor(stator, rotor, startDistance, currentDistance, initialRotationDist);
+		drawTools(stator, rotor, penX, penY);
+	}
+});
+
 function setPenColor() {
 	const input = this.children[0];
 	spiroContext.strokeStyle = input.value;
@@ -539,10 +575,6 @@ function setPaperColor() {
 
 paperSwatches.forEach(function (item) {
 	item.parentElement.addEventListener('click', setPaperColor);
-});
-
-penWidthInput.addEventListener('input', function (event) {
-	spiroContext.lineWidth = parseInt(this.value) / scale;
 });
 
 customPaperInput.addEventListener('input', function (event) {

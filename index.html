@@ -183,8 +183,13 @@
 						<td class="col-3 col-md-4 mb-3">
 						</td>
 						<td colspan="2" class="col-6 mb-3">
-							<label for="stator-translation">Translate stator</label>
-							<input id="stator-translation" class="form-control" type="number" required value="0" placeholder="Number of teeth to shift stator by" title="Number of teeth to shift stator by">
+							<label for="translation">Translate stator by</label>
+							<div class="input-group">
+								<input id="translation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth to shift stator by" title="Number of teeth to shift stator by" aria-describedby="translation-units">
+								<div class="input-group-append">
+									<span class="input-group-text" id="translation-units">teeth</span>
+								</div>
+							</div>
 						</td>
 					</tr>
 					<tr class="row">

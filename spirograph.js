@@ -3,6 +3,7 @@
 let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 48;
 
+let scale, width, height;
 let toolsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth;
 let translationSteps = 0, translateX = 0, translateY = 0;
@@ -290,27 +291,52 @@ class CircleRotor {
 
 const spiroCanvas = document.getElementById('spirograph-canvas');
 const spiroContext = spiroCanvas.getContext('2d');
-spiroContext.globalCompositeOperation = 'multiply';
-spiroContext.lineCap = 'round';
-spiroContext.lineJoin = 'round';
 const toolCanvas = document.getElementById('tool-canvas');
 const toolContext = toolCanvas.getContext('2d');
 const savedCanvas = document.createElement('canvas');
-savedCanvas.width = spiroCanvas.width;
-savedCanvas.height = spiroCanvas.height;
 const saveContext = savedCanvas.getContext('2d');
 const toolColor = 'rgba(0, 64, 255, 0.5)';
-toolContext.strokeStyle = toolColor;
-toolContext.fillStyle = toolColor;
-let scale = spiroCanvas.width >= spiroCanvas.height ? spiroCanvas.height / 2: spiroCanvas.width / 2;
-let width = spiroCanvas.width / scale;
-let height = spiroCanvas.height / scale;
-spiroContext.scale(scale, scale);
-spiroContext.translate(1, 1);
-spiroContext.lineWidth = parseInt(penWidthInput.value) / scale;
-toolContext.scale(scale, scale);
-toolContext.translate(1, 1);
-toolContext.lineWidth = 2 / scale;
+
+function resizeCanvas(fitExact) {
+	saveCanvas();
+	const penColor = spiroContext.strokeStyle;
+	let pixelWidth = document.getElementById('canvas-container').clientWidth;
+	if (spiroCanvas < pixelWidth || fitExact) {
+		spiroCanvas.width = pixelWidth;
+		toolCanvas.width = pixelWidth;
+	} else {
+		pixelWidth = spiroCanvas.width;
+	}
+	let pixelHeight = spiroCanvas.height;
+	if (fitExact && pixelHeight > pixelWidth) {
+		pixelHeight = pixelWidth;
+		spiroCanvas.height = pixelHeight;
+		toolCanvas.height = pixelHeight;
+	}
+	scale = pixelWidth >= pixelHeight ? pixelHeight / 2 : pixelWidth / 2;
+	width = pixelWidth / scale;
+	height = pixelHeight / scale;
+	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
+	restoreCanvas();
+	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+	savedCanvas.width = pixelWidth;
+	savedCanvas.height = pixelHeight;
+
+	let lineWidth = parseInt(penWidthInput.value);
+	if (!(lineWidth >= 1)) {
+		lineWidth = 2;
+	}
+	spiroContext.lineWidth = lineWidth / scale;
+	toolContext.lineWidth = 2 / scale;
+	spiroContext.globalCompositeOperation = 'multiply';
+	spiroContext.strokeStyle = penColor;
+	spiroContext.lineCap = 'round';
+	spiroContext.lineJoin = 'round';
+	toolContext.strokeStyle = toolColor;
+	toolContext.fillStyle = toolColor;
+}
+
+resizeCanvas(true);
 
 function updateNumberOfPoints() {
 	const numPoints = lcm(stator.numTeeth, rotor.numTeeth) / rotor.numTeeth;

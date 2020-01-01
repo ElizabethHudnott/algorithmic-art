@@ -112,7 +112,7 @@ function restoreCanvas() {
 }
 
 function placeRotor(stator, rotor, translateX, translateY, startDistance, distance, initialRotationDist) {
-	const statorState = stator.calc(distance - Math.PI / 2);
+	const statorState = stator.calc(distance);
 	const statorAngle = statorState[2];	// Angle of the normal
 	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
@@ -252,7 +252,7 @@ class InnerCircleStator {
 
 	calc(distance) {
 		const radius = this.radius;
-		const angle = distance / radius;
+		const angle = (distance / radius) - Math.PI / 2;
 		return [
 			radius * Math.cos(angle),	// x-coordinate
 			radius * Math.sin(angle), 	// y-coordinate
@@ -453,6 +453,13 @@ rotorTeethInput.addEventListener('change', function (event) {
 	const numRotorTeethEntered = parseInt(this.value);
 	if (numRotorTeethEntered >= 2) {
 		numRotorTeeth = numRotorTeethEntered;
+		if (numRotorTeeth >= numStatorTeeth) {
+			document.getElementById('rotor-position-outside').checked = true;
+			document.getElementById('rotor-position-inside').disabled = true;
+			//TODO implement rotations outside the stator
+		} else {
+			document.getElementById('rotor-position-inside').disabled = false;
+		}
 		let startDistance = currentDistance;
 		let startTooth;	// Here can be a fraction less than one or an integer
 		if (savedStartTooth) {
@@ -478,6 +485,13 @@ rotorTeethInput.addEventListener('change', function (event) {
 function makeNewStator() {
 	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
 	rotor = new CircleRotor(stator, numRotorTeeth);
+	if (numRotorTeeth >= numStatorTeeth) {
+		document.getElementById('rotor-position-outside').checked = true;
+		document.getElementById('rotor-position-inside').disabled = true;
+		//TODO implement rotations outside the stator
+	} else {
+		document.getElementById('rotor-position-inside').disabled = false;
+	}
 	let startDistance = currentDistance;
 	let startTooth = parseFloat(startToothInput.value);
 	if (startTooth >= 1) {
@@ -515,7 +529,7 @@ statorRadiusInput.addEventListener('change', function (event) {
 
 startToothInput.addEventListener('change', function (event) {
 	const startTooth = parseFloat(this.value);
-	if (startTooth >= 1) {
+	if (Number.isFinite(startTooth)) {
 		savedStartTooth = startTooth;
 		initialRotationDist = 0;
 		const startDistance = (startTooth - 1) * stator.toothSize;

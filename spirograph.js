@@ -112,7 +112,7 @@ function restoreCanvas() {
 }
 
 function placeRotor(stator, rotor, translateX, translateY, startDistance, distance, initialRotationDist) {
-	const statorState = stator.calc(distance);
+	const statorState = stator.calc(distance - Math.PI / 2);
 	const statorAngle = statorState[2];	// Angle of the normal
 	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
@@ -626,14 +626,14 @@ opacityInput.addEventListener('input', updateOpacityReadout);
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
 	function reset() {
-		spiroContext.clearRect(-1, -1, width, height);
-		placeRotor(stator, rotor, 0, 0, 0, 0, 0);
-		drawTools(stator, rotor, penX, penY);
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
 		translationInput.value = 0;
-		translateX = 0;
-		translateY = 0;
+		translationSteps = 0;
+		calcTransform();
+		spiroContext.clearRect(-1, -1, width, height);
+		placeRotor(stator, rotor, 0, 0, 0, 0, 0);
+		drawTools(stator, rotor, penX, penY);
 	}
 	if (isAnimating()) {
 		animController.promise.then(reset);

@@ -13,6 +13,7 @@ let rotorY = 0;
 let rotorAngle = 0;
 let penX = 0;
 let penY = 0;
+let lineDash = [];
 let maxHole, animSpeed, animController;
 
 function parseFraction(text) {
@@ -46,6 +47,7 @@ if (!Number.isFinite(startToothInput.value)) {
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
+const lineDashInput = document.getElementById('line-dash');
 const translationInput = document.getElementById('translation');
 translationSteps = parseFloat(translationInput.value);
 if (!Number.isFinite(translationSteps)) {
@@ -285,7 +287,7 @@ class CircleRotor {
 	}
 
 	contactPoint(distance) {
-		const angle = distance / this.radiusA - Math.PI / 2;
+		const angle = distance / this.radiusA;
 		return [
 			this.radiusA * Math.cos(angle),
 			this.radiusB * Math.sin(angle)
@@ -421,6 +423,7 @@ function drawSpirographAction() {
 
 randomizeSpirographForm();
 calcTransform();
+parseLineDash();
 
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
@@ -587,6 +590,50 @@ animSpeedSlider.addEventListener('input', function (event) {
 penWidthInput.addEventListener('input', function (event) {
 	spiroContext.lineWidth = parseInt(this.value) / scale;
 });
+
+function parseLineDash() {
+	if (lineDashInput.checkValidity()) {
+		const lengthStrs = lineDashInput.value.split(',');
+		let numValues = lengthStrs.length;
+		lineDash = new Array(numValues);
+		for (let i = 0; i < numValues; i++) {
+			lineDash[i] = parseInt(lengthStrs[i]);
+		}
+		if (numValues === 1) {
+			if (lineDash[0] === 1) {
+				lineDash = [];
+			} else {
+				lineDash[1] = lineDash[0];
+			}
+		} else if (numValues % 2 === 1) {
+			for (let i = numValues - 2; i > 0; i--) {
+				lineDash.push(lineDash[i]);
+			}
+		}
+		numValues = lineDash.length;
+		for (let i = 0; i < numValues; i += 2) {
+			if (lineDash[i] > 1) {
+				lineDash[i]--;
+			}
+		}
+		for (let i = 1; i < numValues; i += 2) {
+			lineDash[i]++;
+		}
+		setLineDash();
+	}
+}
+
+function setLineDash() {
+	const lineWidth = spiroContext.lineWidth;
+	const numValues = lineDash.length;
+	const scaledLengths = new Array(numValues);
+	for (let i = 0; i < numValues; i++) {
+		scaledLengths[i] = lineDash[i] / scale;
+	}
+	spiroContext.setLineDash(scaledLengths);
+}
+
+lineDashInput.addEventListener('change', parseLineDash);
 
 translationInput.addEventListener('change', function (event) {
 	const amount = parseFloat(this.value);

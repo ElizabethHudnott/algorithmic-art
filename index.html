@@ -74,7 +74,7 @@
 					<tr class="row">
 						<td colspan="2" class="col-6 mb-3">
 							<label for="rotor-teeth">Number of rotor teeth</label>
-							<input class="form-control" type="number" min="13" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part" title="Number of teeth on the moving part">
+							<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part" title="Number of teeth on the moving part">
 							<datalist id="rotor-teeth-list">
 								<option>24</option>
 								<option>30</option>
@@ -98,7 +98,7 @@
 						</td>
 						<td colspan="2" class="col-6 mb-3">
 							<label for="stator-teeth">Number of stator teeth</label>
-							<input class="form-control" type="number" min="14" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part" title="Number of teeth on the stationary part">
+							<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part" title="Number of teeth on the stationary part">
 							<datalist id="stator-teeth-list">
 								<option>96</option>
 								<option>105</option>
@@ -153,7 +153,7 @@
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="pen-x">Distance from pen to rotor centre</label>
 							<output id="pen-x-readout" class="float-right"></output>
-							<input type="range" class="form-control-range mt-2" id="pen-x" min="0" max="0.99" step="0.03" value="0.75" aria-describedby="pen-x-readout">
+							<input type="range" class="form-control-range mt-2" id="pen-x" min="0" value="1" aria-describedby="pen-x-readout">
 						</td>
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="start-tooth">Starting tooth</label>

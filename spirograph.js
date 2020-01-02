@@ -14,7 +14,7 @@ let rotorY = 0;
 let rotorAngle = 0;
 let penX = 0;
 let penY = 0;
-let animSpeed, animController;
+let maxHole, animSpeed, animController;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -36,10 +36,13 @@ if (!(statorRadius > 0)) {
 	statorRadius = 1;
 }
 const penXSlider = document.getElementById('pen-x');
-let penOffsetX = parseFloat(penXSlider.value);
+let penOffsetX;
 const penYSlider = document.getElementById('pen-y');
 let penOffsetY = parseFloat(penYSlider.value);
 const startToothInput = document.getElementById('start-tooth');
+if (!Number.isFinite(startToothInput.value)) {
+	startToothInput.value = 1;
+}
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
@@ -123,8 +126,8 @@ function placeRotor(stator, rotor, translateX, translateY, startDistance, distan
 }
 
 function updateRotorPosition() {
-	let startDistance = 0;
-	if (animController) {
+	let startDistance = currentDistance;
+	if (animController && animController.status !== 'aborted') {
 		startDistance = animController.startDistance;
 	}
 	placeRotor(stator, rotor, translateX, translateY, startDistance, currentDistance, initialRotationDist);
@@ -271,7 +274,7 @@ class InnerCircleStator {
 class CircleRotor {
 	constructor(stator, numTeeth) {
 		this.numTeeth = numTeeth;
-		this.radiusA = numTeeth * stator.toothSize / (2 * Math.PI);
+		this.radiusA = numTeeth * stator.toothSize / (2 * Math.PI); // "Longest" radius
 		this.radiusB = this.radiusA;
 	}
 
@@ -281,12 +284,22 @@ class CircleRotor {
 	}
 
 	contactPoint(distance) {
-		const angle = distance / this.radiusA;
+		const angle = distance / this.radiusA - Math.PI / 2;
 		return [
 			this.radiusA * Math.cos(angle),
-			this.radiusA * Math.sin(angle)
+			this.radiusB * Math.sin(angle)
 		];
 	}
+}
+
+function calcMaxHole() {
+	// Semi-arbitrary "Number of teeth" is modelled on the typical circular wheel.
+	const numTeeth = 2 * Math.PI * rotor.radiusA / stator.toothSize;
+	maxHole = Math.round(0.5 * numTeeth) - 6;
+	if (maxHole < 0) {
+		maxHole = 0;
+	}
+	penXSlider.max = maxHole;
 }
 
 const spiroCanvas = document.getElementById('spirograph-canvas');
@@ -346,16 +359,24 @@ function updateNumberOfPoints() {
 function randomizeSpirographForm() {
 	const rotors = document.getElementById('rotor-teeth-list').children;
 	const rotorIndex = Math.trunc(Math.random() * rotors.length);
-	const rotorTeeth = rotors[rotorIndex].innerText;
-	document.getElementById('rotor-teeth').value = rotorTeeth;
-	const statorTeeth = Math.random() < 0.5 ? 96 : 105;
-	document.getElementById('stator-teeth').value = statorTeeth;
+	numRotorTeeth = rotors[rotorIndex].innerText;
+	document.getElementById('rotor-teeth').value = numRotorTeeth;
+	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;
+	document.getElementById('stator-teeth').value = numStatorTeeth;
+	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
+	rotor = new CircleRotor(stator, numRotorTeeth);
+	calcMaxHole();
+	const holeNumber = Math.round(maxHole / 4);
+	penXSlider.value = holeNumber;
+	document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
+	penOffsetX = 1 - holeNumber / maxHole;
+	changePenPosition(rotor, penOffsetX, penOffsetY);
 }
 
 function abortDrawing() {
 	initialRotationDist = animController.startDistance - currentDistance + initialRotationDist;
 	const startTooth = parseFloat(startToothInput.value);
-	if (startTooth >= 1) {
+	if (Number.isFinite(startTooth)) {
 		// Check if start tooth has been changed since drawing began
 		const startDistance = (startTooth - 1) * stator.toothSize;
 		if (startDistance !== animController.startDistance) {
@@ -389,13 +410,7 @@ function calcTransform() {
 function drawSpirographAction() {
 	drawButton.classList.add('btn-warning');
 	drawButton.innerText = 'Stop';
-	numStatorTeeth = parseInt(statorTeethInput.value);
-	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
-	numRotorTeeth = parseInt(rotorTeethInput.value);
-	rotor = new CircleRotor(stator, numRotorTeeth);
-	calcTransform();
-	changePenPosition(rotor, penOffsetX, penOffsetY);
-	const startTooth = parseFloat(startToothInput.value);
+	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
 	spiroContext.globalAlpha = 1;
 	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, penX, penY, initialRotationDist);
@@ -404,6 +419,8 @@ function drawSpirographAction() {
 }
 
 randomizeSpirographForm();
+calcTransform();
+/*
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
@@ -412,6 +429,7 @@ animController.promise = animController.promise.then(function (event) {
 		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
 	}
 });
+*/
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -467,15 +485,19 @@ rotorTeethInput.addEventListener('change', function (event) {
 			startToothInput.value = startTooth;
 		} else {
 			startTooth = parseFloat(startToothInput.value);
+			if (Number.isFinite(startTooth)) {
+				startTooth = Math.trunc(startTooth);
+				startToothInput.value = startTooth;
+			}
 		}
-		if (startTooth >= 1) {
-			startTooth = Math.trunc(startTooth);
-			startToothInput.value = startTooth;
+		if (Number.isFinite(startTooth)) {
 			startDistance = (startTooth - 1) * stator.toothSize;
 		}
 		initialRotationDist = 0;
 		rotor = new CircleRotor(stator, numRotorTeeth);
 		placeRotor(stator, rotor, translateX, translateY, startDistance, startDistance, 0);
+		calcMaxHole();
+		updatePenXReadout();
 		changePenPosition(rotor, penOffsetX, penOffsetY);
 		drawTools(stator, rotor, penX, penY);
 		updateNumberOfPoints();
@@ -494,7 +516,7 @@ function makeNewStator() {
 	}
 	let startDistance = currentDistance;
 	let startTooth = parseFloat(startToothInput.value);
-	if (startTooth >= 1) {
+	if (Number.isFinite(startTooth)) {
 		startTooth = Math.trunc(startTooth);
 		startToothInput.value = startTooth;
 		startDistance = (startTooth - 1) * stator.toothSize;
@@ -538,16 +560,17 @@ startToothInput.addEventListener('change', function (event) {
 	}
 });
 
-function updatePenXReadout(event) {
-	penOffsetX = parseFloat(penXSlider.value);
-	document.getElementById('pen-x-readout').innerText = Math.round(penOffsetX * 100) + '%';
+function updatePenXReadout() {
+	const holeNumber = penXSlider.value;
+	document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
+	penOffsetX = 1 - holeNumber / maxHole;
 	changePenPosition(rotor, penOffsetX, penOffsetY);
 	drawTools(stator, rotor, penX, penY);
 }
 updatePenXReadout();
 penXSlider.addEventListener('input', updatePenXReadout);
 
-function updatePenYReadout(event) {
+function updatePenYReadout() {
 	penOffsetY = -parseFloat(penYSlider.value);
 	document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
 	changePenPosition(rotor, penOffsetX, penOffsetY);

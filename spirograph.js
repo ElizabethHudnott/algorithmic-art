@@ -1,6 +1,5 @@
 'use strict';
 
-let maxRotationTime = 10000;
 let maxIncrement = Math.PI / 48;
 
 let scale, width, height;
@@ -35,6 +34,7 @@ let statorRadius = parseFraction(statorRadiusInput.value);
 if (!(statorRadius > 0)) {
 	statorRadius = 1;
 }
+let maxRotationTime = 10000 * statorRadius;
 const penXSlider = document.getElementById('pen-x');
 let penOffsetX;
 const penYSlider = document.getElementById('pen-y');
@@ -75,8 +75,9 @@ function setAnimSpeed(newSpeed) {
 }
 
 class AnimationController {
-	constructor(startDistance) {
+	constructor(startDistance, longestTimeStep) {
 		this.startDistance = startDistance;
+		this.longestTimeStep = longestTimeStep;
 		this.status = 'running';
 	}
 
@@ -166,7 +167,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 	spiroContext.beginPath();
 	const beginTime = performance.now();
 
-	const newAnimController = new AnimationController(startDistance);
+	const newAnimController = new AnimationController(startDistance, maxRotationTime);
 	let animFunction;
 
 	const promise = new Promise(function (resolve, reject) {
@@ -181,7 +182,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 
 			let maxStep;
 			if (animSpeed < 100) {
-				const stepsPerMilli = stepsPerRotation / (maxRotationTime / 100 * (101 - animSpeed));
+				const stepsPerMilli = stepsPerRotation / (newAnimController.longestTimeStep / 100 * (101 - animSpeed));
 				maxStep = (time - beginTime) * stepsPerMilli;
 				if (maxStep > numSteps) {
 					maxStep = numSteps;
@@ -420,7 +421,7 @@ function drawSpirographAction() {
 
 randomizeSpirographForm();
 calcTransform();
-/*
+
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
@@ -429,7 +430,6 @@ animController.promise = animController.promise.then(function (event) {
 		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
 	}
 });
-*/
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -544,6 +544,7 @@ statorRadiusInput.addEventListener('change', function (event) {
 		this.setCustomValidity('');
 		statorRadius = statorRadiusEntered;
 		makeNewStator();
+		maxRotationTime = 10000 * statorRadius;
 	} else {
 		this.setCustomValidity('Please enter a positive number.');
 	}

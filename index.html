@@ -19,7 +19,7 @@
 
 		<div id="canvas-container" class="position-relative w-100 my-2">
 			<canvas id="spirograph-canvas" height="640"></canvas>
-			<canvas class="position-absolute top left" id="tool-canvas" height="640"></canvas>
+			<canvas class="position-absolute top left" id="tool-canvas" height="640" style="pointer-events: none"></canvas>
 		</div>
 
 		<form id="spirograph-form">
@@ -30,10 +30,10 @@
 				</div>
 				<div class="btn-group btn-group-toggle mr-3 mb-2" data-toggle="buttons" aria-label="Selected tool">
 					<label class="btn btn-secondary active">
-						<input type="radio" name="tool" value="line" checked>Ruler
+						<input type="radio" name="tool" value="line">Ruler
 					</label>
 					<label class="btn btn-secondary">
-						<input type="radio" name="tool" value="fill">Fill Tool
+						<input type="radio" name="tool" value="fill" checked>Fill Tool
 					</label>
 				</div>
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="History">

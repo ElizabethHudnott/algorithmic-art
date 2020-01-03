@@ -15,6 +15,7 @@ let penX = 0;
 let penY = 0;
 let lineDash = [];
 let maxHole, animSpeed, animController;
+let currentTool = 'fill';
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -731,4 +732,142 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
+});
+
+function floodFill(canvas, startX, startY, newColor, maxAlpha) {
+	const newR = parseInt(newColor.slice(1, 3), 16);
+	const newG = parseInt(newColor.slice(3, 5), 16);
+	const newB = parseInt(newColor.slice(5, 7), 16);
+	const alphaMultiply = 1 / maxAlpha;
+	const width = canvas.width;
+	const height = canvas.height;
+	const context = canvas.getContext('2d');
+	const dataObj = context.getImageData(0, 0, width, height);
+	const data = dataObj.data;
+	let offset = (startY * width + startX) * 4;
+	const targetR = data[offset];
+	const targetG = data[offset + 1];
+	const targetB = data[offset + 2];
+	const fillTransparent = data[offset + 3] === 0;
+	if (maxAlpha === 1 && targetR === newR && targetG === newG && targetB === newB) {
+		return;
+	}
+
+	function checkPixel() {
+		if (fillTransparent) {
+			return data[offset + 3] === 0;
+		} else {
+			return data[offset] === targetR && data[offset + 1] === targetG &&
+			data[offset + 2] === targetB && data[offset + 3] !== 0;
+		}
+	}
+
+	function fillPixel() {
+		data[offset] = newR;
+		data[offset + 1] = newG;
+		data[offset + 2] = newB;
+		if (fillTransparent) {
+			data[offset + 3] = 255;
+		} else {
+			data[offset + 3] *= alphaMultiply;
+		}
+	}
+	const stack = [startX, startY];
+	let top = 2;
+	while (top > 0) {
+		top -= 2;
+		let x = stack[top];
+		let y = stack[top + 1];
+		offset = (y * width + x) * 4;
+		fillPixel();
+
+		// Check North pixel
+		if (y > 0) {
+			offset = ((y - 1) * width + x) * 4;
+			if (checkPixel()) {
+				stack[top + 1] = y - 1;
+				top += 2;
+			}
+		}
+		// Check South pixel
+		if (y < height - 1) {
+			offset = ((y + 1) * width + x) * 4;
+			if (checkPixel()) {
+				stack[top] = x;
+				stack[top + 1] = y + 1;
+				top += 2;
+			}
+		}
+
+		// Move East
+		let currentX = x;
+		while (currentX > 0) {
+			currentX--;
+			offset = (y * width + currentX) * 4;
+			if (!checkPixel()) {
+				break;
+			}
+			fillPixel();
+			// Check North pixel
+			if (y > 0) {
+				offset = ((y - 1) * width + currentX) * 4;
+				if (checkPixel()) {
+					stack[top] = currentX;
+					stack[top + 1] = y - 1;
+					top += 2;
+				}
+			}
+			// Check South pixel
+			if (y < height - 1) {
+				offset = ((y + 1) * width + currentX) * 4;
+				if (checkPixel()) {
+					stack[top] = currentX;
+					stack[top + 1] = y + 1;
+					top += 2;
+				}
+			}
+		}
+
+		// Move West
+		currentX = x;
+		while (currentX < width - 1) {
+			currentX++;
+			offset = (y * width + currentX) * 4;
+			if (!checkPixel()) {
+				break;
+			}
+			fillPixel();
+			// Check North pixel
+			if (y > 0) {
+				offset = ((y - 1) * width + currentX) * 4;
+				if (checkPixel()) {
+					stack[top] = currentX;
+					stack[top + 1] = y - 1;
+					top += 2;
+				}
+			}
+			// Check South pixel
+			if (y < height - 1) {
+				offset = ((y + 1) * width + currentX) * 4;
+				if (checkPixel()) {
+					stack[top] = currentX;
+					stack[top + 1] = y + 1;
+					top += 2;
+				}
+			}
+		}
+	} // end while stack not empty
+	context.putImageData(dataObj, 0, 0);
+}
+
+spiroCanvas.addEventListener('click', function (event) {
+	const x = Math.round(event.offsetX);
+	const y = Math.round(event.offsetY);
+
+	switch (currentTool) {
+	case 'fill':
+		const alphaThreshold = parseFloat(opacityInput.value);
+		floodFill(spiroCanvas, x, y, spiroContext.strokeStyle, alphaThreshold);
+		break;
+	}
 });

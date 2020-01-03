@@ -749,7 +749,8 @@ function floodFill(canvas, startX, startY, newColor, maxAlpha) {
 	const targetG = data[offset + 1];
 	const targetB = data[offset + 2];
 	const fillTransparent = data[offset + 3] === 0;
-	if (maxAlpha === 1 && targetR === newR && targetG === newG && targetB === newB) {
+	const sameColor = !fillTransparent && targetR === newR && targetG === newG && targetB === newB;
+	if (sameColor) { // TODO make it work with maxAlpha === 1 here instead
 		return;
 	}
 

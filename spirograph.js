@@ -402,6 +402,7 @@ function randomizeSpirographForm() {
 	document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
 	penOffsetX = 1 - holeNumber / maxHole;
 	changePenPosition(rotor, penOffsetX, penOffsetY);
+	setPenColor.call(penSwatches[Math.trunc(Math.random() * 5)].parentElement);
 }
 
 function abortDrawing() {

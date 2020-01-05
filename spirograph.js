@@ -754,12 +754,18 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 		return;
 	}
 
+	const tolerance = 0.05;
+	const divisor = 256 * Math.sqrt(3);
 	function checkPixel() {
 		if (fillTransparent) {
-			return data[offset + 3] === 0;
+			return data[offset + 3] <= 115; // tolerance = 0.45
+		} else if (data[offset + 3] === 0) {
+			return false;
 		} else {
-			return data[offset] === targetR && data[offset + 1] === targetG &&
-			data[offset + 2] === targetB && data[offset + 3] !== 0;
+			const rDistance = data[offset] - targetR;
+			const gDistance = data[offset + 1] - targetG;
+			const bDistance = data[offset + 2] - targetB;
+			return (rDistance * rDistance + gDistance * gDistance + bDistance * bDistance) / divisor <= tolerance;
 		}
 	}
 

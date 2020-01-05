@@ -855,6 +855,22 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 
 	const stack = [startX, startY];
 	let top = 2;
+	function pushPixel(x, y) {
+		stack[top] = x;
+		top++;
+		stack[top] = y;
+		top++;
+	}
+	function pushPixels(x, y) {
+		if (checkPixel(x, y)) {
+			pushPixel(x, y);
+		} else if (x > 0 && checkPixel(x - 1, y)) {
+			pushPixel(x - 1, y);
+		} else if (x < width - 1 && checkPixel(x + 1, y)) {
+			pushPixel(x + 1, y);
+		}
+	}
+
 	while (top > 0) {
 		top -= 2;
 		const x = stack[top];
@@ -862,20 +878,13 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 		offset = (y * width + x) * 4;
 		fillPixel();
 
-		// Check North pixel
+		// Check North pixels
 		if (y > 0) {
-			if (checkPixel(x, y - 1)) {
-				stack[top + 1] = y - 1;
-				top += 2;
-			}
+			pushPixels(x, y - 1);
 		}
-		// Check South pixel
+		// Check South pixels
 		if (y < height - 1) {
-			if (checkPixel(x, y + 1)) {
-				stack[top] = x;
-				stack[top + 1] = y + 1;
-				top += 2;
-			}
+			pushPixels(x, y + 1);
 		}
 
 		// Move East
@@ -886,21 +895,13 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 				break;
 			}
 			fillPixel();
-			// Check North pixel
+			// Check North pixels
 			if (y > 0) {
-				if (checkPixel(currentX, y - 1)) {
-					stack[top] = currentX;
-					stack[top + 1] = y - 1;
-					top += 2;
-				}
+				pushPixels(currentX, y - 1);
 			}
-			// Check South pixel
+			// Check South pixels
 			if (y < height - 1) {
-				if (checkPixel(currentX, y + 1)) {
-					stack[top] = currentX;
-					stack[top + 1] = y + 1;
-					top += 2;
-				}
+				pushPixels(currentX, y + 1);
 			}
 		}
 
@@ -912,21 +913,13 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 				break;
 			}
 			fillPixel();
-			// Check North pixel
+			// Check North pixels
 			if (y > 0) {
-				if (checkPixel(currentX, y - 1)) {
-					stack[top] = currentX;
-					stack[top + 1] = y - 1;
-					top += 2;
-				}
+				pushPixels(currentX, y - 1);
 			}
-			// Check South pixel
+			// Check South pixels
 			if (y < height - 1) {
-				if (checkPixel(currentX, y + 1)) {
-					stack[top] = currentX;
-					stack[top + 1] = y + 1;
-					top += 2;
-				}
+				pushPixels(currentX, y + 1);
 			}
 		}
 	} // end while stack not empty

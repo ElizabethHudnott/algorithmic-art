@@ -322,6 +322,14 @@ class CircleRotor {
 			this.radiusB * Math.sin(angle)
 		];
 	}
+
+	/**
+	 * @param {number} x The proportional x-distance from the centre (0 <= x <= 1).
+	 * @param {number} y The proportional y-distance from the centre (0 <= y <= 1).
+	 */
+	isPointInside(x, y) {
+		return x * x + y * y <= 1;
+	}
 }
 
 function calcMaxHole() {
@@ -600,22 +608,40 @@ startToothInput.addEventListener('change', function (event) {
 
 function updatePenXReadout() {
 	const holeNumber = penXSlider.value;
-	document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
-	penOffsetX = 1 - holeNumber / maxHole;
-	changePenPosition(rotor, penOffsetX, penOffsetY);
-	drawTools(stator, rotor, penX, penY);
+	const newOffset = 1 - holeNumber / maxHole;
+	if (rotor.isPointInside(newOffset, penOffsetY)) {
+		document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
+		penOffsetX = newOffset;
+		changePenPosition(rotor, penOffsetX, penOffsetY);
+		drawTools(stator, rotor, penX, penY);
+	}
 }
 updatePenXReadout();
 penXSlider.addEventListener('input', updatePenXReadout);
+penXSlider.addEventListener('change', function (event) {
+	const match = document.getElementById('pen-x-readout').innerText.match(/\d+$/);
+	const holeNumber = parseInt(match[0]);
+	if (holeNumber !== this.value) {
+		this.value = holeNumber;
+	}
+});
 
 function updatePenYReadout() {
-	penOffsetY = -parseFloat(penYSlider.value);
-	document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
-	changePenPosition(rotor, penOffsetX, penOffsetY);
-	drawTools(stator, rotor, penX, penY);
+	const newOffset = -parseFloat(penYSlider.value);
+	if (rotor.isPointInside(penOffsetX, newOffset)) {
+		penOffsetY = newOffset;
+		document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
+		changePenPosition(rotor, penOffsetX, penOffsetY);
+		drawTools(stator, rotor, penX, penY);
+	}
 }
 updatePenYReadout()
 penYSlider.addEventListener('input', updatePenYReadout);
+penYSlider.addEventListener('change', function (event) {
+	if (parseFloat(this.value) !== -penOffsetY) {
+		this.value = -penOffsetY;
+	}
+});
 
 animSpeedSlider.addEventListener('input', function (event) {
 	setAnimSpeed(parseInt(this.value));
@@ -794,7 +820,7 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 	const divisor = 256 * Math.sqrt(3);
 	function checkPixel() {
 		if (fillTransparent) {
-			return data[offset + 3] <= 115; // tolerance = 0.45
+			return data[offset + 3] < Math.min(fillAlpha, 115); // tolerance = 0.45
 		} else if (data[offset + 3] === 0) {
 			return false;
 		} else {

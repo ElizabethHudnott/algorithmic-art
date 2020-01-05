@@ -61,6 +61,23 @@ const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
 const opacityInput = document.getElementById('opacity');
 
+function hexToRGB(color) {
+	const r = parseInt(color.slice(1, 3), 16);
+	const g = parseInt(color.slice(3, 5), 16);
+	const b = parseInt(color.slice(5, 7), 16);
+	return [r, g, b];
+}
+
+function rgba(r, g, b, a) {
+	return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function setFillStyle() {
+	const [beginR, beginG, beginB] = hexToRGB(spiroContext.strokeStyle);
+	const beginColor = rgba(beginR, beginG, beginB, parseFloat(opacityInput.value));
+	spiroContext.fillStyle = beginColor;
+}
+
 function changePenPosition(rotor, offsetX, offsetY) {
 	penX = offsetX * rotor.radiusA;
 	penY = offsetY * rotor.radiusB;
@@ -416,7 +433,6 @@ function drawSpirographAction() {
 	drawButton.innerText = 'Stop';
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
-	spiroContext.globalAlpha = 1;
 	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, penX, penY, initialRotationDist);
 	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
 	updateNumberOfPoints();
@@ -456,8 +472,7 @@ document.getElementById('spirograph-form').addEventListener('submit', function (
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
-	spiroContext.fillStyle = spiroContext.strokeStyle;
-	spiroContext.globalAlpha = parseFloat(opacityInput.value);
+	setFillStyle();
 	spiroContext.fill('evenodd');
 });
 
@@ -736,9 +751,7 @@ $(function () {
 });
 
 function floodFill(canvas, startX, startY, newColor, transparency) {
-	const newR = parseInt(newColor.slice(1, 3), 16);
-	const newG = parseInt(newColor.slice(3, 5), 16);
-	const newB = parseInt(newColor.slice(5, 7), 16);
+	const [newR, newG, newB] = hexToRGB(newColor);
 	const fillAlpha = Math.round(transparency * 255); // Used to fill areas with 0 alpha
 	const width = canvas.width;
 	const height = canvas.height;

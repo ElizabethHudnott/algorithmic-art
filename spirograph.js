@@ -15,6 +15,7 @@ let penX = 0;
 let penY = 0;
 let lineDash = [];
 let maxHole, animSpeed, animController;
+let isFilled = false
 let currentTool = 'fill';
 
 function parseFraction(text) {
@@ -372,7 +373,6 @@ function resizeCanvas(fitExact) {
 	}
 	spiroContext.lineWidth = lineWidth / scale;
 	toolContext.lineWidth = 2 / scale;
-	spiroContext.globalCompositeOperation = 'multiply';
 	spiroContext.strokeStyle = penColor;
 	spiroContext.lineCap = 'round';
 	spiroContext.lineJoin = 'round';
@@ -444,6 +444,8 @@ function drawSpirographAction() {
 	drawButton.innerText = 'Stop';
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
+	spiroContext.globalCompositeOperation = 'multiply';
+	isFilled = false;
 	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, penX, penY, initialRotationDist);
 	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
 	updateNumberOfPoints();
@@ -483,8 +485,13 @@ document.getElementById('spirograph-form').addEventListener('submit', function (
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
+	if (isFilled) {
+		// TODO replace with an undo action
+		spiroContext.globalCompositeOperation = 'color';
+	}
 	setFillStyle();
 	spiroContext.fill('evenodd');
+	isFilled = true;
 });
 
 document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {

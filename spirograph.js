@@ -714,6 +714,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 	function reset() {
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
+		initialRotationDist = 0;
 		translationInput.value = 0;
 		translationSteps = 0;
 		calcTransform();

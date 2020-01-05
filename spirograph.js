@@ -59,7 +59,8 @@ const customPenInput = document.getElementById('custom-pen-color');
 let customColor = customPenInput.value;
 const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
-const opacityInput = document.getElementById('opacity');
+const opacityInput = document.getElementById('outer-opacity');
+const opacityInput2 = document.getElementById('inner-opacity');
 
 function hexToRGB(color) {
 	const r = parseInt(color.slice(1, 3), 16);
@@ -73,9 +74,18 @@ function rgba(r, g, b, a) {
 }
 
 function setFillStyle() {
-	const [beginR, beginG, beginB] = hexToRGB(spiroContext.strokeStyle);
-	const beginColor = rgba(beginR, beginG, beginB, parseFloat(opacityInput.value));
-	spiroContext.fillStyle = beginColor;
+	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
+	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
+	const innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
+
+	const radius = stator.radius - Math.min(
+		rotor.radiusA * (1 - penOffsetX),
+		rotor.radiusB * (1 - penOffsetY)
+	);
+	const gradient = spiroContext.createRadialGradient(translateX, translateY, 0, translateX, translateY, radius);
+	gradient.addColorStop(0, innerColor);
+	gradient.addColorStop(1, outerColor);
+	spiroContext.fillStyle = gradient;
 }
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -270,7 +280,7 @@ class InnerCircleStator {
 
 	constructor(numTeeth, radius) {
 		this.numTeeth = numTeeth;
-		this.radius = radius;		// private
+		this.radius = radius;
 		this.toothSize = 2 * Math.PI * radius / numTeeth;
 	}
 
@@ -718,11 +728,15 @@ customPaperInput.addEventListener('input', function (event) {
 });
 
 function updateOpacityReadout(event) {
-	const opacity = parseFloat(opacityInput.value);
-	document.getElementById('opacity-readout').innerText = Math.round(opacity * 100) + '%';
+	const opacity = parseFloat(this.value);
+	const readout = document.getElementById(this.getAttribute('aria-describedby'));
+	readout.innerText = Math.round(opacity * 100) + '%';
 }
-updateOpacityReadout();
+
+updateOpacityReadout.call(opacityInput);
+updateOpacityReadout.call(opacityInput2);
 opacityInput.addEventListener('input', updateOpacityReadout);
+opacityInput2.addEventListener('input', updateOpacityReadout);
 
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
@@ -892,8 +906,8 @@ spiroCanvas.addEventListener('click', function (event) {
 
 	switch (currentTool) {
 	case 'fill':
-		const alphaThreshold = parseFloat(opacityInput.value);
-		floodFill(spiroCanvas, x, y, spiroContext.strokeStyle, alphaThreshold);
+		const alphaChange = parseFloat(opacityInput.value);
+		floodFill(spiroCanvas, x, y, spiroContext.strokeStyle, alphaChange);
 		break;
 	}
 });

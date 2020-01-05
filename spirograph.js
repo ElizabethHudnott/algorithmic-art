@@ -798,75 +798,80 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 
-function floodFill(canvas, startX, startY, newColor, transparency) {
+function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const [newR, newG, newB] = hexToRGB(newColor);
-	const fillAlpha = Math.round(transparency * 255); // Used to fill areas with 0 alpha
-	const width = canvas.width;
-	const height = canvas.height;
-	const context = canvas.getContext('2d');
-	const dataObj = context.getImageData(0, 0, width, height);
+	const width = dataObj.width;
+	const height = dataObj.height;
 	const data = dataObj.data;
 	let offset = (startY * width + startX) * 4;
 	const targetR = data[offset];
 	const targetG = data[offset + 1];
 	const targetB = data[offset + 2];
 	const fillTransparent = data[offset + 3] === 0;
-	const sameColor = !fillTransparent && targetR === newR && targetG === newG && targetB === newB;
-	if (sameColor) { // TODO make it work with a lesser constraint about opacity here instead
-		return;
-	}
+	const filled = new Uint8Array(width * height); // Records which pixels we've filled
+	const fillAlpha = Math.ceil(transparency * 255); // Used to fill areas with 0 alpha
 
 	const tolerance = 0.05;
-	const divisor = 256 * Math.sqrt(3);
-	function checkPixel() {
+	const divisor = 255 * Math.sqrt(3);
+	function checkPixel(x, y) {
+		offset = y * width + x;
+		if (filled[offset]) {
+			return false;
+		}
+		offset *= 4;
 		if (fillTransparent) {
-			return data[offset + 3] < Math.min(fillAlpha, 115); // tolerance = 0.45
+			return data[offset + 3] < 128; // tolerance = 0.5
 		} else if (data[offset + 3] === 0) {
 			return false;
 		} else {
 			const rDistance = data[offset] - targetR;
 			const gDistance = data[offset + 1] - targetG;
 			const bDistance = data[offset + 2] - targetB;
-			return (rDistance * rDistance + gDistance * gDistance + bDistance * bDistance) / divisor <= tolerance;
+			const deviation = Math.sqrt(rDistance * rDistance + gDistance * gDistance + bDistance * bDistance) / divisor;
+			return deviation <= tolerance;
 		}
 	}
 
 	function fillPixel() {
-		let x;
+		const maskOffset = offset / 4;
+		if (filled[maskOffset]) {
+			return;
+		}
+		filled[maskOffset] = 1;
 		data[offset] = newR;
 		data[offset + 1] = newG;
 		data[offset + 2] = newB;
+		let p;
 		if (fillTransparent) {
 			data[offset + 3] = fillAlpha;
 		} else if (transparency >= 0.5) {
-			x = (transparency - 0.5) * 2;
-			data[offset + 3] = x * 255 + (1 - x) * data[offset + 3];
+			p = (transparency - 0.5) * 2;
+			data[offset + 3] = p * 255 + (1 - p) * data[offset + 3];
 		} else {
-			x = transparency * 2;
-			data[offset + 3] = x * data[offset + 3];
+			p = transparency * 2;
+			data[offset + 3] = p * data[offset + 3];
 		}
 	}
+
 	const stack = [startX, startY];
 	let top = 2;
 	while (top > 0) {
 		top -= 2;
-		let x = stack[top];
-		let y = stack[top + 1];
+		const x = stack[top];
+		const y = stack[top + 1];
 		offset = (y * width + x) * 4;
 		fillPixel();
 
 		// Check North pixel
 		if (y > 0) {
-			offset = ((y - 1) * width + x) * 4;
-			if (checkPixel()) {
+			if (checkPixel(x, y - 1)) {
 				stack[top + 1] = y - 1;
 				top += 2;
 			}
 		}
 		// Check South pixel
 		if (y < height - 1) {
-			offset = ((y + 1) * width + x) * 4;
-			if (checkPixel()) {
+			if (checkPixel(x, y + 1)) {
 				stack[top] = x;
 				stack[top + 1] = y + 1;
 				top += 2;
@@ -877,15 +882,13 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 		let currentX = x;
 		while (currentX > 0) {
 			currentX--;
-			offset = (y * width + currentX) * 4;
-			if (!checkPixel()) {
+			if (!checkPixel(currentX, y)) {
 				break;
 			}
 			fillPixel();
 			// Check North pixel
 			if (y > 0) {
-				offset = ((y - 1) * width + currentX) * 4;
-				if (checkPixel()) {
+				if (checkPixel(currentX, y - 1)) {
 					stack[top] = currentX;
 					stack[top + 1] = y - 1;
 					top += 2;
@@ -893,8 +896,7 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 			}
 			// Check South pixel
 			if (y < height - 1) {
-				offset = ((y + 1) * width + currentX) * 4;
-				if (checkPixel()) {
+				if (checkPixel(currentX, y + 1)) {
 					stack[top] = currentX;
 					stack[top + 1] = y + 1;
 					top += 2;
@@ -906,15 +908,13 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 		currentX = x;
 		while (currentX < width - 1) {
 			currentX++;
-			offset = (y * width + currentX) * 4;
-			if (!checkPixel()) {
+			if (!checkPixel(currentX, y)) {
 				break;
 			}
 			fillPixel();
 			// Check North pixel
 			if (y > 0) {
-				offset = ((y - 1) * width + currentX) * 4;
-				if (checkPixel()) {
+				if (checkPixel(currentX, y - 1)) {
 					stack[top] = currentX;
 					stack[top + 1] = y - 1;
 					top += 2;
@@ -922,8 +922,7 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 			}
 			// Check South pixel
 			if (y < height - 1) {
-				offset = ((y + 1) * width + currentX) * 4;
-				if (checkPixel()) {
+				if (checkPixel(currentX, y + 1)) {
 					stack[top] = currentX;
 					stack[top + 1] = y + 1;
 					top += 2;
@@ -931,17 +930,22 @@ function floodFill(canvas, startX, startY, newColor, transparency) {
 			}
 		}
 	} // end while stack not empty
-	context.putImageData(dataObj, 0, 0);
 }
 
 spiroCanvas.addEventListener('click', function (event) {
+	if (isAnimating()) {
+		return;
+	}
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
 
 	switch (currentTool) {
 	case 'fill':
 		const alphaChange = parseFloat(opacityInput.value);
-		floodFill(spiroCanvas, x, y, spiroContext.strokeStyle, alphaChange);
+		const dataObj = spiroContext.getImageData(0, 0, spiroCanvas.width, spiroCanvas.height);
+		floodFill(dataObj, x, y, spiroContext.strokeStyle, alphaChange);
+		spiroContext.clearRect(-1, -1, width, height);
+		spiroContext.putImageData(dataObj, 0, 0);
 		break;
 	}
 });

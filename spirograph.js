@@ -734,11 +734,11 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 
-function floodFill(canvas, startX, startY, newColor, opacity) {
+function floodFill(canvas, startX, startY, newColor, transparency) {
 	const newR = parseInt(newColor.slice(1, 3), 16);
 	const newG = parseInt(newColor.slice(3, 5), 16);
 	const newB = parseInt(newColor.slice(5, 7), 16);
-	const fillAlpha = Math.round(opacity * 255);
+	const fillAlpha = Math.round(transparency * 255); // Used to fill areas with 0 alpha
 	const width = canvas.width;
 	const height = canvas.height;
 	const context = canvas.getContext('2d');
@@ -764,13 +764,18 @@ function floodFill(canvas, startX, startY, newColor, opacity) {
 	}
 
 	function fillPixel() {
+		let x;
 		data[offset] = newR;
 		data[offset + 1] = newG;
 		data[offset + 2] = newB;
 		if (fillTransparent) {
 			data[offset + 3] = fillAlpha;
-		} else if (data[offset + 3] < fillAlpha) {
-			data[offset + 3] = fillAlpha;
+		} else if (transparency >= 0.5) {
+			x = (transparency - 0.5) * 2;
+			data[offset + 3] = x * 255 + (1 - x) * data[offset + 3];
+		} else {
+			x = transparency * 2;
+			data[offset + 3] = x * data[offset + 3];
 		}
 	}
 	const stack = [startX, startY];

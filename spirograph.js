@@ -249,7 +249,9 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 
 			drawTools(stator, rotor, penX, penY);
 			restoreCanvas();
+			spiroContext.globalAlpha = parseFloat(opacityInput.value);
 			spiroContext.stroke();
+			spiroContext.globalAlpha = 1;
 
 			if (stepNumber <= numSteps) {
 				requestAnimationFrame(animate);

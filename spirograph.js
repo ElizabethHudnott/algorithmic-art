@@ -77,25 +77,39 @@ function rgba(r, g, b, a) {
 function setFillStyle() {
 	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
-	const innerOpacity = parseFloat(opacityInput2.value);
-	const innerColor = rgba(outerR, outerG, outerB, innerOpacity);
 
-	let minRadius, maxRadius;
-	const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
-	const penToEdge2 = rotor.radiusB * (2 - penOffsetY);
+	let innerColor = outerColor;
+	if (document.getElementById('inner-fill-controls').classList.contains('show')) {
+		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
-	if (penToEdge1 <= penToEdge2) {
-		maxRadius = stator.radius - penToEdge1;
-		minRadius = stator.radius - 2 * rotor.radiusA + penToEdge1;
+		let minRadius, maxRadius;
+		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
+		const penToEdge2 = rotor.radiusB * (2 - penOffsetY);
+
+		if (penToEdge1 <= penToEdge2) {
+			// Calc using Radius A
+			maxRadius = stator.radius - penToEdge1;
+			minRadius = stator.radius - 2 * rotor.radiusA + penToEdge1;
+		} else {
+			// Calc using Radius B
+			maxRadius = stator.radius - penToEdge2;
+			minRadius = stator.radius - 2 * rotor.radiusB + penToEdge2;
+		}
+		if (minRadius < 0) {
+			minRadius += stator.radius;
+		}
+
+		const gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
+		gradient.addColorStop(0, innerColor);
+		gradient.addColorStop(1, outerColor);
+		spiroContext.fillStyle = gradient;
+
 	} else {
-		maxRadius = stator.radius - penToEdge2;
-		minRadius = stator.radius - 2 * rotor.radiusB + penToEdge2;
+
+		spiroContext.fillStyle = outerColor;
+
 	}
 
-	const gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
-	gradient.addColorStop(0, innerColor);
-	gradient.addColorStop(1, outerColor);
-	spiroContext.fillStyle = gradient;
 }
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -772,7 +786,7 @@ customPaperInput.addEventListener('input', function (event) {
 	this.parentElement.classList.add('active');
 });
 
-function updateOpacityReadout(event) {
+function updateOpacityReadout() {
 	const opacity = parseFloat(this.value);
 	const readout = document.getElementById(this.getAttribute('aria-describedby'));
 	readout.innerText = Math.round(opacity * 100) + '%';
@@ -806,8 +820,16 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 });
 
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+	$('[data-toggle="tooltip"]').tooltip();
 });
+
+function opacityPreset() {
+	opacityInput.value = this.dataset.value;
+	updateOpacityReadout.call(opacityInput);
+}
+document.getElementById('opacity-50').addEventListener('click', opacityPreset);
+document.getElementById('opacity-75').addEventListener('click', opacityPreset);
+document.getElementById('opacity-100').addEventListener('click', opacityPreset);
 
 function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const [newR, newG, newB] = hexToRGB(newColor);

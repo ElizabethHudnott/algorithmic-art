@@ -95,9 +95,7 @@ function setFillStyle() {
 			maxRadius = stator.radius - penToEdge2;
 			minRadius = stator.radius - 2 * rotor.radiusB + penToEdge2;
 		}
-		if (minRadius < 0) {
-			minRadius += stator.radius;
-		}
+		minRadius = Math.abs(minRadius);
 
 		const gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
 		gradient.addColorStop(0, innerColor);
@@ -109,7 +107,6 @@ function setFillStyle() {
 		spiroContext.fillStyle = outerColor;
 
 	}
-
 }
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -213,6 +210,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 		const multiple = Math.ceil(increment / maxIncrement);
 		increment = increment / multiple;
 	}
+	increment *= 10;
 	const numSteps = Math.ceil((endDistance - startDistance) / increment);
 	const stepsPerRotation = 2 * Math.PI / increment;
 	let stepNumber = 0;
@@ -245,13 +243,15 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 				maxStep = numSteps;
 			}
 
+			const shift = Math.round(spiroContext.lineWidth * scale) % 2 === 0 ? 0 : 0.5 / scale;
+
 			while (stepNumber <= maxStep) {
 				const distance = startDistance + stepNumber * increment;
 				placeRotor(stator, rotor, translateX, translateY, startDistance, distance, initialRotationDist);
 				const cos = Math.cos(rotorAngle);
 				const sin = Math.sin(rotorAngle);
-				const plotX = rotorX + penX * cos - penY * sin;
-				const plotY = rotorY + penX * sin + penY * cos;
+				const plotX = rotorX + penX * cos - penY * sin + shift;
+				const plotY = rotorY + penX * sin + penY * cos + shift;
 
 				if (stepNumber === 0) {
 					spiroContext.moveTo(plotX, plotY);
@@ -827,6 +827,7 @@ function opacityPreset() {
 	opacityInput.value = this.dataset.value;
 	updateOpacityReadout.call(opacityInput);
 }
+document.getElementById('opacity-0').addEventListener('click', opacityPreset);
 document.getElementById('opacity-50').addEventListener('click', opacityPreset);
 document.getElementById('opacity-75').addEventListener('click', opacityPreset);
 document.getElementById('opacity-100').addEventListener('click', opacityPreset);
@@ -845,6 +846,7 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const fillAlpha = Math.ceil(transparency * 255); // Used to fill areas with 0 alpha
 
 	const tolerance = 0.1;
+	const alphaThreshold = Math.min(fillAlpha - 1, Math.round(tolerance * 255));
 	const divisor = 255 * Math.sqrt(3);
 	function checkPixel(x, y) {
 		offset = y * width + x;
@@ -853,7 +855,7 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 		}
 		offset *= 4;
 		if (fillTransparent) {
-			return data[offset + 3] < 128; // tolerance = 0.5
+			return data[offset + 3] <= alphaThreshold;
 		} else if (data[offset + 3] === 0) {
 			return false;
 		} else {

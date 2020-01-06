@@ -272,18 +272,18 @@
 					</tr>
 					<tr class="row">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
-							<div class="form-group">
-								<label for="outer-opacity">Opacity</label>
-								<output id="outer-opacity-readout" class="float-right"></output>
-								<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0.05" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
-							</div>
+							<label for="outer-opacity">Opacity</label>
+							<output id="outer-opacity-readout" class="float-right"></output>
 							<div class="btn-group btn-group-round" role="group" aria-label="Opacity presets">
+								<button type="button" id="opacity-0" class="btn btn-light btn-btn-sm" data-value="0">0%</button>
 								<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
 								<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
 								<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
-								<span data-toggle="collapse" data-target="#inner-fill-controls" ara-expanded="false aria-controls="inner-fill-controls">
+								<span data-toggle="collapse" data-target="#inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
 									<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
 								</span>
+							</div>
+							<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
 							</div>
 						</td>
 					</tr>
@@ -291,7 +291,7 @@
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="inner-opacity">Centre fill opacity</label>
 							<output id="inner-opacity-readout" class="float-right"></output>
-							<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0.05" max="1" value="0.75" step="0.05" aria-describedby="inner-opacity-readout">
+							<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="inner-opacity-readout">
 						</td>
 					</tr>
 				</tbody>

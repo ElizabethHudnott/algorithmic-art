@@ -77,13 +77,22 @@ function rgba(r, g, b, a) {
 function setFillStyle() {
 	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
-	const innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
+	const innerOpacity = parseFloat(opacityInput2.value);
+	const innerColor = rgba(outerR, outerG, outerB, innerOpacity);
 
-	const radius = stator.radius - Math.min(
-		rotor.radiusA * (1 - penOffsetX),
-		rotor.radiusB * (1 - penOffsetY)
-	);
-	const gradient = spiroContext.createRadialGradient(translateX, translateY, 0, translateX, translateY, radius);
+	let minRadius, maxRadius;
+	const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
+	const penToEdge2 = rotor.radiusB * (2 - penOffsetY);
+
+	if (penToEdge1 <= penToEdge2) {
+		maxRadius = stator.radius - penToEdge1;
+		minRadius = stator.radius - 2 * rotor.radiusA + penToEdge1;
+	} else {
+		maxRadius = stator.radius - penToEdge2;
+		minRadius = stator.radius - 2 * rotor.radiusB + penToEdge2;
+	}
+
+	const gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
 	gradient.addColorStop(0, innerColor);
 	gradient.addColorStop(1, outerColor);
 	spiroContext.fillStyle = gradient;
@@ -811,7 +820,7 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const filled = new Uint8Array(width * height); // Records which pixels we've filled
 	const fillAlpha = Math.ceil(transparency * 255); // Used to fill areas with 0 alpha
 
-	const tolerance = 0.05;
+	const tolerance = 0.1;
 	const divisor = 255 * Math.sqrt(3);
 	function checkPixel(x, y) {
 		offset = y * width + x;

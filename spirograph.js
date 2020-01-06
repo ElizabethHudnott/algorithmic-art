@@ -210,7 +210,6 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 		const multiple = Math.ceil(increment / maxIncrement);
 		increment = increment / multiple;
 	}
-	increment *= 10;
 	const numSteps = Math.ceil((endDistance - startDistance) / increment);
 	const stepsPerRotation = 2 * Math.PI / increment;
 	let stepNumber = 0;

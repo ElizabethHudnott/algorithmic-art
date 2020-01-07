@@ -55,7 +55,8 @@
 			</div>
 			<div colspan="4" id="info" class="mb-4 collapse">
 				<span class="bg-info bg-light p-2">
-					This spirograph has <span id="num-points"></span> points.
+					This spirograph has <span id="num-points"></span> points
+					and its complete length is <span id="length"></span>.
 				</span>
 			</div>
 
@@ -161,7 +162,7 @@
 						</td>
 						<td class="col-6 col-md-3 mb-3">
 							<label for="increment">Step Size</label>
-							<input class="form-control" type="text" value="1" required id="increment" pattern="\d+(\.\d*)?(/[1-9]\d*)?" placeholder="Teeth per step">
+							<input class="form-control" type="number" min="0.01" step="any" value="1" required id="increment" placeholder="Teeth per step">
 						</td>
 					</tr>
 					<tr class="row">

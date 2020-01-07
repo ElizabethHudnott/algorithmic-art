@@ -1,6 +1,6 @@
 'use strict';
 
-let maxIncrement = Math.PI / 48;
+const maxIncrement = 640 * Math.PI / 96;
 
 let scale, width, height;
 let toolsVisible = true;
@@ -30,6 +30,7 @@ function parseFraction(text) {
 
 const drawButton = document.getElementById('btn-draw');
 const numPointsSpan = document.getElementById('num-points');
+const lengthSpan = document.getElementById('length');
 const statorTeethInput = document.getElementById('stator-teeth');
 const incrementInput = document.getElementById('increment');
 const rotorTeethInput = document.getElementById('rotor-teeth');
@@ -206,7 +207,9 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 	if (initialRotationDist === undefined) {
 		initialRotationDist = 0;
 	}
-	const increment = Math.max(teethPerStep * stator.toothSize, 1 / scale);
+	const incrementSF = Math.max(Math.ceil((stator.toothSize * scale) / maxIncrement), 1);
+	const increment = Math.max(teethPerStep * stator.toothSize / incrementSF, 1 / scale);
+
 	const numSteps = (endDistance - startDistance) / increment;
 	const stepsPerRotation = 2 * Math.PI / increment;
 	let stepNumber = 0;
@@ -417,6 +420,9 @@ resizeCanvas(true);
 function updateNumberOfPoints() {
 	const numPoints = lcm(stator.numTeeth, rotor.numTeeth) / rotor.numTeeth;
 	numPointsSpan.innerText = numPoints;
+	const incrementSF = Math.max(Math.ceil((stator.toothSize * scale) / maxIncrement), 1);
+	const length = lcm(stator.numTeeth, rotor.numTeeth) * incrementSF;
+	lengthSpan.innerText = length;
 }
 
 function randomizeSpirographForm() {
@@ -476,7 +482,7 @@ function drawSpirographAction() {
 	drawButton.innerText = 'Stop';
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
-	const increment = parseFraction(incrementInput.value);
+	const increment = parseFloat(incrementInput.value);
 	spiroContext.globalCompositeOperation = 'multiply';
 	isFilled = false;
 	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, increment, penX, penY, initialRotationDist);

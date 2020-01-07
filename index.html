@@ -155,9 +155,13 @@
 							<output id="pen-x-readout" class="float-right"></output>
 							<input type="range" class="form-control-range mt-2" id="pen-x" min="0" value="1" aria-describedby="pen-x-readout">
 						</td>
-						<td colspan="2" class="col-12 col-md-6 mb-3">
+						<td class="col-6 col-md-3 mb-3">
 							<label for="start-tooth">Starting tooth</label>
 							<input type="number" class="form-control" required value="1" step="any" id="start-tooth" placeholder="Tooth number to begin plotting from" title="Tooth number to begin plotting from">
+						</td>
+						<td class="col-6 col-md-3 mb-3">
+							<label for="increment">Step Size</label>
+							<input class="form-control" type="text" value="1" required id="increment" pattern="\d+(\.\d*)?(/[1-9]\d*)?" placeholder="Teeth per step">
 						</td>
 					</tr>
 					<tr class="row">

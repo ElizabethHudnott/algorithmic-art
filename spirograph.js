@@ -31,6 +31,7 @@ function parseFraction(text) {
 const drawButton = document.getElementById('btn-draw');
 const numPointsSpan = document.getElementById('num-points');
 const statorTeethInput = document.getElementById('stator-teeth');
+const incrementInput = document.getElementById('increment');
 const rotorTeethInput = document.getElementById('rotor-teeth');
 const statorRadiusInput = document.getElementById('stator-radius');
 let statorRadius = parseFraction(statorRadiusInput.value);
@@ -198,19 +199,15 @@ function drawTools(stator, rotor, penX, penY) {
 	}
 }
 
-function drawSpirograph(stator, rotor, translateX, translateY, startDistance, endDistance, penX, penY, initialRotationDist) {
+function drawSpirograph(stator, rotor, translateX, translateY, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
 	}
 	if (initialRotationDist === undefined) {
 		initialRotationDist = 0;
 	}
-	let increment = stator.toothSize;
-	if (increment > maxIncrement) {
-		const multiple = Math.ceil(increment / maxIncrement);
-		increment = increment / multiple;
-	}
-	const numSteps = Math.ceil((endDistance - startDistance) / increment);
+	const increment = Math.max(teethPerStep * stator.toothSize, 1 / scale);
+	const numSteps = (endDistance - startDistance) / increment;
 	const stepsPerRotation = 2 * Math.PI / increment;
 	let stepNumber = 0;
 
@@ -234,7 +231,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 			let maxStep;
 			if (animSpeed < 100) {
 				const stepsPerMilli = stepsPerRotation / (newAnimController.longestTimeStep / 100 * (101 - animSpeed));
-				maxStep = (time - beginTime) * stepsPerMilli;
+				maxStep = Math.trunc((time - beginTime) * stepsPerMilli);
 				if (maxStep > numSteps) {
 					maxStep = numSteps;
 				}
@@ -258,6 +255,9 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 					spiroContext.lineTo(plotX, plotY);
 				}
 				stepNumber++;
+				if (stepNumber > numSteps && stepNumber < numSteps + 1) {
+					stepNumber = numSteps;
+				}
 			}
 
 			drawTools(stator, rotor, penX, penY);
@@ -422,7 +422,7 @@ function updateNumberOfPoints() {
 function randomizeSpirographForm() {
 	const rotors = document.getElementById('rotor-teeth-list').children;
 	const rotorIndex = Math.trunc(Math.random() * rotors.length);
-	numRotorTeeth = rotors[rotorIndex].innerText;
+	numRotorTeeth = parseInt(rotors[rotorIndex].innerText);
 	document.getElementById('rotor-teeth').value = numRotorTeeth;
 	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;
 	document.getElementById('stator-teeth').value = numStatorTeeth;
@@ -476,9 +476,10 @@ function drawSpirographAction() {
 	drawButton.innerText = 'Stop';
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
+	const increment = parseFraction(incrementInput.value);
 	spiroContext.globalCompositeOperation = 'multiply';
 	isFilled = false;
-	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, penX, penY, initialRotationDist);
+	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, increment, penX, penY, initialRotationDist);
 	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
 	updateNumberOfPoints();
 }

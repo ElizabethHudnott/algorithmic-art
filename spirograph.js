@@ -211,7 +211,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 	const increment = Math.max(teethPerStep * stator.toothSize / incrementSF, 1 / scale);
 
 	const numSteps = (endDistance - startDistance) / increment;
-	const stepsPerRotation = 2 * Math.PI / increment;
+	const stepsPerRotation = (640 * Math.PI / scale) / increment;
 	let stepNumber = 0;
 
 	saveCanvas();

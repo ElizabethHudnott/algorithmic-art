@@ -81,7 +81,7 @@ function setFillStyle() {
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
 
 	let innerColor = outerColor;
-	if (document.getElementById('inner-fill-controls').classList.contains('show')) {
+	if (document.getElementsByClassName('inner-fill-controls')[0].classList.contains('show')) {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		let minRadius, maxRadius;
@@ -99,9 +99,24 @@ function setFillStyle() {
 		}
 		minRadius = Math.abs(minRadius);
 
-		const gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
-		gradient.addColorStop(0, innerColor);
-		gradient.addColorStop(1, outerColor);
+		let gradient;
+		if (queryChecked(document.getElementById('gradient-type'), 'gradient-type').value === 'radial') {
+			gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
+			gradient.addColorStop(0, innerColor);
+			gradient.addColorStop(1, outerColor);
+		} else {
+			const toothNum = parseFloat(document.getElementById('gradient-tooth').value);
+			const theta = Math.abs(stator.calc((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
+			const x1 = translateX - maxRadius * Math.cos(theta);
+			const y1 = translateY - maxRadius * Math.sin(theta);
+			const x2 = translateX + maxRadius * Math.cos(theta);
+			const y2 = translateY + maxRadius * Math.sin(theta);
+			gradient = spiroContext.createLinearGradient(x1, y1, x2, y2);
+			gradient.addColorStop(0, outerColor);
+			gradient.addColorStop(0.5, innerColor);
+			gradient.addColorStop(1, outerColor);
+		}
+
 		spiroContext.fillStyle = gradient;
 
 	} else {

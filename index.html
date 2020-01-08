@@ -284,7 +284,7 @@
 								<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
 								<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
 								<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
-								<span data-toggle="collapse" data-target="#inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
+								<span data-toggle="collapse" data-target=".inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
 									<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
 								</span>
 							</div>
@@ -292,11 +292,34 @@
 							</div>
 						</td>
 					</tr>
-					<tr class="row collapse" id="inner-fill-controls">
+					<tr class="row collapse inner-fill-controls">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label for="inner-opacity">Centre fill opacity</label>
 							<output id="inner-opacity-readout" class="float-right"></output>
 							<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="inner-opacity-readout">
+						</td>
+					</tr>
+					<tr class="row collapse inner-fill-controls">
+						<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-type">
+							<label class="d-block">Gradient Type</label>
+							<div class="input-group mb-2">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="gradient-type" id="gradient-radial" value="radial" checked>
+									</div>
+								</div>
+								<label class="form-control input-group-text" for="gradient-radial">Outward in all directions</label>
+							</div>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line">
+									</div>
+									<div class="input-group-text">Mirror line through tooth</div>
+								</div>
+								<input type="number" id="gradient-tooth" step="any" value="1" required class="form-control" aria-label="Tooth number that gradient line passes through" placeholder="Tooth number">
+							</div>
+
 						</td>
 					</tr>
 				</tbody>

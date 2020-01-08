@@ -64,6 +64,8 @@ const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
 const opacityInput = document.getElementById('outer-opacity');
 const opacityInput2 = document.getElementById('inner-opacity');
+const gradientToothInput = document.getElementById('gradient-tooth');
+
 
 function hexToRGB(color) {
 	const r = parseInt(color.slice(1, 3), 16);
@@ -105,7 +107,12 @@ function setFillStyle() {
 			gradient.addColorStop(0, innerColor);
 			gradient.addColorStop(1, outerColor);
 		} else {
-			const toothNum = parseFloat(document.getElementById('gradient-tooth').value);
+			const toothNum = parseFloat(gradientToothInput.value);
+			if (!Number.isFinite(toothNum)) {
+				gradientToothInput.setCustomValidity('Please fill in this field.');
+				gradientToothInput.reportValidity();
+				return false;
+			}
 			const theta = Math.abs(stator.calc((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
 			const x1 = translateX - maxRadius * Math.cos(theta);
 			const y1 = translateY - maxRadius * Math.sin(theta);
@@ -124,6 +131,7 @@ function setFillStyle() {
 		spiroContext.fillStyle = outerColor;
 
 	}
+	return true;
 }
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -530,6 +538,8 @@ drawButton.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		event.preventDefault();
 		animController.abort();
+	} else {
+		gradientToothInput.setCustomValidity('');
 	}
 });
 
@@ -543,9 +553,11 @@ document.getElementById('btn-fill').addEventListener('click', function (event) {
 		// TODO replace with an undo action
 		spiroContext.globalCompositeOperation = 'color';
 	}
-	setFillStyle();
-	spiroContext.fill('evenodd');
-	isFilled = true;
+	let success = setFillStyle();
+	if (success) {
+		spiroContext.fill('evenodd');
+		isFilled = true;
+	}
 });
 
 document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
@@ -613,9 +625,11 @@ function makeNewStator() {
 		startDistance = (startTooth - 1) * stator.toothSize;
 	}
 	initialRotationDist = 0;
-	placeRotor(stator, rotor, translateX, translateY, startDistance, startDistance, 0);
 	changePenPosition(rotor, penOffsetX, penOffsetY);
-	drawTools(stator, rotor, penX, penY);
+	if (!isAnimating()) {
+		placeRotor(stator, rotor, translateX, translateY, startDistance, startDistance, 0);
+		drawTools(stator, rotor, penX, penY);
+	}
 }
 
 statorTeethInput.addEventListener('change', function (event) {
@@ -840,10 +854,6 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 	$('#erase-modal').modal('hide');
 });
 
-$(function () {
-	$('[data-toggle="tooltip"]').tooltip();
-});
-
 function opacityPreset() {
 	opacityInput.value = this.dataset.value;
 	updateOpacityReadout.call(opacityInput);
@@ -852,6 +862,27 @@ document.getElementById('opacity-0').addEventListener('click', opacityPreset);
 document.getElementById('opacity-50').addEventListener('click', opacityPreset);
 document.getElementById('opacity-75').addEventListener('click', opacityPreset);
 document.getElementById('opacity-100').addEventListener('click', opacityPreset);
+
+gradientToothInput.addEventListener('input', function (event) {
+	if (Number.isFinite(parseFloat(this.value))) {
+		this.setCustomValidity('');
+	}
+})
+
+{
+	function clear() {
+		this.value = '';
+	}
+
+	const comboboxes = document.querySelectorAll('input[list]');
+	for (let combobox of comboboxes) {
+		combobox.addEventListener('focus', clear);
+	}
+}
+
+$(function () {
+	$('[data-toggle="tooltip"]').tooltip();
+});
 
 function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const [newR, newG, newB] = hexToRGB(newColor);

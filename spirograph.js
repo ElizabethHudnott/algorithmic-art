@@ -15,7 +15,7 @@ let penX = 0;
 let penY = 0;
 let lineDash = [];
 let maxHole, animSpeed, animController;
-let isFilled = false
+let isFilled = false;
 let currentTool = 'fill';
 
 function parseFraction(text) {
@@ -48,6 +48,7 @@ const startToothInput = document.getElementById('start-tooth');
 if (!Number.isFinite(startToothInput.value)) {
 	startToothInput.value = 1;
 }
+const endToothInput = document.getElementById('end-tooth');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
@@ -101,6 +102,11 @@ function setFillStyle() {
 		}
 		minRadius = Math.abs(minRadius);
 
+		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
+		if (centreStyle == 'gradient') {
+			minRadius = 0;
+		}
+
 		let gradient;
 		if (queryChecked(document.getElementById('gradient-type'), 'gradient-type').value === 'radial') {
 			gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
@@ -113,14 +119,15 @@ function setFillStyle() {
 				gradientToothInput.reportValidity();
 				return false;
 			}
-			const theta = Math.abs(stator.calc((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
+			const theta = (stator.calc((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
 			const x1 = translateX - maxRadius * Math.cos(theta);
 			const y1 = translateY - maxRadius * Math.sin(theta);
 			const x2 = translateX + maxRadius * Math.cos(theta);
 			const y2 = translateY + maxRadius * Math.sin(theta);
 			gradient = spiroContext.createLinearGradient(x1, y1, x2, y2);
 			gradient.addColorStop(0, outerColor);
-			gradient.addColorStop(0.5, innerColor);
+			gradient.addColorStop(0.5 * (1 - minRadius / maxRadius), innerColor);
+			gradient.addColorStop(0.5 * (1 + minRadius / maxRadius), innerColor);
 			gradient.addColorStop(1, outerColor);
 		}
 
@@ -538,8 +545,6 @@ drawButton.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		event.preventDefault();
 		animController.abort();
-	} else {
-		gradientToothInput.setCustomValidity('');
 	}
 });
 
@@ -663,6 +668,13 @@ startToothInput.addEventListener('change', function (event) {
 		const startDistance = (startTooth - 1) * stator.toothSize;
 		placeRotor(stator, rotor, translateX, translateY, startDistance, startDistance, 0);
 		drawTools(stator, rotor, penX, penY);
+	}
+});
+
+endToothInput.addEventListener('input', function (event) {
+	if (Number.isFinite(parseFloat(this.value))) {
+		this.setCustomValidity('');
+		document.getElementById('end-point-numbered').checked = true;
 	}
 });
 
@@ -866,6 +878,7 @@ document.getElementById('opacity-100').addEventListener('click', opacityPreset);
 gradientToothInput.addEventListener('input', function (event) {
 	if (Number.isFinite(parseFloat(this.value))) {
 		this.setCustomValidity('');
+		document.getElementById('gradient-type-linear').checked = true;
 	}
 })
 

@@ -190,7 +190,7 @@
 							<div class="input-group">
 								<div class="input-group-prepend">
 									<div class="input-group-text">
-										<input type="radio" name="end-point" value="fixed" aria-label="Turn until lined up in a specific place">
+										<input type="radio" name="end-point" value="fixed" aria-label="Turn until lined up in a specific place" id="end-point-numbered">
 									</div>
 									<div class="input-group-text">Line up with tooth</div>
 								</div>
@@ -294,14 +294,9 @@
 					</tr>
 					<tr class="row collapse inner-fill-controls">
 						<td colspan="2" class="col-12 col-md-6 mb-3">
-							<label for="inner-opacity">Centre fill opacity</label>
-							<output id="inner-opacity-readout" class="float-right"></output>
-							<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.35" step="0.05" aria-describedby="inner-opacity-readout">
 						</td>
-					</tr>
-					<tr class="row collapse inner-fill-controls">
 						<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-type">
-							<label class="d-block">Gradient Type</label>
+							<label class="d-block">Style of gradient</label>
 							<div class="input-group mb-2">
 								<div class="input-group-prepend">
 									<div class="input-group-text">
@@ -313,13 +308,34 @@
 							<div class="input-group">
 								<div class="input-group-prepend">
 									<div class="input-group-text">
-										<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line">
+										<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
 									</div>
 									<div class="input-group-text">Mirror line through tooth</div>
 								</div>
 								<input type="number" id="gradient-tooth" step="any" value="1" class="form-control" aria-label="Tooth number that gradient line passes through" placeholder="Tooth number">
 							</div>
-
+						</td>
+					</tr>
+					<tr class="row collapse inner-fill-controls">
+						<td colspan="2" class="col-12 col-md-6 mb-3">
+							<label for="inner-opacity">Inner fill opacity</label>
+							<output id="inner-opacity-readout" class="float-right"></output>
+							<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.35" step="0.05" aria-describedby="inner-opacity-readout">
+						</td>
+						<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-centre">
+							<label class="d-block">Centre area</label>
+							<div class="form-check form-check-inline">
+							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
+							  <label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
+							</div>
+							<div class="form-check form-check-inline">
+							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
+							  <label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
+							</div>
+							<div class="form-check form-check-inline">
+							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
+							  <label class="form-check-label" for="gradient-centre-clip">Gradient</label>
+							</div>
 						</td>
 					</tr>
 				</tbody>

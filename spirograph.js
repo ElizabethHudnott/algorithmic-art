@@ -194,6 +194,7 @@ function saveCanvas() {
 }
 
 function restoreCanvas() {
+	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
 	spiroContext.clearRect(-1, -1, width, height);
 	spiroContext.drawImage(savedCanvas, -1, -1, width, height);
 }
@@ -230,7 +231,7 @@ function drawTools(stator, rotor, penX, penY) {
 	}
 }
 
-function drawSpirograph(stator, rotor, translateX, translateY, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
+function drawSpirograph(stator, rotor, translateX, translateY, rotation, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
 	}
@@ -245,6 +246,7 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 	let stepNumber = 0;
 
 	saveCanvas();
+	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
 	spiroContext.beginPath();
 	const beginTime = performance.now();
 
@@ -272,7 +274,11 @@ function drawSpirograph(stator, rotor, translateX, translateY, startDistance, en
 				maxStep = numSteps;
 			}
 
-			const shift = Math.round(spiroContext.lineWidth * scale) % 2 === 0 ? 0 : 0.5 / scale;
+			let shift = 0;
+			if (Math.abs(rotation) % Math.PI === 0 && Math.round(spiroContext.lineWidth * scale) % 2 === 1) {
+				shift = 0.5 / scale;
+			}
+			spiroContext.rotate(rotation);
 
 			while (stepNumber <= maxStep) {
 				const distance = startDistance + stepNumber * increment;
@@ -334,7 +340,7 @@ function lcm(a, b) {
 	return a / gcd(a, b) * b;
 }
 
-class InnerCircleStator {
+class CircleStator {
 
 	constructor(numTeeth, radius) {
 		this.numTeeth = numTeeth;
@@ -348,7 +354,7 @@ class InnerCircleStator {
 		return [
 			radius * Math.cos(angle),	// x-coordinate
 			radius * Math.sin(angle), 	// y-coordinate
-			angle + Math.PI				// angle of the normal in radians
+			angle + Math.PI				// angle of the normal in radians (when the rotor is inside)
 		];
 	}
 
@@ -462,7 +468,7 @@ function randomizeSpirographForm() {
 	document.getElementById('rotor-teeth').value = numRotorTeeth;
 	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;
 	document.getElementById('stator-teeth').value = numStatorTeeth;
-	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
+	stator = new CircleStator(numStatorTeeth, statorRadius);
 	rotor = new CircleRotor(stator, numRotorTeeth);
 	calcMaxHole();
 	const holeNumber = Math.round(maxHole / 4);
@@ -513,9 +519,11 @@ function drawSpirographAction() {
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
 	const increment = parseFloat(incrementInput.value);
+	const rotationTooth = parseFloat(document.getElementById('rotation').value);
+	const rotation = rotationTooth;
 	spiroContext.globalCompositeOperation = 'multiply';
 	isFilled = false;
-	animController = drawSpirograph(stator, rotor, translateX, translateY, startDistance, undefined, increment, penX, penY, initialRotationDist);
+	animController = drawSpirograph(stator, rotor, translateX, translateY, rotation, startDistance, undefined, increment, penX, penY, initialRotationDist);
 	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
 	updateNumberOfPoints();
 }
@@ -613,7 +621,7 @@ rotorTeethInput.addEventListener('change', function (event) {
 });
 
 function makeNewStator() {
-	stator = new InnerCircleStator(numStatorTeeth, statorRadius);
+	stator = new CircleStator(numStatorTeeth, statorRadius);
 	rotor = new CircleRotor(stator, numRotorTeeth);
 	if (numRotorTeeth >= numStatorTeeth) {
 		document.getElementById('rotor-position-outside').checked = true;

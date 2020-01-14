@@ -463,7 +463,7 @@ function updateNumberOfPoints() {
 
 function randomizeSpirographForm() {
 	const rotors = document.getElementById('rotor-teeth-list').children;
-	const rotorIndex = Math.trunc(Math.random() * rotors.length);
+	const rotorIndex = Math.trunc(Math.random() * (rotors.length - 2));
 	numRotorTeeth = parseInt(rotors[rotorIndex].innerText);
 	document.getElementById('rotor-teeth').value = numRotorTeeth;
 	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;

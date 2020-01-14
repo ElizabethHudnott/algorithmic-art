@@ -88,17 +88,18 @@ function setFillStyle() {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		let minRadius, maxRadius;
+		const statorRadius = Math.min(stator.radiusA, stator.radiusB);
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
 		const penToEdge2 = rotor.radiusB * (2 - penOffsetY);
 
 		if (penToEdge1 <= penToEdge2) {
 			// Calc using Radius A
-			maxRadius = stator.radius - penToEdge1;
-			minRadius = stator.radius - 2 * rotor.radiusA + penToEdge1;
+			maxRadius = statorRadius - penToEdge1;
+			minRadius = statorRadius - 2 * rotor.radiusA + penToEdge1;
 		} else {
 			// Calc using Radius B
-			maxRadius = stator.radius - penToEdge2;
-			minRadius = stator.radius - 2 * rotor.radiusB + penToEdge2;
+			maxRadius = statorRadius - penToEdge2;
+			minRadius = statorRadius - 2 * rotor.radiusB + penToEdge2;
 		}
 		minRadius = Math.abs(minRadius);
 
@@ -119,7 +120,7 @@ function setFillStyle() {
 				gradientToothInput.reportValidity();
 				return false;
 			}
-			const theta = (stator.calc((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
+			const theta = (stator.contactPoint((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
 			const x1 = translateX - maxRadius * Math.cos(theta);
 			const y1 = translateY - maxRadius * Math.sin(theta);
 			const x2 = translateX + maxRadius * Math.cos(theta);
@@ -200,7 +201,7 @@ function restoreCanvas() {
 }
 
 function placeRotor(stator, rotor, translateX, translateY, startDistance, distance, initialRotationDist) {
-	const statorState = stator.calc(distance);
+	const statorState = stator.contactPoint(distance);
 	const statorAngle = statorState[2];	// Angle of the normal
 	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
@@ -225,7 +226,7 @@ function drawTools(stator, rotor, penX, penY) {
 		stator.draw(toolContext, translateX, translateY);
 		toolContext.translate(rotorX, rotorY);
 		toolContext.rotate(rotorAngle);
-		rotor.draw(toolContext);
+		rotor.draw(toolContext, 0, 0);
 		toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
 		toolContext.fill('evenodd');
 	}
@@ -340,50 +341,34 @@ function lcm(a, b) {
 	return a / gcd(a, b) * b;
 }
 
-class CircleStator {
+class CircularGear {
 
-	constructor(numTeeth, radius) {
+	constructor(numTeeth, arg2) {
 		this.numTeeth = numTeeth;
-		this.radius = radius;
-		this.toothSize = 2 * Math.PI * radius / numTeeth;
+		if (arg2 instanceof CircularGear) {
+			this.radiusA = numTeeth * arg2.toothSize / (2 * Math.PI);
+			this.initialRotation = 0;
+		} else {
+			this.radiusA = arg2;
+			this.initialRotation = -Math.PI / 2;
+		}
+		this.radiusB = this.radiusA;
+		this.toothSize = 2 * Math.PI * this.radiusA / numTeeth;
 	}
 
-	calc(distance) {
-		const radius = this.radius;
-		const angle = (distance / radius) - Math.PI / 2;
+	contactPoint(distance) {
+		const angle = (distance / this.radiusA) + this.initialRotation;
 		return [
-			radius * Math.cos(angle),	// x-coordinate
-			radius * Math.sin(angle), 	// y-coordinate
-			angle + Math.PI				// angle of the normal in radians (when the rotor is inside)
+			this.radiusA * Math.cos(angle),	// x-coordinate
+			this.radiusB * Math.sin(angle),	// y-coordinate
+			angle + Math.PI					// angle of the normal in radians (when the rotor is inside)
 		];
 	}
 
 	draw(context, x, y) {
 		context.beginPath();
-		context.arc(x, y, this.radius, 0, 2 * Math.PI);
+		context.arc(x, y, this.radiusA, 0, 2 * Math.PI);
 		context.stroke();
-	}
-
-}
-
-class CircleRotor {
-	constructor(stator, numTeeth) {
-		this.numTeeth = numTeeth;
-		this.radiusA = numTeeth * stator.toothSize / (2 * Math.PI); // "Longest" radius
-		this.radiusB = this.radiusA;
-	}
-
-	draw(context) {
-		context.beginPath();
-		context.arc(0, 0, this.radiusA, 0, 2 * Math.PI);
-	}
-
-	contactPoint(distance) {
-		const angle = distance / this.radiusA;
-		return [
-			this.radiusA * Math.cos(angle),
-			this.radiusB * Math.sin(angle)
-		];
 	}
 
 	/**
@@ -393,6 +378,7 @@ class CircleRotor {
 	isPointInside(x, y) {
 		return x * x + y * y <= 1;
 	}
+
 }
 
 function calcMaxHole() {
@@ -468,8 +454,8 @@ function randomizeSpirographForm() {
 	document.getElementById('rotor-teeth').value = numRotorTeeth;
 	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;
 	document.getElementById('stator-teeth').value = numStatorTeeth;
-	stator = new CircleStator(numStatorTeeth, statorRadius);
-	rotor = new CircleRotor(stator, numRotorTeeth);
+	stator = new CircularGear(numStatorTeeth, statorRadius);
+	rotor = new CircularGear(numRotorTeeth, stator);
 	calcMaxHole();
 	const holeNumber = Math.round(maxHole / 4);
 	penXSlider.value = holeNumber;
@@ -610,7 +596,7 @@ rotorTeethInput.addEventListener('change', function (event) {
 			startDistance = (startTooth - 1) * stator.toothSize;
 		}
 		initialRotationDist = 0;
-		rotor = new CircleRotor(stator, numRotorTeeth);
+		rotor = new CircularGear(numRotorTeeth, stator);
 		placeRotor(stator, rotor, translateX, translateY, startDistance, startDistance, 0);
 		calcMaxHole();
 		updatePenXReadout();
@@ -621,8 +607,8 @@ rotorTeethInput.addEventListener('change', function (event) {
 });
 
 function makeNewStator() {
-	stator = new CircleStator(numStatorTeeth, statorRadius);
-	rotor = new CircleRotor(stator, numRotorTeeth);
+	stator = new CircularGear(numStatorTeeth, statorRadius);
+	rotor = new CircularGear(numRotorTeeth, stator);
 	if (numRotorTeeth >= numStatorTeeth) {
 		document.getElementById('rotor-position-outside').checked = true;
 		document.getElementById('rotor-position-inside').disabled = true;

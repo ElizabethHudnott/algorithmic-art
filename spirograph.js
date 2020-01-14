@@ -205,9 +205,9 @@ function placeRotor(stator, rotor, translateX, translateY, startDistance, distan
 	const statorAngle = statorState[2];	// Angle of the normal
 	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
-	rotorX = statorState[0] + rotorRadius * Math.cos(statorAngle) + translateX;
-	rotorY = statorState[1] + rotorRadius * Math.sin(statorAngle) + translateY;
-	rotorAngle = Math.atan2(contactPoint[1], contactPoint[0]) + statorAngle + Math.PI;
+	rotorX = statorState[0] - rotorRadius * Math.cos(statorAngle) + translateX;
+	rotorY = statorState[1] - rotorRadius * Math.sin(statorAngle) + translateY;
+	rotorAngle = contactPoint[2] + statorAngle;
 	currentDistance = distance;
 }
 
@@ -361,13 +361,13 @@ class CircularGear {
 		return [
 			this.radiusA * Math.cos(angle),	// x-coordinate
 			this.radiusB * Math.sin(angle),	// y-coordinate
-			angle + Math.PI					// angle of the normal in radians (when the rotor is inside)
+			angle
 		];
 	}
 
 	draw(context, x, y) {
 		context.beginPath();
-		context.arc(x, y, this.radiusA, 0, 2 * Math.PI);
+		context.ellipse(x, y, this.radiusA, this.radiusB, 0, 0, 2 * Math.PI);
 		context.stroke();
 	}
 
@@ -639,6 +639,12 @@ statorTeethInput.addEventListener('change', function (event) {
 		savedStartTooth = undefined;
 		makeNewStator();
 		updateNumberOfPoints();
+	}
+});
+
+statorTeethInput.addEventListener('blur', function (event) {
+	if (this.value === '') {
+		this.value = stator.numTeeth;
 	}
 });
 

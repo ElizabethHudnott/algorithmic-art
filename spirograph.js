@@ -642,12 +642,6 @@ statorTeethInput.addEventListener('change', function (event) {
 	}
 });
 
-statorTeethInput.addEventListener('blur', function (event) {
-	if (this.value === '') {
-		this.value = stator.numTeeth;
-	}
-});
-
 statorRadiusInput.addEventListener('change', function (event) {
 	const statorRadiusEntered = parseFraction(this.value);
 	if (statorRadiusEntered > 0) {
@@ -884,12 +878,20 @@ gradientToothInput.addEventListener('input', function (event) {
 
 {
 	function clear() {
+		this.savedValue = this.value;
 		this.value = '';
+	}
+
+	function restore() {
+		if (this.value === '') {
+			this.value = this.savedValue;
+		}
 	}
 
 	const comboboxes = document.querySelectorAll('input[list]');
 	for (let combobox of comboboxes) {
 		combobox.addEventListener('focus', clear);
+		combobox.addEventListener('blur', restore);
 	}
 }
 

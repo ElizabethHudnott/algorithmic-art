@@ -583,6 +583,7 @@ rotorTeethInput.addEventListener('change', function (event) {
 		if (numRotorTeeth >= numStatorTeeth) {
 			document.getElementById('rotor-position-outside').checked = true;
 			document.getElementById('rotor-position-inside').disabled = true;
+			inOut = 1;
 			//TODO implement rotations outside the stator
 		} else {
 			document.getElementById('rotor-position-inside').disabled = false;
@@ -619,6 +620,7 @@ function makeNewStator() {
 	if (numRotorTeeth >= numStatorTeeth) {
 		document.getElementById('rotor-position-outside').checked = true;
 		document.getElementById('rotor-position-inside').disabled = true;
+		inOut = 1;
 		//TODO implement rotations outside the stator
 	} else {
 		document.getElementById('rotor-position-inside').disabled = false;

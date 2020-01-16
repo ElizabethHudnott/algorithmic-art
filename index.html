@@ -55,7 +55,8 @@
 			</div>
 			<div colspan="4" id="info" class="mb-4 collapse">
 				<span class="bg-info bg-light p-2">
-					This spirograph has <span id="num-points"></span> points
+					This spirograph has <span id="num-points"></span> points,
+					requires <span id="num-revolutions"></span> revolutions,
 					and its complete length is <span id="length"></span>.
 				</span>
 			</div>
@@ -192,11 +193,11 @@
 							<div class="input-group">
 								<div class="input-group-prepend">
 									<div class="input-group-text">
-										<input type="radio" name="end-point" value="fixed" aria-label="Turn until lined up in a specific place" id="end-point-numbered">
+										<input type="radio" name="end-point" value="fixed" aria-label="Rotate around a specific number of times" id="end-point-numbered">
 									</div>
-									<div class="input-group-text">Line up with tooth</div>
+									<label class="form-control input-group-text" for="end-point-numbered">Number of revolutions</label>
 								</div>
-								<input type="number" id="end-tooth" min="1" value="1" class="form-control" aria-label="Tooth number to end at" placeholder="Tooth number">
+								<input type="number" id="revolutions" min="0" value="1" step="any" class="form-control" aria-label="Number of revolutions" placeholder="Number of revolutions">
 							</div>
 						</td>
 					</tr>

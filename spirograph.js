@@ -31,6 +31,7 @@ function parseFraction(text) {
 
 const drawButton = document.getElementById('btn-draw');
 const numPointsSpan = document.getElementById('num-points');
+const numRevsSpan = document.getElementById('num-revolutions');
 const lengthSpan = document.getElementById('length');
 const statorTeethInput = document.getElementById('stator-teeth');
 const incrementInput = document.getElementById('increment');
@@ -49,7 +50,7 @@ const startToothInput = document.getElementById('start-tooth');
 if (!Number.isFinite(startToothInput.value)) {
 	startToothInput.value = 1;
 }
-const endToothInput = document.getElementById('end-tooth');
+const revolutionsInput = document.getElementById('revolutions');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
@@ -213,11 +214,7 @@ function placeRotor(stator, rotor, inOut, translateX, translateY, startDistance,
 }
 
 function updateRotorPosition() {
-	let startDistance = currentDistance;
-	if (animController && animController.status !== 'aborted') {
-		startDistance = animController.startDistance;
-	}
-	placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, currentDistance, initialRotationDist);
+	placeRotor(stator, rotor, inOut, translateX, translateY, currentDistance, currentDistance, initialRotationDist);
 }
 
 function drawTools(stator, rotor, penX, penY) {
@@ -445,7 +442,10 @@ function resizeCanvas(fitExact) {
 resizeCanvas(true);
 
 function updateNumberOfPoints() {
-	const numPoints = lcm(stator.numTeeth, rotor.numTeeth) / rotor.numTeeth;
+	const toothLength = lcm(stator.numTeeth, rotor.numTeeth);
+	const numRevolutions = toothLength / stator.numTeeth;
+	numRevsSpan.innerText = numRevolutions;
+	const numPoints = toothLength / rotor.numTeeth;
 	numPointsSpan.innerText = numPoints;
 	const incrementSF = Math.max(Math.ceil((stator.toothSize * scale) / maxIncrement), 1);
 	const length = lcm(stator.numTeeth, rotor.numTeeth) * incrementSF;
@@ -470,7 +470,7 @@ function randomizeSpirographForm() {
 	setPenColor.call(penSwatches[Math.trunc(Math.random() * 5)].parentElement);
 }
 
-function abortDrawing() {
+function drawingEnded() {
 	initialRotationDist = animController.startDistance - currentDistance + initialRotationDist;
 	const startTooth = parseFloat(startToothInput.value);
 	if (Number.isFinite(startTooth)) {
@@ -484,9 +484,6 @@ function abortDrawing() {
 		startToothInput.value = ((currentDistance / stator.toothSize) % stator.numTeeth) + 1;
 	}
 	// TODO revise end distance
-}
-
-function drawingEnded() {
 	updateRotorPosition();
 	drawTools(stator, rotor, penX, penY);
 	drawButton.classList.remove('btn-warning');
@@ -510,12 +507,17 @@ function drawSpirographAction() {
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = (startTooth - 1) * stator.toothSize;
 	const increment = parseFloat(incrementInput.value);
+	let endDistance;
+	if (document.getElementById('end-point-numbered').checked) {
+		const numRevolutions = parseFloat(revolutionsInput.value);
+		endDistance = startDistance + stator.numTeeth * stator.toothSize * numRevolutions;
+	}
 	const rotationTooth = parseFloat(document.getElementById('rotation').value);
 	const rotation = rotationTooth;
 	spiroContext.globalCompositeOperation = 'multiply';
 	isFilled = false;
-	animController = drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, undefined, increment, penX, penY, initialRotationDist);
-	animController.promise = animController.promise.catch(abortDrawing).then(drawingEnded);
+	animController = drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, increment, penX, penY, initialRotationDist);
+	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();
 }
 
@@ -682,11 +684,24 @@ startToothInput.addEventListener('change', function (event) {
 	}
 });
 
-endToothInput.addEventListener('input', function (event) {
-	if (Number.isFinite(parseFloat(this.value))) {
-		this.setCustomValidity('');
-		document.getElementById('end-point-numbered').checked = true;
+document.getElementById('end-point-auto').addEventListener('input', function (event) {
+	revolutionsInput.setCustomValidity('');
+})
+
+document.getElementById('end-point-numbered').addEventListener('input', function (event) {
+	if (!(parseFloat(revolutionsInput.value) > 0)) {
+		revolutionsInput.setCustomValidity('Please enter a positive number.');
 	}
+});
+
+
+revolutionsInput.addEventListener('input', function (event) {
+	if (parseFloat(this.value) > 0) {
+		this.setCustomValidity('');
+	} else {
+		this.setCustomValidity('Please enter a positive number.');
+	}
+	document.getElementById('end-point-numbered').checked = true;
 });
 
 function updatePenXReadout() {

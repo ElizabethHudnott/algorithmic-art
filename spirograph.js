@@ -1,5 +1,6 @@
 'use strict';
 
+const halfPI = Math.PI / 2;
 const maxIncrement = 640 * Math.PI / 96;
 
 let scale, width, height;
@@ -122,7 +123,7 @@ function setFillStyle() {
 				gradientToothInput.reportValidity();
 				return false;
 			}
-			const theta = (stator.contactPoint((toothNum - 1) * stator.toothSize)[2] - Math.PI / 2) % Math.PI;
+			const theta = (stator.contactPoint((toothNum - 1) * stator.toothSize)[2] - halfPI) % Math.PI;
 			const x1 = translateX - maxRadius * Math.cos(theta);
 			const y1 = translateY - maxRadius * Math.sin(theta);
 			const x2 = translateX + maxRadius * Math.cos(theta);
@@ -221,7 +222,7 @@ function restoreCanvas() {
 function placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, distance, initialRotationDist) {
 	const statorState = stator.contactPoint(distance);
 	const statorAngle = statorState[2];	// Angle of the normal
-	const contactPoint = rotor.contactPoint(startDistance - distance + initialRotationDist);
+	const contactPoint = rotor.contactPoint((distance - startDistance) * inOut + initialRotationDist);
 	const rotorRadius = Math.sqrt(contactPoint[0] * contactPoint[0] + contactPoint[1] * contactPoint[1]);
 	rotorX = statorState[0] + inOut * rotorRadius * Math.cos(statorAngle) + translateX;
 	rotorY = statorState[1] + inOut * rotorRadius * Math.sin(statorAngle) + translateY;
@@ -355,19 +356,30 @@ function lcm(a, b) {
 	return a / gcd(a, b) * b;
 }
 
-class CircularGear {
-
-	constructor(numTeeth, arg2) {
+class Gear {
+	constructor(numTeeth, arg2, aspectRatio) {
 		this.numTeeth = numTeeth;
-		if (arg2 instanceof CircularGear) {
-			this.radiusA = numTeeth * arg2.toothSize / (2 * Math.PI);
+		if (arg2 instanceof Gear) {
+			this.toothSize = arg2.toothSize;
 			this.initialRotation = 0;
 		} else {
 			this.radiusA = arg2;
-			this.initialRotation = -Math.PI / 2;
+			this.radiusB = arg2 * aspectRatio;
+			this.initialRotation = -halfPI;
 		}
-		this.radiusB = this.radiusA;
-		this.toothSize = 2 * Math.PI * this.radiusA / numTeeth;
+	}
+}
+
+class CircularGear extends Gear {
+
+	constructor(numTeeth, arg2) {
+		super(numTeeth, arg2, 1);
+		if (arg2 instanceof Gear) {
+			this.radiusA = numTeeth * arg2.toothSize / (2 * Math.PI);
+			this.radiusB = this.radiusA;
+		} else {
+			this.toothSize = 2 * Math.PI * arg2 / numTeeth;
+		}
 	}
 
 	contactPoint(distance) {
@@ -393,6 +405,69 @@ class CircularGear {
 		return x * x + y * y <= 1;
 	}
 
+}
+
+class RackGear extends Gear {
+
+	constructor(numTeeth, arg2, aspectRatio) {
+		super(numTeeth, arg2, aspectRatio);
+		if (arg2 instanceof Gear) {
+			this.radiusA = numTeeth / (4 * (1 - aspectRatio) + 2 * Math.PI * aspectRatio) * this.toothSize;
+			this.radiusB = this.radiusA * aspectRatio;
+		} else {
+			this.toothSize = (4 * (arg2 - this.radiusB) + 2 * Math.PI * this.radiusB) / numTeeth;
+		}
+	}
+
+	contactPoint(distance) {
+		const rb = this.radiusB;
+		const raMinusRb = this.radiusA - rb;
+		const perimeter = this.numTeeth * this.toothSize;
+		distance = distance % perimeter;
+		if (distance < 0) {
+			distance += perimeter;
+		}
+		if (distance <= raMinusRb) {
+			return [distance, -rb, this.initialRotation];
+		}
+		distance -= raMinusRb;
+		const arcLength = Math.PI * rb;
+		if (distance <= arcLength) {
+			const angle = distance / rb + this.initialRotation;
+			return [
+				raMinusRb + rb * Math.cos(angle),
+				rb * Math.sin(angle),
+				angle
+			]
+		}
+		distance -= arcLength;
+		if (distance <= 2 * raMinusRb) {
+			return [raMinusRb - distance, rb, Math.PI + this.initialRotation];
+		}
+		distance -= 2 * raMinusRb;
+		if (distance <= arcLength) {
+			const angle = Math.PI + distance / rb + this.initialRotation;
+			return [
+				-raMinusRb + rb * Math.cos(angle),
+				rb * Math.sin(angle),
+				angle
+			];
+		}
+		distance -= arcLength;
+		return [-raMinusRb + distance, -rb, this.initialRotation];
+	}
+
+	draw(context, x, y) {
+		const ra = this.radiusA;
+		const rb = this.radiusB;
+		context.beginPath();
+		context.moveTo(-ra + rb, -rb);
+		context.lineTo(ra - rb, -rb);
+		context.arc(ra - rb, 0, rb, -halfPI, halfPI);
+		context.lineTo(-ra + rb, rb);
+		context.arc(-ra + rb, 0, rb, halfPI, -halfPI);
+		context.stroke();
+	}
 }
 
 function calcMaxHole() {

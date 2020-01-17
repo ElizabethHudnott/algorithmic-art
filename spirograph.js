@@ -93,7 +93,7 @@ function setFillStyle() {
 		let minRadius, maxRadius;
 		const statorRadius = Math.min(stator.radiusA, stator.radiusB);
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
-		const penToEdge2 = rotor.radiusB * (2 - penOffsetY);
+		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
 
 		if (penToEdge1 <= penToEdge2) {
 			// Calc using Radius A

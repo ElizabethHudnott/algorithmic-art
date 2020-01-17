@@ -1,7 +1,6 @@
 'use strict';
 
 const halfPI = Math.PI / 2;
-const maxIncrement = 640 * Math.PI / 96;
 
 let scale, width, height;
 let toolsVisible = true;
@@ -247,6 +246,13 @@ function drawTools(stator, rotor, penX, penY) {
 	}
 }
 
+function calcStepMultiplier(stator, rotor, penX, penY) {
+	const maxRadius = Math.max(rotor.radiusA - penX, rotor.radiusB - penY);
+	const maxAngle = stator.toothSize / Math.min(stator.radiusA, stator.radiusB);
+	const maxArc = maxAngle * maxRadius * scale;
+	return Math.trunc(maxArc);
+}
+
 function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
@@ -254,8 +260,7 @@ function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, 
 	if (initialRotationDist === undefined) {
 		initialRotationDist = getInitialRotation();
 	}
-	const incrementSF = Math.max(Math.ceil((stator.toothSize * scale) / maxIncrement), 1);
-	const increment = Math.max(teethPerStep * stator.toothSize / incrementSF, 1 / scale);
+	const increment = teethPerStep * stator.toothSize / calcStepMultiplier(stator, rotor, penX, penY);
 
 	const numSteps = (endDistance - startDistance) / increment;
 	const stepsPerRotation = (640 * Math.PI / scale) / increment;
@@ -534,7 +539,7 @@ function updateNumberOfPoints() {
 	numRevsSpan.innerText = numRevolutions;
 	const numPoints = toothLength / rotor.numTeeth;
 	numPointsSpan.innerText = numPoints;
-	const incrementSF = Math.max(Math.ceil((stator.toothSize * scale) / maxIncrement), 1);
+	const incrementSF = calcStepMultiplier(stator, rotor, penX, penY);
 	const length = lcm(stator.numTeeth, rotor.numTeeth) * incrementSF;
 	lengthSpan.innerText = length;
 }
@@ -568,7 +573,9 @@ function drawingEnded() {
 		}
 	}
 	if (initialRotationDist !== 0) {
-		startToothInput.value = ((currentDistance / stator.toothSize) % stator.numTeeth) + 1;
+		const toothNumber = ((currentDistance / stator.toothSize) % stator.numTeeth) + 1;
+		const roundedToothNum = Math.round(toothNumber * 1000) / 1000;
+		startToothInput.value = roundedToothNum;
 	}
 	// TODO revise end distance
 	updateRotorPosition();
@@ -720,12 +727,14 @@ function makeNewStator() {
 		startToothInput.value = startTooth;
 		startDistance = (startTooth - 1) * stator.toothSize;
 	}
+	calcTransform();
 	setInitialRotation();
 	changePenPosition(rotor, penOffsetX, penOffsetY);
 	if (!isAnimating()) {
 		placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, startDistance, initialRotationDist);
 		drawTools(stator, rotor, penX, penY);
 	}
+	updateNumberOfPoints();
 }
 
 statorTeethInput.addEventListener('change', function (event) {
@@ -735,7 +744,6 @@ statorTeethInput.addEventListener('change', function (event) {
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
 		makeNewStator();
-		updateNumberOfPoints();
 	}
 });
 
@@ -805,6 +813,7 @@ function updatePenXReadout() {
 		penOffsetX = newOffset;
 		changePenPosition(rotor, penOffsetX, penOffsetY);
 		drawTools(stator, rotor, penX, penY);
+		updateNumberOfPoints();
 	}
 }
 updatePenXReadout();
@@ -824,6 +833,7 @@ function updatePenYReadout() {
 		document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
 		changePenPosition(rotor, penOffsetX, penOffsetY);
 		drawTools(stator, rotor, penX, penY);
+		updateNumberOfPoints();
 	}
 }
 updatePenYReadout()

@@ -90,7 +90,7 @@ function setFillStyle() {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		let minRadius, maxRadius;
-		const statorRadius = Math.max(stator.radiusA, stator.radiusB);
+		const statorRadius = stator.radiusA;
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
 		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
 
@@ -250,7 +250,7 @@ function drawTools(stator, rotor, penX, penY) {
 
 function calcStepMultiplier(stator, rotor, penX, penY) {
 	const maxRadius = Math.max(rotor.radiusA - penX, rotor.radiusB - penY);
-	const maxAngle = stator.toothSize / Math.min(stator.radiusA, stator.radiusB);
+	const maxAngle = stator.toothSize / stator.radiusB;
 	const maxArc = maxAngle * maxRadius * scale;
 	return Math.trunc(maxArc);
 }
@@ -693,7 +693,7 @@ document.getElementById('btn-toggle-tools').addEventListener('click', function (
 /** Checks to see if the rotor is small enough to fit inside the stator.
  */
 function checkRotorSize() {
-	if (Math.max(rotor.radiusA, rotor.radiusB) >= Math.min(stator.radiusA, stator.radiusB)) {
+	if (rotor.radiusA >= stator.radiusB) {
 		document.getElementById('rotor-position-outside').checked = true;
 		document.getElementById('rotor-position-inside').disabled = true;
 		inOut = 1;

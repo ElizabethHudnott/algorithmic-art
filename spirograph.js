@@ -33,6 +33,7 @@ const numPointsSpan = document.getElementById('num-points');
 const numRevsSpan = document.getElementById('num-revolutions');
 const lengthSpan = document.getElementById('length');
 const statorTeethInput = document.getElementById('stator-teeth');
+const statorAspectInput = document.getElementById('stator-aspect');
 const incrementInput = document.getElementById('increment');
 const rotorTeethInput = document.getElementById('rotor-teeth');
 const statorRadiusInput = document.getElementById('stator-radius');
@@ -89,7 +90,7 @@ function setFillStyle() {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		let minRadius, maxRadius;
-		const statorRadius = Math.min(stator.radiusA, stator.radiusB);
+		const statorRadius = Math.max(stator.radiusA, stator.radiusB);
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
 		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
 
@@ -156,7 +157,9 @@ function getInitialRotation() {
 function setInitialRotation() {
 	initialRotationDist = getInitialRotation();
 	updateRotorPosition();
-	drawTools(stator, rotor, penX, penY);
+	if (!isAnimating()) {
+		drawTools(stator, rotor, penX, penY);
+	}
 }
 
 function changePenPosition(rotor, offsetX, offsetY) {
@@ -472,7 +475,24 @@ class RackGear extends Gear {
 		context.arc(-ra + rb, 0, rb, halfPI, -halfPI);
 		context.stroke();
 	}
+
+	isPointInside(x, y) {
+		const ra = this.radiusA;
+		const rb = this.radiusB;
+		const rectanglePart = (ra - rb) / ra;
+		if (x <= rectanglePart) {
+			return y <= 1;
+		} else {
+			const xDiff = x - rectanglePart;
+			return xDiff * xDiff + y * y <= 1;
+		}
+	}
+
 }
+
+const gearConstructors = new Map();
+gearConstructors.set('circle', CircularGear);
+gearConstructors.set('rack', RackGear);
 
 function calcMaxHole() {
 	// Semi-arbitrary "Number of teeth" is modelled on the typical circular wheel.
@@ -615,11 +635,11 @@ function drawSpirographAction() {
 }
 
 randomizeSpirographForm();
-setInitialRotation();
 calcTransform();
+setInitialRotation();
 parseLineDash();
-
 drawSpirographAction();
+
 animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
 		document.getElementById('tool-canvas').classList.add('invisible');
@@ -670,21 +690,25 @@ document.getElementById('btn-toggle-tools').addEventListener('click', function (
 	}
 });
 
+/** Checks to see if the rotor is small enough to fit inside the stator.
+ */
+function checkRotorSize() {
+	if (Math.max(rotor.radiusA, rotor.radiusB) >= Math.min(stator.radiusA, stator.radiusB)) {
+		document.getElementById('rotor-position-outside').checked = true;
+		document.getElementById('rotor-position-inside').disabled = true;
+		inOut = 1;
+	} else {
+		document.getElementById('rotor-position-inside').disabled = false;
+	}
+}
+
 rotorTeethInput.addEventListener('change', function (event) {
 	const numRotorTeethEntered = parseInt(this.value);
 	if (numRotorTeethEntered >= 2) {
 		numRotorTeeth = numRotorTeethEntered;
-		if (numRotorTeeth >= numStatorTeeth) {
-			document.getElementById('rotor-position-outside').checked = true;
-			document.getElementById('rotor-position-inside').disabled = true;
-			inOut = 1;
-			setInitialRotation();
-		} else {
-			document.getElementById('rotor-position-inside').disabled = false;
-		}
 		let startDistance = currentDistance;
-		let startTooth;	// Here can be a fraction less than one or an integer
-		if (savedStartTooth) {
+		let startTooth;
+		if (savedStartTooth !== undefined) {
 			startTooth = savedStartTooth;
 			startToothInput.value = startTooth;
 		} else {
@@ -698,6 +722,7 @@ rotorTeethInput.addEventListener('change', function (event) {
 			startDistance = (startTooth - 1) * stator.toothSize;
 		}
 		rotor = new CircularGear(numRotorTeeth, stator);
+		checkRotorSize();
 		setInitialRotation();
 		calcMaxHole();
 		updatePenXReadout();
@@ -710,8 +735,11 @@ rotorTeethInput.addEventListener('change', function (event) {
 	}
 });
 
-function makeNewStator() {
-	stator = new CircularGear(numStatorTeeth, statorRadius);
+function makeStator() {
+	const shape = document.getElementById('stator-shape').value;
+	const aspectRatio = parseFloat(statorAspectInput.value);
+	const constructor = gearConstructors.get(shape);
+	stator = new constructor(numStatorTeeth, statorRadius, aspectRatio);
 	rotor = new CircularGear(numRotorTeeth, stator);
 	if (numRotorTeeth >= numStatorTeeth) {
 		document.getElementById('rotor-position-outside').checked = true;
@@ -743,7 +771,38 @@ statorTeethInput.addEventListener('change', function (event) {
 		numStatorTeeth = numStatorTeethEntered;
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
-		makeNewStator();
+		makeStator();
+	}
+});
+
+document.getElementById('stator-shape').addEventListener('input', function (event) {
+	if (savedStartTooth !== undefined) {
+		startToothInput.value = savedStartTooth;
+	} else {
+		startToothInput.value = 1;
+	}
+	if (this.value === 'circle') {
+		makeStator();
+		statorAspectInput.disabled = true;
+		statorAspectInput.setCustomValidity('');
+	} else {
+		statorAspectInput.disabled = false;
+		if (parseFloat(statorAspectInput.value) > 0) {
+			makeStator();
+		} else {
+			statorAspectInput.setCustomValidity('Please enter a positive number.');
+		}
+	}
+	checkRotorSize();
+	setInitialRotation();
+});
+
+document.getElementById('stator-aspect').addEventListener('input', function (event) {
+	if (parseFloat(this.value) > 0) {
+		makeStator();
+		this.setCustomValidity('');
+	} else {
+		this.setCustomValidity('Please enter a positive number.');
 	}
 });
 
@@ -765,7 +824,7 @@ statorRadiusInput.addEventListener('change', function (event) {
 	if (statorRadiusEntered > 0) {
 		this.setCustomValidity('');
 		statorRadius = statorRadiusEntered;
-		makeNewStator();
+		makeStator();
 		maxRotationTime = 10000 * Math.sqrt(statorRadius);
 	} else {
 		this.setCustomValidity('Please enter a positive number.');
@@ -795,7 +854,6 @@ document.getElementById('end-point-numbered').addEventListener('input', function
 	}
 });
 
-
 revolutionsInput.addEventListener('input', function (event) {
 	if (parseFloat(this.value) > 0) {
 		this.setCustomValidity('');
@@ -812,7 +870,9 @@ function updatePenXReadout() {
 		document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
 		penOffsetX = newOffset;
 		changePenPosition(rotor, penOffsetX, penOffsetY);
-		drawTools(stator, rotor, penX, penY);
+		if (!isAnimating()) {
+			drawTools(stator, rotor, penX, penY);
+		}
 		updateNumberOfPoints();
 	}
 }
@@ -832,7 +892,9 @@ function updatePenYReadout() {
 		penOffsetY = newOffset;
 		document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
 		changePenPosition(rotor, penOffsetX, penOffsetY);
-		drawTools(stator, rotor, penX, penY);
+		if (!isAnimating()) {
+			drawTools(stator, rotor, penX, penY);
+		}
 		updateNumberOfPoints();
 	}
 }
@@ -902,7 +964,9 @@ translationInput.addEventListener('change', function (event) {
 		translationSteps = amount;
 		calcTransform();
 		updateRotorPosition();
-		drawTools(stator, rotor, penX, penY);
+		if (!isAnimating()) {
+			drawTools(stator, rotor, penX, penY);
+		}
 	}
 });
 

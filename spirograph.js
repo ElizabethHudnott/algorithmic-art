@@ -54,6 +54,7 @@ const revolutionsInput = document.getElementById('revolutions');
 const animSpeedSlider = document.getElementById('anim-speed');
 setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
+let lineWidth = parseInt(penWidthInput.value);
 const lineDashInput = document.getElementById('line-dash');
 const translationInput = document.getElementById('translation');
 translationSteps = parseFloat(translationInput.value);
@@ -298,7 +299,7 @@ function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, 
 			}
 
 			let shift = 0;
-			if (Math.abs(rotation) % Math.PI === 0 && Math.round(spiroContext.lineWidth * scale) % 2 === 1) {
+			if (Math.abs(rotation) % halfPI === 0 && lineWidth % 2 === 1) {
 				shift = 0.5 / scale;
 			}
 			spiroContext.rotate(rotation);
@@ -308,8 +309,14 @@ function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, 
 				placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, distance, initialRotationDist);
 				const cos = Math.cos(rotorAngle);
 				const sin = Math.sin(rotorAngle);
-				const plotX = rotorX + penX * cos - penY * sin + shift;
-				const plotY = rotorY + penX * sin + penY * cos + shift;
+				let plotX = rotorX + penX * cos - penY * sin;
+				let plotY = rotorY + penX * sin + penY * cos;
+				if (lineWidth === 1) {
+					plotX = Math.round(plotX * scale) / scale;
+					plotY = Math.round(plotY * scale) / scale;
+				}
+				plotX += shift;
+				plotY += shift;
 
 				if (stepNumber === 0) {
 					spiroContext.moveTo(plotX, plotY);
@@ -537,10 +544,6 @@ function resizeCanvas(fitExact) {
 	savedCanvas.width = pixelWidth;
 	savedCanvas.height = pixelHeight;
 
-	let lineWidth = parseInt(penWidthInput.value);
-	if (!(lineWidth >= 1)) {
-		lineWidth = 2;
-	}
 	spiroContext.lineWidth = lineWidth / scale;
 	toolContext.lineWidth = 2 / scale;
 	spiroContext.strokeStyle = penColor;
@@ -911,7 +914,11 @@ animSpeedSlider.addEventListener('input', function (event) {
 });
 
 penWidthInput.addEventListener('input', function (event) {
-	spiroContext.lineWidth = parseInt(this.value) / scale;
+	if (this.value !== '') {
+		lineWidth = parseInt(this.value);
+		spiroContext.lineWidth =  lineWidth / scale;
+		parseLineDash();
+	}
 });
 
 function parseLineDash() {
@@ -933,14 +940,16 @@ function parseLineDash() {
 				lineDash.push(lineDash[i]);
 			}
 		}
+		const halfLineWidth = Math.ceil(lineWidth / 2);
 		numValues = lineDash.length;
 		for (let i = 0; i < numValues; i += 2) {
-			if (lineDash[i] > 1) {
-				lineDash[i]--;
+			lineDash[i] -= halfLineWidth;
+			if (lineDash[i] < 1) {
+				lineDash[i] = 1;
 			}
 		}
 		for (let i = 1; i < numValues; i += 2) {
-			lineDash[i]++;
+			lineDash[i] += halfLineWidth;
 		}
 		setLineDash();
 	}

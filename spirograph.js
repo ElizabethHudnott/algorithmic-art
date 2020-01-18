@@ -4,7 +4,7 @@ const halfPI = Math.PI / 2;
 
 let scale, width, height;
 let toolsVisible = true;
-let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth;
+let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth, initialRotationDist;
 let inOut = document.getElementById('rotor-position-inside').checked ? -1 : 0;
 let translationSteps = 0, translateX = 0, translateY = 0;
 let currentDistance = 0;
@@ -35,7 +35,6 @@ const lengthSpan = document.getElementById('length');
 const statorTeethInput = document.getElementById('stator-teeth');
 const incrementInput = document.getElementById('increment');
 const rotorTeethInput = document.getElementById('rotor-teeth');
-let initialRotationDist = getInitialRotation();
 const statorRadiusInput = document.getElementById('stator-radius');
 let statorRadius = parseFraction(statorRadiusInput.value);
 if (!(statorRadius > 0)) {
@@ -616,6 +615,7 @@ function drawSpirographAction() {
 }
 
 randomizeSpirographForm();
+setInitialRotation();
 calcTransform();
 parseLineDash();
 

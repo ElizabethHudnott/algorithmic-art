@@ -250,8 +250,8 @@ function drawTools(stator, rotor, penX, penY) {
 }
 
 function calcStepMultiplier(stator, rotor, penX, penY) {
-	const maxRadius = Math.max(rotor.radiusA - penX, rotor.radiusB - penY);
-	const maxAngle = stator.toothSize / stator.radiusB;
+	const maxRadius = Math.max(rotor.radiusA + penX, rotor.radiusB + penY);
+	const maxAngle = stator.toothSize / stator.radiusB; // As if it had a circular part with a radius of radiusB
 	const maxArc = maxAngle * maxRadius * scale;
 	return Math.trunc(maxArc);
 }
@@ -890,10 +890,10 @@ penXSlider.addEventListener('change', function (event) {
 });
 
 function updatePenYReadout() {
-	const newOffset = -parseFloat(penYSlider.value);
+	const newOffset = parseFloat(penYSlider.value);
 	if (rotor.isPointInside(penOffsetX, newOffset)) {
 		penOffsetY = newOffset;
-		document.getElementById('pen-y-readout').innerText = Math.round(-penOffsetY * 100) + '%';
+		document.getElementById('pen-y-readout').innerText = Math.round(penOffsetY * 100) + '%';
 		changePenPosition(rotor, penOffsetX, penOffsetY);
 		if (!isAnimating()) {
 			drawTools(stator, rotor, penX, penY);
@@ -904,8 +904,8 @@ function updatePenYReadout() {
 updatePenYReadout()
 penYSlider.addEventListener('input', updatePenYReadout);
 penYSlider.addEventListener('change', function (event) {
-	if (parseFloat(this.value) !== -penOffsetY) {
-		this.value = -penOffsetY;
+	if (parseFloat(this.value) !== penOffsetY) {
+		this.value = penOffsetY;
 	}
 });
 

@@ -1074,7 +1074,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		offset = undefined;
 		calcTransform();
 		spiroContext.clearRect(-1, -1, width, height);
-		placeRotor(stator, rotor, inOut, 0, 0, 0, 0, initialRotationDist);
+		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);
 		drawTools(stator, rotor, penX, penY);
 	}
 	if (isAnimating()) {

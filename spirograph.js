@@ -608,7 +608,7 @@ function calcOffset() {
 	} else if (inOut === 1) {
 		return stator.radiusA + calcMaxLength(rotor, penX, penY) - 1 + spiroContext.lineWidth / 2;
 	} else {
-		return stator.radiusA - 1;
+		return stator.radiusA - 1 + spiroContext.lineWidth / 2;
 	}
 }
 

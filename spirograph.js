@@ -82,6 +82,13 @@ function rgba(r, g, b, a) {
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function calcMaxLength(rotor, penX, penY) {
+	const angle = Math.atan2(penY, penX);
+	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
+	const distanceFromEdge = Math.min(rotor.radiusB / Math.sin(angle), rotor.radiusA);
+	return distanceFromCentre + distanceFromEdge;
+}
+
 function setFillStyle() {
 	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
@@ -90,25 +97,15 @@ function setFillStyle() {
 	if (document.getElementsByClassName('inner-fill-controls')[0].classList.contains('show')) {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
-		let minRadius, maxRadius;
-		const statorRadius = stator.radiusA;
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
 		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
 
-		if (penToEdge1 <= penToEdge2) {
-			// Calc using Radius A
-			maxRadius = statorRadius - penToEdge1;
-			minRadius = statorRadius - 2 * rotor.radiusA + penToEdge1;
-		} else {
-			// Calc using Radius B
-			maxRadius = statorRadius - penToEdge2;
-			minRadius = statorRadius - 2 * rotor.radiusB + penToEdge2;
-		}
-		minRadius = Math.abs(minRadius);
+		const maxRadius = stator.radiusA - Math.min(penToEdge1, penToEdge2);
+		let minRadius = 0;
 
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
-		if (centreStyle == 'gradient') {
-			minRadius = 0;
+		if (centreStyle !== 'gradient') {
+			minRadius = Math.abs(stator.radiusB - calcMaxLength(rotor, penX, penY));
 		}
 
 		let gradient;
@@ -250,7 +247,7 @@ function drawTools(stator, rotor, penX, penY) {
 }
 
 function calcStepMultiplier(stator, rotor, penX, penY) {
-	const maxRadius = Math.max(rotor.radiusA + penX, rotor.radiusB + penY);
+	const maxRadius = calcMaxLength(rotor, penX, penY);
 	const maxAngle = stator.toothSize / stator.radiusB; // As if it had a circular part with a radius of radiusB
 	const maxArc = maxAngle * maxRadius * scale;
 	return Math.trunc(maxArc);

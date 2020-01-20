@@ -100,12 +100,13 @@ function setFillStyle() {
 		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
 		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
 
-		const maxRadius = stator.radiusA - Math.min(penToEdge1, penToEdge2);
+		const halfLineWidth = spiroContext.lineWidth / 2;
+		const maxRadius = stator.radiusA - Math.min(penToEdge1, penToEdge2) - halfLineWidth;
 		let minRadius = 0;
 
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
 		if (centreStyle !== 'gradient') {
-			minRadius = Math.abs(stator.radiusB - calcMaxLength(rotor, penX, penY));
+			minRadius = Math.abs(stator.radiusB - calcMaxLength(rotor, penX, penY)) + halfLineWidth;
 		}
 
 		let gradient;
@@ -241,13 +242,13 @@ function drawTools(stator, rotor, penX, penY) {
 		toolContext.translate(rotorX, rotorY);
 		toolContext.rotate(rotorAngle);
 		rotor.draw(toolContext, 0, 0);
-		toolContext.arc(penX, penY, 5 / scale, 0, 2 * Math.PI);
+		toolContext.arc(penX, penY, Math.max(lineWidth / 2, 5) / scale, 0, 2 * Math.PI);
 		toolContext.fill('evenodd');
 	}
 }
 
 function calcStepMultiplier(stator, rotor, penX, penY) {
-	const maxRadius = calcMaxLength(rotor, penX, penY);
+	const maxRadius = calcMaxLength(rotor, penX, penY) + spiroContext.lineWidth / 2;
 	const maxAngle = stator.toothSize / stator.radiusB; // As if it had a circular part with a radius of radiusB
 	const maxArc = maxAngle * maxRadius * scale;
 	return Math.trunc(maxArc);
@@ -605,7 +606,7 @@ function calcOffset() {
 	if (offset !== undefined) {
 		return offset;
 	} else if (inOut === 1) {
-		return stator.radiusA + calcMaxLength(rotor, penX, penY) - 1;
+		return stator.radiusA + calcMaxLength(rotor, penX, penY) - 1 + spiroContext.lineWidth / 2;
 	} else {
 		return stator.radiusA - 1;
 	}
@@ -935,6 +936,11 @@ penWidthInput.addEventListener('input', function (event) {
 		lineWidth = parseInt(this.value);
 		spiroContext.lineWidth =  lineWidth / scale;
 		parseLineDash();
+		calcTransform();
+		if (!isAnimating()) {
+			updateRotorPosition();
+			drawTools(stator, rotor, penX, penY);
+		}
 	}
 });
 

@@ -693,6 +693,12 @@ document.getElementById('btn-fill').addEventListener('click', function (event) {
 	}
 });
 
+document.getElementById('btn-randomize').addEventListener('click', function (event) {
+	randomizeSpirographForm();
+	calcTransform();
+	setInitialRotation();
+});
+
 document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
 	toolsVisible = !document.getElementById('tool-canvas').classList.toggle('invisible');
 	if (toolsVisible) {
@@ -751,11 +757,14 @@ rotorTeethInput.addEventListener('change', function (event) {
 
 function makeStator() {
 	const shape = document.getElementById('stator-shape').value;
-	const aspectRatio = parseFloat(statorAspectInput.value);
+	let aspectRatio = parseFloat(statorAspectInput.value);
+	if (aspectRatio <= 0 || aspectRatio > 1) {
+		aspectRatio = stator.radiusA / stator.radiusB;
+	}
 	const constructor = gearConstructors.get(shape);
 	stator = new constructor(numStatorTeeth, statorRadius, aspectRatio);
 	rotor = new CircularGear(numRotorTeeth, stator);
-	if (numRotorTeeth >= numStatorTeeth) {
+	if (rotor.radiusA >= stator.radiusB) {
 		document.getElementById('rotor-position-outside').checked = true;
 		document.getElementById('rotor-position-inside').disabled = true;
 		inOut = 1;
@@ -813,11 +822,12 @@ document.getElementById('stator-shape').addEventListener('input', function (even
 });
 
 document.getElementById('stator-aspect').addEventListener('input', function (event) {
-	if (parseFloat(this.value) > 0) {
+	const newValue = parseFloat(this.value);
+	if (newValue > 0 && newValue <= 1) {
 		makeStator();
 		this.setCustomValidity('');
 	} else {
-		this.setCustomValidity('Please enter a positive number.');
+		this.setCustomValidity('Please enter any positive decimal up to 1.');
 	}
 });
 
@@ -881,8 +891,8 @@ revolutionsInput.addEventListener('input', function (event) {
 });
 
 function updatePenXReadout() {
-	const holeNumber = penXSlider.value;
-	const newOffset = 1 - holeNumber / maxHole;
+	const holeNumber = parseInt(penXSlider.value);
+	const newOffset = maxHole === 0 ? 1 : 1 - holeNumber / maxHole;
 	if (rotor.isPointInside(newOffset, penOffsetY)) {
 		document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
 		penOffsetX = newOffset;

@@ -470,11 +470,11 @@ class RackGear extends Gear {
 		const ra = this.radiusA;
 		const rb = this.radiusB;
 		context.beginPath();
-		context.moveTo(-ra + rb, -rb);
-		context.lineTo(ra - rb, -rb);
-		context.arc(ra - rb, 0, rb, -halfPI, halfPI);
-		context.lineTo(-ra + rb, rb);
-		context.arc(-ra + rb, 0, rb, halfPI, -halfPI);
+		context.moveTo(x - ra + rb, y - rb);
+		context.lineTo(x + ra - rb, y - rb);
+		context.arc(x + ra - rb, y, rb, -halfPI, halfPI);
+		context.lineTo(x - ra + rb, y + rb);
+		context.arc(x - ra + rb, y, rb, halfPI, -halfPI);
 		context.stroke();
 	}
 
@@ -605,9 +605,9 @@ function calcOffset() {
 	if (offset !== undefined) {
 		return offset;
 	} else if (inOut === 1) {
-		return calcMaxLength(rotor, penX, penY);
+		return stator.radiusA + calcMaxLength(rotor, penX, penY) - 1;
 	} else {
-		return 0;
+		return stator.radiusA - 1;
 	}
 }
 
@@ -768,9 +768,9 @@ function makeStator() {
 		startToothInput.value = startTooth;
 		startDistance = (startTooth - 1) * stator.toothSize;
 	}
-	calcTransform();
 	setInitialRotation();
 	changePenPosition(rotor, penOffsetX, penOffsetY);
+	calcTransform();
 	if (!isAnimating()) {
 		placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, startDistance, initialRotationDist);
 		drawTools(stator, rotor, penX, penY);
@@ -807,6 +807,7 @@ document.getElementById('stator-shape').addEventListener('input', function (even
 		}
 	}
 	checkRotorSize();
+	calcTransform();
 	setInitialRotation();
 });
 

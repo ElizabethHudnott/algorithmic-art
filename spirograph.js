@@ -83,9 +83,9 @@ function rgba(r, g, b, a) {
 }
 
 function calcMaxLength(rotor, penX, penY) {
-	const angle = Math.atan2(penY, penX);
 	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
-	const distanceFromEdge = Math.min(rotor.radiusB / Math.sin(angle), rotor.radiusA);
+	// Sort of assume a rectangular bounding box but no chord through the shape can be longer than radiusA.
+	const distanceFromEdge = Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
 	return distanceFromCentre + distanceFromEdge;
 }
 
@@ -571,12 +571,11 @@ function randomizeSpirographForm() {
 	document.getElementById('stator-teeth').value = numStatorTeeth;
 	stator = new CircularGear(numStatorTeeth, statorRadius);
 	rotor = new CircularGear(numRotorTeeth, stator);
+	penYSlider.value = 0;
+	updatePenYReadout();
 	calcMaxHole();
-	const holeNumber = Math.round(maxHole / 4);
-	penXSlider.value = holeNumber;
-	document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
-	penOffsetX = 1 - holeNumber / maxHole;
-	changePenPosition(rotor, penOffsetX, penOffsetY);
+	penXSlider.value = Math.trunc(Math.random() * maxHole);
+	updatePenXReadout();
 	setPenColor.call(penSwatches[Math.trunc(Math.random() * 5)].parentElement);
 }
 
@@ -648,7 +647,6 @@ function drawSpirographAction() {
 }
 
 randomizeSpirographForm();
-calcTransform();
 setInitialRotation();
 parseLineDash();
 drawSpirographAction();

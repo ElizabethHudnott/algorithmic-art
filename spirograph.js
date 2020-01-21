@@ -82,11 +82,16 @@ function rgba(r, g, b, a) {
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-function calcMaxLength(rotor, penX, penY) {
+function maxLength(rotor, penX, penY) {
 	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
 	// Sort of assume a rectangular bounding box but no chord through the shape can be longer than radiusA.
 	const distanceFromEdge = Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
 	return distanceFromCentre + distanceFromEdge;
+}
+
+function minLength(rotor, penX, penY) {
+	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
+	return distanceFromCentre - Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
 }
 
 function setFillStyle() {
@@ -97,16 +102,13 @@ function setFillStyle() {
 	if (document.getElementsByClassName('inner-fill-controls')[0].classList.contains('show')) {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
-		const penToEdge1 = rotor.radiusA * (1 - penOffsetX);
-		const penToEdge2 = rotor.radiusB * (1 - penOffsetY);
-
 		const halfLineWidth = spiroContext.lineWidth / 2;
-		const maxRadius = stator.radiusA - Math.min(penToEdge1, penToEdge2) - halfLineWidth;
+		const maxRadius = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
 		let minRadius = 0;
 
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
 		if (centreStyle !== 'gradient') {
-			minRadius = Math.abs(stator.radiusB - calcMaxLength(rotor, penX, penY)) + halfLineWidth;
+			minRadius = Math.abs(stator.radiusB - maxLength(rotor, penX, penY)) + halfLineWidth;
 		}
 
 		let gradient;
@@ -247,8 +249,8 @@ function drawTools(stator, rotor, penX, penY) {
 	}
 }
 
-function calcStepMultiplier(stator, rotor, penX, penY) {
-	const maxRadius = calcMaxLength(rotor, penX, penY) + spiroContext.lineWidth / 2;
+function stepMultiplier(stator, rotor, penX, penY) {
+	const maxRadius = maxLength(rotor, penX, penY) + spiroContext.lineWidth / 2;
 	const maxAngle = stator.toothSize / stator.radiusB; // As if it had a circular part with a radius of radiusB
 	const maxArc = maxAngle * maxRadius * scale;
 	return Math.trunc(maxArc);
@@ -261,7 +263,7 @@ function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, 
 	if (initialRotationDist === undefined) {
 		initialRotationDist = getInitialRotation();
 	}
-	const increment = teethPerStep * stator.toothSize / calcStepMultiplier(stator, rotor, penX, penY);
+	const increment = teethPerStep * stator.toothSize / stepMultiplier(stator, rotor, penX, penY);
 
 	const numSteps = (endDistance - startDistance) / increment;
 	const stepsPerRotation = (640 * Math.PI / scale) / increment;
@@ -557,7 +559,7 @@ function updateNumberOfPoints() {
 	numRevsSpan.innerText = numRevolutions;
 	const numPoints = toothLength / rotor.numTeeth;
 	numPointsSpan.innerText = numPoints;
-	const incrementSF = calcStepMultiplier(stator, rotor, penX, penY);
+	const incrementSF = stepMultiplier(stator, rotor, penX, penY);
 	const length = lcm(stator.numTeeth, rotor.numTeeth) * incrementSF;
 	lengthSpan.innerText = length;
 }
@@ -605,7 +607,7 @@ function calcOffset() {
 	if (offset !== undefined) {
 		return offset;
 	} else if (inOut === 1) {
-		return stator.radiusA + calcMaxLength(rotor, penX, penY) - 1 + spiroContext.lineWidth / 2;
+		return stator.radiusA + maxLength(rotor, penX, penY) - 1 + spiroContext.lineWidth / 2;
 	} else {
 		return stator.radiusA - 1 + spiroContext.lineWidth / 2;
 	}

@@ -242,10 +242,11 @@
 						<td colspan="2" class="col-6 mb-3">
 							<label for="translation">Translate stator by</label>
 							<div class="input-group">
-								<input id="translation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth to shift stator by" title="Number of teeth to shift stator by" aria-describedby="translation-units">
-								<div class="input-group-append">
-									<span class="input-group-text" id="translation-units">teeth</span>
-								</div>
+								<input id="translation" class="form-control" type="number" required step="any" value="0" placeholder="Length to shift the stator by" title="Length to shift the stator by" aria-describedby="translation-units">
+								<select class="form-control" id="translation-units">
+									<option>teeth</option>
+									<option>units</option>
+								</select>
 							</div>
 						</td>
 					</tr>

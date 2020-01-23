@@ -614,7 +614,11 @@ function calcOffset() {
 }
 
 function calcTransform() {
-	const length = translationSteps * stator.toothSize;
+	let unit = 1;
+	if (document.getElementById('translation-units').value === 'teeth') {
+		unit = stator.toothSize;
+	}
+	const length = translationSteps * unit;
 	if (width >= height) {
 		translateX = length;
 		translateY = 0;
@@ -1009,6 +1013,21 @@ translationInput.addEventListener('change', function (event) {
 		if (!isAnimating()) {
 			drawTools(stator, rotor, penX, penY);
 		}
+	}
+});
+
+document.getElementById('translation-units').addEventListener('input', function (event) {
+	calcTransform();
+	if (translateX - stator.radiusA >= width - 1 ||
+		translateY - stator.radiusA >= height - 1)
+	{
+		translationInput.value = 0;
+		translationSteps = 0;
+		calcTransform();
+	}
+	updateRotorPosition();
+	if (!isAnimating()) {
+		drawTools(stator, rotor, penX, penY);
 	}
 });
 

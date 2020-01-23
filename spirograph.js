@@ -536,7 +536,6 @@ function resizeCanvas(fitExact) {
 	scale = pixelWidth >= pixelHeight ? pixelHeight / 2 : pixelWidth / 2;
 	width = pixelWidth / scale;
 	height = pixelHeight / scale;
-	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
 	restoreCanvas();
 	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 	savedCanvas.width = pixelWidth;

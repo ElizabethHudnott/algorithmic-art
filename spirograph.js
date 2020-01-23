@@ -91,7 +91,7 @@ function maxLength(rotor, penX, penY) {
 
 function minLength(rotor, penX, penY) {
 	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
-	return distanceFromCentre - Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
+	return Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA) - distanceFromCentre;
 }
 
 function setFillStyle() {
@@ -982,6 +982,7 @@ function parseLineDash() {
 		for (let i = 0; i < numValues; i += 2) {
 			lineDash[i] -= halfLineWidth;
 			if (lineDash[i] < 1) {
+				lineDash[i + 1] += 1 - lineDash[i];
 				lineDash[i] = 1;
 			}
 		}

@@ -104,12 +104,21 @@ function setFillStyle() {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		const halfLineWidth = spiroContext.lineWidth / 2;
-		const maxRadius = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
-		let minRadius = 0;
+		let maxRadius;
+		if (inOut === -1) {
+			maxRadius = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
+		} else {
+			maxRadius = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
+		}
 
+		let minRadius = 0;
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
 		if (centreStyle !== 'gradient') {
-			minRadius = Math.abs(stator.radiusB - maxLength(rotor, penX, penY)) + halfLineWidth;
+			if (inOut === -1) {
+				minRadius = Math.abs(stator.radiusB - maxLength(rotor, penX, penY)) + halfLineWidth;
+			} else {
+				minRadius = stator.radiusB + minLength(rotor, penX, penY) + halfLineWidth;
+			}
 		}
 
 		let gradient;

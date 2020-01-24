@@ -66,6 +66,7 @@ const customPenInput = document.getElementById('custom-pen-color');
 let customColor = customPenInput.value;
 const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
+const paperImageInput = document.getElementById('paper-image');
 const opacityInput = document.getElementById('outer-opacity');
 const opacityInput2 = document.getElementById('inner-opacity');
 const gradientToothInput = document.getElementById('gradient-tooth');
@@ -1086,6 +1087,7 @@ customPenInput.addEventListener('input', function (event) {
 
 function setPaperColor() {
 	spiroCanvas.style.backgroundColor = this.children[0].value;
+	spiroCanvas.style.backgroundImage = 'none';
 	customPaperInput.parentElement.classList.remove('active');
 }
 
@@ -1095,11 +1097,32 @@ paperSwatches.forEach(function (item) {
 
 customPaperInput.addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
+	spiroCanvas.style.backgroundImage = 'none';
 	for (let swatch of paperSwatches) {
 		swatch.parentElement.classList.remove('active');
 	}
+	paperImageInput.parentElement.classList.remove('active');
 	this.parentElement.classList.add('active');
 });
+
+const backgroundFileReader = new FileReader();
+
+paperImageInput.addEventListener('click', function (event) {
+	if (backgroundFileReader.result) {
+		spiroCanvas.style.backgroundImage = `url("${backgroundFileReader.result}")`;
+	}
+});
+
+paperImageInput.addEventListener('input', function (event) {
+	const file = this.files[0];
+	if (file) {
+		backgroundFileReader.readAsDataURL(file);
+	}
+});
+
+backgroundFileReader.onload = function (event) {
+	spiroCanvas.style.backgroundImage = `url("${this.result}")`;
+};
 
 function updateOpacityReadout() {
 	const opacity = parseFloat(this.value);

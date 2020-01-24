@@ -2,7 +2,7 @@
 
 const halfPI = Math.PI / 2;
 
-let scale, width, height;
+let rawScale, fixedScale, scale, width, height;
 let toolsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth, initialRotationDist;
 let inOut = document.getElementById('rotor-position-inside').checked ? -1 : 1;
@@ -533,16 +533,12 @@ function resizeCanvas(fitExact) {
 		spiroCanvas.height = pixelHeight;
 		toolCanvas.height = pixelHeight;
 	}
-	scale = pixelWidth >= pixelHeight ? pixelHeight / 2 : pixelWidth / 2;
-	width = pixelWidth / scale;
-	height = pixelHeight / scale;
+	rawScale = pixelWidth >= pixelHeight ? pixelHeight / 2 : pixelWidth / 2;
+	calcScale();
 	restoreCanvas();
-	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 	savedCanvas.width = pixelWidth;
 	savedCanvas.height = pixelHeight;
 
-	spiroContext.lineWidth = lineWidth / scale;
-	toolContext.lineWidth = 2 / scale;
 	spiroContext.strokeStyle = penColor;
 	spiroContext.lineCap = 'round';
 	spiroContext.lineJoin = 'round';
@@ -602,6 +598,22 @@ function drawingEnded() {
 	drawButton.innerText = 'Draw Shape';
 }
 
+function calcScale() {
+	if (fixedScale !== undefined) {
+		scale = fixedScale;
+	} else if (inOut === 1) {
+		scale = rawScale / (stator.radiusA + maxLength(rotor, penX, penY)) - lineWidth / 2;
+	} else {
+		scale = rawScale;
+	}
+	width = spiroCanvas.width / scale;
+	height = spiroCanvas.height / scale;
+	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
+	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+	spiroContext.lineWidth = lineWidth / scale;
+	toolContext.lineWidth = 2 / scale;
+}
+
 function calcOffset() {
 	if (offset !== undefined) {
 		return offset;
@@ -613,11 +625,12 @@ function calcOffset() {
 }
 
 function calcTransform() {
+	calcScale();
 	let unit = 1;
 	if (document.getElementById('translation-units').value === 'teeth') {
 		unit = stator.toothSize;
 	}
-	const length = translationSteps * unit;
+	const length = translationSteps * unit * rawScale / scale;
 	if (width >= height) {
 		translateX = length;
 		translateY = 0;
@@ -644,6 +657,7 @@ function drawSpirographAction() {
 	const rotationTooth = parseFloat(document.getElementById('rotation').value);
 	const rotation = rotationTooth;
 	offset = calcOffset();
+	fixedScale = scale;
 	spiroContext.globalCompositeOperation = 'multiply';
 	isFilled = false;
 	animController = drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, increment, penX, penY, initialRotationDist);
@@ -1107,6 +1121,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		translationInput.value = 0;
 		translationSteps = 0;
 		offset = undefined;
+		fixedScale = undefined;
 		calcTransform();
 		spiroContext.clearRect(-1, -1, width, height);
 		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);

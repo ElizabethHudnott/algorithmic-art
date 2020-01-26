@@ -1078,12 +1078,16 @@ penSwatches.forEach(function (item) {
 	item.parentElement.addEventListener('click', setPenColor);
 });
 
-customPenInput.addEventListener('input', function (event) {
+customPenInput.addEventListener('click', function (event) {
 	spiroContext.strokeStyle = this.value;
+	this.parentElement.classList.add('active');
 	for (let swatch of penSwatches) {
 		swatch.parentElement.classList.remove('active');
 	}
-	this.parentElement.classList.add('active');
+});
+
+customPenInput.addEventListener('input', function (event) {
+	spiroContext.strokeStyle = this.value;
 	const customColorBoxes = this.parentElement.parentElement.children;
 	const count = customColorBoxes.length - 2;
 	let colorBox;

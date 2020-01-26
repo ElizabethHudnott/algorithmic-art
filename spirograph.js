@@ -84,6 +84,9 @@ function rgba(r, g, b, a) {
 }
 
 function maxLength(rotor, penX, penY) {
+	if (penY === 0) {
+		return rotor.radiusA + penX;
+	}
 	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
 	// Sort of assume a rectangular bounding box but no chord through the shape can be longer than radiusA.
 	const distanceFromEdge = Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
@@ -91,6 +94,9 @@ function maxLength(rotor, penX, penY) {
 }
 
 function minLength(rotor, penX, penY) {
+	if (penY === 0) {
+		return rotor.radiusA - penX;
+	}
 	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
 	return Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA) - distanceFromCentre;
 }
@@ -263,7 +269,7 @@ function stepMultiplier(stator, rotor, penX, penY) {
 	const maxRadius = maxLength(rotor, penX, penY) + spiroContext.lineWidth / 2;
 	const maxAngle = stator.toothSize / stator.radiusB; // As if it had a circular part with a radius of radiusB
 	const maxArc = maxAngle * maxRadius * scale;
-	return Math.trunc(maxArc);
+	return maxArc < 1 ? 1 : Math.trunc(maxArc);
 }
 
 function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
@@ -576,7 +582,7 @@ function randomizeSpirographForm() {
 	document.getElementById('rotor-teeth').value = numRotorTeeth;
 	numStatorTeeth = Math.random() < 0.5 ? 96 : 105;
 	document.getElementById('stator-teeth').value = numStatorTeeth;
-	stator = new CircularGear(numStatorTeeth, statorRadius);
+	makeStator();
 	rotor = new CircularGear(numRotorTeeth, stator);
 	penYSlider.value = 0;
 	updatePenYReadout();
@@ -786,7 +792,7 @@ function makeStator() {
 	const shape = document.getElementById('stator-shape').value;
 	let aspectRatio = parseFloat(statorAspectInput.value);
 	if (aspectRatio <= 0 || aspectRatio > 1) {
-		aspectRatio = stator.radiusA / stator.radiusB;
+		aspectRatio = stator.radiusB / stator.radiusA;
 	}
 	const constructor = gearConstructors.get(shape);
 	stator = new constructor(numStatorTeeth, statorRadius, aspectRatio);

@@ -43,6 +43,18 @@
 	box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
 }
 
+/* Individual elements
+ *********************
+ */
+#spirograph-canvas {
+	background-clip: content-box;
+	background-origin: content-box;
+}
+
+#tool-canvas {
+	pointer-events: none;
+}
+
 /* Bootstrap overrides
  *********************
  */

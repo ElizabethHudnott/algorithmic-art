@@ -194,7 +194,7 @@
 						</td>
 						<td class="col-6 col-md-3 mb-3">
 							<label for="increment">Step size</label>
-							<input class="form-control" type="number" min="0.01" step="any" value="1" required id="increment" placeholder="Teeth per step">
+							<input class="form-control" type="number" min="0.01" step="any" value="1" required id="increment">
 						</td>
 					</tr>
 					<tr class="row">
@@ -233,12 +233,22 @@
 						</td>
 						<td colspan="2" class="col-6 mb-3">
 							<label class="d-block">Translate stator by</label>
-							<div class="input-group">
+							<div class="form-group input-group">
 								<div class="input-group-prepend">
 									<span class="input-group-text">x</span>
 								</div>
 								<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
 								<select class="form-control" id="translation-x-units">
+									<option>teeth</option>
+									<option>units</option>
+								</select>
+							</div>
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">y</span>
+								</div>
+								<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
+								<select class="form-control" id="translation-y-units">
 									<option>teeth</option>
 									<option>units</option>
 								</select>
@@ -254,17 +264,18 @@
 							<label for="line-dash">Dash pattern</label>
 							<input class="form-control" id="line-dash" required value="1" pattern="[1-9]\d*(,\s*[1-9]\d*)*" placeholder="Dash pattern" title="Comma separated list of dash and gap lengths">
 						</td>
-						<td colspan="2" class="col-6 mb-3">
+						<td class="col-6 col-md-3 mb-3">
+							<label for="rotation">Rotate stator by</label>
 							<div class="input-group">
-								<div class="input-group-prepend">
-									<span class="input-group-text">y</span>
+								<input id="rotation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth" title="Number of teeth to rotate stator by" aria-describedby="rotation-units">
+								<div class="input-group-append">
+									<span class="input-group-text" id="rotation-units">teeth</span>
 								</div>
-								<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
-								<select class="form-control" id="translation-y-units">
-									<option>teeth</option>
-									<option>units</option>
-								</select>
 							</div>
+						</td>
+						<td class="col-6 col-md-3 mb-3">
+							<label for="orbit">Gear to rotate around</label>
+							<input id="orbit" class="form-control" type="number" required min="0" value="0" placeholder="Number of teeth" title="Number of teeth in the gear to rotate around" list="rotor-teeth-list">
 						</td>
 					</tr>
 					<tr class="row">
@@ -348,17 +359,12 @@
 							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
-							<label for="rotation">Rotate stator by</label>
-							<div class="input-group">
-								<input id="rotation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth" title="Number of teeth to rotate stator by" aria-describedby="rotation-units">
-								<div class="input-group-append">
-									<span class="input-group-text" id="rotation-units">teeth</span>
-								</div>
-							</div>
+							<label for="stretch-direction">Stretch direction</label>
+							<input type="text" id="stretch-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" required value="0" class="form-control" aria-label="Direction of stretch distortion effect" placeholder="Fraction of a circle">
 						</td>
 						<td class="col-6 col-md-3 mb-3">
-							<label for="orbit">Gear to rotate around</label>
-							<input id="orbit" class="form-control" type="number" required min="0" value="0" placeholder="Number of teeth" title="Number of teeth in the gear to rotate around" list="rotor-teeth-list">
+							<label for="stretch-amount">Amount of stretch</label>
+							<input type="number" min="0" required value="1" step="any" id="stretch-amount" class="form-control">
 						</td>
 					</tr>
 					<tr class="row collapse inner-fill-controls">
@@ -381,7 +387,7 @@
 									</div>
 									<div class="input-group-text">Mirror line</div>
 								</div>
-								<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of circle">
+								<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of a circle">
 							</div>
 						</td>
 					</tr>

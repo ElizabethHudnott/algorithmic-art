@@ -632,8 +632,6 @@ function calcScale() {
 	}
 	width = spiroCanvas.width / scale;
 	height = spiroCanvas.height / scale;
-	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
-	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 	spiroContext.lineWidth = lineWidth / scale;
 	toolContext.lineWidth = 2 / scale;
 }

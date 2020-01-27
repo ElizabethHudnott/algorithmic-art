@@ -6,7 +6,7 @@ let rawScale, fixedScale, scale, width, height;
 let toolsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth, initialRotationDist;
 let inOut = document.getElementById('rotor-position-inside').checked ? -1 : 1;
-let translationSteps = 0, translateX = 0, translateY = 0, offset;
+let translationStepsX = 0, translationStepsY = 0, translateX = 0, translateY = 0, offset;
 let currentDistance = 0;
 let rotorX = 0;
 let rotorY = 0;
@@ -56,10 +56,15 @@ setAnimSpeed(parseInt(animSpeedSlider.value));
 const penWidthInput = document.getElementById('pen-width');
 let lineWidth = parseInt(penWidthInput.value);
 const lineDashInput = document.getElementById('line-dash');
-const translationInput = document.getElementById('translation');
-translationSteps = parseFloat(translationInput.value);
-if (!Number.isFinite(translationSteps)) {
-	translationSteps = 0;
+const translationXInput = document.getElementById('translation-x');
+const translationYInput = document.getElementById('translation-y');
+translationStepsX = parseFloat(translationXInput.value);
+if (!Number.isFinite(translationStepsX)) {
+	translationStepsX = 0;
+}
+translationStepsY = parseFloat(translationYInput.value);
+if (!Number.isFinite(translationStepsY)) {
+	translationStepsY = 0;
 }
 const penSwatches = document.getElementsByName('pen-color');
 const customPenInput = document.getElementById('custom-pen-color');
@@ -143,12 +148,12 @@ function setFillStyle() {
 			}
 			const theta = 2 * Math.PI * direction - halfPI;
 			const tan = Math.tan(theta);
-			const xLength = Math.min(maxRadiusB / tan, maxRadiusA);
-			const yLength = tan * xLength;
-			const x1 = translateX - xLength;
-			const y1 = translateY - yLength;
-			const x2 = translateX + xLength;
-			const y2 = translateY + yLength;
+			const xDistance = Math.min(maxRadiusB / tan, maxRadiusA);
+			const yDistance = tan * xDistance;
+			const x1 = translateX - xDistance;
+			const y1 = translateY - yDistance;
+			const x2 = translateX + xDistance;
+			const y2 = translateY + yDistance;
 			gradient = spiroContext.createLinearGradient(x1, y1, x2, y2);
 			gradient.addColorStop(0, outerColor);
 			gradient.addColorStop(0.5 * (1 - minRadius / maxRadiusA), innerColor);
@@ -567,8 +572,6 @@ function resizeCanvas(fitExact) {
 	toolContext.fillStyle = toolColor;
 }
 
-resizeCanvas(true);
-
 function updateNumberOfPoints() {
 	const toothLength = lcm(stator.numTeeth, rotor.numTeeth);
 	const numRevolutions = toothLength / stator.numTeeth;
@@ -647,18 +650,15 @@ function calcOffset() {
 
 function calcTransform() {
 	calcScale();
-	let unit = 1;
-	if (document.getElementById('translation-units').value === 'teeth') {
-		unit = stator.toothSize;
+	let xUnit = 1, yUnit = 1;
+	if (document.getElementById('translation-x-units').value === 'teeth') {
+		xUnit = stator.toothSize;
 	}
-	const length = translationSteps * unit * rawScale / scale;
-	if (width >= height) {
-		translateX = length;
-		translateY = 0;
-	} else {
-		translateX = 0;
-		translateY = length;
+	if (document.getElementById('translation-y-units').value === 'teeth') {
+		yUnit = stator.toothSize;
 	}
+	translateX = translationStepsX * xUnit * rawScale / scale;
+	translateY = translationStepsY * yUnit * rawScale / scale;
 	let extraSpace = calcOffset();
 	translateX += extraSpace;
 	translateY += extraSpace;
@@ -685,19 +685,6 @@ function drawSpirographAction() {
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();
 }
-
-randomizeSpirographForm();
-setInitialRotation();
-parseLineDash();
-drawSpirographAction();
-
-animController.promise = animController.promise.then(function (event) {
-	if (animController.status === 'finished') {
-		document.getElementById('tool-canvas').classList.add('invisible');
-		toolsVisible = false;
-		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
-	}
-});
 
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
@@ -747,8 +734,7 @@ document.getElementById('btn-toggle-tools').addEventListener('click', function (
 	}
 });
 
-/** Checks to see if the rotor is small enough to fit inside the stator.
- */
+/** Checks to see if the rotor is small enough to fit inside the stator. */
 function checkRotorSize() {
 	if (rotor.radiusA >= stator.radiusB) {
 		document.getElementById('rotor-position-outside').checked = true;
@@ -943,7 +929,6 @@ function updatePenXReadout() {
 		updateNumberOfPoints();
 	}
 }
-updatePenXReadout();
 penXSlider.addEventListener('input', updatePenXReadout);
 penXSlider.addEventListener('change', function (event) {
 	const match = document.getElementById('pen-x-readout').innerText.match(/\d+$/);
@@ -967,7 +952,6 @@ function updatePenYReadout() {
 		updateNumberOfPoints();
 	}
 }
-updatePenYReadout()
 penYSlider.addEventListener('input', updatePenYReadout);
 penYSlider.addEventListener('change', function (event) {
 	if (parseFloat(this.value) !== penOffsetY) {
@@ -1039,10 +1023,10 @@ function setLineDash() {
 
 lineDashInput.addEventListener('change', parseLineDash);
 
-translationInput.addEventListener('change', function (event) {
+translationXInput.addEventListener('change', function (event) {
 	const amount = parseFloat(this.value);
 	if (Number.isFinite(amount)) {
-		translationSteps = amount;
+		translationStepsX = amount;
 		calcTransform();
 		updateRotorPosition();
 		if (!isAnimating()) {
@@ -1051,13 +1035,36 @@ translationInput.addEventListener('change', function (event) {
 	}
 });
 
-document.getElementById('translation-units').addEventListener('input', function (event) {
+translationYInput.addEventListener('change', function (event) {
+	const amount = parseFloat(this.value);
+	if (Number.isFinite(amount)) {
+		translationStepsY = amount;
+		calcTransform();
+		updateRotorPosition();
+		if (!isAnimating()) {
+			drawTools(stator, rotor, penX, penY);
+		}
+	}
+});
+
+document.getElementById('translation-x-units').addEventListener('input', function (event) {
 	calcTransform();
-	if (translateX - stator.radiusA >= width - 1 ||
-		translateY - stator.radiusA >= height - 1)
-	{
-		translationInput.value = 0;
-		translationSteps = 0;
+	if (translateX - stator.radiusA >= width - 1) {
+		translationXInput.value = 0;
+		translationStepsX = 0;
+		calcTransform();
+	}
+	updateRotorPosition();
+	if (!isAnimating()) {
+		drawTools(stator, rotor, penX, penY);
+	}
+});
+
+document.getElementById('translation-y-units').addEventListener('input', function (event) {
+	calcTransform();
+	if (translateY - stator.radiusA >= height - 1) {
+		translationYInput.value = 0;
+		translationStepsY = 0;
 		calcTransform();
 	}
 	updateRotorPosition();
@@ -1165,8 +1172,10 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		startToothInput.value = 1;
 		savedStartTooth = undefined;
 		setInitialRotation();
-		translationInput.value = 0;
-		translationSteps = 0;
+		translationXInput.value = 0;
+		translationStepsX = 0;
+		translationYInput.value = 0;
+		translationStepsY = 0;
 		offset = undefined;
 		fixedScale = undefined;
 		calcTransform();
@@ -1217,10 +1226,6 @@ gradientDirectionInput.addEventListener('input', function (event) {
 		combobox.addEventListener('blur', restore);
 	}
 }
-
-$(function () {
-	$('[data-toggle="tooltip"]').tooltip();
-});
 
 function floodFill(dataObj, startX, startY, newColor, transparency) {
 	const [newR, newG, newB] = hexToRGB(newColor);
@@ -1366,4 +1371,26 @@ spiroCanvas.addEventListener('click', function (event) {
 		spiroContext.putImageData(dataObj, 0, 0);
 		break;
 	}
+});
+
+// Initial actions
+
+resizeCanvas(true);
+randomizeSpirographForm();
+updatePenXReadout();
+updatePenYReadout();
+setInitialRotation();
+parseLineDash();
+drawSpirographAction();
+animController.promise = animController.promise.then(function (event) {
+	if (animController.status === 'finished') {
+		document.getElementById('tool-canvas').classList.add('invisible');
+		toolsVisible = false;
+		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
+	}
+});
+
+
+$(function () {
+	$('[data-toggle="tooltip"]').tooltip();
 });

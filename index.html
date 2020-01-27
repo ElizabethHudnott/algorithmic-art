@@ -204,10 +204,6 @@
 								<output id="pen-y-readout" class="float-right"></output>
 								<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-describedby="pen-y-readout">
 							</fieldset>
-							<fieldset class="form-group">
-								<label for="anim-speed">Animation speed</label>
-								<input type="range" class="form-control-range mt-2" id="anim-speed" min="0" max="100" value="60">
-							</fieldset>
 						</td>
 						<td colspan="2" class="col-12 col-md-6 mb-3">
 							<label class="d-block">End position</label>
@@ -231,6 +227,25 @@
 						</td>
 					</tr>
 					<tr class="row">
+						<td colspan="2" class="col-6 mb-3">
+							<label for="anim-speed">Animation speed</label>
+							<input type="range" class="form-control-range mt-2" id="anim-speed" min="0" max="100" value="60">
+						</td>
+						<td colspan="2" class="col-6 mb-3">
+							<label class="d-block">Translate stator by</label>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">x</span>
+								</div>
+								<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
+								<select class="form-control" id="translation-x-units">
+									<option>teeth</option>
+									<option>units</option>
+								</select>
+							</div>
+						</td>
+					</tr>
+					<tr class="row">
 						<td class="col-3 col-md-2 mb-3">
 							<label for="line-width">Line width</label>
 							<input class="form-control" type="number" id="pen-width" min="1" value="2" required placeholder="Pen width" title="Pen thickness in pixels">
@@ -240,10 +255,12 @@
 							<input class="form-control" id="line-dash" required value="1" pattern="[1-9]\d*(,\s*[1-9]\d*)*" placeholder="Dash pattern" title="Comma separated list of dash and gap lengths">
 						</td>
 						<td colspan="2" class="col-6 mb-3">
-							<label for="translation">Translate stator by</label>
 							<div class="input-group">
-								<input id="translation" class="form-control" type="number" required step="any" value="0" placeholder="Length to shift the stator by" title="Length to shift the stator by" aria-describedby="translation-units">
-								<select class="form-control" id="translation-units">
+								<div class="input-group-prepend">
+									<span class="input-group-text">y</span>
+								</div>
+								<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
+								<select class="form-control" id="translation-y-units">
 									<option>teeth</option>
 									<option>units</option>
 								</select>

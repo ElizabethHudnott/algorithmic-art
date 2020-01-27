@@ -362,9 +362,9 @@
 									<div class="input-group-text">
 										<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
 									</div>
-									<div class="input-group-text">Mirror line through tooth</div>
+									<div class="input-group-text">Mirror line</div>
 								</div>
-								<input type="number" id="gradient-tooth" step="any" value="1" class="form-control" aria-label="Tooth number that gradient line passes through" placeholder="Tooth number">
+								<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of circle">
 							</div>
 						</td>
 					</tr>

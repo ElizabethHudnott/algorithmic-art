@@ -69,7 +69,7 @@ const customPaperInput = document.getElementById('custom-paper-color');
 const paperImageInput = document.getElementById('paper-image');
 const opacityInput = document.getElementById('outer-opacity');
 const opacityInput2 = document.getElementById('inner-opacity');
-const gradientToothInput = document.getElementById('gradient-tooth');
+const gradientDirectionInput = document.getElementById('gradient-direction');
 
 
 function hexToRGB(color) {
@@ -110,11 +110,13 @@ function setFillStyle() {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
 		const halfLineWidth = spiroContext.lineWidth / 2;
-		let maxRadius;
+		let maxRadiusA, maxRadiusB;
 		if (inOut === -1) {
-			maxRadius = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
+			maxRadiusA = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
+			maxRadiusB = stator.radiusB - minLength(rotor, penX, penY) - halfLineWidth;
 		} else {
-			maxRadius = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
+			maxRadiusA = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
+			maxRadiusB = stator.radiusB + maxLength(rotor, penX, penY) - halfLineWidth;
 		}
 
 		let minRadius = 0;
@@ -129,25 +131,28 @@ function setFillStyle() {
 
 		let gradient;
 		if (queryChecked(document.getElementById('gradient-type'), 'gradient-type').value === 'radial') {
-			gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadius);
+			gradient = spiroContext.createRadialGradient(translateX, translateY, minRadius, translateX, translateY, maxRadiusA);
 			gradient.addColorStop(0, innerColor);
 			gradient.addColorStop(1, outerColor);
 		} else {
-			const toothNum = parseFloat(gradientToothInput.value);
-			if (!Number.isFinite(toothNum)) {
-				gradientToothInput.setCustomValidity('Please fill in this field.');
-				gradientToothInput.reportValidity();
+			const direction = parseFraction(gradientDirectionInput.value);
+			if (!Number.isFinite(direction)) {
+				gradientDirectionInput.setCustomValidity('Please fill in this field.');
+				gradientDirectionInput.reportValidity();
 				return false;
 			}
-			const theta = (stator.contactPoint((toothNum - 1) * stator.toothSize)[2] - halfPI) % Math.PI;
-			const x1 = translateX - maxRadius * Math.cos(theta);
-			const y1 = translateY - maxRadius * Math.sin(theta);
-			const x2 = translateX + maxRadius * Math.cos(theta);
-			const y2 = translateY + maxRadius * Math.sin(theta);
+			const theta = 2 * Math.PI * direction - halfPI;
+			const tan = Math.tan(theta);
+			const xLength = Math.min(maxRadiusB / tan, maxRadiusA);
+			const yLength = tan * xLength;
+			const x1 = translateX - xLength;
+			const y1 = translateY - yLength;
+			const x2 = translateX + xLength;
+			const y2 = translateY + yLength;
 			gradient = spiroContext.createLinearGradient(x1, y1, x2, y2);
 			gradient.addColorStop(0, outerColor);
-			gradient.addColorStop(0.5 * (1 - minRadius / maxRadius), innerColor);
-			gradient.addColorStop(0.5 * (1 + minRadius / maxRadius), innerColor);
+			gradient.addColorStop(0.5 * (1 - minRadius / maxRadiusA), innerColor);
+			gradient.addColorStop(0.5 * (1 + minRadius / maxRadiusA), innerColor);
 			gradient.addColorStop(1, outerColor);
 		}
 
@@ -1187,8 +1192,8 @@ document.getElementById('opacity-50').addEventListener('click', opacityPreset);
 document.getElementById('opacity-75').addEventListener('click', opacityPreset);
 document.getElementById('opacity-100').addEventListener('click', opacityPreset);
 
-gradientToothInput.addEventListener('input', function (event) {
-	if (Number.isFinite(parseFloat(this.value))) {
+gradientDirectionInput.addEventListener('input', function (event) {
+	if (Number.isFinite(parseFraction(this.value))) {
 		this.setCustomValidity('');
 		document.getElementById('gradient-type-linear').checked = true;
 	}

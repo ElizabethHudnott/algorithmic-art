@@ -1,6 +1,7 @@
 'use strict';
 
 const halfPI = Math.PI / 2;
+const hole1Distance = 0.1;
 
 let rawScale, fixedScale, scale, width, height;
 let toolsVisible = true;
@@ -528,11 +529,10 @@ gearConstructors.set('rack', RackGear);
 function calcMaxHole() {
 	// Semi-arbitrary "Number of teeth" is modelled on the typical circular wheel.
 	const numTeeth = 2 * Math.PI * rotor.radiusA / stator.toothSize;
-	maxHole = Math.round(0.5 * numTeeth) - 6;
-	if (maxHole < 0) {
-		maxHole = 0;
-	}
+	maxHole = Math.max(Math.round(0.5 * numTeeth) - 6, 2);
 	penXSlider.max = maxHole;
+	const hole1Fraction = 1 - 0.1 / rotor.radiusA;
+	penXSlider.min = Math.trunc(maxHole - 1 / hole1Fraction * (maxHole - 1));
 }
 
 const spiroCanvas = document.getElementById('spirograph-canvas');
@@ -914,7 +914,8 @@ revolutionsInput.addEventListener('input', function (event) {
 
 function updatePenXReadout() {
 	const holeNumber = parseInt(penXSlider.value);
-	const newOffset = maxHole === 0 ? 1 : 1 - holeNumber / maxHole;
+	const newOffset = (maxHole - holeNumber) / (maxHole - 1) * (1 - hole1Distance / rotor.radiusA);
+
 	if (rotor.isPointInside(newOffset, penOffsetY)) {
 		document.getElementById('pen-x-readout').innerText = 'Hole ' + holeNumber;
 		penOffsetX = newOffset;
@@ -929,7 +930,7 @@ function updatePenXReadout() {
 }
 penXSlider.addEventListener('input', updatePenXReadout);
 penXSlider.addEventListener('change', function (event) {
-	const match = document.getElementById('pen-x-readout').innerText.match(/\d+$/);
+	const match = document.getElementById('pen-x-readout').innerText.match(/-?\d+$/);
 	const holeNumber = parseInt(match[0]);
 	if (holeNumber !== this.value) {
 		this.value = holeNumber;

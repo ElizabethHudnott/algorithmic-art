@@ -190,7 +190,14 @@
 						</td>
 						<td class="col-6 col-md-3 mb-3">
 							<label for="start-tooth">Starting tooth</label>
-							<input type="number" class="form-control" required value="1" step="any" id="start-tooth" placeholder="Tooth number to begin at" title="Tooth number to begin plotting from">
+							<div class="input-group">
+								<input type="number" class="form-control" required value="0" step="any" id="start-tooth" placeholder="Tooth number" title="Tooth number to begin plotting from">
+								<div class="input-group-append">
+									<button class="btn btn-outline-secondary" type="button" id="btn-start-position" data-toggle="modal" data-target="#start-position-modal">
+										&hellip;
+									</button>
+								</div>
+							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
 							<label for="increment">Step size</label>
@@ -433,7 +440,7 @@
 					Sure you want to erase the current design?
 		      	</p>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-danger">Erase</button>
 				</div>
 			</form>
@@ -463,8 +470,34 @@
 			      	</div>
 		      	</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-primary">Export</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="modal fade" id="start-position-modal" tabindex="-1" role="dialog" aria-labelledby="start-pos-modal-label" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<form id="start-position-form" class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="start-pos-modal-label">Start Position</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body form-row">
+					<div class="col-1"></div>
+					<div class="col-3 col-form-label">
+						<label for="start-position">Ring Marker</label>
+			      	</div>
+			      	<div class="col-6">
+			      		<input class="form-control" type="number" required min="1" max="12" id="start-position" placeholder="Mark number">
+			      	</div>
+		      	</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary">Set</button>
 				</div>
 			</form>
 		</div>

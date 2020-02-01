@@ -825,6 +825,13 @@ function makeStator() {
 		drawTools(stator, rotor, penX, penY);
 	}
 	updateNumberOfPoints();
+
+	if (numStatorTeeth >= 105) {
+		document.getElementById('start-position-multiple').value = 7;
+	} else if (numStatorTeeth >= 96) {
+		document.getElementById('start-position-multiple').value = 8;
+	}
+	document.getElementById('start-position').value = 1;
 }
 
 statorTeethInput.addEventListener('change', function (event) {
@@ -915,7 +922,8 @@ startToothInput.addEventListener('change', updateStartTooth);
 document.getElementById('start-position-form').addEventListener('submit', function (event) {
 	event.preventDefault();
 	const markNumber = parseInt(document.getElementById('start-position').value);
-	startToothInput.value = Math.round((markNumber - 1) / 12 * stator.numTeeth);
+	const teethPerMark = parseInt(document.getElementById('start-position-multiple').value);
+	startToothInput.value = Math.round((markNumber - 1) * teethPerMark);
 	updateStartTooth();
 	$('#start-position-modal').modal('hide');
 });
@@ -1211,6 +1219,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);
 		drawTools(stator, rotor, penX, penY);
 	}
+	document.getElementById('start-position').value = 1;
 	if (isAnimating()) {
 		animController.promise.then(reset);
 		animController.abort();

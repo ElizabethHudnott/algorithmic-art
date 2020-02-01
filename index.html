@@ -304,7 +304,7 @@
 								<div class="btn" style="background-color: hsl(9, 85%, 45%)">
 									<input type="radio" name="pen-color" value="hsl(9, 85%, 45%)">
 								</div>
-				      		</div>
+							</div>
 							<div class="btn-group btn-group-toggle w-100 palette">
 								<div class="btn" style="background-color: hsl(270, 95%, 35%)">
 									<input type="radio" name="pen-color" value="hsl(270, 95%, 35%)">
@@ -319,7 +319,7 @@
 									<input type="radio" name="pen-color" value="hsl(96, 70%, 50%)">
 								</div>
 								<div class="btn btn-light p-0" style="min-width: 20%">
-					      			<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
+									<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
 								</div>
 							</div>
 						</td>
@@ -339,7 +339,7 @@
 									<input type="radio" name="paper-color" value="#b4fdfd">
 								</div>
 								<div class="btn btn-light p-0">
-					      			<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#ffffff">
+									<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#ffffff">
 								</div>
 								<div class="btn btn-light p-0">
 									<label for="paper-image" class="w-100 h-100">
@@ -347,22 +347,22 @@
 									</label>
 									<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
 								</div>
-						</td>
-					</tr>
-					<tr class="row">
-						<td colspan="2" class="col-12 col-md-6 mb-3">
-							<output id="outer-opacity-readout" class="float-right"></output>
-							<label class="d-block" for="outer-opacity">Opacity</label>
-							<div class="btn-group btn-group-round" role="group" aria-label="Opacity presets">
-								<button type="button" id="opacity-0" class="btn btn-light btn-btn-sm" data-value="0">0%</button>
-								<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
-								<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
-								<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
-								<span data-toggle="collapse" data-target=".inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
-									<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
-								</span>
-							</div>
-							<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
+							</td>
+						</tr>
+						<tr class="row">
+							<td colspan="2" class="col-12 col-md-6 mb-3">
+								<output id="outer-opacity-readout" class="float-right"></output>
+								<label class="d-block" for="outer-opacity">Opacity</label>
+								<div class="btn-group btn-group-round" role="group" aria-label="Opacity presets">
+									<button type="button" id="opacity-0" class="btn btn-light btn-btn-sm" data-value="0">0%</button>
+									<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
+									<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
+									<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
+									<span data-toggle="collapse" data-target=".inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
+										<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
+									</span>
+								</div>
+								<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
 							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
@@ -407,16 +407,16 @@
 						<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-centre">
 							<label class="d-block">Centre area</label>
 							<div class="form-check form-check-inline">
-							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
-							  <label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
+								<label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
 							</div>
 							<div class="form-check form-check-inline">
-							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
-							  <label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
+								<label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
 							</div>
 							<div class="form-check form-check-inline">
-							  <input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
-							  <label class="form-check-label" for="gradient-centre-clip">Gradient</label>
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
+								<label class="form-check-label" for="gradient-centre-clip">Gradient</label>
 							</div>
 						</td>
 					</tr>
@@ -438,7 +438,7 @@
 				</div>
 				<p class="modal-body">
 					Sure you want to erase the current design?
-		      	</p>
+				</p>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-danger">Erase</button>
@@ -459,16 +459,20 @@
 				<div class="modal-body form-row">
 					<div class="col-1"></div>
 					<div class="col-11">
-		  				<div class="form-check pb-2">
-			      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent" checked>
-			      			<label class="form-check-label" for="paper-type-transparent">Transparent background</label>
-			      		</div>
-		  				<div class="form-check">
-			      			<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color">
-			      			<label class="form-check-label" for="paper-type-color">Include background colour and/or image </label>
-			      		</div>
-			      	</div>
-		      	</div>
+						<div class="form-check pb-2">
+							<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent" checked>
+							<label class="form-check-label" for="paper-type-transparent">
+								Transparent background
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color">
+							<label class="form-check-label" for="paper-type-color">
+								Include background colour and/or image
+							</label>
+						</div>
+					</div>
+				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-primary">Export</button>
@@ -486,18 +490,29 @@
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<div class="modal-body form-row">
-					<div class="col-1"></div>
-					<div class="col-3 col-form-label">
-						<label for="start-position">Ring Marker</label>
-			      	</div>
-			      	<div class="col-6">
-			      		<input class="form-control" type="number" required min="1" max="12" id="start-position" placeholder="Mark number">
-			      	</div>
-		      	</div>
+				<div class="modal-body">
+					<div class="form-row">
+						<div class="col-1"></div>
+						<div class="col-3 col-form-label">
+							<label for="start-position">Ring marker</label>
+						</div>
+						<div class="col-6">
+							<input class="form-control" type="number" required value="1" id="start-position" placeholder="Mark number">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="col-1"></div>
+						<div class="col-3 col-form-label">
+							<label for="start-position-multiple">Teeth per mark</label>
+						</div>
+						<div class="col-6">
+							<input class="form-control" type="number" required min="2" id="start-position-multiple" placeholder="Number of teeth">
+						</div>
+					</div>
+				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="submit" class="btn btn-primary">Set</button>
+					<button type="submit" class="btn btn-primary">Set Position</button>
 				</div>
 			</form>
 		</div>

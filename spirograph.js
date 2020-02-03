@@ -648,7 +648,7 @@ function calcOffset() {
 
 function calcTransform() {
 	calcScale();
-	let xUnit = 1, yUnit = 1;
+	let xUnit = 2, yUnit = 2;
 	if (document.getElementById('translation-x-units').value === 'teeth') {
 		xUnit = stator.toothSize;
 	}

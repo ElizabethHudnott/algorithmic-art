@@ -283,7 +283,37 @@ function stepMultiplier(stator, rotor, penX, penY) {
 	return maxArc < 1 ? 1 : Math.trunc(maxArc);
 }
 
-function drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, teethPerStep, penX, penY, initialRotationDist) {
+class SpiroDescription {
+	constructor(stator, rotor) {
+		this.stator = stator;
+		this.rotor = rotor;
+		this.inOut = -1;
+		this.translateX = 0;
+		this.translateY = 0;
+		this.rotation = 0;
+		this.startDistance = 0;
+		this.endDistance = undefined;
+		this.teethPerStep = 1;
+		this.penX = rotor.radiusA;
+		this.penY = 0;
+		this.initialRotationDist = 0;
+	}
+}
+
+function drawSpirograph(description) {
+	const stator = description.stator;
+	const rotor = description.rotor;
+	const inOut = description.inOut;
+	const translateX = description.translateX;
+	const translateY = description.translateY;
+	const rotation = description.rotation;
+	const startDistance = description.startDistance;
+	let endDistance = description.endDistance;
+	const teethPerStep = description.teethPerStep;
+	const penX = description.penX;
+	const penY = description.penY;
+	let initialRotationDist = description.initialRotationDist;
+
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
 	}
@@ -684,7 +714,19 @@ function drawSpirographAction() {
 	fixedScale = scale;
 	setCompositionOp();
 	isFilled = false;
-	animController = drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, increment, penX, penY, initialRotationDist);
+
+	const description = new SpiroDescription(stator, rotor);
+	description.inOut = inOut;
+	description.translateX = translateX;
+	description.translateY = translateY;
+	description.rotation = rotation;
+	description.startDistance = startDistance;
+	description.endDistance = endDistance;
+	description.teethPerStep = increment;
+	description.penX = penX;
+	description.penY = penY;
+	description.initialRotationDist = initialRotationDist;
+	animController = drawSpirograph(description);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();
 }

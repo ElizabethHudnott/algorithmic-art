@@ -1110,13 +1110,9 @@ document.getElementById('translation-y-units').addEventListener('input', functio
 });
 
 function setPenColor() {
-	const input = this.children[0];
-	spiroContext.strokeStyle = input.value;
-
+	spiroContext.strokeStyle = this.children[0].value;
 	for (let swatch of penSwatches) {
-		if (swatch !== input) {
-			swatch.parentElement.classList.remove('active');
-		}
+		swatch.parentElement.classList.remove('active');
 	}
 	customPenInput.parentElement.classList.remove('active');
 	this.classList.add('active');
@@ -1155,21 +1151,29 @@ customPenInput.addEventListener('input', function (event) {
 function setPaperColor() {
 	spiroCanvas.style.backgroundColor = this.children[0].value;
 	spiroCanvas.style.backgroundImage = 'none';
+	for (let swatch of paperSwatches) {
+		swatch.parentElement.classList.remove('active');
+	}
 	customPaperInput.parentElement.classList.remove('active');
+	this.classList.add('active');
 }
 
 paperSwatches.forEach(function (item) {
 	item.parentElement.addEventListener('click', setPaperColor);
 });
 
-customPaperInput.addEventListener('input', function (event) {
+customPaperInput.addEventListener('click', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
 	spiroCanvas.style.backgroundImage = 'none';
+	this.parentElement.classList.add('active');
 	for (let swatch of paperSwatches) {
 		swatch.parentElement.classList.remove('active');
 	}
 	paperImageInput.parentElement.classList.remove('active');
-	this.parentElement.classList.add('active');
+});
+
+customPaperInput.addEventListener('input', function (event) {
+	spiroCanvas.style.backgroundColor = this.value;
 });
 
 const backgroundFileReader = new FileReader();

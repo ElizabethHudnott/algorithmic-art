@@ -662,6 +662,11 @@ function calcTransform() {
 	translateY += extraSpace;
 }
 
+function setCompositionOp() {
+	const compositionOp = queryChecked(document.getElementById('composition'), 'composition').value;
+	spiroContext.globalCompositeOperation = compositionOp;
+}
+
 function drawSpirographAction() {
 	drawButton.classList.add('btn-warning');
 	drawButton.innerText = 'Stop';
@@ -677,7 +682,7 @@ function drawSpirographAction() {
 	const rotation = rotationTooth;
 	offset = calcOffset();
 	fixedScale = scale;
-	spiroContext.globalCompositeOperation = 'multiply';
+	setCompositionOp();
 	isFilled = false;
 	animController = drawSpirograph(stator, rotor, inOut, translateX, translateY, rotation, startDistance, endDistance, increment, penX, penY, initialRotationDist);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
@@ -725,6 +730,8 @@ document.getElementById('btn-fill').addEventListener('click', function (event) {
 	if (isFilled) {
 		// TODO replace with an undo action
 		spiroContext.globalCompositeOperation = 'color';
+	} else {
+		setCompositionOp();
 	}
 	let success = setFillStyle();
 	if (success) {

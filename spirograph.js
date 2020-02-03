@@ -132,6 +132,7 @@ function setFillStyle() {
 		let minRadius = 0;
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
 		if (centreStyle !== 'gradient') {
+			const halfLineWidth = spiroContext.lineWidth / 2;
 			if (inOut === -1) {
 				minRadius = Math.abs(stator.radiusB - maxLength(rotor, penX, penY)) + halfLineWidth;
 			} else {
@@ -383,6 +384,7 @@ function drawSpirograph(description) {
 					const dy = plotY - translateY;
 					const r = Math.sqrt(dx * dx + dy * dy);
 					let theta = Math.atan2(dy, dx);
+					theta -= swirlAmount;
 					if (swirlRate === 1) {
 						theta += swirlAmount * r / maxRadius;
 					} else {

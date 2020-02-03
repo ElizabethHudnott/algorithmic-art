@@ -107,6 +107,19 @@ function minLength(rotor, penX, penY) {
 	return Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA) - distanceFromCentre;
 }
 
+function maxRadii(stator, rotor, inOut, penX, penY, lineWidth) {
+	const halfLineWidth = lineWidth / 2;
+	let maxRadiusA, maxRadiusB;
+	if (inOut === -1) {
+		maxRadiusA = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
+		maxRadiusB = stator.radiusB - minLength(rotor, penX, penY) - halfLineWidth;
+	} else {
+		maxRadiusA = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
+		maxRadiusB = stator.radiusB + maxLength(rotor, penX, penY) - halfLineWidth;
+	}
+	return [maxRadiusA, maxRadiusB];
+}
+
 function setFillStyle() {
 	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
@@ -115,16 +128,7 @@ function setFillStyle() {
 	if (document.getElementsByClassName('inner-fill-controls')[0].classList.contains('show')) {
 		innerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput2.value));
 
-		const halfLineWidth = spiroContext.lineWidth / 2;
-		let maxRadiusA, maxRadiusB;
-		if (inOut === -1) {
-			maxRadiusA = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
-			maxRadiusB = stator.radiusB - minLength(rotor, penX, penY) - halfLineWidth;
-		} else {
-			maxRadiusA = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
-			maxRadiusB = stator.radiusB + maxLength(rotor, penX, penY) - halfLineWidth;
-		}
-
+		const [maxRadiusA, maxRadiusB] = maxRadii(stator, rotor, inOut, penX, penY, spiroContext.lineWidth);
 		let minRadius = 0;
 		const centreStyle = queryChecked(document.getElementById('gradient-centre'), 'gradient-centre').value;
 		if (centreStyle !== 'gradient') {
@@ -297,6 +301,8 @@ class SpiroDescription {
 		this.penX = rotor.radiusA;
 		this.penY = 0;
 		this.initialRotationDist = 0;
+		this.swirlAmount = 0;
+		this.swirlRate = 1;
 	}
 }
 
@@ -313,6 +319,9 @@ function drawSpirograph(description) {
 	const penX = description.penX;
 	const penY = description.penY;
 	let initialRotationDist = description.initialRotationDist;
+	const swirlAmount = description.swirlAmount;
+	const swirlRate = description.swirlRate;
+	const maxRadius = Math.max(...maxRadii(stator, rotor, inOut, penX, penY, spiroContext.lineWidth));
 
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
@@ -368,6 +377,21 @@ function drawSpirograph(description) {
 				const sin = Math.sin(rotorAngle);
 				let plotX = rotorX + penX * cos - penY * sin;
 				let plotY = rotorY + penX * sin + penY * cos;
+
+				if (swirlAmount !== 0) {
+					const dx = plotX - translateX;
+					const dy = plotY - translateY;
+					const r = Math.sqrt(dx * dx + dy * dy);
+					let theta = Math.atan2(dy, dx);
+					if (swirlRate === 1) {
+						theta += swirlAmount * r / maxRadius;
+					} else {
+						theta += swirlAmount / (swirlRate - 1) * (swirlRate ** (r / maxRadius) - 1);
+					}
+					plotX = r * Math.cos(theta) + translateX;
+					plotY = r * Math.sin(theta) + translateY;
+				}
+
 				if (lineWidth === 1) {
 					plotX = Math.round(plotX * scale) / scale + shift;
 					plotY = Math.round(plotY * scale) / scale + shift;
@@ -726,6 +750,8 @@ function drawSpirographAction() {
 	description.penX = penX;
 	description.penY = penY;
 	description.initialRotationDist = initialRotationDist;
+	description.swirlAmount = parseFloat(document.getElementById('swirl-amount').value) * Math.PI / 180;
+	description.swirlRate = parseFloat(document.getElementById('swirl-rate').value);
 	animController = drawSpirograph(description);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();

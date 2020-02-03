@@ -391,12 +391,24 @@
 							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
-							<label for="stretch-direction">Stretch direction</label>
-							<input type="text" id="stretch-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" required value="0" class="form-control" aria-label="Direction of stretch distortion effect" placeholder="Fraction of a circle">
+							<div class="form-group">
+								<label for="stretch-direction">Stretch direction</label>
+								<input type="text" id="stretch-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" required value="0" class="form-control" aria-label="Direction of stretch distortion effect" placeholder="Fraction of a circle">
+							</div>
+							<div class="form-group">
+								<label for="swirl-amount">Swirl amount</label>
+								<input type="number" required value="0" step="any" id="swirl-amount" class="form-control" aria-label="Number of degrees of swirl distortion to apply" placeholder="Number of degrees">
+							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
-							<label for="stretch-amount">Amount of stretch</label>
-							<input type="number" min="0" required value="1" step="any" id="stretch-amount" class="form-control">
+							<div class="form-group">
+								<label for="stretch-amount">Amount of stretch</label>
+								<input type="number" min="0" required value="1" step="any" id="stretch-amount" class="form-control">
+							</div>
+							<div class="form-group">
+								<label for="swirl-rate">Swirl rate</label>
+								<input type="number" required value="1" step="any" id="swirl-rate" class="form-control" aria-label="Base of the swirl distortion's power curve">
+							</div>
 						</td>
 					</tr>
 					<tr class="row collapse inner-fill-controls">

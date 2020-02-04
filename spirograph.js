@@ -753,7 +753,7 @@ function drawSpirographAction() {
 	description.penY = penY;
 	description.initialRotationDist = initialRotationDist;
 	description.swirlAmount = parseFloat(document.getElementById('swirl-amount').value) * Math.PI / 180;
-	description.swirlRate = parseFloat(document.getElementById('swirl-rate').value);
+	description.swirlRate = 2 ** (parseFloat(document.getElementById('swirl-rate').value) - 1);
 	animController = drawSpirograph(description);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();

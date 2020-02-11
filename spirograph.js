@@ -4,6 +4,7 @@ const halfPI = Math.PI / 2;
 const hole1Distance = 0.1;
 
 let rawScale, fixedScale, scale, width, height;
+let fixedSwirlRotation, fixedSwirlRadius;
 let toolsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth, initialRotationDist;
 let inOut = document.getElementById('rotor-position-inside').checked ? -1 : 1;
@@ -17,7 +18,6 @@ let penY = 0;
 let lineDash = [];
 let maxHole, animSpeed, animController;
 let isFilled = false;
-let currentTool = 'fill';
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -304,6 +304,8 @@ class SpiroDescription {
 		this.initialRotationDist = 0;
 		this.swirlAmount = 0;
 		this.swirlRate = 1;
+		this.swirlCompensation = 0;
+		this.swirlRadius = 1;
 	}
 }
 
@@ -322,7 +324,8 @@ function drawSpirograph(description) {
 	let initialRotationDist = description.initialRotationDist;
 	const swirlAmount = description.swirlAmount;
 	const swirlRate = description.swirlRate;
-	const maxRadius = Math.max(...maxRadii(stator, rotor, inOut, penX, penY, spiroContext.lineWidth));
+	const swirlCompensation = description.swirlCompensation;
+	const swirlRadius = description.swirlRadius;
 
 	if (endDistance === undefined) {
 		endDistance = startDistance + stator.toothSize * lcm(stator.numTeeth, rotor.numTeeth);
@@ -384,11 +387,11 @@ function drawSpirograph(description) {
 					const dy = plotY - translateY;
 					const r = Math.sqrt(dx * dx + dy * dy);
 					let theta = Math.atan2(dy, dx);
-					theta -= swirlAmount;
+					theta -= swirlCompensation;
 					if (swirlRate === 1) {
-						theta += swirlAmount * r / maxRadius;
+						theta += swirlAmount * r / swirlRadius;
 					} else {
-						theta += swirlAmount / (swirlRate - 1) * (swirlRate ** (r / maxRadius) - 1);
+						theta += swirlAmount / (swirlRate - 1) * (swirlRate ** (r / swirlRadius) - 1);
 					}
 					plotX = r * Math.cos(theta) + translateX;
 					plotY = r * Math.sin(theta) + translateY;
@@ -754,6 +757,25 @@ function drawSpirographAction() {
 	description.initialRotationDist = initialRotationDist;
 	description.swirlAmount = parseFloat(document.getElementById('swirl-amount').value) * Math.PI / 180;
 	description.swirlRate = 2 ** (parseFloat(document.getElementById('swirl-rate').value) - 1);
+	if (document.getElementById('swirl-rotate').checked) {
+		description.swirlCompensation = description.swirlAmount;
+		if (fixedSwirlRotation === undefined) {
+			fixedSwirlRotation = description.swirlAmount;
+		}
+	} else if (fixedSwirlRotation !== undefined) {
+		description.swirlCompensation = fixedSwirlRotation;
+	} else {
+		fixedSwirlRotation = 0;
+	}
+	if (document.getElementById('swirl-radius-fix').checked) {
+		if (fixedSwirlRadius === undefined) {
+			fixedSwirlRadius = Math.max(...maxRadii(stator, rotor, inOut, penX, penY, spiroContext.lineWidth));
+		}
+		description.swirlRadius = fixedSwirlRadius;
+	} else {
+		description.swirlRadius = Math.max(...maxRadii(stator, rotor, inOut, penX, penY, spiroContext.lineWidth));
+	}
+
 	animController = drawSpirograph(description);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();
@@ -1295,6 +1317,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		translationStepsY = 0;
 		offset = undefined;
 		fixedScale = undefined;
+		fixedSwirlRotation = undefined;
 		calcTransform();
 		spiroContext.clearRect(-1, -1, width, height);
 		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);
@@ -1477,6 +1500,7 @@ spiroCanvas.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		return;
 	}
+	const currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
 

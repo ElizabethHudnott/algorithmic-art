@@ -29,12 +29,12 @@
 					<button type="button" class="btn btn-secondary" id="btn-fill">Fill Shape</button>
 					<button id="btn-randomize" type="button" class="btn btn-secondary">Randomize</button>
 				</div>
-				<div class="btn-group btn-group-toggle mr-3 mb-2" data-toggle="buttons" aria-label="Selected tool">
+				<div class="btn-group btn-group-toggle mr-3 mb-2" data-toggle="buttons" aria-label="Selected tool" id="tools">
 					<label class="btn btn-secondary active">
-						<input type="radio" name="tool" value="line">Ruler
+						<input type="radio" name="tool" value="line" checked>Ruler
 					</label>
 					<label class="btn btn-secondary">
-						<input type="radio" name="tool" value="fill" checked>Flood Fill
+						<input type="radio" name="tool" value="fill">Flood Fill
 					</label>
 				</div>
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="History">
@@ -399,6 +399,12 @@
 								<label for="swirl-amount">Swirl angle</label>
 								<input type="number" required value="0" step="any" id="swirl-amount" class="form-control" aria-label="Number of degrees of swirl distortion to apply" placeholder="Number of degrees">
 							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" value="" id="swirl-rotate" checked>
+								<label class="form-check-label" for="swirl-rotate">
+									Compensating rotation
+								</label>
+							</div>
 						</td>
 						<td class="col-6 col-md-3 mb-3">
 							<div class="form-group">
@@ -408,6 +414,12 @@
 							<div class="form-group">
 								<label for="swirl-rate">Swirl rate</label>
 								<input type="number" required value="1" step="any" id="swirl-rate" class="form-control" aria-label="Base of the swirl distortion's power curve">
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" value="" id="swirl-radius-fix">
+								<label class="form-check-label" for="swirl-radius-fix">
+									Single radius
+								</label>
 							</div>
 						</td>
 					</tr>

@@ -18,6 +18,7 @@ let penY = 0;
 let lineDash = [];
 let maxHole, animSpeed, animController;
 let isFilled = false;
+let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -1500,7 +1501,7 @@ spiroCanvas.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		return;
 	}
-	const currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
+	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
 

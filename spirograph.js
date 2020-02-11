@@ -1375,11 +1375,9 @@ gradientDirectionInput.addEventListener('input', function (event) {
 	}
 }
 
-function floodFill(dataObj, startX, startY, newColor, transparency) {
+function floodFill(width, height, data, startX, startY, newColor, transparency) {
+	[startX, startY] = untransformPoint(startX, startY);
 	const [newR, newG, newB] = hexToRGB(newColor);
-	const width = dataObj.width;
-	const height = dataObj.height;
-	const data = dataObj.data;
 	let offset = (startY * width + startX) * 4;
 	const targetR = data[offset];
 	const targetG = data[offset + 1];
@@ -1517,6 +1515,13 @@ function transformPoint(mouseX, mouseY) {
 	return [r, theta];
 }
 
+function untransformPoint(x, y) {
+	return [
+		Math.round(x * scale + scale),
+		Math.round(y * scale + scale),
+	]
+}
+
 function twoClickLogic(r, theta) {
 	if (mouseClickedR === undefined) {
 		mouseClickedR = r;
@@ -1540,18 +1545,27 @@ spiroCanvas.addEventListener('click', function (event) {
 		return;
 	}
 	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
-	const x = Math.round(event.offsetX);
-	const y = Math.round(event.offsetY);
-	const [r, theta] = transformPoint(x, y);
+	const [r, theta] = transformPoint(event.offsetX, event.offsetY);
+	const symmetryAngle = 2 * Math.PI / symmetry;
+	const strokeStyle = spiroContext.strokeStyle;
+	const opacity = parseFloat(opacityInput.value);
 
 	switch (currentTool) {
 	case 'fill':
-		const alphaChange = parseFloat(opacityInput.value);
-		const dataObj = spiroContext.getImageData(0, 0, spiroCanvas.width, spiroCanvas.height);
-		floodFill(dataObj, x, y, spiroContext.strokeStyle, alphaChange);
+		const pixelWidth = spiroCanvas.width;
+		const pixelHeight = spiroCanvas.height;
+		const dataObj = spiroContext.getImageData(0, 0, pixelWidth, pixelHeight);
+		const data = dataObj.data;
+		for (let i = 0; i < symmetry; i++) {
+			const angle = theta + i * symmetryAngle;
+			const fillX = translateX + r * Math.cos(angle);
+			const fillY = translateY + r * Math.sin(angle);
+			floodFill(pixelWidth, pixelHeight, data, fillX, fillY, strokeStyle, opacity);
+		}
 		spiroContext.clearRect(-1, -1, width, height);
 		spiroContext.putImageData(dataObj, 0, 0);
 		break;
+
 	case 'line':
 		twoClickLogic(r, theta);
 	}
@@ -1562,9 +1576,7 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 		return;
 	}
 
-	const x = Math.round(event.offsetX);
-	const y = Math.round(event.offsetY);
-	const [r, theta] = transformPoint(x, y);
+	const [r, theta] = transformPoint(event.offsetX, event.offsetY);
 	const dTheta = theta - mouseClickedTheta;
 	const symmetryAngle = 2 * Math.PI / symmetry;
 

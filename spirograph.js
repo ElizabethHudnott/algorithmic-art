@@ -19,6 +19,7 @@ let lineDash = [];
 let maxHole, animSpeed, animController;
 let isFilled = false;
 let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
+let mouseClickedX, mouseClickedY;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -839,7 +840,7 @@ document.getElementById('btn-randomize').addEventListener('click', function (eve
 	setInitialRotation();
 });
 
-document.getElementById('btn-toggle-tools').addEventListener('click', function (event) {
+document.getElementById('btn-toggle-gears').addEventListener('click', function (event) {
 	toolsVisible = !document.getElementById('tool-canvas').classList.toggle('invisible');
 	if (toolsVisible) {
 		drawTools(stator, rotor, penX, penY);
@@ -1497,6 +1498,31 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 	} // end while stack not empty
 }
 
+function transformPoint(mouseX, mouseY) {
+	return [
+		(mouseX - scale) / scale,
+		(mouseY - scale) / scale
+	];
+}
+
+function twoClickLogic(x, y) {
+	if (mouseClickedX === undefined) {
+		mouseClickedX = x;
+		mouseClickedY = y;
+		saveCanvas();
+	} else {
+		mouseClickedX = undefined;
+	}
+}
+
+spiroCanvas.addEventListener('contextmenu', function (event) {
+	if (mouseClickedX !== undefined) {
+		event.preventDefault();
+		restoreCanvas();
+		mouseClickedX = undefined;
+	}
+})
+
 spiroCanvas.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		return;
@@ -1504,6 +1530,7 @@ spiroCanvas.addEventListener('click', function (event) {
 	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
+	const [tx, ty] = transformPoint(x, y);
 
 	switch (currentTool) {
 	case 'fill':
@@ -1512,6 +1539,30 @@ spiroCanvas.addEventListener('click', function (event) {
 		floodFill(dataObj, x, y, spiroContext.strokeStyle, alphaChange);
 		spiroContext.clearRect(-1, -1, width, height);
 		spiroContext.putImageData(dataObj, 0, 0);
+		break;
+	case 'line':
+		twoClickLogic(tx, ty);
+	}
+});
+
+spiroCanvas.addEventListener('pointermove', function (event) {
+	if (mouseClickedX === undefined) {
+		return;
+	}
+
+	const x = Math.round(event.offsetX);
+	const y = Math.round(event.offsetY);
+	const [tx, ty] = transformPoint(x, y);
+
+	switch (currentTool) {
+	case 'line':
+		restoreCanvas();
+		spiroContext.globalAlpha = parseFloat(opacityInput.value);
+		spiroContext.beginPath();
+		spiroContext.moveTo(mouseClickedX, mouseClickedY);
+		spiroContext.lineTo(tx, ty);
+		spiroContext.stroke();
+		spiroContext.globalAlpha = 1;
 		break;
 	}
 });
@@ -1529,7 +1580,7 @@ animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
 		document.getElementById('tool-canvas').classList.add('invisible');
 		toolsVisible = false;
-		document.getElementById('btn-toggle-tools').innerText = 'Show Gears';
+		document.getElementById('btn-toggle-gears').innerText = 'Show Gears';
 	}
 });
 

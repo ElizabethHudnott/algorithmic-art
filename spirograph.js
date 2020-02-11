@@ -19,7 +19,7 @@ let lineDash = [];
 let maxHole, animSpeed, animController;
 let isFilled = false;
 let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
-let mouseClickedX, mouseClickedY;
+let mouseClickedR, mouseClickedTheta;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -1506,20 +1506,22 @@ function transformPoint(mouseX, mouseY) {
 }
 
 function twoClickLogic(x, y) {
-	if (mouseClickedX === undefined) {
-		mouseClickedX = x;
-		mouseClickedY = y;
+	if (mouseClickedR === undefined) {
+		const dx = x - translateX;
+		const dy = y - translateY;
+		mouseClickedR = Math.sqrt(dx * dx + dy * dy);
+		mouseClickedTheta = Math.atan2(dy, dx);
 		saveCanvas();
 	} else {
-		mouseClickedX = undefined;
+		mouseClickedR = undefined;
 	}
 }
 
 spiroCanvas.addEventListener('contextmenu', function (event) {
-	if (mouseClickedX !== undefined) {
+	if (mouseClickedR !== undefined) {
 		event.preventDefault();
 		restoreCanvas();
-		mouseClickedX = undefined;
+		mouseClickedR = undefined;
 	}
 })
 
@@ -1546,21 +1548,23 @@ spiroCanvas.addEventListener('click', function (event) {
 });
 
 spiroCanvas.addEventListener('pointermove', function (event) {
-	if (mouseClickedX === undefined) {
+	if (mouseClickedR === undefined) {
 		return;
 	}
 
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
-	const [tx, ty] = transformPoint(x, y);
+	const [tranformedX, transformedY] = transformPoint(x, y);
 
 	switch (currentTool) {
 	case 'line':
+		const startX = translateX + mouseClickedR * Math.cos(mouseClickedTheta);
+		const startY = translateY + mouseClickedR * Math.sin(mouseClickedTheta);
 		restoreCanvas();
 		spiroContext.globalAlpha = parseFloat(opacityInput.value);
 		spiroContext.beginPath();
-		spiroContext.moveTo(mouseClickedX, mouseClickedY);
-		spiroContext.lineTo(tx, ty);
+		spiroContext.moveTo(startX, startY);
+		spiroContext.lineTo(tranformedX, transformedY);
 		spiroContext.stroke();
 		spiroContext.globalAlpha = 1;
 		break;

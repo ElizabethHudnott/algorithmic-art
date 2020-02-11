@@ -29,13 +29,21 @@
 					<button type="button" class="btn btn-secondary" id="btn-fill">Fill Shape</button>
 					<button id="btn-randomize" type="button" class="btn btn-secondary">Randomize</button>
 				</div>
-				<div class="btn-group btn-group-toggle mr-3 mb-2" data-toggle="buttons" aria-label="Selected tool" id="tools">
-					<label class="btn btn-secondary active">
-						<input type="radio" name="tool" value="line" checked>Ruler
-					</label>
-					<label class="btn btn-secondary">
-						<input type="radio" name="tool" value="fill">Flood Fill
-					</label>
+				<div class="btn-group mr-3 mb-2" aria-label="Drawing tool">
+					<input type="number" min="1" value="1" id="symmetry" class="form-control" style="width: 4.2rem" title="Number of points of symmetry" aria-label="Number of points of symmetry">
+					<button class="btn btn-secondary dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Drawing
+					</button>
+					<div class="dropdown-menu " aria-labelledby="btn-tools">
+						<div id="tools" class="btn-group-vertical btn-group-toggle w-100" data-toggle="buttons">
+							<label class="btn btn-light active w-100">
+								<input type="radio" name="tool" value="line" checked>Ruler
+							</label>
+							<label class="btn btn-light w-100">
+								<input type="radio" name="tool" value="fill">Fill
+							</label>
+						</div>
+					</div>
 				</div>
 				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="History">
 					<button type="button" class="btn btn-secondary" id="btn-undo" disabled>Undo</button>

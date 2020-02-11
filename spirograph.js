@@ -32,6 +32,11 @@ function parseFraction(text) {
 }
 
 const drawButton = document.getElementById('btn-draw');
+const symmetryInput = document.getElementById('symmetry');
+let symmetry = parseInt(symmetryInput.value);
+if (!Number.isFinite(symmetry)) {
+	symmetry = 1;
+}
 const numPointsSpan = document.getElementById('num-points');
 const numRevsSpan = document.getElementById('num-revolutions');
 const lengthSpan = document.getElementById('length');
@@ -1498,19 +1503,24 @@ function floodFill(dataObj, startX, startY, newColor, transparency) {
 	} // end while stack not empty
 }
 
+symmetryInput.addEventListener('input', function (event) {
+	if (this.value !== '') {
+		symmetry = parseInt(this.value);
+	}
+});
+
 function transformPoint(mouseX, mouseY) {
-	return [
-		(mouseX - scale) / scale,
-		(mouseY - scale) / scale
-	];
+	const dx = (mouseX - scale) / scale - translateX;
+	const dy = (mouseY - scale) / scale - translateY;
+	const r = Math.sqrt(dx * dx + dy * dy);
+	const theta = Math.atan2(dy, dx);
+	return [r, theta];
 }
 
-function twoClickLogic(x, y) {
+function twoClickLogic(r, theta) {
 	if (mouseClickedR === undefined) {
-		const dx = x - translateX;
-		const dy = y - translateY;
-		mouseClickedR = Math.sqrt(dx * dx + dy * dy);
-		mouseClickedTheta = Math.atan2(dy, dx);
+		mouseClickedR = r;
+		mouseClickedTheta = theta;
 		saveCanvas();
 	} else {
 		mouseClickedR = undefined;
@@ -1532,7 +1542,7 @@ spiroCanvas.addEventListener('click', function (event) {
 	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
-	const [tx, ty] = transformPoint(x, y);
+	const [r, theta] = transformPoint(x, y);
 
 	switch (currentTool) {
 	case 'fill':
@@ -1543,7 +1553,7 @@ spiroCanvas.addEventListener('click', function (event) {
 		spiroContext.putImageData(dataObj, 0, 0);
 		break;
 	case 'line':
-		twoClickLogic(tx, ty);
+		twoClickLogic(r, theta);
 	}
 });
 
@@ -1554,18 +1564,26 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 
 	const x = Math.round(event.offsetX);
 	const y = Math.round(event.offsetY);
-	const [tranformedX, transformedY] = transformPoint(x, y);
+	const [r, theta] = transformPoint(x, y);
+	const dTheta = theta - mouseClickedTheta;
+	const symmetryAngle = 2 * Math.PI / symmetry;
 
 	switch (currentTool) {
 	case 'line':
-		const startX = translateX + mouseClickedR * Math.cos(mouseClickedTheta);
-		const startY = translateY + mouseClickedR * Math.sin(mouseClickedTheta);
 		restoreCanvas();
 		spiroContext.globalAlpha = parseFloat(opacityInput.value);
-		spiroContext.beginPath();
-		spiroContext.moveTo(startX, startY);
-		spiroContext.lineTo(tranformedX, transformedY);
-		spiroContext.stroke();
+		for (let i = 0; i < symmetry; i++) {
+			const startAngle = mouseClickedTheta + i * symmetryAngle;
+			const startX = translateX + mouseClickedR * Math.cos(startAngle);
+			const startY = translateY + mouseClickedR * Math.sin(startAngle);
+			const endAngle = startAngle + dTheta;
+			const endX = translateX + r * Math.cos(endAngle);
+			const endY = translateY + r * Math.sin(endAngle);
+			spiroContext.beginPath();
+			spiroContext.moveTo(startX, startY);
+			spiroContext.lineTo(endX, endY);
+			spiroContext.stroke();
+		}
 		spiroContext.globalAlpha = 1;
 		break;
 	}

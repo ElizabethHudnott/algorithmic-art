@@ -1375,7 +1375,7 @@ gradientDirectionInput.addEventListener('input', function (event) {
 	}
 }
 
-function floodFill(width, height, data, startX, startY, newColor, transparency) {
+function floodFill(width, height, data, filled, startX, startY, newColor, transparency) {
 	[startX, startY] = untransformPoint(startX, startY);
 	const [newR, newG, newB] = hexToRGB(newColor);
 	let offset = (startY * width + startX) * 4;
@@ -1383,7 +1383,10 @@ function floodFill(width, height, data, startX, startY, newColor, transparency) 
 	const targetG = data[offset + 1];
 	const targetB = data[offset + 2];
 	const fillTransparent = data[offset + 3] === 0;
-	const filled = new Uint8Array(width * height); // Records which pixels we've filled
+	if (filled === undefined) {
+		// Records which pixels we've filled
+		filled = new Uint8Array(width * height);
+	}
 	const fillAlpha = Math.ceil(transparency * 255); // Used to fill areas with 0 alpha
 
 	const tolerance = 0.1;
@@ -1499,6 +1502,7 @@ function floodFill(width, height, data, startX, startY, newColor, transparency) 
 			}
 		}
 	} // end while stack not empty
+	return filled;
 }
 
 symmetryInput.addEventListener('input', function (event) {
@@ -1556,11 +1560,12 @@ spiroCanvas.addEventListener('click', function (event) {
 		const pixelHeight = spiroCanvas.height;
 		const dataObj = spiroContext.getImageData(0, 0, pixelWidth, pixelHeight);
 		const data = dataObj.data;
+		let filledPixels;
 		for (let i = 0; i < symmetry; i++) {
 			const angle = theta + i * symmetryAngle;
 			const fillX = translateX + r * Math.cos(angle);
 			const fillY = translateY + r * Math.sin(angle);
-			floodFill(pixelWidth, pixelHeight, data, fillX, fillY, strokeStyle, opacity);
+			filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
 		}
 		spiroContext.clearRect(-1, -1, width, height);
 		spiroContext.putImageData(dataObj, 0, 0);
@@ -1576,7 +1581,9 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 		return;
 	}
 
-	const [r, theta] = transformPoint(event.offsetX, event.offsetY);
+	const x = event.offsetX;
+	const y = event.offsetY;
+	const [r, theta] = transformPoint(x, y);
 	const dTheta = theta - mouseClickedTheta;
 	const symmetryAngle = 2 * Math.PI / symmetry;
 

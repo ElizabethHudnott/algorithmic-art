@@ -20,7 +20,7 @@ let maxHole, animSpeed, animController;
 let isFilled = false;
 let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 let mouseClickedX, mouseClickedY, mouseClickedR, mouseClickedTheta;
-let currentPath = new Path2D(), nextPath;
+let lastPath, currentPath = new Path2D(), currentPathIsEmpty, nextPath;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -1539,9 +1539,12 @@ function twoClickLogicRepeat(x, y, r, theta) {
 		mouseClickedY = y;
 		mouseClickedR = r;
 		mouseClickedTheta = theta;
+		lastPath = currentPath;
 		currentPath = new Path2D();
+		currentPathIsEmpty = true;
 	} else {
 		currentPath.addPath(nextPath);
+		currentPathIsEmpty = false;
 	}
 	saveCanvas();
 }
@@ -1558,6 +1561,9 @@ spiroCanvas.addEventListener('contextmenu', function (event) {
 	if (mouseClickedX !== undefined) {
 		event.preventDefault();
 		restoreCanvas();
+		if (currentPathIsEmpty) {
+			currentPath = lastPath;
+		}
 		mouseClickedX = undefined;
 	}
 })

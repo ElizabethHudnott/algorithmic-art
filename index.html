@@ -12,10 +12,10 @@
 </head>
 <body class="bg-dark">
 	<div class="container bg-white">
-		<div class="jumbotron bg-complement">
+		<header class="jumbotron bg-complement">
 			<h1 class="display-4">Elizabeth's Spirograph Lab</h1>
 			<p class="lead">A childhood toy digitally resurrected.</p>
-		</div>
+		</header>
 
 		<div id="canvas-container" class="position-relative w-100 my-2">
 			<canvas id="spirograph-canvas" height="640"></canvas>
@@ -37,7 +37,10 @@
 					<div class="dropdown-menu " aria-labelledby="btn-tools">
 						<div id="tools" class="btn-group-vertical btn-group-toggle w-100" data-toggle="buttons">
 							<label class="btn btn-light active w-100">
-								<input type="radio" name="tool" value="line" checked>Ruler
+								<input type="radio" name="tool" value="line" checked>Line
+							</label>
+							<label class="btn btn-light w-100">
+								<input type="radio" name="tool" value="circle">Circle
 							</label>
 							<label class="btn btn-light w-100">
 								<input type="radio" name="tool" value="fill">Fill

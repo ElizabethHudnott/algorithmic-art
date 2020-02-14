@@ -19,7 +19,8 @@ let lineDash = [];
 let maxHole, animSpeed, animController;
 let isFilled = false;
 let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
-let mouseClickedR, mouseClickedTheta;
+let mouseClickedX, mouseClickedY, mouseClickedR, mouseClickedTheta;
+let currentPath = new Path2D(), nextPath;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -348,7 +349,7 @@ function drawSpirograph(description) {
 
 	saveCanvas();
 	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
-	spiroContext.beginPath();
+	currentPath = new Path2D();
 	const beginTime = performance.now();
 
 	const newAnimController = new AnimationController(startDistance, maxRotationTime);
@@ -410,9 +411,9 @@ function drawSpirograph(description) {
 				}
 
 				if (stepNumber === 0) {
-					spiroContext.moveTo(plotX, plotY);
+					currentPath.moveTo(plotX, plotY);
 				} else {
-					spiroContext.lineTo(plotX, plotY);
+					currentPath.lineTo(plotX, plotY);
 				}
 				stepNumber++;
 				if (stepNumber > numSteps && stepNumber < numSteps + 1) {
@@ -423,7 +424,7 @@ function drawSpirograph(description) {
 			drawTools(stator, rotor, penX, penY);
 			restoreCanvas();
 			spiroContext.globalAlpha = parseFloat(opacityInput.value);
-			spiroContext.stroke();
+			spiroContext.stroke(currentPath);
 			spiroContext.globalAlpha = 1;
 
 			if (stepNumber <= numSteps) {
@@ -834,7 +835,7 @@ document.getElementById('btn-fill').addEventListener('click', function (event) {
 	}
 	let success = setFillStyle();
 	if (success) {
-		spiroContext.fill('evenodd');
+		spiroContext.fill(currentPath, 'evenodd');
 		isFilled = true;
 	}
 });
@@ -1512,11 +1513,9 @@ symmetryInput.addEventListener('input', function (event) {
 });
 
 function transformPoint(mouseX, mouseY) {
-	const dx = (mouseX - scale) / scale - translateX;
-	const dy = (mouseY - scale) / scale - translateY;
-	const r = Math.sqrt(dx * dx + dy * dy);
-	const theta = Math.atan2(dy, dx);
-	return [r, theta];
+	const x = (mouseX - scale) / scale;
+	const y = (mouseY - scale) / scale;
+	return [x, y];
 }
 
 function untransformPoint(x, y) {
@@ -1526,21 +1525,40 @@ function untransformPoint(x, y) {
 	]
 }
 
-function twoClickLogic(r, theta) {
-	if (mouseClickedR === undefined) {
+function rectToPolar(x, y) {
+	const dx = x - translateX;
+	const dy = y - translateY;
+	const r = Math.sqrt(dx * dx + dy * dy);
+	const theta = Math.atan2(dy, dx);
+	return [r, theta];
+}
+
+function twoClickLogicRepeat(x, y, r, theta) {
+	if (mouseClickedX === undefined) {
+		mouseClickedX = x;
+		mouseClickedY = y;
 		mouseClickedR = r;
 		mouseClickedTheta = theta;
-		saveCanvas();
+		currentPath = new Path2D();
 	} else {
-		mouseClickedR = undefined;
+		currentPath.addPath(nextPath);
+	}
+	saveCanvas();
+}
+
+function twoClickLogic(x, y, r, theta) {
+	if (mouseClickedX === undefined) {
+		twoClickLogicRepeat(x, y, r, theta);
+	} else {
+		mouseClickedX = undefined;
 	}
 }
 
 spiroCanvas.addEventListener('contextmenu', function (event) {
-	if (mouseClickedR !== undefined) {
+	if (mouseClickedX !== undefined) {
 		event.preventDefault();
 		restoreCanvas();
-		mouseClickedR = undefined;
+		mouseClickedX = undefined;
 	}
 })
 
@@ -1549,7 +1567,8 @@ spiroCanvas.addEventListener('click', function (event) {
 		return;
 	}
 	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
-	const [r, theta] = transformPoint(event.offsetX, event.offsetY);
+	const [x, y] = transformPoint(event.offsetX, event.offsetY);
+	const [r, theta] = rectToPolar(x, y);
 	const symmetryAngle = 2 * Math.PI / symmetry;
 	const strokeStyle = spiroContext.strokeStyle;
 	const opacity = parseFloat(opacityInput.value);
@@ -1572,25 +1591,34 @@ spiroCanvas.addEventListener('click', function (event) {
 		break;
 
 	case 'line':
-		twoClickLogic(r, theta);
+		twoClickLogic(x, y, r, theta);
+		break;
+
+	case 'circle':
+		twoClickLogicRepeat(x, y, r, theta);
+		break;
 	}
 });
 
 spiroCanvas.addEventListener('pointermove', function (event) {
-	if (mouseClickedR === undefined) {
+	if (mouseClickedX === undefined) {
 		return;
 	}
 
-	const x = event.offsetX;
-	const y = event.offsetY;
-	const [r, theta] = transformPoint(x, y);
+	const [x, y] = transformPoint(event.offsetX, event.offsetY);
+	const [r, theta] = rectToPolar(x, y);
+	const dx = x - mouseClickedX;
+	const dy = y - mouseClickedY;
 	const dTheta = theta - mouseClickedTheta;
+	const distance = Math.sqrt(dx * dx + dy * dy);
 	const symmetryAngle = 2 * Math.PI / symmetry;
+
+	restoreCanvas();
+	spiroContext.globalAlpha = parseFloat(opacityInput.value);
 
 	switch (currentTool) {
 	case 'line':
-		restoreCanvas();
-		spiroContext.globalAlpha = parseFloat(opacityInput.value);
+		nextPath = new Path2D();
 		for (let i = 0; i < symmetry; i++) {
 			const startAngle = mouseClickedTheta + i * symmetryAngle;
 			const startX = translateX + mouseClickedR * Math.cos(startAngle);
@@ -1598,14 +1626,26 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 			const endAngle = startAngle + dTheta;
 			const endX = translateX + r * Math.cos(endAngle);
 			const endY = translateY + r * Math.sin(endAngle);
-			spiroContext.beginPath();
-			spiroContext.moveTo(startX, startY);
-			spiroContext.lineTo(endX, endY);
-			spiroContext.stroke();
+			nextPath.moveTo(startX, startY);
+			nextPath.lineTo(endX, endY);
 		}
-		spiroContext.globalAlpha = 1;
+		spiroContext.stroke(nextPath);
+		break;
+
+	case 'circle':
+		nextPath = new Path2D();
+		for (let i = 0; i < symmetry; i++) {
+			const angle = i * symmetryAngle;
+			const centreX = translateX + mouseClickedR * Math.cos(angle);
+			const centreY = translateY + mouseClickedR * Math.sin(angle);
+			nextPath.moveTo(centreX + distance, centreY);
+			nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+		}
+		spiroContext.stroke(nextPath);
 		break;
 	}
+
+	spiroContext.globalAlpha = 1;
 });
 
 // Initial actions

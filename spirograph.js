@@ -2,10 +2,11 @@
 
 const halfPI = Math.PI / 2;
 const hole1Distance = 0.1;
+const pointerSize = 4;
 
 let rawScale, fixedScale, scale, width, height;
 let fixedSwirlRotation, fixedSwirlRadius;
-let toolsVisible = true;
+let gearsVisible = true;
 let stator, rotor, numStatorTeeth, numRotorTeeth, savedStartTooth, initialRotationDist;
 let inOut = document.getElementById('rotor-position-inside').checked ? -1 : 1;
 let translationStepsX = 0, translationStepsY = 0, translateX = 0, translateY = 0, offset;
@@ -20,7 +21,9 @@ let maxHole, animSpeed, animController;
 let isFilled = false;
 let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 let mouseClickedX, mouseClickedY, mouseClickedR, mouseClickedTheta;
-let lastPath, currentPath = new Path2D(), currentPathIsEmpty, nextPath;
+let currentPath = new Path2D();
+let lastPath, currentPathIsEmpty, nextPath;
+let mouseR = 0, mouseTheta = 0;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -276,16 +279,60 @@ function updateRotorPosition() {
 	placeRotor(stator, rotor, inOut, translateX, translateY, currentDistance, currentDistance, initialRotationDist);
 }
 
+function eraseTools() {
+	toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+	toolContext.clearRect(-1, -1, width, height);
+}
+
 function drawTools(stator, rotor, penX, penY) {
-	if (toolsVisible) {
-		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
-		toolContext.clearRect(-1, -1, width, height);
+	eraseTools();
+	if (gearsVisible) {
+		toolContext.lineWidth = 2 / scale;
+		toolContext.strokeStyle = toolColor;
 		stator.draw(toolContext, translateX, translateY);
+		toolContext.strokeStyle = toolColor;
 		toolContext.translate(rotorX, rotorY);
 		toolContext.rotate(rotorAngle);
 		rotor.draw(toolContext, 0, 0);
 		toolContext.arc(penX, penY, Math.max(lineWidth / 2, 5) / scale, 0, 2 * Math.PI);
 		toolContext.fill('evenodd');
+		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
+	}
+	drawMousePointer();
+}
+
+function drawMousePointer() {
+	if (mouseR === undefined) {
+		return;
+	}
+	const symmetryAngle = 2 * Math.PI / symmetry;
+	const numPointers = Math.abs(mouseTheta) < 1 / scale ? 1 : symmetry;
+	toolContext.lineWidth = 1 / scale;
+	for (let i = 0; i < numPointers; i++) {
+		const angle = mouseTheta + i * symmetryAngle;
+		const cursorX = Math.round((translateX + mouseR * Math.cos(angle)) * scale) / scale + 0.5 / scale;
+		const cursorY = Math.round((translateY + mouseR * Math.sin(angle)) * scale) / scale + 0.5 / scale;
+		// Shadow
+		toolContext.beginPath();
+		toolContext.moveTo(cursorX + 1 / scale, cursorY - pointerSize / scale);
+		toolContext.lineTo(cursorX + 1 / scale, cursorY + pointerSize / scale);
+		toolContext.strokeStyle = 'white';
+		toolContext.stroke();
+		toolContext.beginPath();
+		// Top line
+		toolContext.moveTo(cursorX, cursorY - pointerSize / scale);
+		toolContext.lineTo(cursorX, cursorY - 1 / scale);
+		// Bottom line
+		toolContext.moveTo(cursorX, cursorY + 1 / scale);
+		toolContext.lineTo(cursorX, cursorY + pointerSize / scale);
+		// Left line
+		toolContext.moveTo(cursorX - pointerSize / scale, cursorY);
+		toolContext.lineTo(cursorX - 1 / scale, cursorY);
+		// Right line
+		toolContext.moveTo(cursorX + 1 / scale, cursorY);
+		toolContext.lineTo(cursorX + pointerSize / scale, cursorY);
+		toolContext.strokeStyle = i === 0 ? 'red' : 'black';
+		toolContext.stroke();
 	}
 }
 
@@ -700,7 +747,6 @@ function calcScale() {
 	width = spiroCanvas.width / scale;
 	height = spiroCanvas.height / scale;
 	spiroContext.lineWidth = lineWidth / scale;
-	toolContext.lineWidth = 2 / scale;
 }
 
 function calcOffset() {
@@ -847,11 +893,12 @@ document.getElementById('btn-randomize').addEventListener('click', function (eve
 });
 
 document.getElementById('btn-toggle-gears').addEventListener('click', function (event) {
-	toolsVisible = !document.getElementById('tool-canvas').classList.toggle('invisible');
-	if (toolsVisible) {
+	gearsVisible = !gearsVisible;
+	if (gearsVisible) {
 		drawTools(stator, rotor, penX, penY);
 		this.innerText = 'Hide Gears';
 	} else {
+		eraseTools();
 		this.innerText = 'Show Gears';
 	}
 });
@@ -1533,12 +1580,12 @@ function rectToPolar(x, y) {
 	return [r, theta];
 }
 
-function twoClickLogicRepeat(x, y, r, theta) {
+function twoClickLogicRepeat(x, y) {
 	if (mouseClickedX === undefined) {
 		mouseClickedX = x;
 		mouseClickedY = y;
-		mouseClickedR = r;
-		mouseClickedTheta = theta;
+		mouseClickedR = mouseR;
+		mouseClickedTheta = mouseTheta;
 		lastPath = currentPath;
 		currentPath = new Path2D();
 		currentPathIsEmpty = true;
@@ -1549,9 +1596,9 @@ function twoClickLogicRepeat(x, y, r, theta) {
 	saveCanvas();
 }
 
-function twoClickLogic(x, y, r, theta) {
+function twoClickLogic(x, y) {
 	if (mouseClickedX === undefined) {
-		twoClickLogicRepeat(x, y, r, theta);
+		twoClickLogicRepeat(x, y);
 	} else {
 		mouseClickedX = undefined;
 	}
@@ -1574,7 +1621,6 @@ spiroCanvas.addEventListener('click', function (event) {
 	}
 	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
-	const [r, theta] = rectToPolar(x, y);
 	const symmetryAngle = 2 * Math.PI / symmetry;
 	const strokeStyle = spiroContext.strokeStyle;
 	const opacity = parseFloat(opacityInput.value);
@@ -1587,9 +1633,9 @@ spiroCanvas.addEventListener('click', function (event) {
 		const data = dataObj.data;
 		let filledPixels;
 		for (let i = 0; i < symmetry; i++) {
-			const angle = theta + i * symmetryAngle;
-			const fillX = translateX + r * Math.cos(angle);
-			const fillY = translateY + r * Math.sin(angle);
+			const angle = mouseTheta + i * symmetryAngle;
+			const fillX = translateX + mouseR * Math.cos(angle);
+			const fillY = translateY + mouseR * Math.sin(angle);
 			filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
 		}
 		spiroContext.clearRect(-1, -1, width, height);
@@ -1597,27 +1643,35 @@ spiroCanvas.addEventListener('click', function (event) {
 		break;
 
 	case 'line':
-		twoClickLogic(x, y, r, theta);
+		twoClickLogic(x, y);
 		break;
 
 	case 'circle':
-		twoClickLogicRepeat(x, y, r, theta);
+		twoClickLogicRepeat(x, y);
 		break;
 	}
 });
 
 spiroCanvas.addEventListener('pointermove', function (event) {
+	const [x, y] = transformPoint(event.offsetX, event.offsetY);
+	[mouseR, mouseTheta] = rectToPolar(x, y);
+
+	if (isAnimating()) {
+		return;
+	}
+
+	// Draw mouse pointer
+	drawTools(stator, rotor, penX, penY);
+
 	if (mouseClickedX === undefined) {
 		return;
 	}
 
-	const [x, y] = transformPoint(event.offsetX, event.offsetY);
-	const [r, theta] = rectToPolar(x, y);
+	const symmetryAngle = 2 * Math.PI / symmetry;
 	const dx = x - mouseClickedX;
 	const dy = y - mouseClickedY;
-	const dTheta = theta - mouseClickedTheta;
+	const dTheta = mouseTheta - mouseClickedTheta;
 	const distance = Math.sqrt(dx * dx + dy * dy);
-	const symmetryAngle = 2 * Math.PI / symmetry;
 
 	restoreCanvas();
 	spiroContext.globalAlpha = parseFloat(opacityInput.value);
@@ -1630,8 +1684,8 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 			const startX = translateX + mouseClickedR * Math.cos(startAngle);
 			const startY = translateY + mouseClickedR * Math.sin(startAngle);
 			const endAngle = startAngle + dTheta;
-			const endX = translateX + r * Math.cos(endAngle);
-			const endY = translateY + r * Math.sin(endAngle);
+			const endX = translateX + mouseR * Math.cos(endAngle);
+			const endY = translateY + mouseR * Math.sin(endAngle);
 			nextPath.moveTo(startX, startY);
 			nextPath.lineTo(endX, endY);
 		}
@@ -1641,7 +1695,7 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 	case 'circle':
 		nextPath = new Path2D();
 		for (let i = 0; i < symmetry; i++) {
-			const angle = i * symmetryAngle;
+			const angle = mouseClickedTheta + i * symmetryAngle;
 			const centreX = translateX + mouseClickedR * Math.cos(angle);
 			const centreY = translateY + mouseClickedR * Math.sin(angle);
 			nextPath.moveTo(centreX + distance, centreY);
@@ -1652,6 +1706,13 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 	}
 
 	spiroContext.globalAlpha = 1;
+});
+
+spiroCanvas.addEventListener('pointerleave', function (event) {
+	mouseR = undefined;
+	if (!isAnimating()) {
+		drawTools(stator, rotor, penX, penY);
+	}
 });
 
 // Initial actions
@@ -1665,8 +1726,8 @@ parseLineDash();
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
-		document.getElementById('tool-canvas').classList.add('invisible');
-		toolsVisible = false;
+		eraseTools();
+		gearsVisible = false;
 		document.getElementById('btn-toggle-gears').innerText = 'Show Gears';
 	}
 });

@@ -49,6 +49,7 @@
 #spirograph-canvas {
 	background-clip: content-box;
 	background-origin: content-box;
+	cursor: none;
 }
 
 #tool-canvas {

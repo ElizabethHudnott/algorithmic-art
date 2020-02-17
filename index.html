@@ -11,8 +11,11 @@
 	<script src="spirograph.js" defer></script>
 </head>
 <body class="bg-dark">
-	<div class="container bg-white">
+	<div class="container bg-white position-relative">
 		<header class="jumbotron bg-complement">
+			<div class="position-absolute" style="right: 1rem; top: 1.1rem">
+				<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+			</div>
 			<h1 class="display-4">Elizabeth's Spirograph Lab</h1>
 			<p class="lead">A childhood toy digitally resurrected.</p>
 		</header>
@@ -23,47 +26,71 @@
 		</div>
 
 		<form id="spirograph-form">
-			<div class="btn-toolbar mt-3 mb-2" role="toolbar" aria-label="Drawing tools">
-				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Spirograph plotting tools">
-					<button id="btn-draw" type="submit" class="btn btn-primary" style="width: 7rem">Draw Shape</button>
-					<button type="button" class="btn btn-secondary" id="btn-fill">Fill Shape</button>
-					<button id="btn-randomize" type="button" class="btn btn-secondary">Randomize</button>
-				</div>
-				<div class="btn-group mr-3 mb-2" aria-label="Drawing tool">
-					<input type="number" min="1" value="1" id="symmetry" class="form-control" style="width: 4.2rem" title="Number of points of symmetry" aria-label="Number of points of symmetry">
-					<button class="btn btn-secondary dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							Tool
-					</button>
-					<div class="dropdown-menu " aria-labelledby="btn-tools">
-						<div id="tools" class="btn-group-vertical btn-group-toggle w-100" data-toggle="buttons">
-							<label class="btn btn-light active w-100">
+			<div class="btn-toolbar my-3" role="toolbar" aria-label="Drawing tools">
+				<button id="btn-draw" type="submit" class="btn btn-light">
+					<img src="img/spirograph.png" alt="Draw shape" title="Draw pattern">
+				</button>
+				<button type="button" class="btn btn-light" id="btn-fill">
+					<img src="img/fill_color_pink.png" alt="Fill shape" title="Fill shape">
+				</button>
+				<button id="btn-fastforward" type="button" class="btn btn-light">
+					<img src="img/control_end_blue.png" alt="Fast forward" title="Fast forward">
+				</button>
+				<button id="btn-randomize" type="button" class="btn btn-light">
+					<img src="img/dice.png" alt="Randomize" title="Randomize">
+				</button>
+				<input type="number" min="1" value="1" id="symmetry" class="form-control" style="width: 4.2rem" title="Number of points of symmetry" aria-label="Number of points of symmetry">
+				<button class="btn dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<img src="img/draw_line_32.png" alt="Tool" title="Current tool">
+				</button>
+				<div class="dropdown-menu p-0" aria-labelledby="btn-tools">
+					<div id="tools" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
+						<label class="btn btn-light active w-100 d-flex">
+							<div class="col-auto">
+								<img src="img/draw_line.png">
+							</div>
+							<div class="col text-left">
 								<input type="radio" name="tool" value="line" checked>Line
-							</label>
-							<label class="btn btn-light w-100">
+							</div>
+						</label>
+						<label class="btn btn-light w-100 d-flex">
+							<div class="col-auto">
+								<img src="img/draw_ellipse.png">
+							</div>
+							<div class="col text-left">
 								<input type="radio" name="tool" value="circle">Circle
-							</label>
-							<label class="btn btn-light w-100">
+							</div>
+						</label>
+						<label class="btn btn-light w-100 d-flex">
+							<div class="col-auto">
+								<img src="img/fill_color.png">
+							</div>
+							<div class="col text-left">
 								<input type="radio" name="tool" value="fill">Fill
-							</label>
-						</div>
+							</div>
+						</label>
 					</div>
 				</div>
-				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="History">
-					<button type="button" class="btn btn-secondary" id="btn-undo" disabled>Undo</button>
-					<button type="button" class="btn btn-secondary" id="btn-redo" disabled>Redo</button>
-				</div>
-				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="Information">
-					<button type="button" class="btn btn-info" id="btn-toggle-gears" style="width: 7rem">
-						Hide Gears
+				<button type="button" class="btn btn-light" id="btn-undo" disabled>
+					<img src="img/undo.png" alt="Undo" title="Undo">
+				</button>
+				<button type="button" class="btn btn-light" id="btn-redo" disabled>
+					<img src="img/redo.png" alt="Redo" title="Redo">
+				</button>
+				<button type="button" class="btn btn-light active" id="btn-toggle-gears" data-toggle="button" aria-pressed="true">
+					<img src="img/gear_in.png" alt="Toggle gears" title="Toggle gears">
+				</button>
+				<div data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+					<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">
+						<img src="img/information.png" alt="Toggle info" title="Toggle info">
 					</button>
-					<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-						Toggle Info
-					</button>
 				</div>
-				<div class="btn-group btn-group-round mr-3 mb-2" role="group" aria-label="File">
-					<button type="button" class="btn btn-secondary" id="btn-export" data-toggle="modal" data-target="#export-modal">Export</button>
-					<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#erase-modal">Erase All</button>
-				</div>
+				<button type="button" class="btn btn-light" id="btn-export" data-toggle="modal" data-target="#export-modal">
+					<img src="img/download_cloud.png" alt="Download" title="Download">
+				</button>
+				<button type="button" class="btn btn-light" data-toggle="modal" data-target="#erase-modal">
+					<img src="img/page_white.png" alt="New" title="New">
+				</button>
 			</div>
 			<div colspan="4" id="info" class="mb-4 collapse">
 				<span class="bg-info bg-light p-2">
@@ -378,7 +405,7 @@
 								</div>
 								<div class="btn btn-light p-0" style="min-width: 20%">
 									<label for="paper-image" class="w-100 h-100">
-										<img src="img/upload.png" style="vertical-align: baseline">
+										<img src="img/upload.png" style="vertical-align: baseline" alt="Upload background image" title="Upload background image">
 									</label>
 									<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
 								</div>
@@ -485,6 +512,12 @@
 		</form>
 
 		<h5>Your Spirograph Recipe</h5>
+
+		<footer>
+			<small>
+				This site uses icons from <a href="http://www.fatcow.com/free-icons">fatcow.com</a>.
+			</small>
+		</footer>
 	</div>
 
 	<div class="modal fade" id="erase-modal" tabindex="-1" role="dialog" aria-labelledby="erase-modal-label" aria-hidden="true">

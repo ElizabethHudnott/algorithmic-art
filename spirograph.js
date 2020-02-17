@@ -732,8 +732,10 @@ function drawingEnded() {
 	// TODO revise end distance
 	updateRotorPosition();
 	drawTools(stator, rotor, penX, penY);
-	drawButton.classList.remove('btn-warning');
-	drawButton.innerText = 'Draw Shape';
+	const img = drawButton.children[0];
+	img.src = 'img/spirograph.png';
+	img.alt = 'Draw shape';
+	img.title = 'Draw pattern';
 }
 
 function calcScale() {
@@ -783,8 +785,10 @@ function setCompositionOp() {
 }
 
 function drawSpirographAction() {
-	drawButton.classList.add('btn-warning');
-	drawButton.innerText = 'Stop';
+const img = drawButton.children[0];
+	img.src = 'img/control_stop_blue.png';
+	img.alt = 'Stop';
+	img.title = 'Stop drawing';
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = startTooth * stator.toothSize;
 	const increment = parseFloat(incrementInput.value);
@@ -894,14 +898,20 @@ document.getElementById('btn-randomize').addEventListener('click', function (eve
 	setInitialRotation();
 });
 
+for (const item of document.getElementById('tools').children) {
+	item.addEventListener('click', function (event) {
+		currentTool = this.querySelector('input').value;
+		const imgFilename = this.querySelector('img').src.slice(0, -4) + '_32.png';
+		document.getElementById('btn-tools').children[0].src = imgFilename;
+	});
+}
+
 document.getElementById('btn-toggle-gears').addEventListener('click', function (event) {
 	gearsVisible = !gearsVisible;
 	if (gearsVisible) {
 		drawTools(stator, rotor, penX, penY);
-		this.innerText = 'Hide Gears';
 	} else {
 		eraseTools();
-		this.innerText = 'Show Gears';
 	}
 });
 
@@ -1362,6 +1372,11 @@ updateOpacityReadout.call(opacityInput2);
 opacityInput.addEventListener('input', updateOpacityReadout);
 opacityInput2.addEventListener('input', updateOpacityReadout);
 
+document.getElementById('btn-fastforward').addEventListener('click', function (event) {
+	setAnimSpeed(100);
+	animSpeedSlider.value = 100;
+});
+
 document.getElementById('erase-form').addEventListener('submit', function(event) {
 	event.preventDefault();
 	function reset() {
@@ -1621,7 +1636,6 @@ spiroCanvas.addEventListener('click', function (event) {
 	if (isAnimating()) {
 		return;
 	}
-	currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
 	const symmetryAngle = 2 * Math.PI / symmetry;
 	const strokeStyle = spiroContext.strokeStyle;
@@ -1730,7 +1744,9 @@ animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {
 		eraseTools();
 		gearsVisible = false;
-		document.getElementById('btn-toggle-gears').innerText = 'Show Gears';
+		const button = document.getElementById('btn-toggle-gears');
+		button.classList.remove('active');
+		button.setAttribute('aria-pressed', 'false');
 	}
 });
 

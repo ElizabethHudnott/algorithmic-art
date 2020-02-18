@@ -879,7 +879,7 @@ document.getElementById('spirograph-form').addEventListener('submit', function (
 });
 
 document.getElementById('btn-hamburger').addEventListener('click', function (event) {
-	document.getElementById('sidebar').classList.toggle('collapsed-horizontal');
+	document.getElementById('spirograph-form').classList.toggle('collapsed-horizontal');
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {

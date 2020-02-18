@@ -711,7 +711,7 @@ function randomizeSpirographForm() {
 	calcMaxHole();
 	penXSlider.value = Math.trunc(Math.random() * maxHole);
 	updatePenXReadout();
-	setPenColor.call(penSwatches[Math.trunc(Math.random() * 5)].parentElement);
+	setPenColor.call(penSwatches[Math.trunc(Math.random() * 9)].parentElement);
 }
 
 function drawingEnded() {
@@ -876,6 +876,10 @@ drawButton.addEventListener('click', function (event) {
 document.getElementById('spirograph-form').addEventListener('submit', function (event) {
 	event.preventDefault();
 	drawSpirographAction();
+});
+
+document.getElementById('btn-hamburger').addEventListener('click', function (event) {
+	document.getElementById('sidebar').classList.toggle('collapsed-horizontal');
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {

@@ -26,6 +26,10 @@
 	left: 0;
 }
 
+.right {
+	right: 0;
+}
+
 .top {
 	top: 0;
 }
@@ -41,6 +45,15 @@
 
 .palette .active {
 	box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
+.collapse-horizontal {
+	overflow: hidden;
+	transition: width 0.4s;
+}
+
+.collapsed-horizontal {
+	width: 0 !important;
 }
 
 /* Individual elements
@@ -69,7 +82,13 @@
 	border-radius: 0.25rem;
 }
 
+.container-fluid {
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
 .jumbotron {
-	margin-left: -15px;
-	margin-right: -15px;
+	margin-left: -8px;
+	margin-right: -8px;
+	padding: 1.5rem 1.25rem;
 }

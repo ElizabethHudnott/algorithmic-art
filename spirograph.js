@@ -755,7 +755,7 @@ function calcOffset() {
 	if (offset !== undefined) {
 		return offset;
 	} else if (inOut === 1) {
-		return stator.radiusA + maxLength(rotor, penX, penY) - 1 + spiroContext.lineWidth / 2;
+		return stator.radiusA + maxLength(rotor, penX, penY) + spiroContext.lineWidth / 2 - 1;
 	} else if (stator.radiusA > 1) {
 		return stator.radiusA - minLength(rotor, penX, penY) + spiroContext.lineWidth / 2 - 1;
 	} else {
@@ -785,10 +785,11 @@ function setCompositionOp() {
 }
 
 function drawSpirographAction() {
-const img = drawButton.children[0];
+	const img = drawButton.children[0];
 	img.src = 'img/control_stop_blue.png';
 	img.alt = 'Stop';
 	img.title = 'Stop drawing';
+	mouseClickedX = undefined;
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = startTooth * stator.toothSize;
 	const increment = parseFloat(incrementInput.value);
@@ -1396,6 +1397,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		fixedSwirlRotation = undefined;
 		calcTransform();
 		spiroContext.clearRect(-1, -1, width, height);
+		saveContext.clearRect(0, 0, savedCanvas.width, savedCanvas.height);
 		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);
 		drawTools(stator, rotor, penX, penY);
 	}
@@ -1642,8 +1644,6 @@ spiroCanvas.addEventListener('click', function (event) {
 	}
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
 	const symmetryAngle = 2 * Math.PI / symmetry;
-	const strokeStyle = spiroContext.strokeStyle;
-	const opacity = parseFloat(opacityInput.value);
 
 	switch (currentTool) {
 	case 'fill':
@@ -1651,6 +1651,8 @@ spiroCanvas.addEventListener('click', function (event) {
 		const pixelHeight = spiroCanvas.height;
 		const dataObj = spiroContext.getImageData(0, 0, pixelWidth, pixelHeight);
 		const data = dataObj.data;
+		const strokeStyle = spiroContext.strokeStyle;
+		const opacity = parseFloat(opacityInput.value);
 		let filledPixels;
 		for (let i = 0; i < symmetry; i++) {
 			const angle = mouseTheta + i * symmetryAngle;
@@ -1675,10 +1677,6 @@ spiroCanvas.addEventListener('click', function (event) {
 spiroCanvas.addEventListener('pointermove', function (event) {
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
 	[mouseR, mouseTheta] = rectToPolar(x, y);
-
-	if (isAnimating()) {
-		return;
-	}
 
 	// Draw mouse pointer
 	drawTools(stator, rotor, penX, penY);

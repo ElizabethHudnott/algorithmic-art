@@ -23,7 +23,7 @@ let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 let mouseClickedX, mouseClickedY, mouseClickedR, mouseClickedTheta;
 let currentPath = new Path2D();
 let lastPath, currentPathIsEmpty, nextPath;
-let mouseR = 0, mouseTheta = 0;
+let mouseR = 0, mouseTheta = 0, mirrorSymmetry = false;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -298,42 +298,72 @@ function drawTools(stator, rotor, penX, penY) {
 		toolContext.fill('evenodd');
 		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 	}
-	drawMousePointer();
+	drawMousePointers();
 }
 
-function drawMousePointer() {
+function drawMousePointers() {
 	if (mouseR === undefined) {
 		return;
 	}
 	const symmetryAngle = 2 * Math.PI / symmetry;
-	const numPointers = Math.abs(mouseTheta) < 1 / scale ? 1 : symmetry;
+	const numPointers = Math.abs(mouseR) < 1 / scale ? 1 : symmetry;
 	toolContext.lineWidth = 1 / scale;
-	for (let i = 0; i < numPointers; i++) {
-		const angle = mouseTheta + i * symmetryAngle;
-		const cursorX = Math.round((translateX + mouseR * Math.cos(angle)) * scale) / scale + 0.5 / scale;
-		const cursorY = Math.round((translateY + mouseR * Math.sin(angle)) * scale) / scale + 0.5 / scale;
-		// Shadow
-		toolContext.beginPath();
-		toolContext.moveTo(cursorX + 1 / scale, cursorY - pointerSize / scale);
-		toolContext.lineTo(cursorX + 1 / scale, cursorY + pointerSize / scale);
-		toolContext.strokeStyle = 'white';
-		toolContext.stroke();
-		toolContext.beginPath();
-		// Top line
-		toolContext.moveTo(cursorX, cursorY - pointerSize / scale);
-		toolContext.lineTo(cursorX, cursorY - 1 / scale);
-		// Bottom line
-		toolContext.moveTo(cursorX, cursorY + 1 / scale);
-		toolContext.lineTo(cursorX, cursorY + pointerSize / scale);
-		// Left line
-		toolContext.moveTo(cursorX - pointerSize / scale, cursorY);
-		toolContext.lineTo(cursorX - 1 / scale, cursorY);
-		// Right line
-		toolContext.moveTo(cursorX + 1 / scale, cursorY);
-		toolContext.lineTo(cursorX + pointerSize / scale, cursorY);
-		toolContext.strokeStyle = i === 0 ? 'red' : 'black';
-		toolContext.stroke();
+	let color = 'red';
+
+	if (mirrorSymmetry) {
+
+		const mirrorAngle = Math.round((mouseTheta + halfPI) / symmetryAngle) * symmetryAngle - halfPI;
+		const mirrorMouseAngle = mouseTheta - mirrorAngle;
+		const mirrorMouseDistance = mouseR * Math.sin(mirrorMouseAngle);
+		const onMirrorLine = Math.abs(mirrorMouseDistance) < 1 / scale;
+
+		for (let i = 0; i < numPointers; i++) {
+			const thisMirrorAngle = mirrorAngle + i * symmetryAngle;
+			let angle = thisMirrorAngle + mirrorMouseAngle;
+			drawMousePointer(mouseR, angle, color);
+			color = 'black';
+			if (!onMirrorLine) {
+				angle = thisMirrorAngle - mirrorMouseAngle;
+				drawMousePointer(mouseR, angle, 'black');
+			}
+		}
+
+	} else {
+
+		for (let i = 0; i < numPointers; i++) {
+			const angle = mouseTheta + i * symmetryAngle;
+			drawMousePointer(mouseR, angle, color);
+			color = 'black';
+		}
+
 	}
+}
+
+function drawMousePointer(r, theta, color) {
+	const x = Math.round((translateX + mouseR * Math.cos(theta)) * scale) / scale + 0.5 / scale;
+	const y = Math.round((translateY + mouseR * Math.sin(theta)) * scale) / scale + 0.5 / scale;
+
+	// Shadow
+	toolContext.beginPath();
+	toolContext.moveTo(x + 1 / scale, y - pointerSize / scale);
+	toolContext.lineTo(x + 1 / scale, y + pointerSize / scale);
+	toolContext.strokeStyle = 'white';
+	toolContext.stroke();
+	toolContext.beginPath();
+	// Top line
+	toolContext.moveTo(x, y - pointerSize / scale);
+	toolContext.lineTo(x, y - 1 / scale);
+	// Bottom line
+	toolContext.moveTo(x, y + 1 / scale);
+	toolContext.lineTo(x, y + pointerSize / scale);
+	// Left line
+	toolContext.moveTo(x - pointerSize / scale, y);
+	toolContext.lineTo(x - 1 / scale, y);
+	// Right line
+	toolContext.moveTo(x + 1 / scale, y);
+	toolContext.lineTo(x + pointerSize / scale, y);
+	toolContext.strokeStyle = color;
+	toolContext.stroke();
 }
 
 function stepMultiplier(stator, rotor, penX, penY) {
@@ -1580,6 +1610,10 @@ symmetryInput.addEventListener('input', function (event) {
 	if (this.value !== '') {
 		symmetry = parseInt(this.value);
 	}
+});
+
+document.getElementById('btn-mirror').addEventListener('click', function (event) {
+	mirrorSymmetry = !mirrorSymmetry;
 });
 
 function transformPoint(mouseX, mouseY) {

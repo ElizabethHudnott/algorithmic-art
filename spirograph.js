@@ -166,9 +166,8 @@ function setFillStyle() {
 				return false;
 			}
 			const theta = 2 * Math.PI * direction - halfPI;
-			const tan = Math.tan(theta);
-			const xDistance = Math.min(maxRadiusB / Math.abs(tan), maxRadiusA);
-			const yDistance = tan * xDistance;
+			const xDistance = maxRadiusA * Math.cos(theta);
+			const yDistance = maxRadiusB * Math.sin(theta);
 			const x1 = translateX - xDistance;
 			const y1 = translateY - yDistance;
 			const x2 = translateX + xDistance;

@@ -122,11 +122,13 @@ function maxRadii(stator, rotor, inOut, penX, penY, lineWidth) {
 	const halfLineWidth = lineWidth / 2;
 	let maxRadiusA, maxRadiusB;
 	if (inOut === -1) {
-		maxRadiusA = stator.radiusA - minLength(rotor, penX, penY) - halfLineWidth;
-		maxRadiusB = stator.radiusB - minLength(rotor, penX, penY) - halfLineWidth;
+		const length = minLength(rotor, penX, penY) - halfLineWidth;
+		maxRadiusA = stator.radiusA - length;
+		maxRadiusB = stator.radiusB - length;
 	} else {
-		maxRadiusA = stator.radiusA + maxLength(rotor, penX, penY) - halfLineWidth;
-		maxRadiusB = stator.radiusB + maxLength(rotor, penX, penY) - halfLineWidth;
+		const length = maxLength(rotor, penX, penY) - halfLineWidth;
+		maxRadiusA = stator.radiusA + length;
+		maxRadiusB = stator.radiusB + length;
 	}
 	return [maxRadiusA, maxRadiusB];
 }
@@ -165,7 +167,7 @@ function setFillStyle() {
 			}
 			const theta = 2 * Math.PI * direction - halfPI;
 			const tan = Math.tan(theta);
-			const xDistance = Math.min(maxRadiusB / tan, maxRadiusA);
+			const xDistance = Math.min(maxRadiusB / Math.abs(tan), maxRadiusA);
 			const yDistance = tan * xDistance;
 			const x1 = translateX - xDistance;
 			const y1 = translateY - yDistance;

@@ -1739,15 +1739,39 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 	switch (currentTool) {
 	case 'line':
 		nextPath = new Path2D();
-		for (let i = 0; i < symmetry; i++) {
-			const startAngle = mouseClickedTheta + i * symmetryAngle;
-			const startX = translateX + mouseClickedR * Math.cos(startAngle);
-			const startY = translateY + mouseClickedR * Math.sin(startAngle);
-			const endAngle = startAngle + dTheta;
-			const endX = translateX + mouseR * Math.cos(endAngle);
-			const endY = translateY + mouseR * Math.sin(endAngle);
-			nextPath.moveTo(startX, startY);
-			nextPath.lineTo(endX, endY);
+		if (mirrorSymmetry) {
+			for (let i = 0; i < numPoints; i++) {
+				const thisMirrorAngle = mirrorAngle + i * symmetryAngle;
+				let startAngle = thisMirrorAngle + mirrorMouseClickedAngle;
+				let startX = translateX + mouseClickedR * Math.cos(startAngle);
+				let startY = translateY + mouseClickedR * Math.sin(startAngle);
+				let endAngle = thisMirrorAngle + mirrorMouseAngle;
+				let endX = translateX + mouseR * Math.cos(endAngle);
+				let endY = translateY + mouseR * Math.sin(endAngle);
+				nextPath.moveTo(startX, startY);
+				nextPath.lineTo(endX, endY);
+				if (!onMirrorLine || !clickedOnMirrorLine) {
+					startAngle = thisMirrorAngle - mirrorMouseClickedAngle;
+					startX = translateX + mouseClickedR * Math.cos(startAngle);
+					startY = translateY + mouseClickedR * Math.sin(startAngle);
+					endAngle = thisMirrorAngle - mirrorMouseAngle;
+					endX = translateX + mouseR * Math.cos(endAngle);
+					endY = translateY + mouseR * Math.sin(endAngle);
+					nextPath.moveTo(startX, startY);
+					nextPath.lineTo(endX, endY);
+				}
+			}
+		} else {
+			for (let i = 0; i < symmetry; i++) {
+				const startAngle = mouseClickedTheta + i * symmetryAngle;
+				const startX = translateX + mouseClickedR * Math.cos(startAngle);
+				const startY = translateY + mouseClickedR * Math.sin(startAngle);
+				const endAngle = startAngle + dTheta;
+				const endX = translateX + mouseR * Math.cos(endAngle);
+				const endY = translateY + mouseR * Math.sin(endAngle);
+				nextPath.moveTo(startX, startY);
+				nextPath.lineTo(endX, endY);
+			}
 		}
 		spiroContext.stroke(nextPath);
 		break;

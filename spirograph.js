@@ -23,7 +23,9 @@ let currentTool = queryChecked(document.getElementById('tools'), 'tool').value;
 let mouseClickedX, mouseClickedY, mouseClickedR, mouseClickedTheta;
 let currentPath = new Path2D();
 let lastPath, currentPathIsEmpty, nextPath;
-let mouseR = 0, mouseTheta = 0, mirrorSymmetry = false;
+let mouseR = 0, mouseTheta = 0;
+let mirrorAngle, mirrorMouseAngle, onMirrorLine, clickedOnMirrorLine;
+let mirrorSymmetry = false;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -41,6 +43,7 @@ let symmetry = parseInt(symmetryInput.value);
 if (!Number.isFinite(symmetry)) {
 	symmetry = 1;
 }
+let symmetryAngle = 2 * Math.PI / symmetry;
 const numPointsSpan = document.getElementById('num-points');
 const numRevsSpan = document.getElementById('num-revolutions');
 const lengthSpan = document.getElementById('length');
@@ -306,17 +309,11 @@ function drawMousePointers() {
 	if (mouseR === undefined) {
 		return;
 	}
-	const symmetryAngle = 2 * Math.PI / symmetry;
 	const numPointers = Math.abs(mouseR) < 1 / scale ? 1 : symmetry;
 	toolContext.lineWidth = 1 / scale;
 	let color = 'red';
 
 	if (mirrorSymmetry) {
-
-		const mirrorAngle = Math.round((mouseTheta + halfPI) / symmetryAngle) * symmetryAngle - halfPI;
-		const mirrorMouseAngle = mouseTheta - mirrorAngle;
-		const mirrorMouseDistance = mouseR * Math.sin(mirrorMouseAngle);
-		const onMirrorLine = Math.abs(mirrorMouseDistance) < 1 / scale;
 
 		for (let i = 0; i < numPointers; i++) {
 			const thisMirrorAngle = mirrorAngle + i * symmetryAngle;
@@ -1610,6 +1607,7 @@ function floodFill(width, height, data, filled, startX, startY, newColor, transp
 symmetryInput.addEventListener('input', function (event) {
 	if (this.value !== '') {
 		symmetry = parseInt(this.value);
+		symmetryAngle = 2 * Math.PI / symmetry;
 	}
 });
 
@@ -1644,6 +1642,7 @@ function twoClickLogicRepeat(x, y) {
 		mouseClickedY = y;
 		mouseClickedR = mouseR;
 		mouseClickedTheta = mouseTheta;
+		clickedOnMirrorLine = onMirrorLine;
 		lastPath = currentPath;
 		currentPath = new Path2D();
 		currentPathIsEmpty = true;
@@ -1678,7 +1677,6 @@ spiroCanvas.addEventListener('click', function (event) {
 		return;
 	}
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
-	const symmetryAngle = 2 * Math.PI / symmetry;
 
 	switch (currentTool) {
 	case 'fill':
@@ -1712,6 +1710,14 @@ spiroCanvas.addEventListener('click', function (event) {
 spiroCanvas.addEventListener('pointermove', function (event) {
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
 	[mouseR, mouseTheta] = rectToPolar(x, y);
+	if (mouseClickedX === undefined) {
+		mirrorAngle = Math.round((mouseTheta + halfPI) / symmetryAngle) * symmetryAngle - halfPI;
+	}
+	mirrorMouseAngle = mouseTheta - mirrorAngle;
+
+	const mirrorMouseDistance = mouseR * Math.sin(mirrorMouseAngle);
+	onMirrorLine = Math.abs(mirrorMouseDistance) < 1 / scale;
+
 
 	// Draw mouse pointer
 	drawTools(stator, rotor, penX, penY);
@@ -1720,11 +1726,12 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 		return;
 	}
 
-	const symmetryAngle = 2 * Math.PI / symmetry;
 	const dx = x - mouseClickedX;
 	const dy = y - mouseClickedY;
 	const dTheta = mouseTheta - mouseClickedTheta;
 	const distance = Math.sqrt(dx * dx + dy * dy);
+	const numPoints = Math.abs(mouseClickedR) < 1 / scale ? 1 : symmetry;
+	const mirrorMouseClickedAngle = mouseClickedTheta - mirrorAngle;
 
 	restoreCanvas();
 	spiroContext.globalAlpha = parseFloat(opacityInput.value);
@@ -1747,12 +1754,31 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 
 	case 'circle':
 		nextPath = new Path2D();
-		for (let i = 0; i < symmetry; i++) {
-			const angle = mouseClickedTheta + i * symmetryAngle;
-			const centreX = translateX + mouseClickedR * Math.cos(angle);
-			const centreY = translateY + mouseClickedR * Math.sin(angle);
-			nextPath.moveTo(centreX + distance, centreY);
-			nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+		if (mirrorSymmetry) {
+			for (let i = 0; i < numPoints; i++) {
+				const thisMirrorAngle = mirrorAngle + i * symmetryAngle;
+				let angle = thisMirrorAngle + mirrorMouseClickedAngle;
+				let centreX = translateX + mouseClickedR * Math.cos(angle);
+				let centreY = translateY + mouseClickedR * Math.sin(angle);
+				nextPath.moveTo(centreX + distance, centreY);
+				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+				if (!onMirrorLine) {
+					angle = thisMirrorAngle - mirrorMouseClickedAngle;
+					centreX = translateX + mouseClickedR * Math.cos(angle);
+					centreY = translateY + mouseClickedR * Math.sin(angle);
+					nextPath.moveTo(centreX + distance, centreY);
+					nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+				}
+
+			}
+		} else {
+			for (let i = 0; i < numPoints; i++) {
+				const angle = mouseClickedTheta + i * symmetryAngle;
+				const centreX = translateX + mouseClickedR * Math.cos(angle);
+				const centreY = translateY + mouseClickedR * Math.sin(angle);
+				nextPath.moveTo(centreX + distance, centreY);
+				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+			}
 		}
 		spiroContext.stroke(nextPath);
 		break;

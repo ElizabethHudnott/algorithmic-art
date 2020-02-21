@@ -1476,6 +1476,10 @@ gradientDirectionInput.addEventListener('input', function (event) {
 
 function floodFill(width, height, data, filled, startX, startY, newColor, transparency) {
 	[startX, startY] = untransformPoint(startX, startY);
+	if (startX < 0 || startY < 0 || startX >= width || startY >= height) {
+		return;
+	}
+
 	const [newR, newG, newB] = hexToRGB(newColor);
 	let offset = (startY * width + startX) * 4;
 	const targetR = data[offset];
@@ -1687,11 +1691,27 @@ spiroCanvas.addEventListener('click', function (event) {
 		const strokeStyle = spiroContext.strokeStyle;
 		const opacity = parseFloat(opacityInput.value);
 		let filledPixels;
-		for (let i = 0; i < symmetry; i++) {
-			const angle = mouseTheta + i * symmetryAngle;
-			const fillX = translateX + mouseR * Math.cos(angle);
-			const fillY = translateY + mouseR * Math.sin(angle);
-			filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
+		if (mirrorSymmetry) {
+			for (let i = 0; i < symmetry; i++) {
+				const thisMirrorAngle = mirrorAngle + i * symmetryAngle;
+				let angle = thisMirrorAngle + mirrorMouseAngle;
+				let fillX = translateX + mouseR * Math.cos(angle);
+				let fillY = translateY + mouseR * Math.sin(angle);
+				filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
+				if (!onMirrorLine) {
+					angle = thisMirrorAngle - mirrorMouseAngle;
+					fillX = translateX + mouseR * Math.cos(angle);
+					fillY = translateY + mouseR * Math.sin(angle);
+					filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
+				}
+			}
+		} else {
+			for (let i = 0; i < symmetry; i++) {
+				const angle = mouseTheta + i * symmetryAngle;
+				const fillX = translateX + mouseR * Math.cos(angle);
+				const fillY = translateY + mouseR * Math.sin(angle);
+				filledPixels = floodFill(pixelWidth, pixelHeight, data, filledPixels, fillX, fillY, strokeStyle, opacity);
+			}
 		}
 		spiroContext.clearRect(-1, -1, width, height);
 		spiroContext.putImageData(dataObj, 0, 0);
@@ -1708,6 +1728,10 @@ spiroCanvas.addEventListener('click', function (event) {
 });
 
 spiroCanvas.addEventListener('pointermove', function (event) {
+	if (!document.hasFocus()) {
+		return;
+	}
+
 	const [x, y] = transformPoint(event.offsetX, event.offsetY);
 	[mouseR, mouseTheta] = rectToPolar(x, y);
 	if (mouseClickedX === undefined) {
@@ -1715,6 +1739,7 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 	}
 	mirrorMouseAngle = mouseTheta - mirrorAngle;
 
+	// TODO This needs elaborating on further to handle other cases
 	const mirrorMouseDistance = mouseR * Math.sin(mirrorMouseAngle);
 	onMirrorLine = Math.abs(mirrorMouseDistance) < 1 / scale;
 
@@ -1793,7 +1818,6 @@ spiroCanvas.addEventListener('pointermove', function (event) {
 					nextPath.moveTo(centreX + distance, centreY);
 					nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
 				}
-
 			}
 		} else {
 			for (let i = 0; i < numPoints; i++) {
@@ -1816,6 +1840,18 @@ spiroCanvas.addEventListener('pointerleave', function (event) {
 	if (!isAnimating()) {
 		drawTools(stator, rotor, penX, penY);
 	}
+});
+
+window.addEventListener('blur', function (event) {
+	spiroCanvas.style.cursor = 'default';
+	mouseR = undefined;
+	if (!isAnimating()) {
+		drawTools(stator, rotor, penX, penY);
+	}
+});
+
+window.addEventListener('focus', function (event) {
+	spiroCanvas.style.cursor = null;
 });
 
 // Initial actions

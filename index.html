@@ -12,7 +12,7 @@
 	<script src="spirograph.js" defer></script>
 </head>
 <body>
-	<div class="container-fluid position-relative">
+	<div class="container-fluid position-relative d-flex flex-column min-vh-100">
 		<header class="jumbotron bg-complement mb-2">
 			<h1>
 				<span class="display-4">Elizabeth's Spirograph Lab</span>
@@ -23,7 +23,7 @@
 			<p class="lead">A childhood toy digitally resurrected.</p>
 		</header>
 
-		<main class="position-relative">
+		<main class="position-relative flex-grow-1">
 			<div>
 				<div id="canvas-container" class="position-relative w-100 mb-2">
 					<canvas id="spirograph-canvas" height="640"></canvas>
@@ -65,6 +65,14 @@
 								</div>
 								<div class="col text-left">
 									<input type="radio" name="tool" value="circle">Circle
+								</div>
+							</label>
+							<label class="btn btn-light w-100 d-flex">
+								<div class="col-auto">
+									<img src="img/pencil.png">
+								</div>
+								<div class="col text-left">
+									<input type="radio" name="tool" value="freehand">Freehand
 								</div>
 							</label>
 							<label class="btn btn-light w-100 d-flex">

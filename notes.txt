@@ -1,0 +1,42 @@
+
+drawingEnded: initialRotationDist !== 0 assumption not always true!
+
+bug: changing anim speed while drawing causes a jump or a pause
+bug: jerky animation for larger step sizes
+bug: need to stroke existing path with source-over if nothing's changed
+option to a) exclude centre in shape fill b) fill constant c) include in gradient
+add gradient to flood fill
+eraser tool
+
+
+Language
+var = value
+var += value
+var = [value1, value2]
+spirograph
+fill
+flood x y
+
+repeat n
+	statement1
+	statement2
+
+Math.abs(mouseTheta - mirrorAngle - symmetryAngle / 2) < 0.01
+
+const tan = Math.tan(shearAngle);
+if (tan <= 1) {
+	shearX = -tan ;
+	shearY = 0;
+} else {
+	shearX = 0;
+	shearY = -1 / tan;
+}
+
+spiroContext.setTransform(
+	scale / (1 + Math.abs(shearX)),
+	shearY * scale,
+	shearX * scale,
+	scale / (1 + Math.abs(shearY)),
+	scale,
+	scale
+);

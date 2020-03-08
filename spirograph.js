@@ -28,6 +28,7 @@ let mirrorAngle, mirrorMouseAngle, onMirrorLine, clickedOnMirrorLine;
 let mirrorSymmetry = false;
 let drawingMouseDown = false; // When true then we draw while mouse button is held down.
 let numPointsInPath = 0; // Number of points in the current freehand path
+let compositionOp = 'multiply';
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -266,8 +267,10 @@ function saveCanvas() {
 
 function restoreCanvas() {
 	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
+	spiroContext.globalCompositeOperation = 'source-over';
 	spiroContext.clearRect(-1, -1, width, height);
 	spiroContext.drawImage(savedCanvas, -1, -1, width, height);
+	spiroContext.globalCompositeOperation = compositionOp;
 }
 
 function placeRotor(stator, rotor, inOut, translateX, translateY, startDistance, distance, initialRotationDist) {
@@ -809,11 +812,6 @@ function calcTransform() {
 	translateY += extraSpace;
 }
 
-function setCompositionOp() {
-	const compositionOp = queryChecked(document.getElementById('composition'), 'composition').value;
-	spiroContext.globalCompositeOperation = compositionOp;
-}
-
 function drawSpirographAction() {
 	const img = drawButton.children[0];
 	img.src = 'img/control_stop_blue.png';
@@ -832,7 +830,6 @@ function drawSpirographAction() {
 	const rotation = rotationTooth;
 	offset = calcOffset();
 	fixedScale = scale;
-	setCompositionOp();
 	isFilled = false;
 
 	const description = new SpiroDescription(stator, rotor);
@@ -914,16 +911,15 @@ document.getElementById('btn-hamburger').addEventListener('click', function (eve
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
-	if (isFilled) {
+	if (isFilled && compositionOp !== 'destination-out') {
 		// TODO replace with an undo action
 		spiroContext.globalCompositeOperation = 'color';
-	} else {
-		setCompositionOp();
 	}
 	let success = setFillStyle();
 	if (success) {
 		spiroContext.fill(currentPath, 'evenodd');
 		isFilled = true;
+		spiroContext.globalCompositeOperation = compositionOp;
 	}
 });
 
@@ -1346,6 +1342,15 @@ customPenInput.addEventListener('input', function (event) {
 	colorBox.style.backgroundColor = customColor;
 	colorBox.children[0].value = customColor;
 	customColor = this.value;
+});
+
+function setCompositionOp() {
+	compositionOp = this.value;
+	spiroContext.globalCompositeOperation = compositionOp;
+}
+
+document.getElementsByName('composition').forEach(function (item) {
+	item.addEventListener('input', setCompositionOp);
 });
 
 
@@ -1882,7 +1887,6 @@ function drawWithMouse(event) {
 		spiroContext.stroke(nextPath);
 		break;
 	}
-
 	spiroContext.globalAlpha = 1;
 }
 

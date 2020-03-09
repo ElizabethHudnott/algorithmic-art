@@ -3,6 +3,7 @@
 const halfPI = Math.PI / 2;
 const hole1Distance = 0.1;
 const pointerSize = 4;
+const defaultCompositioOp = 'multiply';
 
 let rawScale, fixedScale, scale, width, height;
 let fixedSwirlRotation, fixedSwirlRadius;
@@ -817,7 +818,7 @@ function drawSpirographAction() {
 	img.src = 'img/control_stop_blue.png';
 	img.alt = 'Stop';
 	img.title = 'Stop drawing';
-	mouseClickedX = undefined;
+	cancelDrawing();
 	let startTooth = parseFloat(startToothInput.value);
 	const startDistance = startTooth * stator.toothSize;
 	const increment = parseFloat(incrementInput.value);
@@ -911,6 +912,7 @@ document.getElementById('btn-hamburger').addEventListener('click', function (eve
 });
 
 document.getElementById('btn-fill').addEventListener('click', function (event) {
+	cancelDrawing();
 	if (isFilled && compositionOp !== 'destination-out') {
 		// TODO replace with an undo action
 		spiroContext.globalCompositeOperation = 'color';
@@ -1431,6 +1433,11 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		fixedScale = undefined;
 		fixedSwirlRotation = undefined;
 		calcTransform();
+		if (compositionOp === 'destination-out') {
+			spiroContext.globalCompositeOperation = defaultCompositioOp;
+			compositionOp = defaultCompositioOp;
+			document.getElementById('composition-' + defaultCompositioOp).checked = true;
+		}
 		spiroContext.clearRect(-1, -1, width, height);
 		saveContext.clearRect(0, 0, savedCanvas.width, savedCanvas.height);
 		placeRotor(stator, rotor, inOut, translateX, translateY, 0, 0, initialRotationDist);
@@ -1441,6 +1448,7 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 		animController.promise.then(reset);
 		animController.abort();
 	} else {
+		cancelDrawing();
 		reset();
 	}
 	$('#erase-modal').modal('hide');
@@ -1689,7 +1697,17 @@ spiroCanvas.addEventListener('contextmenu', function (event) {
 		mouseClickedX = undefined;
 		drawingMouseDown = false;
 	}
-})
+});
+
+function cancelDrawing() {
+	if (mouseClickedX !== undefined) {
+		restoreCanvas();
+		if (currentPathIsEmpty) {
+			currentPath = lastPath;
+		}
+		mouseClickedX = undefined;
+	}
+}
 
 spiroCanvas.addEventListener('pointerdown', function (event) {
 	if (event.button !== 0 || isAnimating()) {
@@ -1757,8 +1775,10 @@ spiroCanvas.addEventListener('pointerup', function (event) {
 		const distance = Math.sqrt(dx * dx + dy * dy);
 		if (distance > 10 / scale) {
 			mouseClickedX = undefined;
+			currentPath = nextPath;
 		}
 	} else {
+		currentPath = nextPath;
 		drawingMouseDown = false;
 	}
 });
@@ -1852,7 +1872,7 @@ function drawWithMouse(event) {
 			}
 		}
 		spiroContext.stroke(nextPath);
-		if (numPointsInPath > 3000) {
+		if (drawingMouseDown && numPointsInPath > 3000) {
 			mouseDownLogic();
 		}
 		break;
@@ -1867,7 +1887,7 @@ function drawWithMouse(event) {
 				let centreY = translateY + mouseClickedR * Math.sin(angle);
 				nextPath.moveTo(centreX + distance, centreY);
 				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
-				if (!onMirrorLine) {
+				if (!clickedOnMirrorLine) {
 					angle = thisMirrorAngle - mirrorMouseStartAngle;
 					centreX = translateX + mouseClickedR * Math.cos(angle);
 					centreY = translateY + mouseClickedR * Math.sin(angle);

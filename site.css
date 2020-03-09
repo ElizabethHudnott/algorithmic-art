@@ -63,6 +63,7 @@
 	background-clip: content-box;
 	background-origin: content-box;
 	cursor: none;
+	user-select: none;
 }
 
 #tool-canvas {

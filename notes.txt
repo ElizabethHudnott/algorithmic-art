@@ -1,7 +1,4 @@
 default eraser size
-bug: circle symmetry disappearing
-bug: drawing spirograph / changing tool while drawing
-
 drawingEnded: initialRotationDist !== 0 assumption not always true!
 
 bug: changing anim speed while drawing causes a jump or a pause

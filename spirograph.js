@@ -5,6 +5,12 @@ const hole1Distance = 0.1;
 const pointerSize = 4;
 const defaultCompositioOp = 'multiply';
 
+const DrawMode = Object.freeze({
+	STROKE: 1,
+	FILL: 2,
+	STROKE_AND_FILL: 3,
+});
+
 let rawScale, fixedScale, scale, width, height;
 let fixedSwirlRotation, fixedSwirlRadius;
 let gearsVisible = true;
@@ -30,6 +36,7 @@ let mirrorSymmetry = false;
 let drawingMouseDown = false; // When true then we draw while mouse button is held down.
 let numPointsInPath = 0; // Number of points in the current freehand path
 let compositionOp = 'multiply';
+let drawMode = DrawMode.STROKE;
 
 function parseFraction(text) {
 	const numerator = parseFloat(text);
@@ -92,6 +99,7 @@ const paperSwatches = document.getElementsByName('paper-color');
 const customPaperInput = document.getElementById('custom-paper-color');
 const paperImageInput = document.getElementById('paper-image');
 const opacityInput = document.getElementById('outer-opacity');
+let opacity = parseFloat(opacityInput.value);
 const opacityInput2 = document.getElementById('inner-opacity');
 const gradientDirectionInput = document.getElementById('gradient-direction');
 
@@ -140,9 +148,21 @@ function maxRadii(stator, rotor, inOut, penX, penY, lineWidth) {
 	return [maxRadiusA, maxRadiusB];
 }
 
+function doDrawingOp(path) {
+	if (drawMode & DrawMode.STROKE) {
+		spiroContext.globalAlpha = opacity;
+		spiroContext.stroke(path);
+		spiroContext.globalAlpha = 1;
+	}
+	if (drawMode & DrawMode.FILL) {
+		spiroContext.fill(path, 'evenodd');
+		isFilled = true;
+	}
+}
+
 function setFillStyle() {
 	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
-	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
+	const outerColor = rgba(outerR, outerG, outerB, opacity);
 
 	let innerColor = outerColor;
 	if (document.getElementsByClassName('inner-fill-controls')[0].classList.contains('show')) {
@@ -504,13 +524,14 @@ function drawSpirograph(description) {
 
 			drawTools(stator, rotor, penX, penY);
 			restoreCanvas();
-			spiroContext.globalAlpha = parseFloat(opacityInput.value);
-			spiroContext.stroke(currentPath);
-			spiroContext.globalAlpha = 1;
 
 			if (stepNumber <= numSteps) {
+				spiroContext.globalAlpha = opacity;
+				spiroContext.stroke(currentPath);
+				spiroContext.globalAlpha = 1;
 				requestAnimationFrame(animate);
 			} else {
+				doDrawingOp(currentPath);
 				newAnimController.finish();
 				resolve();
 			}
@@ -1411,7 +1432,10 @@ function updateOpacityReadout() {
 
 updateOpacityReadout.call(opacityInput);
 updateOpacityReadout.call(opacityInput2);
-opacityInput.addEventListener('input', updateOpacityReadout);
+opacityInput.addEventListener('input', function (event) {
+	opacity = parseFloat(this.value);
+	updateOpacityReadout.call(this);
+});
 opacityInput2.addEventListener('input', updateOpacityReadout);
 
 document.getElementById('btn-fastforward').addEventListener('click', function (event) {
@@ -1455,7 +1479,9 @@ document.getElementById('erase-form').addEventListener('submit', function(event)
 });
 
 function opacityPreset() {
-	opacityInput.value = this.dataset.value;
+	const value = this.dataset.value;
+	opacity = parseFloat(value);
+	opacityInput.value = value;
 	updateOpacityReadout.call(opacityInput);
 }
 document.getElementById('opacity-0').addEventListener('click', opacityPreset);
@@ -1665,11 +1691,13 @@ function twoClickLogicRepeat() {
 		lastPath = currentPath;
 		currentPath = new Path2D();
 		currentPathIsEmpty = true;
+		saveCanvas();
 	} else {
 		currentPath.addPath(nextPath);
 		currentPathIsEmpty = false;
+		restoreCanvas();
+		doDrawingOp(currentPath);
 	}
-	saveCanvas();
 }
 
 function twoClickLogic() {
@@ -1684,6 +1712,8 @@ function mouseDownLogic() {
 	saveCanvas();
 	nextPath = new Path2D();
 	numPointsInPath = 0;
+	currentPath = new Path2D();
+	currentPathIsEmpty = true;
 	drawingMouseDown = true;
 }
 
@@ -1693,6 +1723,8 @@ spiroCanvas.addEventListener('contextmenu', function (event) {
 		restoreCanvas();
 		if (currentPathIsEmpty) {
 			currentPath = lastPath;
+		} else {
+			doDrawingOp(currentPath);
 		}
 		mouseClickedX = undefined;
 		drawingMouseDown = false;
@@ -1704,8 +1736,40 @@ function cancelDrawing() {
 		restoreCanvas();
 		if (currentPathIsEmpty) {
 			currentPath = lastPath;
+		} else {
+			doDrawingOp(currentPath);
 		}
 		mouseClickedX = undefined;
+	}
+}
+
+spiroCanvas.addEventListener('pointerup', function (event) {
+	if (event.button !== 0) {
+		return;
+	}
+	if (mouseClickedX !== undefined) {
+		const dx = mouseX - currentClickX;
+		const dy = mouseY - currentClickY;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		if (distance < 10 / scale) {
+			return;
+		}
+	}
+
+	mouseClickedX = undefined;
+	drawingMouseDown = false;
+	currentPath = nextPath;
+	restoreCanvas();
+	doDrawingOp(currentPath);
+});
+
+function previewShape() {
+	if (currentPathIsEmpty) {
+		doDrawingOp(nextPath);
+	} else {
+		spiroContext.globalAlpha = opacity;
+		spiroContext.stroke(nextPath);
+		spiroContext.globalAlpha = 1;
 	}
 }
 
@@ -1722,7 +1786,6 @@ spiroCanvas.addEventListener('pointerdown', function (event) {
 		const dataObj = spiroContext.getImageData(0, 0, pixelWidth, pixelHeight);
 		const data = dataObj.data;
 		const strokeStyle = spiroContext.strokeStyle;
-		const opacity = parseFloat(opacityInput.value);
 		let filledPixels;
 		if (mirrorSymmetry) {
 			for (let i = 0; i < symmetry; i++) {
@@ -1762,24 +1825,6 @@ spiroCanvas.addEventListener('pointerdown', function (event) {
 		mouseDownLogic();
 		break;
 
-	}
-});
-
-spiroCanvas.addEventListener('pointerup', function (event) {
-	if (event.button !== 0) {
-		return;
-	}
-	if (mouseClickedX !== undefined) {
-		const dx = mouseX - currentClickX;
-		const dy = mouseY - currentClickY;
-		const distance = Math.sqrt(dx * dx + dy * dy);
-		if (distance > 10 / scale) {
-			mouseClickedX = undefined;
-			currentPath = nextPath;
-		}
-	} else {
-		currentPath = nextPath;
-		drawingMouseDown = false;
 	}
 });
 
@@ -1827,7 +1872,7 @@ function drawWithMouse(event) {
 	const numPoints = Math.abs(mouseClickedR) < 1 / scale ? 1 : symmetry;
 
 	restoreCanvas();
-	spiroContext.globalAlpha = parseFloat(opacityInput.value);
+	doDrawingOp(currentPath);
 
 	switch (currentTool) {
 	case 'line':
@@ -1871,7 +1916,9 @@ function drawWithMouse(event) {
 				nextPath.lineTo(endX, endY);
 			}
 		}
+		spiroContext.globalAlpha = opacity;
 		spiroContext.stroke(nextPath);
+		spiroContext.globalAlpha = 1;
 		if (drawingMouseDown && numPointsInPath > 3000) {
 			mouseDownLogic();
 		}
@@ -1904,7 +1951,7 @@ function drawWithMouse(event) {
 				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
 			}
 		}
-		spiroContext.stroke(nextPath);
+		previewShape();
 		break;
 	}
 	spiroContext.globalAlpha = 1;

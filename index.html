@@ -33,6 +33,39 @@
 					<button id="btn-draw" type="submit" form="spirograph-form" class="btn btn-light">
 						<img src="img/spirograph.png" alt="Draw shape" title="Draw pattern">
 					</button>
+					<div class="dropdown">
+						<button class="btn dropdown-toggle" type="button" id="btn-draw-mode" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<img src="img/stroke-shape.png" alt="Mode" title="Drawing mode">
+						</button>
+						<div class="dropdown-menu p-0" aria-labelledby="btn-draw-mode">
+							<div id="draw-mode" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
+								<label class="btn btn-light active w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/stroke-shape.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="draw-mode" value="stroke" checked>Outline
+									</div>
+								</label>
+								<label class="btn btn-light w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/fill-shape.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="draw-mode" value="fill">Filled
+									</div>
+								</label>
+								<label class="btn btn-light w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/stroke-and-fill-shape.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="draw-mode" value="stroke-and-fill">Filled with outline
+									</div>
+								</label>
+							</div>
+						</div>
+					</div>
 					<button type="button" class="btn btn-light" id="btn-fill">
 						<img src="img/fill_color_pink.png" alt="Fill shape" title="Fill shape">
 					</button>
@@ -46,43 +79,45 @@
 					<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false" id="btn-mirror">
 						<img src="img/mirror.png" alt="Kaleidoscope" title="Kaleidoscope mode">
 					</button>
-					<button class="btn dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<img src="img/draw_line_32.png" alt="Tool" title="Current tool">
-					</button>
-					<div class="dropdown-menu p-0" aria-labelledby="btn-tools">
-						<div id="tools" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
-							<label class="btn btn-light active w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/draw_line.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="line" checked>Line
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/draw_ellipse.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="circle">Circle
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/pencil.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="freehand">Freehand
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/fill_color.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="fill">Fill
-								</div>
-							</label>
+					<div class="dropdown">
+						<button class="btn dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<img src="img/draw_line_32.png" alt="Tool" title="Current tool">
+						</button>
+						<div class="dropdown-menu p-0" aria-labelledby="btn-tools">
+							<div id="tools" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
+								<label class="btn btn-light active w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/draw_line.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="tool" value="line" checked>Line
+									</div>
+								</label>
+								<label class="btn btn-light w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/draw_ellipse.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="tool" value="circle">Circle
+									</div>
+								</label>
+								<label class="btn btn-light w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/pencil.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="tool" value="freehand">Freehand
+									</div>
+								</label>
+								<label class="btn btn-light w-100 d-flex">
+									<div class="col-auto">
+										<img src="img/fill_color.png">
+									</div>
+									<div class="col text-left">
+										<input type="radio" name="tool" value="fill">Fill
+									</div>
+								</label>
+							</div>
 						</div>
 					</div>
 					<button type="button" class="btn btn-light" id="btn-undo" disabled>

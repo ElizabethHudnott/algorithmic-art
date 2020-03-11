@@ -37,7 +37,7 @@ class TenPrint {
 		cellsDownCanvas = Math.round(canvasHeight / cellHeight);
 
 		let lineWidth;
-		if (cellWidth >= cellHeight) {
+		if (cellWidth <= cellHeight) {
 			lineWidth = Math.round(this.strokeRatio * cellWidth);
 		} else {
 			lineWidth = Math.round(this.strokeRatio * cellHeight);
@@ -51,6 +51,7 @@ class TenPrint {
 
 		context.beginPath();
 		context.lineWidth = lineWidth;
+		context.lineCap = 'square';
 		context.strokeStyle = this.strokeStyle;
 
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {

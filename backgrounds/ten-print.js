@@ -10,9 +10,10 @@ class TenPrint {
 		this.cellsAcrossScreen = 54;
 		this.cellsDownScreen = 25;
 		this.zoomOut = 1;
+		this.blankProbability = 0; // 0 <= x <= 0.25 are good values.
 		this.probability = 0.5;
 		this.strokeStyle = '#0088FF';
-		// Stroke width as a proportion of the cell's width or height;
+		// Stroke width as a proportion of the cell's width or height.
 		this.strokeRatio = 0.125;
 	}
 
@@ -54,11 +55,24 @@ class TenPrint {
 		context.lineCap = 'square';
 		context.strokeStyle = this.strokeStyle;
 
+		let blankSpacing = Math.trunc(1 / this.blankProbability);
+		while (blankSpacing > 1 && (cellsAcrossCanvas % blankSpacing <= 1 || cellsAcrossCanvas % blankSpacing === blankSpacing - 1)) {
+			blankSpacing--;
+		}
+		const blankProbability =  this.blankProbability * blankSpacing;
+
+		let cellNumber = 1;
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 			const y = cellY * cellHeight;
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
+				cellNumber++;
+				if (blankSpacing > 0 && cellNumber % blankSpacing === 0 && Math.random() < blankProbability) {
+					continue;
+				}
+
 				const x = cellX * cellWidth;
-				if (Math.random() > this.probability) {
+				const p = Math.random();
+				if (p > this.probability) {
 					// Backslash
 					context.moveTo(x, y);
 					context.lineTo(x + cellWidth, y + cellHeight);

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Background Generation Test page</title>
+	<script src="ten-print.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+<canvas id="canvas"></canvas>
+<script>
+	const canvas = document.getElementById('canvas');
+	let generator = new TenPrint();
+	function draw() {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		generator.generate(canvas);
+	}
+
+	draw();
+</script>
+</body>
+</html>

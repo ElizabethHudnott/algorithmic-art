@@ -45,28 +45,40 @@ class TenPrint {
 			lineWidth = 1;
 		}
 
-		let blankSpacing;
-		let blankProbability = this.blankProbability;
-		if (blankProbability > 0) {
-			blankSpacing = Math.trunc(1 / this.blankProbability);
-			while (blankSpacing > 1 && (cellsAcrossCanvas % blankSpacing <= 1 || cellsAcrossCanvas % blankSpacing === blankSpacing - 1)) {
-				blankSpacing--;
-			}
-			blankProbability =  this.blankProbability * blankSpacing;
-		} else {
-			blankSpacing = cellsAcrossCanvas * cellsDownCanvas;
+		const blankSpacing = Math.max(Math.trunc(1 / this.blankProbability), 1);
+		let spacingShift = Math.ceil(blankSpacing / 2);
+		while (blankSpacing % spacingShift === 0 && spacingShift > 2) {
+			spacingShift--;
 		}
+		const blankProbability =  this.blankProbability * blankSpacing;
+		const maxBlankRun = Math.round(1 / (1 - this.blankProbability) + 0.49) - 1;
 
-		let cellNumber = 1;
+		let blankRunLength = 0;
+		let blankDiffusion = 0;
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 			const yTop = cellY * cellHeight;
 			const yBottom = yTop + cellHeight;
+			blankRunLength = 0;
+			blankDiffusion = 0;
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-				cellNumber++;
-				if (blankSpacing > 0 && cellNumber % blankSpacing === 0 && Math.random() < blankProbability) {
+				const cellNumber = cellX + cellY * spacingShift + 1;
+				const randomBlank = Math.random();
+				if (cellNumber % blankSpacing === 0 &&  randomBlank < blankProbability) {
+					if (blankRunLength < maxBlankRun) {
+						blankRunLength++;
+						blankDiffusion = 0;
+						continue;
+					} else {
+						blankDiffusion += blankProbability;
+					}
+				}
+				if (blankDiffusion >= 1 && blankRunLength === 0) {
+					blankRunLength++;
+					blankDiffusion = 0;
 					continue;
 				}
 
+				blankRunLength = 0;
 				const xLeft = cellX * cellWidth;
 				const xRight = xLeft + cellWidth;
 

@@ -7,14 +7,17 @@
 class TenPrint {
 
 	constructor() {
-		this.cellsDownScreen = 25;
-		this.angle = Math.atan(3 / 4);
+		this.angle = Math.atan2(3, 4);
 		this.zoomOut = 1;
-		this.blankProbability = 0; // 0 <= x <= 0.25 are good values.
+		// Probability of a cell being left blank
+		this.blankProbability = 0;
+		// Probability of a forward slash given not blank
 		this.probability = 0.5;
+		// Forward slash style
 		this.stroke1Style = '#887ecb';
+		// Backslash style
 		this.stroke2Style = '#887ecb';
-		// Stroke width as a proportion of the cell's width or height.
+		// Stroke width as a proportion of the cell's area.
 		this.strokeRatio = 0.125;
 	}
 
@@ -24,30 +27,25 @@ class TenPrint {
 
 	generate(canvas) {
 		const context = canvas.getContext('2d');
-		const zoom = this.zoomOut;
+		const cellsDownScreen = 25;
+		const tan = Math.tan(this.angle);
+		const sqrTan = Math.min(Math.sqrt(tan), 1);
+		const zoom = this.zoomOut / sqrTan;
 
 		const canvasHeight = canvas.height;
 		const heightProportion = canvasHeight / screen.height;
-		let cellsDownCanvas = heightProportion * this.cellsDownScreen * zoom;
+		let cellsDownCanvas = heightProportion * cellsDownScreen * zoom;
 		const cellHeight = Math.max(Math.round(canvasHeight / cellsDownCanvas), 2);
 		cellsDownCanvas = Math.round(canvasHeight / cellHeight);
 
-		const cellWidth = Math.max(Math.min(Math.round(cellHeight / Math.tan(this.angle)), 200000), 2);
+		const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
 		const cellsAcrossCanvas = Math.max(Math.round(canvas.width / cellWidth), 1);
 
-		let lineWidth;
-		if (cellWidth <= cellHeight) {
-			lineWidth = Math.round(this.strokeRatio * 2 / 3 * cellWidth);
-		} else {
-			lineWidth = Math.round(this.strokeRatio  * 2 / 3 * cellHeight);
-		}
-		if (lineWidth < 1) {
-			lineWidth = 1;
-		}
+		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
 
 		const blankSpacing = Math.max(Math.trunc(1 / this.blankProbability), 1);
 		let spacingShift = Math.ceil(blankSpacing / 2);
-		while (blankSpacing % spacingShift === 0 && spacingShift > 2) {
+		while (blankSpacing % spacingShift === 0 && spacingShift > 1) {
 			spacingShift--;
 		}
 		const blankProbability =  this.blankProbability * blankSpacing;

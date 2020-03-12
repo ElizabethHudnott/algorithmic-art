@@ -7,7 +7,7 @@
 class TenPrint {
 
 	constructor() {
-		this.angle = Math.atan2(3, 4);
+		this.angle = Math.atan(1 / 0.936);
 		this.zoomOut = 1;
 		// Probability of a cell being left blank
 		this.blankProbability = 0;
@@ -40,6 +40,8 @@ class TenPrint {
 
 		const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
 		const cellsAcrossCanvas = Math.max(Math.round(canvas.width / cellWidth), 1);
+		console.log(`${cellsAcrossCanvas} x ${cellsDownCanvas}`);
+		console.log(cellWidth / cellHeight);
 
 		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
 

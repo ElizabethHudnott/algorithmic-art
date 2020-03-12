@@ -57,7 +57,6 @@ class TenPrint {
 			const yTop = cellY * cellHeight;
 			const yBottom = yTop + cellHeight;
 			blankRunLength = 0;
-			blankDiffusion = 0;
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 				const cellNumber = cellX + cellY * spacingShift + 1;
 				const randomBlank = Math.random();
@@ -70,7 +69,7 @@ class TenPrint {
 						blankDiffusion += blankProbability;
 					}
 				}
-				if (blankDiffusion >= 1 && blankRunLength === 0) {
+				if (blankDiffusion >= 1 && blankRunLength < maxBlankRun) {
 					blankRunLength++;
 					blankDiffusion = 0;
 					continue;

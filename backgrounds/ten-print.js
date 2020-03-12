@@ -71,7 +71,7 @@ class TenPrint {
 				}
 				if (blankDiffusion >= 1 && blankRunLength < maxBlankRun) {
 					blankRunLength++;
-					blankDiffusion = 0;
+					blankDiffusion--;
 					continue;
 				}
 

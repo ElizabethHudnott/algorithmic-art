@@ -3,11 +3,25 @@
 /**Inspired by Daniel Sheefmahhnnn's Coding Challenge #76 (https://thecodingtrain.com/CodingChallenges/076-10print.html)
  * which he developed from the book 10 PRINT (https://10print.org/).
  */
+ {
 
-class TenPrint {
+	function TenPrint() {
+		const me = this;
+		this.title = '10 PRINT';
+		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
+			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
+				me.zoomOut = this.value;
+				me.generate(true);
+			});
 
-	constructor() {
-		this.angle = Math.atan(1 / 0.936);
+			optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
+				me.angle = this.value * Math.PI / 180;
+				me.generate(true);
+			});
+			return optionsDoc;
+		});
+
+		this.angle = Math.atan2(1, 0.936);
 		this.zoomOut = 1;
 		// Probability of a cell being left blank
 		this.blankProbability = 0;
@@ -21,25 +35,29 @@ class TenPrint {
 		this.strokeRatio = 0.125;
 	}
 
-	readProperties() {
+	backgroundGenerators.set('ten-print', new TenPrint());
 
-	}
-
-	generate(canvas) {
+	TenPrint.prototype.generate = function (preview) {
+		const beginTime = performance.now();
+		const canvas = document.getElementById('background-canvas');
 		const context = canvas.getContext('2d');
+		context.clearRect(0, 0, canvas.width, canvas.height);
 		const cellsDownScreen = 25;
-		const tan = Math.tan(this.angle);
+		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);
 		const zoom = this.zoomOut / sqrTan;
 
 		const canvasHeight = canvas.height;
 		const heightProportion = canvasHeight / screen.height;
 		let cellsDownCanvas = heightProportion * cellsDownScreen * zoom;
-		const cellHeight = Math.max(Math.round(canvasHeight / cellsDownCanvas), 2);
-		cellsDownCanvas = Math.round(canvasHeight / cellHeight);
+		const cellHeight = Math.min(Math.max(Math.round(canvasHeight / cellsDownCanvas), 2), canvasHeight);
+		cellsDownCanvas = Math.max(Math.round(canvasHeight / cellHeight), 1);
 
 		const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
-		const cellsAcrossCanvas = Math.max(Math.round(canvas.width / cellWidth), 1);
+		let cellsAcrossCanvas = Math.max(Math.round(canvas.width / cellWidth), 1);
+		if (preview && cellsAcrossCanvas > 200) {
+			cellsAcrossCanvas = 200;
+		}
 
 		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
 
@@ -100,6 +118,9 @@ class TenPrint {
 					context.closePath();
 				}
 				context.fill();
+			}
+			if (preview && yBottom >= 480 && performance.now() >= beginTime + 20) {
+				break;
 			}
 		}
 	}

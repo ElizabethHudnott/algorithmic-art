@@ -10,14 +10,41 @@
 		this.title = '10 PRINT';
 		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
 			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
-				me.zoomOut = this.value;
-				me.generate(true);
+				me.zoomOut = parseFloat(this.value);
+				progressiveBackgroundGen(me);
 			});
 
 			optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
-				me.angle = this.value * Math.PI / 180;
-				me.generate(true);
+				me.angle = parseFloat(this.value) * Math.PI / 180;
+				progressiveBackgroundGen(me);
 			});
+
+			optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
+				me.strokeRatio = parseFloat(this.value);
+				progressiveBackgroundGen(me);
+			});
+
+			optionsDoc.getElementById('ten-print-gap-probability').addEventListener('input', function (event) {
+				me.blankProbability = parseFloat(this.value);
+				progressiveBackgroundGen(me);
+			});
+
+			optionsDoc.getElementById('ten-print-probability').addEventListener('input', function (event) {
+				me.probability = parseFloat(this.value);
+				progressiveBackgroundGen(me);
+			});
+
+			function changeColor(index) {
+				return function (event) {
+					me.colors[index] = this.value;
+					progressiveBackgroundGen(me);
+				};
+			}
+
+			optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
+				item.addEventListener('input', changeColor(index));
+			});
+
 			return optionsDoc;
 		});
 
@@ -27,21 +54,17 @@
 		this.blankProbability = 0;
 		// Probability of a forward slash given not blank
 		this.probability = 0.5;
-		// Forward slash style
-		this.stroke1Style = '#887ecb';
-		// Backslash style
-		this.stroke2Style = '#887ecb';
+		this.colors = ['#887ecb', '#887ecb', '#887ecb', '#887ecb'];
 		// Stroke width as a proportion of the cell's area.
-		this.strokeRatio = 0.125;
+		this.strokeRatio = 0.12;
 	}
 
 	backgroundGenerators.set('ten-print', new TenPrint());
 
-	TenPrint.prototype.generate = function (preview) {
+	TenPrint.prototype.generate = function* () {
 		const beginTime = performance.now();
 		const canvas = document.getElementById('background-canvas');
 		const context = canvas.getContext('2d');
-		context.clearRect(0, 0, canvas.width, canvas.height);
 		const cellsDownScreen = 25;
 		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);
@@ -53,11 +76,17 @@
 		const cellHeight = Math.min(Math.max(Math.round(canvasHeight / cellsDownCanvas), 2), canvasHeight);
 		cellsDownCanvas = Math.max(Math.round(canvasHeight / cellHeight), 1);
 
+		const canvasWidth = canvas.width;
 		const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
-		let cellsAcrossCanvas = Math.max(Math.round(canvas.width / cellWidth), 1);
-		if (preview && cellsAcrossCanvas > 200) {
-			cellsAcrossCanvas = 200;
-		}
+		const cellsAcrossCanvas = Math.max(Math.round(canvasWidth / cellWidth), 1);
+
+		const diagonalDist = Math.sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
+		const style1 = context.createRadialGradient(0, canvasHeight, 0, 0, canvasHeight, diagonalDist);
+		style1.addColorStop(0, this.colors[0]);
+		style1.addColorStop(1, this.colors[1]);
+		const style2 = context.createRadialGradient(canvasWidth, canvasHeight, 0, canvasWidth, canvasHeight, diagonalDist);
+		style2.addColorStop(0, this.colors[3]);
+		style2.addColorStop(1, this.colors[2]);
 
 		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
 
@@ -71,10 +100,15 @@
 
 		let blankRunLength = 0;
 		let blankDiffusion = 0;
+		context.clearRect(0, 0, canvasWidth, canvasHeight);
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 			const yTop = cellY * cellHeight;
 			const yBottom = yTop + cellHeight;
-			blankRunLength = 0;
+
+			if (blankSpacing > 1) {
+				blankRunLength = 0;
+			}
+
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 				const cellNumber = cellX + cellY * spacingShift + 1;
 				const randomBlank = Math.random();
@@ -102,7 +136,7 @@
 
 				if (p < this.probability) {
 					// Forward slash
-					context.fillStyle = this.stroke1Style;
+					context.fillStyle = style1;
 					context.moveTo(xLeft, yBottom - lineWidth);
 					context.lineTo(xRight, yTop - lineWidth);
 					context.lineTo(xRight, yTop + lineWidth);
@@ -110,7 +144,7 @@
 					context.closePath();
 				} else {
 					// Backslash
-					context.fillStyle = this.stroke2Style;
+					context.fillStyle = style2;
 					context.moveTo(xLeft, yTop - lineWidth);
 					context.lineTo(xRight, yBottom - lineWidth);
 					context.lineTo(xRight, yBottom + lineWidth);
@@ -119,8 +153,8 @@
 				}
 				context.fill();
 			}
-			if (preview && yBottom >= 480 && performance.now() >= beginTime + 20) {
-				break;
+			if (cellY % 20 === 19 && performance.now() >= beginTime + 20) {
+				yield;
 			}
 		}
 	}

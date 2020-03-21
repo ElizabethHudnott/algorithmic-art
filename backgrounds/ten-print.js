@@ -90,12 +90,27 @@
 
 		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
 
-		const blankSpacing = Math.max(Math.trunc(1 / this.blankProbability), 1);
-		let spacingShift = Math.ceil(blankSpacing / 2);
-		while (blankSpacing % spacingShift === 0 && spacingShift > 1) {
-			spacingShift--;
+		let blankProbability = this.blankProbability;
+		let blankSpacing = blankProbability === 0 ? 0 : Math.max(Math.trunc(1 / blankProbability), 1);
+		let spacingShift;
+		if (blankProbability < 0.06 && this.zoomOut > 3) {
+			blankSpacing = 1;
+			spacingShift = 0;
+		} else {
+			const halfBlankSpacing = Math.trunc(blankSpacing / 2);
+			let bestSpacingShift = 1;
+			let maxRemainder = 0;
+			for (spacingShift = 2; spacingShift <= halfBlankSpacing; spacingShift++) {
+				const remainder = blankSpacing % spacingShift;
+				if (remainder > maxRemainder) {
+					bestSpacingShift = spacingShift;
+					maxRemainder = remainder;
+				}
+			}
+			spacingShift = bestSpacingShift;
 		}
-		const blankProbability =  this.blankProbability * blankSpacing;
+
+		blankProbability =  this.blankProbability * blankSpacing;
 		const maxBlankRun = Math.round(1 / (1 - this.blankProbability) + 0.49) - 1;
 
 		let blankRunLength = 0;

@@ -88,7 +88,9 @@
 		style2.addColorStop(0, this.colors[3]);
 		style2.addColorStop(1, this.colors[2]);
 
-		const lineWidth = Math.max(Math.round(0.5 * this.strokeRatio * cellHeight / sqrTan), 1);
+		const lineWidth = Math.max(Math.round(this.strokeRatio * cellHeight / sqrTan) / 2, 0.5);
+		const lineWidth1 = Math.trunc(lineWidth);
+		const lineWidth2 = Math.ceil(lineWidth);
 
 		let blankProbability = this.blankProbability;
 		let blankSpacing = blankProbability === 0 ? 0 : Math.max(Math.trunc(1 / blankProbability), 1);
@@ -152,18 +154,18 @@
 				if (p < this.probability) {
 					// Forward slash
 					context.fillStyle = style1;
-					context.moveTo(xLeft, yBottom - lineWidth);
-					context.lineTo(xRight, yTop - lineWidth);
-					context.lineTo(xRight, yTop + lineWidth);
-					context.lineTo(xLeft, yBottom + lineWidth);
+					context.moveTo(xLeft, yBottom - lineWidth1);
+					context.lineTo(xRight, yTop - lineWidth1);
+					context.lineTo(xRight, yTop + lineWidth2);
+					context.lineTo(xLeft, yBottom + lineWidth2);
 					context.closePath();
 				} else {
 					// Backslash
 					context.fillStyle = style2;
-					context.moveTo(xLeft, yTop - lineWidth);
-					context.lineTo(xRight, yBottom - lineWidth);
-					context.lineTo(xRight, yBottom + lineWidth);
-					context.lineTo(xLeft, yTop + lineWidth);
+					context.moveTo(xLeft, yTop - lineWidth1);
+					context.lineTo(xRight, yBottom - lineWidth1);
+					context.lineTo(xRight, yBottom + lineWidth2);
+					context.lineTo(xLeft, yTop + lineWidth2);
 					context.closePath();
 				}
 				context.fill();

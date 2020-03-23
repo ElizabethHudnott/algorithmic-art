@@ -6,15 +6,18 @@
 		this.title = 'Sierpinski Carpet';
 		this.maxDepth = 6;
 		const colors = [];
-		colors[0] = 'rgba(0, 0, 104, 0.55)';
-		colors[1] = 'rgba(220, 220, 200, 0.5)';
-		colors[2] = colors[0];
-		colors[3] = colors[1];
-		colors[4] = colors[0];
-		colors[5] = colors[1];
-		colors[6] = colors[0];
-		colors[7] = colors[1];
+
+		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
+		colors[1] = 'hsla(  0, 100%, 80%, 0.5)';
+		colors[2] = 'hsla( 30, 100%, 80%, 0.5)';
+
+		colors[7] = 'hsla(330, 100%, 50%, 0.5)';
 		colors[8] = 'black';
+		colors[3] = 'hsla( 30, 100%, 50%, 0.5)';
+
+		colors[6] = 'hsla(330, 100%, 20%, 0.5)';
+		colors[5] = 'hsla(  0, 100%, 20%, 0.5)';
+		colors[4] = 'hsla( 30, 100%, 20%, 0.5)';
 		this.colors = colors;
 	}
 
@@ -40,11 +43,15 @@
 				break;
 			}
 			for (let tile of queue) {
-				const x = Math.round(tile.x);
-				const y = Math.round(tile.y);
+				const x = tile.x;
+				const y = tile.y;
 				if (depth < 4) {
 					context.fillStyle = tile.color;
-					context.fillRect(x, y, prevSideLength, prevSideLength);
+					const roundedX = Math.trunc(x);
+					const roundedY = Math.trunc(y);
+					const roundedWidth = Math.ceil(prevSideLength + x - roundedX);
+					const roundedHeight = Math.ceil(prevSideLength + y - roundedY);
+					context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 					context.fillStyle = colors[8];
 				}
 

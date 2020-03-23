@@ -82,11 +82,11 @@
 
 		const diagonalDist = Math.sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
 		const style1 = context.createRadialGradient(0, canvasHeight, 0, 0, canvasHeight, diagonalDist);
-		style1.addColorStop(0, this.colors[0]);
+		style1.addColorStop(0, this.colors[2]);
 		style1.addColorStop(1, this.colors[1]);
 		const style2 = context.createRadialGradient(canvasWidth, canvasHeight, 0, canvasWidth, canvasHeight, diagonalDist);
 		style2.addColorStop(0, this.colors[3]);
-		style2.addColorStop(1, this.colors[2]);
+		style2.addColorStop(1, this.colors[0]);
 
 		const lineWidth = Math.max(Math.round(this.strokeRatio * cellHeight / sqrTan) / 2, 0.5);
 		const lineWidth1 = Math.trunc(lineWidth);

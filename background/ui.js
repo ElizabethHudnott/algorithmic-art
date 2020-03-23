@@ -50,7 +50,9 @@ function generateBackground() {
 }
 
 function progressiveBackgroundGen(generator) {
-	const redraw = generator.generate();
+	const beginTime = performance.now();
+	const context = canvas.getContext('2d');
+	const redraw = generator.generate(beginTime, canvas, context);
 	backgroundRedraw = redraw;
 	let done = false;
 	function drawSection() {
@@ -68,15 +70,21 @@ function switchBackgroundGenerator(name) {
 	backgroundGeneratorFactory(name).then(function (gen) {
 		bgGenerator = gen;
 		generateBackground();
-		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
-		gen.optionsDocument.then(function (optionsDoc) {
-			const container = document.getElementById('background-gen-options');
-			container.innerHTML = '';
-			const elements = optionsDoc.body.children;
-			while (elements.length > 0) {
-				container.appendChild(elements[0]);
-			}
-		});
+		const optionsDocPromise = gen.optionsDocument;
+		if (optionsDocPromise === undefined) {
+			document.getElementById('btn-background-gen-options').disabled = true;
+		} else {
+			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
+			optionsDocPromise.then(function (optionsDoc) {
+				const container = document.getElementById('background-gen-options');
+				container.innerHTML = '';
+				const elements = optionsDoc.body.children;
+				while (elements.length > 0) {
+					container.appendChild(elements[0]);
+				}
+				document.getElementById('btn-background-gen-options').disabled = false;
+			});
+		}
 	});
 }
 

@@ -61,10 +61,7 @@
 
 	backgroundGenerators.set('ten-print', new TenPrint());
 
-	TenPrint.prototype.generate = function* () {
-		const beginTime = performance.now();
-		const canvas = document.getElementById('background-canvas');
-		const context = canvas.getContext('2d');
+	TenPrint.prototype.generate = function* (beginTime, canvas, context) {
 		const cellsDownScreen = 25;
 		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);

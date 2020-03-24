@@ -3,8 +3,41 @@
 	<div class="col-3 col-form-label">
 		<label for="carpet-depth">Depth</label>
 	</div>
-	<div class="col-7">
+	<div class="col-6">
 		<input id="carpet-depth" class="form-control" type="number" min="0" value="4">
+	</div>
+</div>
+
+<div class="form-row mb-3">
+	<div class="col-1"></div>
+	<div class="col-3">Colour Mixing</div>
+	<div class="col-6">
+		<select id="carpet-composition-op" class="form-control">
+			<option value="source-over">Source Over</option>
+			<option value="destination-over">Destination Over</option>
+			<option value="lighter">Lighter (+)</option>
+			<option value="lighten">Lightest (max)</option>
+			<option value="darken">Darkest (min)</option>
+			<option value="xor">XOR</option>
+			<option value="multiply">Multiply</option>
+			<option value="screen">Screen</option>
+			<option value="overlay">Overlay</option>
+			<option value="color-dodge">Colour Dodge</option>
+			<option value="color-burn">Colour Burn</option>
+			<option value="hard-light">Hard Light</option>
+			<option value="soft-light">Soft Light</option>
+			<option value="difference">Difference</option>
+			<option value="exclusion">Exclusion</option>
+			<option value="hue">Hue</option>
+			<option value="saturation">Saturation</option>
+			<option value="color">Hue &amp; Saturation</option>
+			<option value="luminosity">Luminosity</option>
+		</select>
+	</div>
+	<div class="col-1">
+		<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank">
+			<img src="../img/help.png">
+		</a>
 	</div>
 </div>
 
@@ -14,10 +47,10 @@
 	<div class="col-2">
 		<input type="color" value="#ffffff">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-center">
 		<input type="color" value="#ffffff">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-right">
 		<input type="color" value="#ffffff">
 	</div>
 </div>
@@ -27,10 +60,10 @@
 	<div class="col-2">
 		<input type="color" value="#ffffff">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-center">
 		<input type="color" value="#000000">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-right">
 		<input type="color" value="#ffffff">
 	</div>
 </div>
@@ -40,10 +73,10 @@
 	<div class="col-2">
 		<input type="color" value="#ffffff">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-center">
 		<input type="color" value="#ffffff">
 	</div>
-	<div class="col-2">
+	<div class="col-2 text-right">
 		<input type="color" value="#ffffff">
 	</div>
 </div>

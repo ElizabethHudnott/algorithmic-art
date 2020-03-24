@@ -13,6 +13,11 @@
 				progressiveBackgroundGen(me);
 			});
 
+			optionsDoc.getElementById('carpet-composition-op').addEventListener('input', function (event) {
+				me.compositionOp = this.value;
+				progressiveBackgroundGen(me);
+			});
+
 			function changeColor(index) {
 				return function (event) {
 					const [r, g, b] = hexToRGB(this.value);
@@ -30,8 +35,9 @@
 
 
 		this.maxDepth = 4;
-		const colors = [];
+		this.compositionOp = 'source-over';
 
+		const colors = [];
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
 		colors[1] = 'hsla(240, 100%, 80%, 0.5)';
 		colors[2] = 'hsla( 30, 100%, 80%, 0.5)';
@@ -61,7 +67,7 @@
 		let nextQueue = [];
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
-		context.globalCompositeOperation = 'soft-light';
+		context.globalCompositeOperation = this.compositionOp;
 
 		for (let depth = 0; depth <= this.maxDepth; depth++) {
 			let sideLength = outerSize / 3 ** (depth + 1);

@@ -114,7 +114,6 @@
 
 		let blankRunLength = 0;
 		let blankDiffusion = 0;
-		context.clearRect(0, 0, canvasWidth, canvasHeight);
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 			const yTop = cellY * cellHeight;
 			const yBottom = yTop + cellHeight;

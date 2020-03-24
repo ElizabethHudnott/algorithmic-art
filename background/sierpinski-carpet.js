@@ -3,21 +3,46 @@
 {
 
 	function SierpinskiCarpet() {
+		const me = this;
 		this.title = 'Sierpinski Carpet';
-		this.maxDepth = 6;
+
+		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
+
+			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
+				me.maxDepth = this.value;
+				progressiveBackgroundGen(me);
+			});
+
+			function changeColor(index) {
+				return function (event) {
+					const [r, g, b] = hexToRGB(this.value);
+					me.colors[index] = rgba(r, g, b, 0.5);
+					progressiveBackgroundGen(me);
+				};
+			}
+
+			optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
+				item.addEventListener('input', changeColor(index));
+			});
+
+			return optionsDoc;
+		});
+
+
+		this.maxDepth = 4;
 		const colors = [];
 
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
-		colors[1] = 'hsla(  0, 100%, 80%, 0.5)';
+		colors[1] = 'hsla(240, 100%, 80%, 0.5)';
 		colors[2] = 'hsla( 30, 100%, 80%, 0.5)';
 
-		colors[7] = 'hsla(330, 100%, 50%, 0.5)';
-		colors[8] = 'black';
-		colors[3] = 'hsla( 30, 100%, 50%, 0.5)';
+		colors[3] = 'hsla(330, 90%, 50%, 0.5)';
+		colors[4] = 'black';
+		colors[5] = 'hsla( 30, 100%, 50%, 0.5)';
 
 		colors[6] = 'hsla(330, 100%, 20%, 0.5)';
-		colors[5] = 'hsla(  0, 100%, 20%, 0.5)';
-		colors[4] = 'hsla( 30, 100%, 20%, 0.5)';
+		colors[7] = 'hsla(  0, 100%, 20%, 0.5)';
+		colors[8] = 'hsla( 120, 100%, 20%, 0.5)';
 		this.colors = colors;
 	}
 
@@ -35,6 +60,7 @@
 		let queue = [new Tile(0, 0, 'transparent')];
 		let nextQueue = [];
 		let prevSideLength = outerSize;
+		let numProcessed = 0;
 		context.globalCompositeOperation = 'soft-light';
 
 		for (let depth = 0; depth <= this.maxDepth; depth++) {
@@ -47,12 +73,12 @@
 				const y = tile.y;
 				if (depth < 4) {
 					context.fillStyle = tile.color;
-					const roundedX = Math.trunc(x);
-					const roundedY = Math.trunc(y);
-					const roundedWidth = Math.ceil(prevSideLength + x - roundedX);
-					const roundedHeight = Math.ceil(prevSideLength + y - roundedY);
+					const roundedX = Math.round(x);
+					const roundedY = Math.round(y);
+					const roundedWidth = Math.round(prevSideLength + x - roundedX);
+					const roundedHeight = Math.round(prevSideLength + y - roundedY);
 					context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
-					context.fillStyle = colors[8];
+					context.fillStyle = colors[4];
 				}
 
 				const centreX = x + sideLength;
@@ -66,11 +92,17 @@
 				nextQueue.push(new Tile(x, y, colors[0]));
 				nextQueue.push(new Tile(x + sideLength, y, colors[1]));
 				nextQueue.push(new Tile(x + 2 * sideLength, y, colors[2]));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + sideLength, colors[3]));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, colors[4]));
-				nextQueue.push(new Tile(x + sideLength, y + 2 * sideLength, colors[5]));
+				nextQueue.push(new Tile(x, y + sideLength, colors[3]));
+				nextQueue.push(new Tile(x + 2 * sideLength, y + sideLength, colors[5]));
 				nextQueue.push(new Tile(x, y + 2 * sideLength, colors[6]));
-				nextQueue.push(new Tile(x, y + sideLength, colors[7]));
+				nextQueue.push(new Tile(x + sideLength, y + 2 * sideLength, colors[7]));
+				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, colors[8]));
+
+				numProcessed++;
+				if (numProcessed % 4700 === 0 && performance.now() >= beginTime + 20) {
+					yield;
+				}
+
 			}
 			queue = nextQueue;
 			nextQueue = [];

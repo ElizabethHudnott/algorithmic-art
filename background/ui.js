@@ -46,14 +46,14 @@ const canvas = document.getElementById('background-canvas');
 function generateBackground() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	progressiveBackgroundGen(bgGenerator);
+	progressiveBackgroundGen(bgGenerator, false);
 }
 
-function progressiveBackgroundGen(generator) {
+function progressiveBackgroundGen(generator, preview) {
 	const beginTime = performance.now();
 	const context = canvas.getContext('2d');
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	const redraw = generator.generate(beginTime, canvas, context);
+	const redraw = generator.generate(beginTime, canvas, context, preview);
 	backgroundRedraw = redraw;
 	let done = false;
 	function drawSection() {

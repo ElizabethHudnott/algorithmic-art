@@ -10,25 +10,36 @@
 
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
 				me.maxDepth = this.value;
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, false);
 			});
 
 			optionsDoc.getElementById('carpet-composition-op').addEventListener('input', function (event) {
 				me.compositionOp = this.value;
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, false);
 			});
 
-			function changeColor(index) {
+			const colorControls = optionsDoc.querySelectorAll('input[type=color]');
+			const opacitySliders = Array.from(optionsDoc.getElementsByClassName('carpet-opacity'));
+
+			function changeColor(index, preview) {
 				return function (event) {
-					const [r, g, b] = hexToRGB(this.value);
-					me.colors[index] = rgba(r, g, b, 0.5);
-					progressiveBackgroundGen(me);
+					const [r, g, b] = hexToRGB(colorControls[index].value);
+					const alpha = parseFloat(opacitySliders[index].value);
+					me.colors[index] = rgba(r, g, b, alpha);
+					progressiveBackgroundGen(me, preview);
 				};
 			}
 
-			optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
-				item.addEventListener('input', changeColor(index));
+			colorControls.forEach(function (item, index) {
+				item.addEventListener('input', changeColor(index, false));
 			});
+
+			for (let i = 0; i < opacitySliders.length; i++) {
+				opacitySliders[i].addEventListener('input', changeColor(i, true));
+				opacitySliders[i].addEventListener('mouseup', function (event) {
+					progressiveBackgroundGen(me, false);
+				});
+			};
 
 			return optionsDoc;
 		});
@@ -37,18 +48,22 @@
 		this.maxDepth = 4;
 		this.compositionOp = 'source-over';
 
-		const colors = [];
+		const colors = new Array(9);
+		colors.fill('#ffffff80');
+		colors[4] = 'black';
+
+		/*
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
 		colors[1] = 'hsla(240, 100%, 80%, 0.5)';
 		colors[2] = 'hsla( 30, 100%, 80%, 0.5)';
-
 		colors[3] = 'hsla(330, 90%, 50%, 0.5)';
 		colors[4] = 'black';
 		colors[5] = 'hsla( 30, 100%, 50%, 0.5)';
-
 		colors[6] = 'hsla(330, 100%, 20%, 0.5)';
 		colors[7] = 'hsla(  0, 100%, 20%, 0.5)';
 		colors[8] = 'hsla( 120, 100%, 20%, 0.5)';
+		*/
+
 		this.colors = colors;
 	}
 
@@ -60,7 +75,7 @@
 		this.color = color;
 	}
 
-	SierpinskiCarpet.prototype.generate = function* (beginTime, canvas, context) {
+	SierpinskiCarpet.prototype.generate = function* (beginTime, canvas, context, preview) {
 		const outerSize = Math.min(canvas.width, canvas.height);
 		const colors = this.colors;
 		let queue = [new Tile(0, 0, 'transparent')];
@@ -69,7 +84,12 @@
 		let numProcessed = 0;
 		context.globalCompositeOperation = this.compositionOp;
 
-		for (let depth = 0; depth <= this.maxDepth; depth++) {
+		let maxDepth = this.maxDepth;
+		if (preview && maxDepth > 3) {
+			maxDepth = 3;
+		}
+
+		for (let depth = 0; depth <= maxDepth; depth++) {
 			let sideLength = outerSize / 3 ** (depth + 1);
 			if (sideLength < 1) {
 				break;
@@ -105,7 +125,7 @@
 				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, colors[8]));
 
 				numProcessed++;
-				if (numProcessed % 4700 === 0 && performance.now() >= beginTime + 20) {
+				if ((numProcessed & 511) === 511 && performance.now() >= beginTime + 20) {
 					yield;
 				}
 

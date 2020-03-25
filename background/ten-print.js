@@ -11,33 +11,33 @@
 		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
 			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
 				me.zoomOut = parseFloat(this.value);
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, true);
 			});
 
 			optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
 				me.angle = parseFloat(this.value) * Math.PI / 180;
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, true);
 			});
 
 			optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
 				me.strokeRatio = parseFloat(this.value);
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, true);
 			});
 
 			optionsDoc.getElementById('ten-print-gap-probability').addEventListener('input', function (event) {
 				me.blankProbability = parseFloat(this.value);
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, true);
 			});
 
 			optionsDoc.getElementById('ten-print-probability').addEventListener('input', function (event) {
 				me.probability = parseFloat(this.value);
-				progressiveBackgroundGen(me);
+				progressiveBackgroundGen(me, true);
 			});
 
 			function changeColor(index) {
 				return function (event) {
 					me.colors[index] = this.value;
-					progressiveBackgroundGen(me);
+					progressiveBackgroundGen(me, true);
 				};
 			}
 
@@ -61,7 +61,7 @@
 
 	backgroundGenerators.set('ten-print', new TenPrint());
 
-	TenPrint.prototype.generate = function* (beginTime, canvas, context) {
+	TenPrint.prototype.generate = function* (beginTime, canvas, context, preview) {
 		const cellsDownScreen = 25;
 		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);

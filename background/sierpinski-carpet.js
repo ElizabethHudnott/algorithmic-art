@@ -48,9 +48,9 @@
 		this.maxDepth = 4;
 		this.compositionOp = 'source-over';
 
-		const colors = new Array(9);
+		const colors = new Array(10);
 		colors.fill('#ffffff80');
-		colors[4] = 'black';
+		colors[9] = 'black';
 
 		/*
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
@@ -97,22 +97,24 @@
 			for (let tile of queue) {
 				const x = tile.x;
 				const y = tile.y;
-				if (depth < 4) {
-					context.fillStyle = tile.color;
-					const roundedX = Math.round(x);
-					const roundedY = Math.round(y);
-					const roundedWidth = Math.round(prevSideLength + x - roundedX);
-					const roundedHeight = Math.round(prevSideLength + y - roundedY);
-					context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
-					context.fillStyle = colors[4];
-				}
+				context.fillStyle = tile.color;
+				const roundedX = Math.round(x);
+				const roundedY = Math.round(y);
+				let roundedWidth = Math.round(prevSideLength + x - roundedX);
+				let roundedHeight = Math.round(prevSideLength + y - roundedY);
+				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+				context.fillStyle = colors[9];
 
 				const centreX = x + sideLength;
 				const centreY = y + sideLength;
 				const roundedCentreX = Math.round(centreX);
 				const roundedCentreY = Math.round(centreY);
-				const roundedWidth = Math.round(sideLength + centreX - roundedCentreX);
-				const roundedHeight = Math.round(sideLength + centreY - roundedCentreY);
+				roundedWidth = Math.round(sideLength + centreX - roundedCentreX);
+				roundedHeight = Math.round(sideLength + centreY - roundedCentreY);
+				if (roundedWidth <= 1 || roundedHeight <=1) {
+					roundedWidth = 1;
+					roundedHeight = 1;
+				}
 				context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 
 				nextQueue.push(new Tile(x, y, colors[0]));
@@ -134,6 +136,7 @@
 			nextQueue = [];
 			prevSideLength = sideLength;
 		}
-	}
+	};
+
 
 }

@@ -48,9 +48,9 @@
 		this.maxDepth = 4;
 		this.compositionOp = 'source-over';
 
-		const colors = new Array(10);
+		const colors = new Array(9);
 		colors.fill('#ffffff80');
-		colors[9] = 'black';
+		colors[4] = 'black';
 
 		/*
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
@@ -103,7 +103,6 @@
 				let roundedWidth = Math.round(prevSideLength + x - roundedX);
 				let roundedHeight = Math.round(prevSideLength + y - roundedY);
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
-				context.fillStyle = colors[9];
 
 				const centreX = x + sideLength;
 				const centreY = y + sideLength;
@@ -115,7 +114,14 @@
 					roundedWidth = 1;
 					roundedHeight = 1;
 				}
-				context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+				context.fillStyle = colors[4];
+				if (depth <= 2) {
+					const div = depth + 1;
+					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
+						Math.round(15 / div), Math.round(6 / div), Math.round(15 / div));
+				} else {
+					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+				}
 
 				nextQueue.push(new Tile(x, y, colors[0]));
 				nextQueue.push(new Tile(x + sideLength, y, colors[1]));
@@ -138,5 +144,46 @@
 		}
 	};
 
+	SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, size, fgSpacing, quadLength, bgSpacing) {
+		let combinedSpacing;
+		let currentSize = size;
+		let leftX = x;
+		let bottomY = y + size;
+		let rightX, topY, prevSpacing;
+		context.beginPath();
+		while (currentSize >= 2 * fgSpacing) {
+			combinedSpacing = fgSpacing + bgSpacing;
+			rightX = leftX + currentSize;
+			topY = bottomY - currentSize;
+			context.moveTo(leftX, bottomY);
+			context.lineTo(rightX, bottomY);
+			context.lineTo(rightX, topY);
+			context.lineTo(leftX, topY);
+			context.lineTo(leftX, bottomY);
+			context.lineTo(leftX + quadLength, bottomY);
+			context.lineTo(leftX + fgSpacing, topY + fgSpacing);
+			context.lineTo(rightX - fgSpacing, topY + fgSpacing);
+			context.lineTo(rightX - fgSpacing, bottomY - fgSpacing);
+			context.lineTo(leftX, bottomY - quadLength);
+			currentSize -= 2 * combinedSpacing;
+
+			prevSpacing = fgSpacing;
+			if (fgSpacing > 1) {
+				fgSpacing--;
+				if (quadLength > fgSpacing) {
+					quadLength = fgSpacing;
+				}
+			}
+			leftX += combinedSpacing;
+			bottomY -= combinedSpacing;
+		}
+		leftX -= combinedSpacing;
+		bottomY += combinedSpacing;
+		context.moveTo(rightX - prevSpacing, bottomY - prevSpacing);
+		context.lineTo(leftX + prevSpacing, bottomY - prevSpacing);
+		context.lineTo(leftX + prevSpacing, topY + prevSpacing);
+		context.lineTo(leftX, bottomY);
+		context.fill();
+	};
 
 }

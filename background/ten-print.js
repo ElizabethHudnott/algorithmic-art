@@ -61,19 +61,17 @@
 
 	backgroundGenerators.set('ten-print', new TenPrint());
 
-	TenPrint.prototype.generate = function* (beginTime, canvas, context, preview) {
+	TenPrint.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
 		const cellsDownScreen = 25;
 		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);
 		const zoom = this.zoomOut / sqrTan;
 
-		const canvasHeight = canvas.height;
 		const heightProportion = canvasHeight / screen.height;
 		let cellsDownCanvas = heightProportion * cellsDownScreen * zoom;
 		const cellHeight = Math.min(Math.max(Math.round(canvasHeight / cellsDownCanvas), 2), canvasHeight);
 		cellsDownCanvas = Math.max(Math.round(canvasHeight / cellHeight), 1);
 
-		const canvasWidth = canvas.width;
 		const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
 		const cellsAcrossCanvas = Math.max(Math.round(canvasWidth / cellWidth), 1);
 

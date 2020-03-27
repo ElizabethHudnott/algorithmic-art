@@ -75,8 +75,8 @@
 		this.color = color;
 	}
 
-	SierpinskiCarpet.prototype.generate = function* (beginTime, canvas, context, preview) {
-		const outerSize = Math.min(canvas.width, canvas.height);
+	SierpinskiCarpet.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
+		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
 		let queue = [new Tile(0, 0, 'transparent')];
 		let nextQueue = [];

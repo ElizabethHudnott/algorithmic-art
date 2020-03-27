@@ -1,7 +1,8 @@
 'use strict';
 
 const backgroundGenerators = new Map();
-let bgGenerator;
+const backgroundGenOptionsDOM = new Map();
+let bgGenerator, bgGeneratorName;
 let backgroundRedraw;
 
 function injectScript(src) {
@@ -52,8 +53,10 @@ function generateBackground() {
 function progressiveBackgroundGen(generator, preview) {
 	const beginTime = performance.now();
 	const context = canvas.getContext('2d');
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	const redraw = generator.generate(beginTime, canvas, context, preview);
+	const width = canvas.width;
+	const height = canvas.height;
+	context.clearRect(0, 0, width, height);
+	const redraw = generator.generate(beginTime, context, width, height, preview);
 	backgroundRedraw = redraw;
 	let done = false;
 	function drawSection() {
@@ -70,28 +73,63 @@ function progressiveBackgroundGen(generator, preview) {
 function switchBackgroundGenerator(name) {
 	backgroundGeneratorFactory(name).then(function (gen) {
 		bgGenerator = gen;
+		const prevGenName = bgGeneratorName;
+		bgGeneratorName = name;
 		generateBackground();
-		const optionsDocPromise = gen.optionsDocument;
-		if (optionsDocPromise === undefined) {
-			document.getElementById('btn-background-gen-options').disabled = true;
-		} else {
-			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
-			optionsDocPromise.then(function (optionsDoc) {
-				const container = document.getElementById('background-gen-options');
-				container.innerHTML = '';
-				const elements = optionsDoc.body.children;
-				while (elements.length > 0) {
-					container.appendChild(elements[0]);
-				}
-				document.getElementById('btn-background-gen-options').disabled = false;
-			});
+
+		const optionsButton = document.getElementById('btn-background-gen-options');
+		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
+
+		function attachOptionsDOM(dom) {
+			const container = document.getElementById('background-gen-options');
+			const oldDOM = backgroundGenOptionsDOM.get(prevGenName);
+			let elements = container.children;
+			while (elements.length > 0) {
+				const oldElement = container.removeChild(elements[0]);
+				oldDOM.appendChild(oldElement);
+			}
+			elements = dom.children;
+			while (elements.length > 0) {
+				container.appendChild(elements[0]);
+			}
 		}
+
+		// Try to get from cache first.
+		const dom = backgroundGenOptionsDOM.get(name);
+		if (dom !== undefined) {
+			attachOptionsDOM(dom);
+			optionsButton.disabled = false;
+		} else {
+			const optionsDocPromise = gen.optionsDocument;
+			if (optionsDocPromise === undefined) {
+				optionsButton.disabled = true;
+			} else {
+				optionsDocPromise.then(function (optionsDoc) {
+					const dom = optionsDoc.body;
+					attachOptionsDOM(dom);
+					optionsButton.disabled = false;
+					backgroundGenOptionsDOM.set(name, dom);
+				});
+			}
+		}
+
 	});
 }
 
 const urlParameters = new URLSearchParams(document.location.search);
 {
-	let firstGenName = urlParameters.get('gen') || 'ten-print';
+	const generatorButtonContainer = document.getElementById('generators');
+	function generatorSwitcher(event) {
+		switchBackgroundGenerator(this.value);
+	}
+
+	for (let button of generatorButtonContainer.querySelectorAll('input')) {
+		button.addEventListener('click', generatorSwitcher);
+	}
+
+	const firstGenName = urlParameters.get('gen') || 'ten-print';
+	const generatorButton = checkInput(generatorButtonContainer, 'generator', firstGenName);
+	generatorButton.parentNode.classList.add('active');
 	switchBackgroundGenerator(firstGenName);
 }
 

@@ -4,6 +4,13 @@ body {
 }
 
 .floating {
-	opacity: 0.8;
+	opacity: 0.85;
 	position: absolute;
+}
+
+.opaque {
+	opacity: 1;
+}
+.emphasize-active .active {
+	font-weight: bold;
 }

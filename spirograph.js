@@ -31,16 +31,6 @@ let drawingMouseDown = false; // When true then we draw while mouse button is he
 let numPointsInPath = 0; // Number of points in the current freehand path
 let compositionOp = 'multiply';
 
-function parseFraction(text) {
-	const numerator = parseFloat(text);
-	let denominator = 1;
-	const slashPosition = text.indexOf('/');
-	if (slashPosition !== -1) {
-		denominator = parseInt(text.slice(slashPosition + 1));
-	}
-	return numerator / denominator;
-}
-
 const drawButton = document.getElementById('btn-draw');
 const symmetryInput = document.getElementById('symmetry');
 let symmetry = parseInt(symmetryInput.value);
@@ -857,31 +847,6 @@ function drawSpirographAction() {
 	animController = drawSpirograph(description);
 	animController.promise = animController.promise.then(drawingEnded, drawingEnded);
 	updateNumberOfPoints();
-}
-
-function focusFirst() {
-	const element = this.querySelector('input:enabled:not(:read-only):not([display=none])');
-	if (element.type === 'radio') {
-		const selected = queryChecked(this, element.name);
-		if (selected === null) {
-			element.focus();
-		} else {
-			selected.focus();
-		}
-	} else {
-		element.focus();
-		if (element.select instanceof Function) {
-			element.select();
-		}
-	}
-}
-
-function queryChecked(ancestor, name) {
-	return ancestor.querySelector(`:checked[name=${name}]`);
-}
-
-function checkInput(ancestor, name, value) {
-	ancestor.querySelector(`[name=${name}][value=${value}]`).checked = true;
 }
 
 drawButton.addEventListener('click', function (event) {

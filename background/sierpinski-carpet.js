@@ -115,10 +115,10 @@
 					roundedHeight = 1;
 				}
 				context.fillStyle = colors[4];
-				if (depth <= 2) {
-					const div = depth + 1;
+				if (depth <= 3) {
+					const div = 3 ** depth;
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
-						Math.round(15 / div), Math.round(6 / div), Math.round(15 / div));
+						Math.round(24 / div), Math.max(Math.round(9 / div), 1), Math.round(27 / div));
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}
@@ -149,7 +149,7 @@
 		let currentSize = size;
 		let leftX = x;
 		let bottomY = y + size;
-		let rightX, topY, prevSpacing;
+		let rightX, topY, prevSpacing, corner1, corner2;
 		context.beginPath();
 		while (currentSize >= 2 * fgSpacing) {
 			combinedSpacing = fgSpacing + bgSpacing;
@@ -161,9 +161,11 @@
 			context.lineTo(leftX, topY);
 			context.lineTo(leftX, bottomY);
 			context.lineTo(leftX + quadLength, bottomY);
-			context.lineTo(leftX + fgSpacing, topY + fgSpacing);
+			corner1 = topY + fgSpacing - Math.round(0.02 * fgSpacing * fgSpacing);
+			context.lineTo(leftX + fgSpacing, corner1);
 			context.lineTo(rightX - fgSpacing, topY + fgSpacing);
-			context.lineTo(rightX - fgSpacing, bottomY - fgSpacing);
+			corner2 = bottomY - Math.round(fgSpacing * 0.75);
+			context.lineTo(rightX - fgSpacing, corner2);
 			context.lineTo(leftX, bottomY - quadLength);
 			currentSize -= 2 * combinedSpacing;
 
@@ -179,9 +181,11 @@
 		}
 		leftX -= combinedSpacing;
 		bottomY += combinedSpacing;
-		context.moveTo(rightX - prevSpacing, bottomY - prevSpacing);
-		context.lineTo(leftX + prevSpacing, bottomY - prevSpacing);
+		context.moveTo(rightX - prevSpacing, corner2);
+		context.lineTo(leftX + prevSpacing, corner2);
 		context.lineTo(leftX + prevSpacing, topY + prevSpacing);
+		context.lineTo(rightX - prevSpacing, topY + prevSpacing);
+		context.lineTo(leftX + prevSpacing, corner1);
 		context.lineTo(leftX, bottomY);
 		context.fill();
 	};

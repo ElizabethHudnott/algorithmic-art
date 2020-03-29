@@ -18,6 +18,20 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
+				item.addEventListener('input', function (event) {
+					me.filling = this.value;
+					progressiveBackgroundGen(me, false);
+				})
+			});
+
+			optionsDoc.querySelectorAll('input[name=carpet-mid-compose-op]').forEach(function (item) {
+				item.addEventListener('input', function (event) {
+					me.centreCompositionOp = this.value;
+					progressiveBackgroundGen(me, false);
+				})
+			});
+
 			const colorControls = optionsDoc.querySelectorAll('input[type=color]');
 			const opacitySliders = Array.from(optionsDoc.getElementsByClassName('carpet-opacity'));
 
@@ -47,6 +61,8 @@
 
 		this.maxDepth = 4;
 		this.compositionOp = 'source-over';
+		this.filling = 0;
+		this.centreCompositionOp = '';
 
 		const colors = new Array(9);
 		colors.fill('#ffffff80');
@@ -82,7 +98,11 @@
 		let nextQueue = [];
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
-		context.globalCompositeOperation = this.compositionOp;
+
+		let centreCompositionOp = this.centreCompositionOp;
+		if (centreCompositionOp === '') {
+			centreCompositionOp = this.compositionOp;
+		}
 
 		let maxDepth = this.maxDepth;
 		if (preview && maxDepth > 3) {
@@ -102,6 +122,7 @@
 				const roundedY = Math.round(y);
 				let roundedWidth = Math.round(prevSideLength + x - roundedX);
 				let roundedHeight = Math.round(prevSideLength + y - roundedY);
+				context.globalCompositeOperation = this.compositionOp;
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 
 				const centreX = x + sideLength;
@@ -115,7 +136,8 @@
 					roundedHeight = 1;
 				}
 				context.fillStyle = colors[4];
-				if (depth <= 3) {
+				context.globalCompositeOperation = centreCompositionOp;
+				if (this.filling > 0 && depth <= 3) {
 					const div = 3 ** depth;
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 						Math.round(24 / div), Math.max(Math.round(9 / div), 1), Math.round(27 / div));

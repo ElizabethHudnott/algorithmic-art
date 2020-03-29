@@ -1,6 +1,5 @@
 'use strict';
 
-const halfPI = Math.PI / 2;
 const hole1Distance = 0.1;
 const pointerSize = 4;
 const defaultCompositioOp = 'multiply';
@@ -151,7 +150,7 @@ function setFillStyle() {
 				gradientDirectionInput.reportValidity();
 				return false;
 			}
-			const theta = 2 * Math.PI * direction - halfPI;
+			const theta = 2 * Math.PI * direction - HALF_PI;
 			const xDistance = maxRadiusA * Math.cos(theta);
 			const yDistance = maxRadiusB * Math.sin(theta);
 			const x1 = translateX - xDistance;
@@ -437,7 +436,7 @@ function drawSpirograph(description) {
 			}
 
 			let shift = 0;
-			if (Math.abs(rotation) % halfPI === 0 && lineWidth % 2 === 1) {
+			if (Math.abs(rotation) % HALF_PI === 0 && lineWidth % 2 === 1) {
 				shift = 0.5 / scale;
 			}
 			spiroContext.rotate(rotation);
@@ -531,7 +530,7 @@ class Gear {
 		} else {
 			this.radiusA = arg2;
 			this.radiusB = arg2 * aspectRatio;
-			this.initialRotation = -halfPI;
+			this.initialRotation = -HALF_PI;
 		}
 	}
 }
@@ -629,9 +628,9 @@ class RackGear extends Gear {
 		context.beginPath();
 		context.moveTo(x - ra + rb, y - rb);
 		context.lineTo(x + ra - rb, y - rb);
-		context.arc(x + ra - rb, y, rb, -halfPI, halfPI);
+		context.arc(x + ra - rb, y, rb, -HALF_PI, HALF_PI);
 		context.lineTo(x - ra + rb, y + rb);
-		context.arc(x - ra + rb, y, rb, halfPI, -halfPI);
+		context.arc(x - ra + rb, y, rb, HALF_PI, -HALF_PI);
 		context.stroke();
 	}
 
@@ -1747,7 +1746,7 @@ function drawWithMouse(event) {
 	prevMouseTheta = mouseTheta;
 	[mouseR, mouseTheta] = rectToPolar(mouseX, mouseY);
 	if (mouseClickedX === undefined) {
-		mirrorAngle = Math.round((mouseTheta + halfPI) / symmetryAngle) * symmetryAngle - halfPI;
+		mirrorAngle = Math.round((mouseTheta + HALF_PI) / symmetryAngle) * symmetryAngle - HALF_PI;
 	}
 	mirrorMouseAngle = mouseTheta - mirrorAngle;
 

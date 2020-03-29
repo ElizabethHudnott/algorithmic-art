@@ -44,6 +44,7 @@ function backgroundGeneratorFactory(name) {
 
 
 const canvas = document.getElementById('background-canvas');
+canvas.getContext('2d').save();
 function generateBackground() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
@@ -55,7 +56,9 @@ function progressiveBackgroundGen(generator, preview) {
 	const context = canvas.getContext('2d');
 	const width = canvas.width;
 	const height = canvas.height;
+	context.restore();
 	context.clearRect(0, 0, width, height);
+	context.save();
 	const redraw = generator.generate(beginTime, context, width, height, preview);
 	backgroundRedraw = redraw;
 	let done = false;
@@ -128,8 +131,12 @@ const urlParameters = new URLSearchParams(document.location.search);
 	}
 
 	const firstGenName = urlParameters.get('gen') || 'ten-print';
-	const generatorButton = checkInput(generatorButtonContainer, 'generator', firstGenName);
-	generatorButton.parentNode.classList.add('active');
+	try {
+		const generatorButton = checkInput(generatorButtonContainer, 'generator', firstGenName);
+		generatorButton.parentNode.classList.add('active');
+	} catch (e) {
+		console.log(`Loaded experimental background generator ${firstGenName}. There is no UI button for activating this generator.`)
+	}
 	switchBackgroundGenerator(firstGenName);
 }
 

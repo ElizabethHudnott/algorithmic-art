@@ -3,15 +3,28 @@
 	<div class="col-3 col-form-label">
 		<label for="carpet-depth">Depth</label>
 	</div>
-	<div class="col-6">
-		<input id="carpet-depth" class="form-control" type="number" min="0" value="4">
+	<div class="col-3">
+		<div class="input-group">
+			<input id="carpet-depth" class="form-control" type="number" min="1" value="5" aria-label="Total depth" aria-describedby="carpet-depth-text">
+			<div class="input-group-append">
+				<span class="input-group-text" id="carpet-depth-text">total</span>
+			</div>
+		</div>
+	</div>
+	<div class="col-4">
+		<div class="input-group">
+			<input id="carpet-pattern-depth" class="form-control" type="number" min="0" value="4" aria-label="Pattern depth" aria-describedby="carpet-pattern-depth-text">
+			<div class="input-group-append">
+				<span class="input-group-text" id="carpet-pattern-depth-text">patterned</span>
+			</div>
+		</div>
 	</div>
 </div>
 
 <div class="form-row mb-3">
 	<div class="col-1"></div>
 	<div class="col-3">Colour Mixing</div>
-	<div class="col-6">
+	<div class="col-7">
 		<select id="carpet-composition-op" class="form-control">
 			<option value="source-over">Source Over</option>
 			<option value="destination-over">Destination Over</option>
@@ -44,6 +57,7 @@
 <div class="form-row mb-3">
 	<div class="col-1"></div>
 	<div class="col-3">Centre Pattern</div>
+	<div class="col-1"></div>
 	<div class="col-2">
 		<div class="form-check">
 			<input class="form-check-input" type="radio" name="carpet-filling" id="carpet-fill-block" value="0" checked>
@@ -61,6 +75,7 @@
 <div class="form-row mb-3">
 	<div class="col-1"></div>
 	<div class="col-3">Centre Mixing</div>
+	<div class="col-1"></div>
 	<div class="col-2">
 		<div class="form-check">
 			<input class="form-check-input" type="radio" name="carpet-mid-compose-op" id="carpet-mid-compose-op-same" value="" checked>

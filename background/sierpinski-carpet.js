@@ -9,7 +9,12 @@
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
-				me.maxDepth = this.value;
+				me.maxDepth = this.value - 1;
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
+				me.patternDepth = this.value - 1;
 				progressiveBackgroundGen(me, false);
 			});
 
@@ -60,9 +65,12 @@
 
 
 		this.maxDepth = 4;
+		this.patternDepth = 3;
 		this.compositionOp = 'source-over';
 		this.filling = 0;
 		this.centreCompositionOp = '';
+
+		this.fgSpacingFraction = 24 / 51;
 
 		const colors = new Array(9);
 		colors.fill('#ffffff80');
@@ -114,6 +122,10 @@
 			if (sideLength < 1) {
 				break;
 			}
+			const div = 3 ** depth;
+			const combinedSpacing = Math.round(51 / div);
+			const fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
+			const bgSpacing = combinedSpacing - fgSpacing;
 			for (let tile of queue) {
 				const x = tile.x;
 				const y = tile.y;
@@ -137,10 +149,9 @@
 				}
 				context.fillStyle = colors[4];
 				context.globalCompositeOperation = centreCompositionOp;
-				if (this.filling > 0 && depth <= 3) {
-					const div = 3 ** depth;
+				if (this.filling > 0 && depth <= this.patternDepth) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
-						Math.round(24 / div), Math.max(Math.round(9 / div), 1), Math.round(27 / div));
+						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}

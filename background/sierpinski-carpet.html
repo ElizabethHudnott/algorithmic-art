@@ -11,7 +11,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-4">
+	<div class="col-4 collapse" id="carpet-pattern-opts">
 		<div class="input-group">
 			<input id="carpet-pattern-depth" class="form-control" type="number" min="0" value="4" aria-label="Pattern depth" aria-describedby="carpet-pattern-depth-text">
 			<div class="input-group-append">
@@ -52,7 +52,7 @@
 		</select>
 	</div>
 	<div class="col-1">
-		<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank">
+		<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank" class="align-middle">
 			<img src="../img/help.png">
 		</a>
 	</div>
@@ -136,14 +136,16 @@
 	</div>
 </div>
 
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label" for="carpet-relative-spacing">
-			Centre Mix
-		</label>
-	</div>
-	<div class="col-6">
-		<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" id="carpet-relative-spacing">
+<div id="carpet-concentric-opts" class="collapse" aria-expanded="false">
+	<div class="form-row form-group">
+		<div class="col-1"></div>
+		<div class="col-3">
+			<label class="col-form-label" for="carpet-relative-spacing">
+				Centre Mix
+			</label>
+		</div>
+		<div class="col-6">
+			<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" id="carpet-relative-spacing">
+		</div>
 	</div>
 </div>

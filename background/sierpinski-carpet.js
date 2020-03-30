@@ -9,6 +9,9 @@
 
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
+			const patternOptions = optionsDoc.getElementById('carpet-pattern-opts');
+			const concentricOptions = optionsDoc.getElementById('carpet-concentric-opts');
+
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
 				me.maxDepth = parseInt(this.value) - 1;
 				progressiveBackgroundGen(me, false);
@@ -26,7 +29,10 @@
 
 			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
 				item.addEventListener('input', function (event) {
-					me.filling = this.value;
+					const filling = parseInt(this.value);
+					me.filling = filling;
+					$(patternOptions).collapse(filling > 0 ? 'show' : 'hide');
+					$(concentricOptions).collapse(filling === 1 ? 'show' : 'hide');
 					progressiveBackgroundGen(me, false);
 				})
 			});
@@ -41,9 +47,13 @@
 
 			function changeColor(index, preview) {
 				return function (event) {
-					const [r, g, b] = hexToRGB(colorControls[index].value);
+					const color = colorControls[index].value;
+					const [r, g, b] = hexToRGB(color);
 					const alpha = parseFloat(opacitySliders[index].value);
 					me.colors[index] = rgba(r, g, b, alpha);
+					if (index === 4) {
+						me.colors[9] = color;
+					}
 					progressiveBackgroundGen(me, preview);
 				};
 			}
@@ -76,9 +86,10 @@
 
 		this.fgSpacingFraction = 0.5;
 
-		const colors = new Array(9);
+		const colors = new Array(10);
 		colors.fill('#ffffff80');
 		colors[4] = 'black';
+		colors[9] = colors[4];
 
 		/*
 		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
@@ -149,9 +160,11 @@
 					roundedWidth = 1;
 					roundedHeight = 1;
 				}
-				context.fillStyle = colors[4];
 				if (depth <= this.centreEmphasis) {
 					context.globalCompositeOperation = 'source-over';
+					context.fillStyle = colors[9];
+				} else {
+					context.fillStyle = colors[4];
 				}
 				if (this.filling > 0 && depth <= this.patternDepth) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,

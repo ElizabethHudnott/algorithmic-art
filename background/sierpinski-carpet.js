@@ -9,6 +9,10 @@
 
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
+			function fullRedraw() {
+				progressiveBackgroundGen(me, false);
+			}
+
 			const patternOptions = optionsDoc.getElementById('carpet-pattern-opts');
 			const concentricOptions = optionsDoc.getElementById('carpet-concentric-opts');
 
@@ -64,15 +68,15 @@
 
 			for (let i = 0; i < opacitySliders.length; i++) {
 				opacitySliders[i].addEventListener('input', changeColor(i, true));
-				opacitySliders[i].addEventListener('mouseup', function (event) {
-					progressiveBackgroundGen(me, false);
-				});
+				opacitySliders[i].addEventListener('mouseup', fullRedraw);
 			};
 
-			optionsDoc.getElementById('carpet-relative-spacing').addEventListener('input', function (event) {
+			const fgSpacingSlider = optionsDoc.getElementById('carpet-relative-spacing');
+			fgSpacingSlider.addEventListener('input', function (event) {
 				me.fgSpacingFraction = parseFloat(this.value);
 				progressiveBackgroundGen(me, true);
 			});
+			fgSpacingSlider.addEventListener('mouseup', fullRedraw);
 
 			return optionsDoc;
 		});
@@ -183,7 +187,7 @@
 				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, colors[8]));
 
 				numProcessed++;
-				if ((numProcessed & 511) === 511 && performance.now() >= beginTime + 20) {
+				if ((numProcessed & 300) === 299 && performance.now() >= beginTime + 20) {
 					yield;
 				}
 

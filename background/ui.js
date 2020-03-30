@@ -116,6 +116,7 @@ function switchBackgroundGenerator(name) {
 			}
 		}
 
+		document.getElementById('btn-generate-background').disabled = !gen.hasRandomness;
 	});
 }
 

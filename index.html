@@ -203,26 +203,30 @@
 						</tr>
 						<tr class="row">
 							<td class="col-6 col-md-3 mb-3">
-								<label class="d-block mb-3">Rotor position</label>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-inside" value="inside" checked>
-									<label class="form-check-label" for="rotor-position-inside">Inside</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-outside" value="outside">
-									<label class="form-check-label" for="rotor-position-outside">Outside</label>
-								</div>
+								<fieldset>
+									<legend class="col-form-label">Rotor position</legend>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-inside" value="inside" checked>
+										<label class="form-check-label" for="rotor-position-inside">Inside</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-outside" value="outside">
+										<label class="form-check-label" for="rotor-position-outside">Outside</label>
+									</div>
+								</fieldset>
 							</td>
 							<td class="col-6 col-md-3 mb-3">
-								<label class="d-block mb-3">Rotor orientation</label>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="orientation" id="orientation-inward" value="inward" checked>
-									<label class="form-check-label" for="orientation-inward">Inward</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="orientation" id="orientation-outward" value="outward">
-									<label class="form-check-label" for="orientation-outward">Outward</label>
-								</div>
+								<fieldset>
+									<legend class="col-form-label">Rotor orientation</legend>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="orientation" id="orientation-inward" value="inward" checked>
+										<label class="form-check-label" for="orientation-inward">Inward</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="orientation" id="orientation-outward" value="outward">
+										<label class="form-check-label" for="orientation-outward">Outward</label>
+									</div>
+								</fieldset>
 							</td>
 							<td colspan="2" class="col-6 mb-3">
 								<label for="stator-radius">Scale</label>
@@ -267,24 +271,26 @@
 								</fieldset>
 							</td>
 							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<label class="d-block">End position</label>
-								<div class="input-group mb-2">
-									<div class="input-group-prepend">
-										<div class="input-group-text">
-											<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
+								<fieldset>
+									<legend class="col-form-label">End position</legend>
+									<div class="input-group mb-2">
+										<div class="input-group-prepend">
+											<div class="input-group-text">
+												<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
+											</div>
 										</div>
+										<label class="form-control input-group-text" for="end-point-auto">Finished shape</label>
 									</div>
-									<label class="form-control input-group-text" for="end-point-auto">Finished shape</label>
-								</div>
-								<div class="input-group">
-									<div class="input-group-prepend">
-										<div class="input-group-text">
-											<input type="radio" name="end-point" value="fixed" aria-label="Rotate around a specific number of times" id="end-point-numbered">
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<div class="input-group-text">
+												<input type="radio" name="end-point" value="fixed" aria-label="Rotate around a specific number of times" id="end-point-numbered">
+											</div>
+											<label class="form-control input-group-text" for="end-point-numbered">Number of revolutions</label>
 										</div>
-										<label class="form-control input-group-text" for="end-point-numbered">Number of revolutions</label>
+										<input type="number" id="revolutions" min="0" value="1" step="any" class="form-control" aria-label="Number of revolutions" placeholder="Number of revolutions">
 									</div>
-									<input type="number" id="revolutions" min="0" value="1" step="any" class="form-control" aria-label="Number of revolutions" placeholder="Number of revolutions">
-								</div>
+								</fieldset>
 							</td>
 						</tr>
 						<tr class="row">
@@ -293,27 +299,29 @@
 								<input type="range" class="form-control-range mt-2" id="anim-speed" min="0" max="100" value="60">
 							</td>
 							<td colspan="2" class="col-6 mb-3">
-								<label class="d-block">Translate stator by</label>
-								<div class="form-group input-group">
-									<div class="input-group-prepend">
-										<span class="input-group-text">x</span>
+								<fieldset>
+									<legend class="col-form-label">Translate stator by</legend>
+									<div class="form-group input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">x</span>
+										</div>
+										<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
+										<select class="form-control" id="translation-x-units">
+											<option>teeth</option>
+											<option>units</option>
+										</select>
 									</div>
-									<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
-									<select class="form-control" id="translation-x-units">
-										<option>teeth</option>
-										<option>units</option>
-									</select>
-								</div>
-								<div class="form-group input-group">
-									<div class="input-group-prepend">
-										<span class="input-group-text">y</span>
+									<div class="form-group input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">y</span>
+										</div>
+										<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
+										<select class="form-control" id="translation-y-units">
+											<option>teeth</option>
+											<option>units</option>
+										</select>
 									</div>
-									<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
-									<select class="form-control" id="translation-y-units">
-										<option>teeth</option>
-										<option>units</option>
-									</select>
-								</div>
+								</fieldset>
 							</td>
 						</tr>
 						<tr class="row">
@@ -341,42 +349,44 @@
 						</tr>
 						<tr class="row">
 							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<label class="d-block">Pen colour</label>
-								<div class="btn-group btn-group-toggle w-100 palette">
-									<div class="btn active" style="background-color: black">
-										<input type="radio" name="pen-color" value="black" checked>
+								<fieldset>
+									<legend class="col-form-label">Pen colour</legend>
+									<div class="btn-group btn-group-toggle w-100 palette">
+										<div class="btn active" style="background-color: black">
+											<input type="radio" name="pen-color" value="black" checked>
+										</div>
+										<div class="btn" style="background-color: hsl(2, 80%, 45%)">
+											<input type="radio" name="pen-color" value="hsl(2, 80%, 45%)">
+										</div>
+										<div class="btn" style="background-color: hsl(140, 70%, 30%)">
+											<input type="radio" name="pen-color" value="hsl(140, 70%, 30%)">
+										</div>
+										<div class="btn" style="background-color: hsl(230, 90%, 30%)">
+											<input type="radio" name="pen-color" value="hsl(230, 90%, 30%)">
+										</div>
+										<div class="btn" style="background-color: hsl(15, 97%, 48%)">
+											<input type="radio" name="pen-color" value="hsl(15, 97%, 48%)">
+										</div>
 									</div>
-									<div class="btn" style="background-color: hsl(2, 80%, 45%)">
-										<input type="radio" name="pen-color" value="hsl(2, 80%, 45%)">
+									<div class="btn-group btn-group-toggle w-100 palette mb-2">
+										<div class="btn" style="background-color: hsl(270, 95%, 35%)">
+											<input type="radio" name="pen-color" value="hsl(270, 95%, 35%)">
+										</div>
+										<div class="btn" style="background-color: hsl(207, 80%, 50%)">
+											<input type="radio" name="pen-color" value="hsl(207, 80%, 50%)">
+										</div>
+										<div class="btn" style="background-color: hsl(340, 80%, 45%)">
+											<input type="radio" name="pen-color" value="hsl(340, 80%, 45%)">
+										</div>
+										<div class="btn" style="background-color: hsl(96, 70%, 50%)">
+											<input type="radio" name="pen-color" value="hsl(96, 70%, 50%)">
+										</div>
+										<div class="btn btn-light p-0" style="min-width: 20%">
+											<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
+										</div>
 									</div>
-									<div class="btn" style="background-color: hsl(140, 70%, 30%)">
-										<input type="radio" name="pen-color" value="hsl(140, 70%, 30%)">
-									</div>
-									<div class="btn" style="background-color: hsl(230, 90%, 30%)">
-										<input type="radio" name="pen-color" value="hsl(230, 90%, 30%)">
-									</div>
-									<div class="btn" style="background-color: hsl(15, 97%, 48%)">
-										<input type="radio" name="pen-color" value="hsl(15, 97%, 48%)">
-									</div>
-								</div>
-								<div class="btn-group btn-group-toggle w-100 palette mb-2">
-									<div class="btn" style="background-color: hsl(270, 95%, 35%)">
-										<input type="radio" name="pen-color" value="hsl(270, 95%, 35%)">
-									</div>
-									<div class="btn" style="background-color: hsl(207, 80%, 50%)">
-										<input type="radio" name="pen-color" value="hsl(207, 80%, 50%)">
-									</div>
-									<div class="btn" style="background-color: hsl(340, 80%, 45%)">
-										<input type="radio" name="pen-color" value="hsl(340, 80%, 45%)">
-									</div>
-									<div class="btn" style="background-color: hsl(96, 70%, 50%)">
-										<input type="radio" name="pen-color" value="hsl(96, 70%, 50%)">
-									</div>
-									<div class="btn btn-light p-0" style="min-width: 20%">
-										<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
-									</div>
-								</div>
-								<div id="composition">
+								</fieldset>
+								<fieldset id="composition">
 									<div class="form-check form-check-inline">
 										<input class="form-check-input" type="radio" name="composition" id="composition-multiply" value="multiply" checked>
 										<label class="form-check-label" for="composition-multiply">Subtractive mixing (pens)</label>
@@ -389,47 +399,49 @@
 										<input class="form-check-input" type="radio" name="composition" id="composition-eraser" value="destination-out">
 										<label class="form-check-label" for="composition-eraser">Eraser</label>
 									</div>
-								</div>
+								</fieldset>
 							</td>
 							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<label class="d-block">Paper</label>
-								<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
-									<div class="btn active" style="background-color: white">
-										<input type="radio" name="paper-color" value="white" checked>
+								<fieldset>
+									<legend class="col-form-label">Paper</legend>
+									<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
+										<div class="btn active" style="background-color: white">
+											<input type="radio" name="paper-color" value="white" checked>
+										</div>
+										<div class="btn" style="background-color: #ffb0c8">
+											<input type="radio" name="paper-color" value="#ffb0c8">
+										</div>
+										<div class="btn" style="background-color: hsl(149, 94%, 69%)">
+											<input type="radio" name="paper-color" value="hsl(149, 94%, 69%)">
+										</div>
+										<div class="btn" style="background-color: hsl(210, 94%, 83%)">
+											<input type="radio" name="paper-color" value="hsl(210, 94%, 83%)">
+										</div>
+										<div class="btn" style="background-color: hsl(30, 94%, 77%)">
+											<input type="radio" name="paper-color" value="hsl(30, 94%, 77%)">
+										</div>
 									</div>
-									<div class="btn" style="background-color: #ffb0c8">
-										<input type="radio" name="paper-color" value="#ffb0c8">
+									<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
+										<div class="btn" style="background-color: black">
+											<input type="radio" name="paper-color" value="black">
+										</div>
+										<div class="btn" style="background-color: hsl(180, 79%, 73%)">
+											<input type="radio" name="paper-color" value="hsl(180, 79%, 73%)">
+										</div>
+										<div class="btn" style="background-color: hsl(57, 97%, 76%)">
+											<input type="radio" name="paper-color" value="hsl(57, 97%, 76%)">
+										</div>
+										<div class="btn btn-light p-0" style="min-width: 20%">
+											<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#f0b0fd">
+										</div>
+										<div class="btn btn-light p-0" style="min-width: 20%">
+											<label for="paper-image" class="w-100 h-100">
+												<img src="img/upload.png" style="vertical-align: baseline" alt="Upload background image" title="Upload background image">
+											</label>
+											<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
+										</div>
 									</div>
-									<div class="btn" style="background-color: hsl(149, 94%, 69%)">
-										<input type="radio" name="paper-color" value="hsl(149, 94%, 69%)">
-									</div>
-									<div class="btn" style="background-color: hsl(210, 94%, 83%)">
-										<input type="radio" name="paper-color" value="hsl(210, 94%, 83%)">
-									</div>
-									<div class="btn" style="background-color: hsl(30, 94%, 77%)">
-										<input type="radio" name="paper-color" value="hsl(30, 94%, 77%)">
-									</div>
-								</div>
-								<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
-									<div class="btn" style="background-color: black">
-										<input type="radio" name="paper-color" value="black">
-									</div>
-									<div class="btn" style="background-color: hsl(180, 79%, 73%)">
-										<input type="radio" name="paper-color" value="hsl(180, 79%, 73%)">
-									</div>
-									<div class="btn" style="background-color: hsl(57, 97%, 76%)">
-										<input type="radio" name="paper-color" value="hsl(57, 97%, 76%)">
-									</div>
-									<div class="btn btn-light p-0" style="min-width: 20%">
-										<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#f0b0fd">
-									</div>
-									<div class="btn btn-light p-0" style="min-width: 20%">
-										<label for="paper-image" class="w-100 h-100">
-											<img src="img/upload.png" style="vertical-align: baseline" alt="Upload background image" title="Upload background image">
-										</label>
-										<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
-									</div>
-								</div>
+								</fieldset>
 							</td>
 						</tr>
 						<tr class="row">
@@ -485,24 +497,26 @@
 							<td colspan="2" class="col-12 col-md-6 mb-3">
 							</td>
 							<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-type">
-								<label class="d-block">Style of gradient</label>
-								<div class="input-group mb-2">
-									<div class="input-group-prepend">
-										<div class="input-group-text">
-											<input type="radio" name="gradient-type" id="gradient-radial" value="radial" checked>
+								<fieldset>
+									<legend class="col-form-label">Style of gradient</legend>
+									<div class="input-group mb-2">
+										<div class="input-group-prepend">
+											<div class="input-group-text">
+												<input type="radio" name="gradient-type" id="gradient-radial" value="radial" checked>
+											</div>
 										</div>
+										<label class="form-control input-group-text" for="gradient-radial">Outward in all directions</label>
 									</div>
-									<label class="form-control input-group-text" for="gradient-radial">Outward in all directions</label>
-								</div>
-								<div class="input-group">
-									<div class="input-group-prepend">
-										<div class="input-group-text">
-											<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<div class="input-group-text">
+												<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
+											</div>
+											<div class="input-group-text">Mirror line</div>
 										</div>
-										<div class="input-group-text">Mirror line</div>
+										<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of a circle">
 									</div>
-									<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of a circle">
-								</div>
+								</fieldset>
 							</td>
 						</tr>
 						<tr class="row collapse inner-fill-controls">
@@ -512,19 +526,21 @@
 								<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.35" step="0.05" aria-describedby="inner-opacity-readout">
 							</td>
 							<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-centre">
-								<label class="d-block">Centre area</label>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
-									<label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
-									<label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
-									<label class="form-check-label" for="gradient-centre-clip">Gradient</label>
-								</div>
+								<fieldset>
+									<legend class="col-form-label">Centre area</legend>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
+										<label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
+										<label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
+										<label class="form-check-label" for="gradient-centre-clip">Gradient</label>
+									</div>
+								</fieldset>
 							</td>
 						</tr>
 					</tbody>

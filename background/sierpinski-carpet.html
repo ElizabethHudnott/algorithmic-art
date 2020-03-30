@@ -1,4 +1,4 @@
-<div class="form-row mb-2">
+<div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3 col-form-label">
 		<label for="carpet-depth">Depth</label>
@@ -21,10 +21,14 @@
 	</div>
 </div>
 
-<div class="form-row mb-3">
+<div class="form-row form-group">
 	<div class="col-1"></div>
-	<div class="col-3">Colour Mixing</div>
-	<div class="col-7">
+	<div class="col-3">
+		<label class="col-form-label" for="carpet-composition-op">
+			Colour Mixing
+		</label>
+	</div>
+	<div class="col-5">
 		<select id="carpet-composition-op" class="form-control">
 			<option value="source-over">Source Over</option>
 			<option value="destination-over">Destination Over</option>
@@ -57,7 +61,6 @@
 <div class="form-row mb-3">
 	<div class="col-1"></div>
 	<div class="col-3">Centre Pattern</div>
-	<div class="col-1"></div>
 	<div class="col-2">
 		<div class="form-check">
 			<input class="form-check-input" type="radio" name="carpet-filling" id="carpet-fill-block" value="0" checked>
@@ -72,21 +75,15 @@
 	</div>
 </div>
 
-<div class="form-row mb-3">
+<div class="form-row form-group">
 	<div class="col-1"></div>
-	<div class="col-3">Centre Mixing</div>
-	<div class="col-1"></div>
-	<div class="col-2">
-		<div class="form-check">
-			<input class="form-check-input" type="radio" name="carpet-mid-compose-op" id="carpet-mid-compose-op-same" value="" checked>
-			<label class="form-check-label" for="carpet-mid-compose-op-same">Same</label>
-		</div>
-	</div>
 	<div class="col-3">
-		<div class="form-check">
-			<input class="form-check-input" type="radio" name="carpet-mid-compose-op" id="carpet-mid-compose-op-source" value="source-over">
-			<label class="form-check-label" for="carpet-mid-compose-op-source">Source over</label>
-		</div>
+		<label class="col-form-label" for="carpet-emphasis">
+			Emphasis
+		</label>
+	</div>
+	<div class="col-5">
+		<input class="form-control" min="1" value="1" type="number" id="carpet-emphasis">
 	</div>
 </div>
 
@@ -136,5 +133,17 @@
 	<div class="col-2 text-center">
 		<input type="color" value="#ffffff"><br>
 		<input type="range" min="0" max="1" step="0.003" value="0.5" class="carpet-opacity form-control-range mt-2">
+	</div>
+</div>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-3">
+		<label class="col-form-label" for="carpet-relative-spacing">
+			Center Mix
+		</label>
+	</div>
+	<div class="col-6">
+		<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" id="carpet-relative-spacing">
 	</div>
 </div>

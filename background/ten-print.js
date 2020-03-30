@@ -8,6 +8,8 @@
 	function TenPrint() {
 		const me = this;
 		this.title = '10 PRINT';
+		this.hasRandomness = true;
+
 		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
 			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
 				me.zoomOut = parseFloat(this.value);

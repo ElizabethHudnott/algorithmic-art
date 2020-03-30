@@ -5,16 +5,17 @@
 	function SierpinskiCarpet() {
 		const me = this;
 		this.title = 'Sierpinski Carpet';
+		this.hasRandomness = false;
 
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
-				me.maxDepth = this.value - 1;
+				me.maxDepth = parseInt(this.value) - 1;
 				progressiveBackgroundGen(me, false);
 			});
 
 			optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
-				me.patternDepth = this.value - 1;
+				me.patternDepth = parseInt(this.value) - 1;
 				progressiveBackgroundGen(me, false);
 			});
 
@@ -30,11 +31,9 @@
 				})
 			});
 
-			optionsDoc.querySelectorAll('input[name=carpet-mid-compose-op]').forEach(function (item) {
-				item.addEventListener('input', function (event) {
-					me.centreCompositionOp = this.value;
-					progressiveBackgroundGen(me, false);
-				})
+			optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
+				me.centreEmphasis = parseInt(this.value) - 1;
+				progressiveBackgroundGen(me, false);
 			});
 
 			const colorControls = optionsDoc.querySelectorAll('input[type=color]');
@@ -60,6 +59,11 @@
 				});
 			};
 
+			optionsDoc.getElementById('carpet-relative-spacing').addEventListener('input', function (event) {
+				me.fgSpacingFraction = parseFloat(this.value);
+				progressiveBackgroundGen(me, true);
+			});
+
 			return optionsDoc;
 		});
 
@@ -68,9 +72,9 @@
 		this.patternDepth = 3;
 		this.compositionOp = 'source-over';
 		this.filling = 0;
-		this.centreCompositionOp = '';
+		this.centreEmphasis = 0;
 
-		this.fgSpacingFraction = 24 / 51;
+		this.fgSpacingFraction = 0.5;
 
 		const colors = new Array(9);
 		colors.fill('#ffffff80');
@@ -107,11 +111,6 @@
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
 
-		let centreCompositionOp = this.centreCompositionOp;
-		if (centreCompositionOp === '') {
-			centreCompositionOp = this.compositionOp;
-		}
-
 		let maxDepth = this.maxDepth;
 		if (preview && maxDepth > 3) {
 			maxDepth = 3;
@@ -124,7 +123,10 @@
 			}
 			const div = 3 ** depth;
 			const combinedSpacing = Math.round(51 / div);
-			const fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
+			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
+			if (fgSpacing === 0) {
+				fgSpacing = 1;
+			}
 			const bgSpacing = combinedSpacing - fgSpacing;
 			for (let tile of queue) {
 				const x = tile.x;
@@ -148,7 +150,9 @@
 					roundedHeight = 1;
 				}
 				context.fillStyle = colors[4];
-				context.globalCompositeOperation = centreCompositionOp;
+				if (depth <= this.centreEmphasis) {
+					context.globalCompositeOperation = 'source-over';
+				}
 				if (this.filling > 0 && depth <= this.patternDepth) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);

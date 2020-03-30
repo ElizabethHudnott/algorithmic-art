@@ -2,6 +2,10 @@
 
 {
 	function Phyllotaxis() {
+		const me = this;
+		this.title = 'Phyllotaxis';
+		this.hasRandomness = false;
+
 		this.angle = 137.4 * Math.PI / 180;
 		this.scale = 20;
 		this.petalSize = 15;

@@ -93,3 +93,11 @@
 	margin-right: -8px;
 	padding: 1rem 1.25rem;
 }
+
+input[type=color] {
+	cursor: pointer;
+}
+
+button[disabled], input[type=color][disabled] {
+	cursor: auto;
+}

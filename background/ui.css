@@ -3,6 +3,19 @@ body {
 	overflow: hidden;
 }
 
+input[type=color] {
+	cursor: pointer;
+}
+
+button[disabled], input[type=color][disabled] {
+	cursor: auto;
+}
+
+.bg-center {
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
 .floating {
 	opacity: 0.85;
 	position: absolute;

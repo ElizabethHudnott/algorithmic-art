@@ -85,15 +85,20 @@ function switchBackgroundGenerator(name) {
 
 		function attachOptionsDOM(dom) {
 			const container = document.getElementById('background-gen-options');
-			const oldDOM = backgroundGenOptionsDOM.get(prevGenName);
-			let elements = container.children;
+			const elements = dom.children;
+			while (elements.length > 0) {
+				container.appendChild(elements[0]);
+			}
+		}
+
+		// Switch out previous DOM
+		const container = document.getElementById('background-gen-options');
+		const oldDOM = backgroundGenOptionsDOM.get(prevGenName);
+		if (oldDOM !== undefined) {
+			const elements = container.children;
 			while (elements.length > 0) {
 				const oldElement = container.removeChild(elements[0]);
 				oldDOM.appendChild(oldElement);
-			}
-			elements = dom.children;
-			while (elements.length > 0) {
-				container.appendChild(elements[0]);
 			}
 		}
 

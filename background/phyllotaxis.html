@@ -8,7 +8,7 @@
 	<div class="col-1"></div>
 	<div class="col-3">
 		<label class="col-form-label" for="phyllotaxis-scale">
-			Spacing
+			Scale
 		</label>
 	</div>
 	<div class="col-3">
@@ -37,5 +37,41 @@
 	</div>
 	<div class="col-3">
 		<input type="number" step="any" value="0" id="phyllotaxis-petal-enlarge" class="form-control">
+	</div>
+</div>
+
+<hr>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-3">
+		<label class="col-form-label">Rotate</label>
+	</div>
+	<div class="col-2">
+		Hue
+	</div>
+	<div class="col-3">
+		<div class="input-group">
+			<input class="form-control" type="number" min="1" value="61" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
+			<div class="input-group-append">
+				<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-3">
+		<label class="col-form-label" for="phyllotaxis-hue-min">
+			Hue
+		</label>
+	</div>
+	<div class="col-3">
+		<input class="form-control-range mt-2" type="range" min="0" max="360" value="0" id="phyllotaxis-hue-min">
+	</div>
+	<div class="col-1"></div>
+	<div class="col-3">
+		<input class="form-control-range mt-2" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
 	</div>
 </div>

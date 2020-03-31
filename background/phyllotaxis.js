@@ -37,6 +37,24 @@
 				}
 			});
 
+			optionsDoc.getElementById('phyllotaxis-color-mod').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value) && value !== 0) {
+					me.colorMod = value;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
+			optionsDoc.getElementById('phyllotaxis-hue-min').addEventListener('input', function (event) {
+				me.hueMin = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-hue-max').addEventListener('input', function (event) {
+				me.hueMax = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
@@ -44,9 +62,22 @@
 		this.scale = 21;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
+
+		this.colorMod = 61;
+
+		this.hueMin = 0;
+		this.hueMax = 360;
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
+
+	class Petal {
+		constructor(r, theta, petalSize) {
+			this.r = r;
+			this.theta = theta;
+			this.radius = petalSize;
+		}
+	}
 
 	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight) {
 		const angle = this.angle;
@@ -54,17 +85,28 @@
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
 
+		const colorMod = this.colorMod;
+		const hueRange = this.hueMax - this.hueMin;
+
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
 
 		const points = [];
 		let r = scale;
 		let n = 1;
-		while (r < maxR) {
+		let currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(scale));
+
+		while (r + currentPetalSize < maxR) {
 			const phi = n * angle;
-			points.push(new PolarPoint(r, phi));
+			points.push(new Petal(r, phi, currentPetalSize));
 			n++;
 			r = scale * Math.sqrt(n);
+			let radius
+			if (petalEnlargement >= 0) {
+				currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
+			} else {
+				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
+			}
 		}
 
 		for (let i = points.length - 1; i >= 0; i--) {
@@ -74,18 +116,12 @@
 			const x = r * Math.cos(theta);
 			const y = r * Math.sin(theta);
 			context.beginPath();
-			let radius
-			if (petalEnlargement >= 0) {
-				radius = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
-			} else {
-				radius = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
-			}
-			context.arc(x, y, radius, 0, TWO_PI);
-			const h = ((theta / Math.PI * 180) % 61);
-			//const h = i % 120;
-			//const h = (theta / Math.PI * 180 - r);
-			const s = 1 - 0.4 * r / maxR;
-			context.fillStyle = hsla(h, s, 0.5, 1);
+			context.arc(x, y, point.radius, 0, TWO_PI);
+			const colorAngle = ((theta / Math.PI * 180) % colorMod);
+			const hue = colorAngle * hueRange / colorMod + this.hueMin;
+			//hue = i % 120;
+			//hue = (theta / Math.PI * 180 - r);
+			context.fillStyle = hsla(hue, 1, 0.5, 1);
 			context.fill();
 		}
 	};

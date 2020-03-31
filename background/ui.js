@@ -153,5 +153,8 @@ document.getElementById('paper-color').addEventListener('input', function (event
 document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
 
 setTimeout(function () {
-	document.getElementById('instructions').classList.remove('show');
+	const instructions = document.getElementById('instructions');
+	if (instructions !== null) {
+		instructions.classList.remove('show');
+	}
 }, 10000);

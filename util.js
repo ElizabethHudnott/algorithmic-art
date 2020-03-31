@@ -52,12 +52,5 @@ function parseFraction(text) {
 	return numerator / denominator;
 }
 
-class PolarPoint {
-	constructor(r, theta) {
-		this.r = r;
-		this.theta = theta;
-	}
-}
-
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;

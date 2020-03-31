@@ -17,13 +17,19 @@
 			const concentricOptions = optionsDoc.getElementById('carpet-concentric-opts');
 
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
-				me.maxDepth = parseInt(this.value) - 1;
-				progressiveBackgroundGen(me, false);
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.maxDepth = value - 1;
+					progressiveBackgroundGen(me, false);
+				}
 			});
 
 			optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
-				me.patternDepth = parseInt(this.value) - 1;
-				progressiveBackgroundGen(me, false);
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.patternDepth = value - 1;
+					progressiveBackgroundGen(me, false);
+				}
 			});
 
 			optionsDoc.getElementById('carpet-composition-op').addEventListener('input', function (event) {
@@ -42,8 +48,11 @@
 			});
 
 			optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
-				me.centreEmphasis = parseInt(this.value) - 1;
-				progressiveBackgroundGen(me, false);
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.centreEmphasis = value - 1;
+					progressiveBackgroundGen(me, false);
+				}
 			});
 
 			const colorControls = optionsDoc.querySelectorAll('input[type=color]');

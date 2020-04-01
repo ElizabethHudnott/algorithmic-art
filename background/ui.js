@@ -152,9 +152,12 @@ document.getElementById('paper-color').addEventListener('input', function (event
 
 document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
 
-setTimeout(function () {
+function removeInstructions() {
 	const instructions = document.getElementById('instructions');
 	if (instructions !== null) {
 		instructions.classList.remove('show');
 	}
-}, 10000);
+}
+
+document.getElementById('btn-background-gen-options').addEventListener('click', removeInstructions);
+setTimeout(removeInstructions, 10000);

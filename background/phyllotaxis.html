@@ -7,36 +7,65 @@
 <div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3">
-		<label class="col-form-label" for="phyllotaxis-scale">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-scale">
 			Scale
 		</label>
 	</div>
 	<div class="col-3">
-		<input type="number" min="0" step="any" value="21" id="phyllotaxis-scale" class="form-control">
+		<input type="number" min="0" step="any" value="21" id="phyllotaxis-scale" class="form-control form-control-sm">
 	</div>
 </div>
 
 <div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3">
-		<label class="col-form-label" for="phyllotaxis-petal-size">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-start">
+			Start
+		</label>
+	</div>
+	<div class="col-3">
+		<input type="number" min="0" value="1" id="phyllotaxis-start" class="form-control form-control-sm">
+	</div>
+</div>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-3">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-skip">
+			Skip
+		</label>
+	</div>
+	<div class="col-3">
+		<div class="input-group input-group-sm">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="phyllotaxis-skip-label">1 in</span>
+			</div>
+			<input type="number" min="0" value="0" id="phyllotaxis-skip" class="form-control" aria-describedby="phyllotaxis-skip-label">
+		</div>
+	</div>
+</div>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-3">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
 			Petal Size
 		</label>
 	</div>
 	<div class="col-3">
-		<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control">
+		<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control form-control-sm">
 	</div>
 </div>
 
 <div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3">
-		<label class="col-form-label" for="phyllotaxis-petal-enlarge">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-enlarge">
 			Petal Growth
 		</label>
 	</div>
 	<div class="col-3">
-		<input type="number" step="any" value="0" id="phyllotaxis-petal-enlarge" class="form-control">
+		<input type="number" step="any" value="0" id="phyllotaxis-petal-enlarge" class="form-control form-control-sm">
 	</div>
 </div>
 
@@ -44,14 +73,20 @@
 
 <div class="form-row form-group">
 	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label">Rotate</label>
-	</div>
 	<div class="col-2">
-		Hue
+		<label class="col-form-label col-form-label-sm">Rotation</label>
 	</div>
 	<div class="col-3">
-		<div class="input-group">
+		<select class="form-control form-control-sm">
+			<option value="h">Hue</option>
+			<option value="s">Saturation</option>
+			<option value="l">Lightness</option>
+			<option value="a">Opacity</option>
+			<option value="all" selected>All</option>
+		</select>
+	</div>
+	<div class="col-3">
+		<div class="input-group input-group-sm">
 			<input class="form-control" type="number" min="1" value="61" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
 			<div class="input-group-append">
 				<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
@@ -62,16 +97,22 @@
 
 <div class="form-row form-group">
 	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label" for="phyllotaxis-hue-min">
+	<div class="col-2">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-hue-min">
 			Hue
 		</label>
 	</div>
 	<div class="col-3">
-		<input class="form-control-range mt-2" type="range" min="0" max="360" value="0" id="phyllotaxis-hue-min">
+		<input class="form-control-range mt-1" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-min">
 	</div>
-	<div class="col-1"></div>
 	<div class="col-3">
-		<input class="form-control-range mt-2" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
+		<input class="form-control-range mt-1 collapse" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
+	</div>
+	<div class="col-3">
+		<select class="form-control form-control-sm" id="phyllotaxis-hue-mode">
+			<option value="a">Angular</option>
+			<option value="r">Radial</option>
+			<option value="c" selected>Fixed</option>
+		</select>
 	</div>
 </div>

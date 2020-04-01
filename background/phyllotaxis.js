@@ -21,6 +21,22 @@
 				}
 			});
 
+			optionsDoc.getElementById('phyllotaxis-start').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.start = value;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
+			optionsDoc.getElementById('phyllotaxis-skip').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.skip = value;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
 			optionsDoc.getElementById('phyllotaxis-petal-size').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value > 0) {
@@ -55,18 +71,27 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
+				me.hueMode = this.value;
+				$('#phyllotaxis-hue-max').collapse(this.value === 'c' ? 'hide' : 'show');
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
 		this.angle = 137.4 * Math.PI / 180;
 		this.scale = 21;
+		this.start = 1;
+		this.step = 1;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
 
 		this.colorMod = 61;
 
-		this.hueMin = 0;
+		this.hueMin = 30;
 		this.hueMax = 360;
+		this.hueMode = 'c';	// constant
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
@@ -92,13 +117,24 @@
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
 
 		const points = [];
-		let r = scale;
-		let n = 1;
-		let currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(scale));
+		let n = this.start;
+		let r = scale * Math.sqrt(n);
+		let lastR;
+		const skip = this.skip;
+
+		let currentPetalSize;
+		if (petalEnlargement >= 0) {
+			currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
+		} else {
+			currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
+		}
 
 		while (r + currentPetalSize < maxR) {
 			const phi = n * angle;
-			points.push(new Petal(r, phi, currentPetalSize));
+			if (n % skip !== skip - 1) {
+				points.push(new Petal(r, phi, currentPetalSize));
+				lastR = r;
+			}
 			n++;
 			r = scale * Math.sqrt(n);
 			let radius
@@ -118,7 +154,19 @@
 			context.beginPath();
 			context.arc(x, y, point.radius, 0, TWO_PI);
 			const colorAngle = ((theta / Math.PI * 180) % colorMod);
-			const hue = colorAngle * hueRange / colorMod + this.hueMin;
+
+			let hue;
+			switch (this.hueMode) {
+			case 'a':
+				hue = colorAngle * hueRange / colorMod + this.hueMin;
+				break;
+			case 'r':
+				hue = this.hueMin + hueRange * r / lastR;
+				break;
+			case 'c':
+				hue = this.hueMin;
+				break;
+			}
 			//hue = i % 120;
 			//hue = (theta / Math.PI * 180 - r);
 			context.fillStyle = hsla(hue, 1, 0.5, 1);

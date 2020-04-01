@@ -41,8 +41,8 @@
 				item.addEventListener('input', function (event) {
 					const filling = parseInt(this.value);
 					me.filling = filling;
-					$(patternOptions).collapse(filling > 0 ? 'show' : 'hide');
-					$(concentricOptions).collapse(filling === 1 ? 'show' : 'hide');
+					$(patternOptions).collapse(filling >= 2 ? 'show' : 'hide');
+					$(concentricOptions).collapse(filling === 2 ? 'show' : 'hide');
 					progressiveBackgroundGen(me, false);
 				})
 			});
@@ -139,6 +139,7 @@
 		if (preview && maxDepth > 3) {
 			maxDepth = 3;
 		}
+		const filling = this.filling
 
 		for (let depth = 0; depth <= maxDepth; depth++) {
 			let sideLength = outerSize / 3 ** (depth + 1);
@@ -179,9 +180,16 @@
 				} else {
 					context.fillStyle = colors[4];
 				}
-				if (this.filling > 0 && depth <= this.patternDepth) {
+				if (prevSideLength < 3) {
+					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+				} else if (filling >= 2 && depth <= this.patternDepth) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);
+				} else if (filling === 1) {
+					const radius = roundedWidth / 2;
+					context.beginPath();
+					context.arc(roundedCentreX + radius, roundedCentreY + radius, radius, 0, TWO_PI);
+					context.fill();
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}

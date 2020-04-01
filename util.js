@@ -1,3 +1,27 @@
+function injectScript(src) {
+	return new Promise(function (resolve, reject) {
+		const script = document.createElement('script');
+		script.async = true;
+		script.src = src;
+		script.addEventListener('load', resolve);
+		script.addEventListener('error', () => reject('injectScript: Error loading ' + src));
+		script.addEventListener('abort', () => reject('injectScript: Aborted loading ' + src));
+		document.head.appendChild(script);
+	});
+}
+
+function downloadDocument(url) {
+	return new Promise(function (resolve, reject) {
+		const request = new XMLHttpRequest();
+		request.onload = function() {
+			resolve(this.responseXML);
+		}
+		request.open("GET", url);
+		request.responseType = "document";
+		request.send();
+	});
+}
+
 function focusFirst() {
 	const element = this.querySelector('input:enabled:not(:read-only):not([display=none])');
 	if (element.type === 'radio') {

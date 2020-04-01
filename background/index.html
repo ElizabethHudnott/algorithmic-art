@@ -13,12 +13,12 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous" defer></script>
 </head>
 <body>
-<div class="floating" style="top: 0.5em; right: 0.5em;">
+<div class="floating" style="top: 0.5em; left: 0.5em;">
 	<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 </div>
 
-<div class="alert alert-dark alert-dismissible fade show position-absolute" role="alert" style="top: 0.5em; left: 50%; width: 350px; margin-left: -175px !important" id="instructions">
-  Controls are in the lower left corner.
+<div class="alert alert-dark alert-dismissible fade show position-absolute mx-auto" role="alert" style="top: 0.5em; left: 0; right: 0; width: fit-content;" id="instructions">
+  Controls are in the lower right corner.
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -26,7 +26,7 @@
 
 <canvas id="background-canvas"></canvas>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 1.5em; left: 0.5em;">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 1em; right: 8px;">
 	<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		<img src="../img/module.png" alt="Pattern" title="Change background generator">
 	</button>
@@ -55,18 +55,20 @@
 </div>
 
 <div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true">
-	<div class="modal-dialog" role="document">
+	<div class="modal-dialog modal-dialog-centered mx-0" role="document">
 		<form id="background-gen-form" class="modal-content">
-			<div class="modal-header">
+			<div class="modal-header" id="background-gen-modal-header">
 				<h5 class="modal-title" id="background-gen-modal-label"></h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div id="background-gen-options" class="modal-body">
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+			<div class="collapse show" id="background-gen-modal-content">
+				<div id="background-gen-options" class="modal-body">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
 			</div>
 		</form>
 	</div>

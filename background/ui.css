@@ -32,3 +32,15 @@ button[disabled], input[type=color][disabled] {
 .emphasize-active .active {
 	font-weight: bold;
 }
+
+#background-gen-modal {
+	top: 1.75rem;
+}
+
+#background-gen-modal-header {
+	user-select: none;
+}
+
+#background-gen-modal .modal-dialog {
+	margin-top: 0;
+}

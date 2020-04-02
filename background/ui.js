@@ -175,7 +175,7 @@ function progressiveBackgroundGen(generator, preview) {
 		}
 	});
 
-	modalHeader.addEventListener('dblclick', function (event) {
+	$(modal).on('shown.bs.modal', function (event) {
 		const child = modal.children[0];
 		const classList = child.classList;
 		if (classList.contains('modal-dialog-centered')) {
@@ -183,6 +183,9 @@ function progressiveBackgroundGen(generator, preview) {
 			modal.style.top = Math.round((window.innerHeight - child.children[0].clientHeight) / 2) + 'px';
 			classList.remove('modal-dialog-centered');
 		}
+	});
+
+	modalHeader.addEventListener('dblclick', function (event) {
 		$('#background-gen-modal-content').collapse('toggle');
 	});
 

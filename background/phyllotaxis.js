@@ -53,6 +53,13 @@
 				}
 			});
 
+			optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]').forEach(function (item) {
+				item.addEventListener('input', function (event) {
+					me.stack = parseInt(this.value);
+					progressiveBackgroundGen(me, false);
+				});
+			});
+
 			optionsDoc.getElementById('phyllotaxis-color-mod').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value) && value !== 0) {
@@ -100,6 +107,7 @@
 		this.scale = 21;
 		this.start = 1;
 		this.step = 1;
+		this.stack = -1;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
 
@@ -166,7 +174,9 @@
 			}
 		}
 
-		for (let i = points.length - 1; i >= 0; i--) {
+		const stack = this.stack;
+		const numPoints = points.length;
+		for (let i = stack > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stack) {
 			const point = points[i];
 			const r = point.r;
 			const theta = point.theta;

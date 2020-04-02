@@ -1,140 +1,176 @@
-<div class="form-row mb-3">
-	<div class="col-12">
-		<input type="range" min="0" max="1" step="any" id="phyllotaxis-angle-range" class="form-control-range mt-2">
-	</div>
-</div>
+<ul class="nav nav-tabs" role="tablist">
+	<li class="nav-item">
+		<a class="nav-link active" id="phyllotaxis-geometry-tab" data-toggle="tab" href="#phyllotaxis-geometry" role="tab" aria-controls="phyllotaxis-geometry" aria-selected="true">
+			Geometry
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" id="phyllotaxis-color-tab" data-toggle="tab" href="#phyllotaxis-color" role="tab" aria-controls="phyllotaxis-color" aria-selected="false">
+			Colour
+		</a>
+	</li>
+</ul>
 
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-scale">
-			Scale
-		</label>
-	</div>
-	<div class="col-3">
-		<input type="number" min="0" step="any" value="21" id="phyllotaxis-scale" class="form-control form-control-sm">
-	</div>
-</div>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-start">
-			Start
-		</label>
-	</div>
-	<div class="col-3">
-		<input type="number" min="0" value="1" id="phyllotaxis-start" class="form-control form-control-sm">
-	</div>
-</div>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-skip">
-			Skip
-		</label>
-	</div>
-	<div class="col-3">
-		<div class="input-group input-group-sm">
-			<div class="input-group-prepend">
-				<span class="input-group-text" id="phyllotaxis-skip-label">1 in</span>
-			</div>
-			<input type="number" min="0" value="0" id="phyllotaxis-skip" class="form-control" aria-describedby="phyllotaxis-skip-label">
-		</div>
-	</div>
-</div>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
-			Petal Size
-		</label>
-	</div>
-	<div class="col-3">
-		<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control form-control-sm">
-	</div>
-</div>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-3">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-enlarge">
-			Petal Growth
-		</label>
-	</div>
-	<div class="col-3">
-		<input type="number" step="any" value="0" id="phyllotaxis-petal-enlarge" class="form-control form-control-sm">
-	</div>
-</div>
-
-<hr>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-2">
-		<label class="col-form-label col-form-label-sm">Rotation</label>
-	</div>
-	<div class="col-3">
-		<select class="form-control form-control-sm">
-			<option value="h">Hue</option>
-			<option value="s">Saturation</option>
-			<option value="l">Lightness</option>
-			<option value="a">Opacity</option>
-			<option value="all" selected>All</option>
-		</select>
-	</div>
-	<div class="col-3">
-		<div class="input-group input-group-sm">
-			<input class="form-control" type="number" min="1" value="61" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
-			<div class="input-group-append">
-				<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
+<div class="tab-content">
+	<div class="tab-pane active pt-3" id="phyllotaxis-geometry" role="tabpanel" aria-labelledby="phyllotaxis-geometry-tab">
+		<div class="form-row mb-3">
+			<div class="col-12">
+				<input type="range" min="0" max="1" step="any" id="phyllotaxis-angle-range" class="form-control-range mt-2">
 			</div>
 		</div>
-	</div>
-</div>
 
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-2">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-hue-min">
-			Hue
-		</label>
-	</div>
-	<div class="col-3">
-		<input class="form-control-range mt-1" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-min">
-	</div>
-	<div class="col-3">
-		<input class="form-control-range mt-1 collapse" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
-	</div>
-	<div class="col-3">
-		<select class="form-control form-control-sm" id="phyllotaxis-hue-mode">
-			<option value="a">Angular</option>
-			<option value="r">Radial</option>
-			<option value="c" selected>Fixed</option>
-		</select>
-	</div>
-</div>
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-scale">
+					Scale
+				</label>
+			</div>
+			<div class="col-3">
+				<input type="number" min="0" step="any" value="21" id="phyllotaxis-scale" class="form-control form-control-sm">
+			</div>
+		</div>
 
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<div class="col-2">
-		<label class="col-form-label col-form-label-sm" for="phyllotaxis-saturation-min">
-			Saturation
-		</label>
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-start">
+					Start
+				</label>
+			</div>
+			<div class="col-3">
+				<input type="number" min="0" value="1" id="phyllotaxis-start" class="form-control form-control-sm">
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-skip">
+					Skip
+				</label>
+			</div>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="phyllotaxis-skip-label">1 in</span>
+					</div>
+					<input type="number" min="0" value="0" id="phyllotaxis-skip" class="form-control" aria-describedby="phyllotaxis-skip-label">
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
+					Petal Size
+				</label>
+			</div>
+			<div class="col-3">
+				<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control form-control-sm">
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-enlarge">
+					Petal Growth
+				</label>
+			</div>
+			<div class="col-3">
+				<input type="number" step="0.01" value="0" id="phyllotaxis-petal-enlarge" class="form-control form-control-sm">
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
+				<span class="col-form-label col-form-label-sm">Stacking</span>
+			</div>
+			<div class="col-4">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="phyllotaxis-stack" id="phyllotaxis-stack-dec" value="-1" checked>
+					<label class="form-check-label small" for="phyllotaxis-stack-dec">Innermost on top</label>
+				</div>
+			</div>
+			<div class="col-4">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="phyllotaxis-stack" id="phyllotaxis-stack-inc" value="1">
+					<label class="form-check-label small" for="phyllotaxis-stack-inc">Outermost on top</label>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="col-3">
-		<input class="form-control-range mt-1" type="range" min="0" max="1" step="0.002" value="1" id="phyllotaxis-saturation-min">
-	</div>
-	<div class="col-3">
-		<input class="form-control-range mt-1 collapse" type="range" min="0" max="1" step="0.002" value="0" id="phyllotaxis-saturation-max">
-	</div>
-	<div class="col-3">
-		<select class="form-control form-control-sm" id="phyllotaxis-saturation-mode">
-			<option value="a">Angular</option>
-			<option value="r">Radial</option>
-			<option value="c" selected>Fixed</option>
-		</select>
+
+	<div class="tab-pane pt-3" id="phyllotaxis-color" role="tabpanel" aria-labelledby="phyllotaxis-color-tab">
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-2">
+				<label class="col-form-label col-form-label-sm">Rotation</label>
+			</div>
+			<div class="col-3">
+				<select class="form-control form-control-sm">
+					<option value="h">Hue</option>
+					<option value="s">Saturation</option>
+					<option value="l">Lightness</option>
+					<option value="a">Opacity</option>
+					<option value="all" selected>All</option>
+				</select>
+			</div>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<input class="form-control" type="number" min="1" value="61" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
+					<div class="input-group-append">
+						<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-2">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-hue-min">
+					Hue
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-min">
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1 collapse" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
+			</div>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="phyllotaxis-hue-mode">
+					<option value="a">Angular</option>
+					<option value="r">Radial</option>
+					<option value="c" selected>Fixed</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-2">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-saturation-min">
+					Saturation
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="1" step="0.002" value="1" id="phyllotaxis-saturation-min">
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1 collapse" type="range" min="0" max="1" step="0.002" value="0" id="phyllotaxis-saturation-max">
+			</div>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="phyllotaxis-saturation-mode">
+					<option value="a">Angular</option>
+					<option value="r">Radial</option>
+					<option value="c" selected>Fixed</option>
+				</select>
+			</div>
+		</div>
 	</div>
 </div>

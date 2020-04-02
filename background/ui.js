@@ -7,6 +7,12 @@ let backgroundRedraw;
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
 
+function generateBackground() {
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	progressiveBackgroundGen(bgGenerator, false);
+}
+
 function progressiveBackgroundGen(generator, preview) {
 	const beginTime = performance.now();
 	const context = canvas.getContext('2d');
@@ -30,12 +36,6 @@ function progressiveBackgroundGen(generator, preview) {
 }
 
 {
-	function generateBackground() {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		progressiveBackgroundGen(bgGenerator, false);
-	}
-
 	const backgroundGenOptionsDOM = new Map();
 	let bgGeneratorName;
 

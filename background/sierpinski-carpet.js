@@ -13,8 +13,7 @@
 				progressiveBackgroundGen(me, false);
 			}
 
-			const patternOptions = optionsDoc.getElementById('carpet-pattern-opts');
-			const concentricOptions = optionsDoc.getElementById('carpet-concentric-opts');
+			const concentricOpts = optionsDoc.getElementById('carpet-concentric-opts');
 
 			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
@@ -41,10 +40,24 @@
 				item.addEventListener('input', function (event) {
 					const filling = parseInt(this.value);
 					me.filling = filling;
-					$(patternOptions).collapse(filling > 0 ? 'show' : 'hide');
-					$(concentricOptions).collapse(filling === 1 ? 'show' : 'hide');
+					const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
+					$(patternOptsSelector).collapse(filling > 0 ? 'show' : 'hide');
+					$(concentricOpts).collapse(filling === 1 ? 'show' : 'hide');
 					progressiveBackgroundGen(me, false);
 				})
+			});
+
+			optionsDoc.querySelectorAll('input[name=carpet-pattern-location]').forEach(function (item) {
+				item.addEventListener('input', function (event) {
+					const locations = parseInt(this.value);
+					me.patternLocations = locations;
+					progressiveBackgroundGen(me, false);
+				})
+			});
+
+			optionsDoc.getElementById('carpet-patterned-centre').addEventListener('input', function (event) {
+				me.patternedCentre = this.checked;
+				progressiveBackgroundGen(me, false);
 			});
 
 			optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
@@ -95,25 +108,33 @@
 		this.patternDepth = 3;
 		this.compositionOp = 'source-over';
 		this.filling = 0;
+		this.patternLocations = 3;
+		this.patternedCentre = true;
 		this.centreEmphasis = 0;
 
 		this.fgSpacingFraction = 0.5;
 
-		const colors = new Array(10);
+		const colors = new Array(12);
 		colors.fill('#ffffff80');
 		colors[4] = 'black';
 		colors[9] = colors[4];
+		colors[10] = 'transparent';
+		colors[11] = colors[10];
+
 
 		/*
-		colors[0] = 'hsla(330, 100%, 80%, 0.5)';
-		colors[1] = 'hsla(240, 100%, 80%, 0.5)';
-		colors[2] = 'hsla( 30, 100%, 80%, 0.5)';
-		colors[3] = 'hsla(330, 90%, 50%, 0.5)';
-		colors[4] = 'black';
-		colors[5] = 'hsla( 30, 100%, 50%, 0.5)';
-		colors[6] = 'hsla(330, 100%, 20%, 0.5)';
-		colors[7] = 'hsla(  0, 100%, 20%, 0.5)';
-		colors[8] = 'hsla( 120, 100%, 20%, 0.5)';
+		 *	0	Top left
+		 *	1	Top centre
+		 *	2	Top right
+		 *	3	Middle left
+		 *	4	Centre
+		 *	5	Middle right
+		 *	6	Bottom left
+		 *	7	Bottom centre
+		 *	8	Bottom right
+		 *	9	Centre (emphasis)
+		 *	10	Centre (depth zero background)
+		 *	11	Centre (depth zero background)
 		*/
 
 		this.colors = colors;
@@ -121,16 +142,17 @@
 
 	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 
-	function Tile(x, y, color) {
+	function Tile(x, y, relationship) {
 		this.x = x;
 		this.y = y;
-		this.color = color;
+		this.relationship = relationship;
 	}
 
 	SierpinskiCarpet.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
 		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
-		let queue = [new Tile(0, 0, 'transparent')];
+		const initialColor = 10 + ((this.patternLocations === 1) ^ this.patternedCentre);
+		let queue = [new Tile(0, 0, initialColor)];
 		let nextQueue = [];
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
@@ -146,16 +168,18 @@
 				break;
 			}
 			const div = 3 ** depth;
+			const emphasize = depth <= this.centreEmphasis;
+			const drawPattern = this.filling > 0 && depth <= this.patternDepth && prevSideLength >= 2;
 			const combinedSpacing = Math.round(51 / div);
 			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
 			if (fgSpacing === 0) {
 				fgSpacing = 1;
 			}
-			const bgSpacing = combinedSpacing - fgSpacing;
+			const bgSpacing = Math.max(combinedSpacing - fgSpacing, 0);
 			for (let tile of queue) {
 				const x = tile.x;
 				const y = tile.y;
-				context.fillStyle = tile.color;
+				context.fillStyle = colors[tile.relationship];
 				const roundedX = Math.round(x);
 				const roundedY = Math.round(y);
 				let roundedWidth = Math.round(prevSideLength + x - roundedX);
@@ -173,30 +197,31 @@
 					roundedWidth = 1;
 					roundedHeight = 1;
 				}
-				if (depth <= this.centreEmphasis) {
+				if (emphasize) {
 					context.globalCompositeOperation = 'source-over';
 					context.fillStyle = colors[9];
 				} else {
 					context.fillStyle = colors[4];
 				}
-				if (this.filling > 0 && depth <= this.patternDepth) {
+				const patternLocation = (this.patternLocations & (2 ** (tile.relationship % 2))) !== 0;
+				if (drawPattern && patternLocation) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}
 
-				nextQueue.push(new Tile(x, y, colors[0]));
-				nextQueue.push(new Tile(x + sideLength, y, colors[1]));
-				nextQueue.push(new Tile(x + 2 * sideLength, y, colors[2]));
-				nextQueue.push(new Tile(x, y + sideLength, colors[3]));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + sideLength, colors[5]));
-				nextQueue.push(new Tile(x, y + 2 * sideLength, colors[6]));
-				nextQueue.push(new Tile(x + sideLength, y + 2 * sideLength, colors[7]));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, colors[8]));
+				nextQueue.push(new Tile(x, y, 0));
+				nextQueue.push(new Tile(x + sideLength, y, 1));
+				nextQueue.push(new Tile(x + 2 * sideLength, y, 2));
+				nextQueue.push(new Tile(x, y + sideLength, 3));
+				nextQueue.push(new Tile(x + 2 * sideLength, y + sideLength, 5));
+				nextQueue.push(new Tile(x, y + 2 * sideLength, 6));
+				nextQueue.push(new Tile(x + sideLength, y + 2 * sideLength, 7));
+				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, 8));
 
 				numProcessed++;
-				if ((numProcessed & 300) === 299 && performance.now() >= beginTime + 20) {
+				if ((numProcessed & 500) === 499 && performance.now() >= beginTime + 20) {
 					yield;
 				}
 

@@ -1,19 +1,19 @@
 <div class="form-row form-group">
 	<div class="col-1"></div>
-	<div class="col-3 col-form-label">
+	<div class="col-3 col-form-label col-form-label-sm">
 		<label for="carpet-depth">Depth</label>
 	</div>
 	<div class="col-3">
-		<div class="input-group">
-			<input id="carpet-depth" class="form-control" type="number" min="1" value="5" aria-label="Total depth" aria-describedby="carpet-depth-text">
+		<div class="input-group input-group-sm">
+			<input id="carpet-depth" class="form-control text-right" type="number" min="1" value="5" aria-label="Total depth" aria-describedby="carpet-depth-text">
 			<div class="input-group-append">
 				<span class="input-group-text" id="carpet-depth-text">total</span>
 			</div>
 		</div>
 	</div>
 	<div class="col-4 collapse" id="carpet-pattern-opts">
-		<div class="input-group">
-			<input id="carpet-pattern-depth" class="form-control" type="number" min="0" value="4" aria-label="Pattern depth" aria-describedby="carpet-pattern-depth-text">
+		<div class="input-group input-group-sm">
+			<input id="carpet-pattern-depth" class="form-control text-right" type="number" min="0" value="4" aria-label="Pattern depth" aria-describedby="carpet-pattern-depth-text">
 			<div class="input-group-append">
 				<span class="input-group-text" id="carpet-pattern-depth-text">patterned</span>
 			</div>
@@ -24,12 +24,12 @@
 <div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3">
-		<label class="col-form-label" for="carpet-composition-op">
+		<label class="col-form-label col-form-label-sm" for="carpet-composition-op">
 			Colour Mixing
 		</label>
 	</div>
 	<div class="col-5">
-		<select id="carpet-composition-op" class="form-control">
+		<select id="carpet-composition-op" class="form-control form-control-sm">
 			<option value="source-over">Source Over</option>
 			<option value="destination-over">Destination Over</option>
 			<option value="lighter">Lighter (+)</option>
@@ -58,19 +58,51 @@
 	</div>
 </div>
 
-<div class="form-row mb-3">
+<div class="form-row">
 	<div class="col-1"></div>
-	<div class="col-3">Centre Pattern</div>
+	<div class="col-3">
+		<div class="col-form-label col-form-label-sm">
+			Filling
+		</div>
+	</div>
 	<div class="col-2">
 		<div class="form-check">
 			<input class="form-check-input" type="radio" name="carpet-filling" id="carpet-fill-block" value="0" checked>
-			<label class="form-check-label" for="carpet-fill-block">Block</label>
+			<label class="form-check-label small" for="carpet-fill-block">Block</label>
 		</div>
 	</div>
 	<div class="col-3">
 		<div class="form-check">
 			<input class="form-check-input" type="radio" name="carpet-filling" id="carpet-fill-concentric" value="1">
-			<label class="form-check-label" for="carpet-fill-concentric">Concentric</label>
+			<label class="form-check-label small" for="carpet-fill-concentric">Concentric</label>
+		</div>
+	</div>
+</div>
+
+<div class="form-row mb-3 collapse" id="carpet-pattern-location">
+	<div class="col-4"></div>
+	<div class="col-2">
+		<div class="form-check">
+			<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-corner" value="1">
+			<label class="form-check-label small" for="carpet-pattern-loc-corner">Corners</label>
+		</div>
+	</div>
+	<div class="col-2">
+		<div class="form-check">
+			<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-middle" value="2">
+			<label class="form-check-label small" for="carpet-pattern-loc-middle">Middle</label>
+		</div>
+	</div>
+	<div class="col-2">
+		<div class="form-check">
+			<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-both" value="3" checked>
+			<label class="form-check-label small" for="carpet-pattern-loc-both">Both</label>
+		</div>
+	</div>
+	<div class="col-2">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" id="carpet-patterned-centre" checked>
+			<label class="form-check-label small" for="carpet-patterned-centre">Centre</label>
 		</div>
 	</div>
 </div>
@@ -78,18 +110,22 @@
 <div class="form-row form-group">
 	<div class="col-1"></div>
 	<div class="col-3">
-		<label class="col-form-label" for="carpet-emphasis">
+		<label class="col-form-label col-form-label-sm" for="carpet-emphasis">
 			Emphasis
 		</label>
 	</div>
 	<div class="col-5">
-		<input class="form-control" min="1" value="1" type="number" id="carpet-emphasis">
+		<input class="form-control form-control-sm" min="1" value="1" type="number" id="carpet-emphasis">
 	</div>
 </div>
 
-<div class="form-row mb-4">
+<div class="form-row mb-3">
 	<div class="col-1"></div>
-	<div class="col-3">Colours</div>
+	<div class="col-3">
+		<div class="col-form-label col-form-label-sm">
+			Colours
+		</div>
+	</div>
 	<div class="col-2 text-center">
 		<input type="color" value="#ffffff"><br>
 		<input type="range" min="0" max="1" step="0.003" value="0.5" class="carpet-opacity form-control-range mt-2">
@@ -104,7 +140,7 @@
 	</div>
 </div>
 
-<div class="form-row mb-4">
+<div class="form-row mb-3">
 	<div class="col-4"></div>
 	<div class="col-2 text-center">
 		<input type="color" value="#ffffff"><br>
@@ -120,7 +156,7 @@
 	</div>
 </div>
 
-<div class="form-row mb-4">
+<div class="form-row mb-3">
 	<div class="col-4"></div>
 	<div class="col-2 text-center">
 		<input type="color" value="#ffffff"><br>
@@ -140,7 +176,7 @@
 	<div class="form-row form-group">
 		<div class="col-1"></div>
 		<div class="col-3">
-			<label class="col-form-label" for="carpet-relative-spacing">
+			<label class="col-form-label col-form-label-sm" for="carpet-relative-spacing">
 				Centre Mix
 			</label>
 		</div>

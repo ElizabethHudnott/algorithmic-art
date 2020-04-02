@@ -176,6 +176,13 @@ function progressiveBackgroundGen(generator, preview) {
 	});
 
 	modalHeader.addEventListener('dblclick', function (event) {
+		const child = modal.children[0];
+		const classList = child.classList;
+		if (classList.contains('modal-dialog-centered')) {
+			modal.style.left = modal.offsetLeft + 'px';
+			modal.style.top = Math.round((window.innerHeight - child.children[0].clientHeight) / 2) + 'px';
+			classList.remove('modal-dialog-centered');
+		}
 		$('#background-gen-modal-content').collapse('toggle');
 	});
 

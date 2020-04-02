@@ -116,3 +116,25 @@
 		</select>
 	</div>
 </div>
+
+<div class="form-row form-group">
+	<div class="col-1"></div>
+	<div class="col-2">
+		<label class="col-form-label col-form-label-sm" for="phyllotaxis-saturation-min">
+			Saturation
+		</label>
+	</div>
+	<div class="col-3">
+		<input class="form-control-range mt-1" type="range" min="0" max="1" step="0.002" value="1" id="phyllotaxis-saturation-min">
+	</div>
+	<div class="col-3">
+		<input class="form-control-range mt-1 collapse" type="range" min="0" max="1" step="0.002" value="0" id="phyllotaxis-saturation-max">
+	</div>
+	<div class="col-3">
+		<select class="form-control form-control-sm" id="phyllotaxis-saturation-mode">
+			<option value="a">Angular</option>
+			<option value="r">Radial</option>
+			<option value="c" selected>Fixed</option>
+		</select>
+	</div>
+</div>

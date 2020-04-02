@@ -77,6 +77,22 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-saturation-min').addEventListener('input', function (event) {
+				me.saturationMin = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-saturation-max').addEventListener('input', function (event) {
+				me.saturationMax = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
+				me.saturationMode = this.value;
+				$('#phyllotaxis-saturation-max').collapse(this.value === 'c' ? 'hide' : 'show');
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
@@ -92,6 +108,10 @@
 		this.hueMin = 30;
 		this.hueMax = 360;
 		this.hueMode = 'c';	// constant
+
+		this.saturationMin = 1;
+		this.saturationMax = 0;
+		this.saturationMode = 'c';
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
@@ -112,6 +132,7 @@
 
 		const colorMod = this.colorMod;
 		const hueRange = this.hueMax - this.hueMin;
+		const saturationRange = this.saturationMax - this.saturationMin;
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
@@ -155,7 +176,7 @@
 			context.arc(x, y, point.radius, 0, TWO_PI);
 			const colorAngle = ((theta / Math.PI * 180) % colorMod);
 
-			let hue;
+			let hue, saturation;
 			switch (this.hueMode) {
 			case 'a':
 				hue = colorAngle * hueRange / colorMod + this.hueMin;
@@ -167,9 +188,20 @@
 				hue = this.hueMin;
 				break;
 			}
+			switch (this.saturationMode) {
+			case 'a':
+				saturation = colorAngle * saturationRange / colorMod + this.saturationMin;
+				break;
+			case 'r':
+				saturation = this.saturationMin + saturationRange * r / lastR;
+				break;
+			case 'c':
+				saturation = this.saturationMin;
+				break;
+			}
 			//hue = i % 120;
 			//hue = (theta / Math.PI * 180 - r);
-			context.fillStyle = hsla(hue, 1, 0.5, 1);
+			context.fillStyle = hsla(hue, saturation, 0.5, 1);
 			context.fill();
 		}
 	};

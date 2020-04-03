@@ -21,7 +21,7 @@
 	</div>
 </div>
 
-<div class="form-row form-group">
+<div class="form-row">
 	<div class="col-1"></div>
 	<div class="col-3">
 		<label class="col-form-label col-form-label-sm" for="carpet-composition-op">
@@ -29,7 +29,7 @@
 		</label>
 	</div>
 	<div class="col-5">
-		<select id="carpet-composition-op" class="form-control form-control-sm">
+		<select id="carpet-composition-op" class="form-control form-control-sm" aria-describedby="carpet-composition-bug">
 			<option value="source-over">Source Over</option>
 			<option value="destination-over">Destination Over</option>
 			<option value="lighter">Lighter (+)</option>
@@ -55,6 +55,12 @@
 		<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank" class="align-middle">
 			<img src="../img/help.png">
 		</a>
+	</div>
+</div>
+<div class="form-row mb-2">
+	<div class="col-4"></div>
+	<div class="col-8">
+		<small id="carpet-composition-bug" class="form-text text-muted">Many values cause poor performance in Firefox.</small>
 	</div>
 </div>
 

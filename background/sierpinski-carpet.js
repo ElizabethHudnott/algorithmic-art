@@ -114,7 +114,7 @@
 
 		this.fgSpacingFraction = 0.5;
 
-		const colors = new Array(12);
+		const colors = new Array(11);
 		colors.fill('#ffffff80');
 		colors[4] = 'black';
 		colors[9] = colors[4];
@@ -134,7 +134,6 @@
 		 *	8	Bottom right
 		 *	9	Centre (emphasis)
 		 *	10	Centre (depth zero background)
-		 *	11	Centre (depth zero background)
 		*/
 
 		this.colors = colors;
@@ -151,8 +150,7 @@
 	SierpinskiCarpet.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
 		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
-		const initialColor = 10 + ((this.patternLocations === 1) ^ this.patternedCentre);
-		let queue = [new Tile(0, 0, initialColor)];
+		let queue = [new Tile(0, 0, 10)];
 		let nextQueue = [];
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
@@ -179,7 +177,8 @@
 			for (let tile of queue) {
 				const x = tile.x;
 				const y = tile.y;
-				context.fillStyle = colors[tile.relationship];
+				const relationship = tile.relationship;
+				context.fillStyle = colors[relationship];
 				const roundedX = Math.round(x);
 				const roundedY = Math.round(y);
 				let roundedWidth = Math.round(prevSideLength + x - roundedX);
@@ -203,7 +202,8 @@
 				} else {
 					context.fillStyle = colors[4];
 				}
-				const patternLocation = (this.patternLocations & (2 ** (tile.relationship % 2))) !== 0;
+				const patternLocation = relationship === 10 ? this.patternedCentre :
+					(this.patternLocations & (2 ** (relationship % 2))) !== 0;
 				if (drawPattern && patternLocation) {
 					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);

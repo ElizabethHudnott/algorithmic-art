@@ -100,6 +100,38 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-lightness-min').addEventListener('input', function (event) {
+				me.lightnessMin = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-lightness-max').addEventListener('input', function (event) {
+				me.lightnessMax = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
+				me.lightnessMode = this.value;
+				$('#phyllotaxis-lightness-max').collapse(this.value === 'c' ? 'hide' : 'show');
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-opacity-min').addEventListener('input', function (event) {
+				me.opacityMin = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-opacity-max').addEventListener('input', function (event) {
+				me.opacityMax = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
+				me.opacityMode = this.value;
+				$('#phyllotaxis-opacity-max').collapse(this.value === 'c' ? 'hide' : 'show');
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
@@ -120,6 +152,14 @@
 		this.saturationMin = 1;
 		this.saturationMax = 0;
 		this.saturationMode = 'c';
+
+		this.lightnessMin = 0.5;
+		this.lightnessMax = 0;
+		this.lightnessMode = 'c';
+
+		this.opacityMin = 1;
+		this.opacityMax = 0;
+		this.opacityMode = 'c';
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
@@ -141,6 +181,8 @@
 		const colorMod = this.colorMod;
 		const hueRange = this.hueMax - this.hueMin;
 		const saturationRange = this.saturationMax - this.saturationMin;
+		const lightnessRange = this.lightnessMax - this.lightnessMin;
+		const opacityRange = this.opacityMax - this.opacityMin;
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
@@ -176,6 +218,12 @@
 
 		const stack = this.stack;
 		const numPoints = points.length;
+		const lastRSquared = lastR * lastR;
+		let hue = this.hueMin;
+		let saturation = this.saturationMin;
+		let lightness = this.lightnessMin;
+		let opacity = this.opacityMin;
+
 		for (let i = stack > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stack) {
 			const point = points[i];
 			const r = point.r;
@@ -184,34 +232,48 @@
 			const y = r * Math.sin(theta);
 			context.beginPath();
 			context.arc(x, y, point.radius, 0, TWO_PI);
-			const colorAngle = ((theta / Math.PI * 180) % colorMod);
+			const degrees = theta / Math.PI * 180;
+			const radialValue = (r * r) / lastRSquared;
 
-			let hue, saturation;
 			switch (this.hueMode) {
 			case 'a':
-				hue = colorAngle * hueRange / colorMod + this.hueMin;
+				hue = (degrees % colorMod) * hueRange / colorMod + this.hueMin;
 				break;
 			case 'r':
-				hue = this.hueMin + hueRange * r / lastR;
-				break;
-			case 'c':
-				hue = this.hueMin;
+				hue = this.hueMin + hueRange * radialValue;
 				break;
 			}
+
 			switch (this.saturationMode) {
 			case 'a':
-				saturation = colorAngle * saturationRange / colorMod + this.saturationMin;
+				saturation = (degrees % colorMod) * saturationRange / colorMod + this.saturationMin;
 				break;
 			case 'r':
-				saturation = this.saturationMin + saturationRange * r / lastR;
-				break;
-			case 'c':
-				saturation = this.saturationMin;
+				saturation = this.saturationMin + saturationRange * radialValue;
 				break;
 			}
+
+			switch (this.lightnessMode) {
+			case 'a':
+				lightness = (degrees % colorMod) * lightnessRange / colorMod + this.lightnessMin;
+				break;
+			case 'r':
+				lightness = this.lightnessMin + lightnessRange * radialValue;
+				break;
+			}
+
+			switch (this.opacityMode) {
+			case 'a':
+				opacity = (degrees % colorMod) * opacityRange / colorMod + this.opacityMin;
+				break;
+			case 'r':
+				opacity = this.opacityMin + opacityRange * radialValue;
+				break;
+			}
+
 			//hue = i % 120;
 			//hue = (theta / Math.PI * 180 - r);
-			context.fillStyle = hsla(hue, saturation, 0.5, 1);
+			context.fillStyle = hsla(hue, saturation, lightness, opacity);
 			context.fill();
 		}
 	};

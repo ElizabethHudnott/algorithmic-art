@@ -36,6 +36,7 @@ function progressiveBackgroundGen(generator, preview) {
 }
 
 {
+	const urlParameters = new URLSearchParams(document.location.search);
 	const backgroundGenOptionsDOM = new Map();
 	let bgGeneratorName;
 
@@ -100,11 +101,14 @@ function progressiveBackgroundGen(generator, preview) {
 				}
 			}
 			document.getElementById('btn-generate-background').disabled = !gen.hasRandomness;
+			urlParameters.set('gen', name);
+			let url = document.location;
+			url = url.origin + url.pathname + '?' + urlParameters.toString();
+			history.replaceState(null, '', url.toString());
 		});
 	}
 
 	// Select a background generator based on URL.
-	const urlParameters = new URLSearchParams(document.location.search);
 	const firstGenName = urlParameters.get('gen') || 'ten-print';
 	const generatorButtonContainer = document.getElementById('generators');
 	try {

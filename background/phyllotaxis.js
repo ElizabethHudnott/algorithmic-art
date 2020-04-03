@@ -8,9 +8,25 @@
 
 		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {
 
+			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.maxPetals = value * 1000;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
 			optionsDoc.getElementById('phyllotaxis-angle-range').addEventListener('input', function (event) {
 				me.angle = parseFloat(this.value) * TWO_PI;
 				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-exponent').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.exponent = value;
+					progressiveBackgroundGen(me, false);
+				}
 			});
 
 			optionsDoc.getElementById('phyllotaxis-scale').addEventListener('input', function (event) {
@@ -135,13 +151,15 @@
 			return optionsDoc;
 		});
 
-		this.angle = 137.4 * Math.PI / 180;
-		this.scale = 21;
+		this.exponent = 0.5;
+		this.angle = 2 * Math.PI * 0.618;
+		this.scale = 20;
 		this.start = 1;
 		this.step = 1;
 		this.stack = -1;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
+		this.maxPetals = 10000;
 
 		this.colorMod = 61;
 
@@ -177,6 +195,7 @@
 		const scale = this.scale;
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
+		const maxPetals = this.maxPetals;
 
 		const colorMod = this.colorMod;
 		const hueRange = this.hueMax - this.hueMin;
@@ -188,8 +207,9 @@
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
 
 		const points = [];
+		const exponent = this.exponent;
 		let n = this.start;
-		let r = scale * Math.sqrt(n);
+		let r = scale * n ** exponent;
 		let lastR;
 		const skip = this.skip;
 
@@ -200,14 +220,14 @@
 			currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 		}
 
-		while (r + currentPetalSize < maxR) {
+		while (n <= maxPetals && r + currentPetalSize < maxR) {
 			const phi = n * angle;
 			if (n % skip !== skip - 1) {
 				points.push(new Petal(r, phi, currentPetalSize));
 				lastR = r;
 			}
 			n++;
-			r = scale * Math.sqrt(n);
+			r = scale * n ** exponent;
 			let radius
 			if (petalEnlargement >= 0) {
 				currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));

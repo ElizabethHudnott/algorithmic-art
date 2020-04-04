@@ -21,6 +21,14 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-spread').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value)) {
+					me.spread = value;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
 			optionsDoc.getElementById('phyllotaxis-exponent').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value > 0) {
@@ -153,6 +161,7 @@
 
 		this.exponent = 0.5;
 		this.angle = 2 * Math.PI * 0.618;
+		this.spread = 1;
 		this.scale = 20;
 		this.start = 1;
 		this.step = 1;
@@ -209,6 +218,7 @@
 
 		const points = [];
 		let n = this.start;
+		let numPetals = 0;
 		let r = scale * n ** exponent;
 		let lastR;
 		const skip = this.skip;
@@ -220,13 +230,15 @@
 			currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 		}
 
-		while (n <= maxPetals && r + currentPetalSize < maxR) {
+		while (numPetals <= maxPetals && r + currentPetalSize < maxR) {
 			const phi = n * angle;
-			if (n % skip !== skip - 1) {
+			if (numPetals % skip !== skip - 1) {
 				points.push(new Petal(r, phi, currentPetalSize));
 				lastR = r;
 			}
-			n++;
+			numPetals++;
+			const inc = n === 0 ? 1 : 1 / (n ** ((1 - this.spread) * exponent));
+			n += inc;
 			r = scale * n ** exponent;
 			let radius
 			if (petalEnlargement >= 0) {

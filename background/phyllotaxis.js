@@ -192,7 +192,9 @@
 
 	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight) {
 		const angle = this.angle;
-		const scale = this.scale;
+		const maxR = Math.max(canvasWidth, canvasHeight) / 2;
+		const exponent = this.exponent;
+		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
 		const maxPetals = this.maxPetals;
@@ -204,10 +206,8 @@
 		const opacityRange = this.opacityMax - this.opacityMin;
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
-		const maxR = Math.max(canvasWidth, canvasHeight) / 2 - petalSize;
 
 		const points = [];
-		const exponent = this.exponent;
 		let n = this.start;
 		let r = scale * n ** exponent;
 		let lastR;

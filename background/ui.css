@@ -3,11 +3,6 @@ body {
 	overflow: hidden;
 }
 
-.form-control:invalid {
-	background-color: #f4bec3;
-}
-
-
 input[type=color] {
 	cursor: pointer;
 }

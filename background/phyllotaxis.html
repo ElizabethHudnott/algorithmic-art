@@ -163,13 +163,20 @@
 					<option value="all" selected>All</option>
 				</select>
 			</div>
+			<div class="col-2">
+				<select class="form-control form-control-sm" id="phyllotaxis-angle-mode">
+					<option value="0">&theta;</option>
+					<option value="1">n</option>
+					<option value="2">&theta; - r</option>
+				</select>
+			</div>
+			<div class="col-1">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-color-mod">
+					mod
+				</label>
+			</div>
 			<div class="col-3">
-				<div class="input-group input-group-sm">
-					<input class="form-control" type="number" min="1" value="256" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
-					<div class="input-group-append">
-						<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
-					</div>
-				</div>
+				<input class="form-control form-control-sm" type="number" min="1" value="256" id="phyllotaxis-color-mod">
 			</div>
 		</div>
 

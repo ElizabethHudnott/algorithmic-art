@@ -8,6 +8,7 @@
 
 		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {
 			const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
+			const angleModeSelect = optionsDoc.getElementById('phyllotaxis-angle-mode');
 			const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
 
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
@@ -86,12 +87,26 @@
 				});
 			});
 
+			angleModeSelect.addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				const field = colorFieldSelect.value;
+				if (field === 'all') {
+					me.angleMode.fill(value);
+				} else {
+					me.angleMode[parseInt(field)] = value;
+				}
+				progressiveBackgroundGen(me, false);
+			});
+
 			colorFieldSelect.addEventListener('input', function (event) {
 				const field = this.value;
 				if (field === 'all') {
+					me.angleMode.fill(parseInt(angleModeSelect.value));
 					colorModInput.value = '';
 				} else {
-					colorModInput.value = me.colorMod[parseInt(field)];
+					const fieldNum = parseInt(field);
+					angleModeSelect.value = me.angleMode[fieldNum];
+					colorModInput.value = me.colorMod[fieldNum];
 				}
 			});
 
@@ -186,6 +201,8 @@
 		this.petalEnlargement = 0;
 		this.maxPetals = 10000;
 
+		this.angleMode = new Array(4);
+		this.angleMode.fill(0);
 		this.colorMod = new Array(4);
 		this.colorMod.fill(256);
 
@@ -216,6 +233,23 @@
 		}
 	}
 
+	Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, min) {
+		let value;
+		switch (this.angleMode[property]) {
+		case 0:
+			value = degrees;
+			break;
+		case 1:
+			value = n;
+			break;
+		case 2:
+			value = degrees - r;
+			break;
+		}
+		const mod = this.colorMod[property];
+		return (value % mod) * range / mod + min;
+	};
+
 	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight) {
 		const angle = this.angle;
 		const maxR = Math.max(canvasWidth, canvasHeight) / 2;
@@ -225,7 +259,6 @@
 		const petalEnlargement = this.petalEnlargement;
 		const maxPetals = this.maxPetals;
 
-		const colorMod = this.colorMod;
 		const hueRange = this.hueMax - this.hueMin;
 		const saturationRange = this.saturationMax - this.saturationMin;
 		const lightnessRange = this.lightnessMax - this.lightnessMin;
@@ -286,7 +319,7 @@
 
 			switch (this.hueMode) {
 			case 'a':
-				hue = (degrees % colorMod[0]) * hueRange / colorMod[0] + this.hueMin;
+				hue = this.angularColor(r, degrees, i, 0, hueRange, this.hueMin);
 				break;
 			case 'r':
 				hue = this.hueMin + hueRange * radialValue;
@@ -295,7 +328,7 @@
 
 			switch (this.saturationMode) {
 			case 'a':
-				saturation = (degrees % colorMod[1]) * saturationRange / colorMod[1] + this.saturationMin;
+				saturation = this.angularColor(r, degrees, i, 1, saturationRange, this.saturationMin);
 				break;
 			case 'r':
 				saturation = this.saturationMin + saturationRange * radialValue;
@@ -304,7 +337,7 @@
 
 			switch (this.lightnessMode) {
 			case 'a':
-				lightness = (degrees % colorMod[2]) * lightnessRange / colorMod[2] + this.lightnessMin;
+				lightness = this.angularColor(r, degrees, i, 2, lightnessRange, this.lightnessMin);
 				break;
 			case 'r':
 				lightness = this.lightnessMin + lightnessRange * radialValue;
@@ -313,7 +346,7 @@
 
 			switch (this.opacityMode) {
 			case 'a':
-				opacity = (degrees % colorMod[3]) * opacityRange / colorMod[3] + this.opacityMin;
+				opacity = this.angularColor(r, degrees, i, 3, opacityRange, this.opacityMin);
 				break;
 			case 'r':
 				opacity = this.opacityMin + opacityRange * radialValue;

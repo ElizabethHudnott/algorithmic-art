@@ -6,6 +6,7 @@
 		const me = this;
 		this.title = 'Sierpinski Carpet';
 		this.hasRandomness = false;
+		this.hasCustomImage = true;
 
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
@@ -150,6 +151,7 @@
 	SierpinskiCarpet.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
 		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
+		const filling = this.filling;
 		let queue = [new Tile(0, 0, 10)];
 		let nextQueue = [];
 		let prevSideLength = outerSize;
@@ -167,7 +169,7 @@
 			}
 			const div = 3 ** depth;
 			const emphasize = depth <= this.centreEmphasis;
-			const drawPattern = this.filling > 0 && depth <= this.patternDepth && prevSideLength >= 2;
+			const drawPattern = filling > 0 && depth <= this.patternDepth && prevSideLength >= 2;
 			const combinedSpacing = Math.round(51 / div);
 			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
 			if (fgSpacing === 0) {
@@ -205,8 +207,12 @@
 				const patternLocation = relationship === 10 ? this.patternedCentre :
 					(this.patternLocations & (2 ** (relationship % 2))) !== 0;
 				if (drawPattern && patternLocation) {
-					this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
-						fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);
+					if (filling === 1) {
+						this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
+							fgSpacing, Math.max(Math.round(9 / div), 1), bgSpacing);
+					} else {
+						context.drawImage(bgGeneratorImage, roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+					}
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}

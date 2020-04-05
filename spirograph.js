@@ -1337,24 +1337,24 @@ customPaperInput.addEventListener('input', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;
 });
 
-const backgroundFileReader = new FileReader();
+let paperImageURL;
 
 paperImageInput.addEventListener('click', function (event) {
-	if (backgroundFileReader.result) {
-		spiroCanvas.style.backgroundImage = `url("${backgroundFileReader.result}")`;
+	if (paperImageURL) {
+		spiroCanvas.style.backgroundImage = `url("${paperImageURL}")`;
 	}
 });
 
 paperImageInput.addEventListener('input', function (event) {
 	const file = this.files[0];
 	if (file) {
-		backgroundFileReader.readAsDataURL(file);
+		if (paperImageURL !== undefined) {
+			URL.revokeObjectURL(paperImageURL);
+		}
+		paperImageURL = URL.createObjectURL(file);
+		spiroCanvas.style.backgroundImage = `url("${paperImageURL}")`;
 	}
 });
-
-backgroundFileReader.onload = function (event) {
-	spiroCanvas.style.backgroundImage = `url("${this.result}")`;
-};
 
 function updateOpacityReadout() {
 	const opacity = parseFloat(this.value);

@@ -16,6 +16,10 @@ button[disabled], input[type=color][disabled] {
 	background-position: center center;
 }
 
+.w-fit {
+	width: fit-content !important;
+}
+
 .floating {
 	opacity: 0.85;
 	position: absolute;

@@ -1,8 +1,7 @@
 'use strict';
 
 const backgroundGenerators = new Map();
-let bgGenerator;
-let backgroundRedraw;
+let bgGenerator, backgroundRedraw;
 
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
@@ -12,6 +11,9 @@ function generateBackground() {
 	canvas.height = window.innerHeight;
 	progressiveBackgroundGen(bgGenerator, false);
 }
+
+const bgGeneratorImage = new Image();
+bgGeneratorImage.onload = generateBackground;
 
 function progressiveBackgroundGen(generator, preview) {
 	const beginTime = performance.now();
@@ -101,6 +103,8 @@ function progressiveBackgroundGen(generator, preview) {
 				}
 			}
 			document.getElementById('btn-generate-background').disabled = !gen.hasRandomness;
+			document.getElementById('background-gen-image-controls').classList.toggle('d-none', !gen.hasCustomImage);
+
 			urlParameters.set('gen', name);
 			let url = document.location;
 			url = url.origin + url.pathname + '?' + urlParameters.toString();
@@ -191,6 +195,16 @@ function progressiveBackgroundGen(generator, preview) {
 
 	modalHeader.addEventListener('dblclick', function (event) {
 		$('#background-gen-modal-content').collapse('toggle');
+	});
+
+	document.getElementById('background-gen-image').addEventListener('input', function (event) {
+		const file = this.files[0];
+		if (file) {
+			if (bgGeneratorImage.src) {
+				URL.revokeObjectURL(bgGeneratorImage.src);
+			}
+			bgGeneratorImage.src = URL.createObjectURL(file);
+		}
 	});
 
 }

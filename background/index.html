@@ -14,7 +14,7 @@
 </head>
 <body>
 
-<div class="alert alert-dark alert-dismissible fade show position-absolute mx-auto" role="alert" style="top: 0.5em; left: 0; right: 0; width: fit-content;" id="instructions">
+<div class="alert alert-dark alert-dismissible fade show position-absolute w-fit mx-auto" role="alert" style="top: 0.5em; left: 0; right: 0" id="instructions">
   Controls are in the lower right corner.
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
@@ -65,10 +65,25 @@
 				</button>
 			</div>
 			<div class="collapse show" id="background-gen-modal-content">
-				<div id="background-gen-options" class="modal-body">
+				<div class="modal-body">
+					<div id="background-gen-options">
+					</div>
+					<div id="background-gen-image-controls" class="form-row form-group">
+						<div class="col-1"></div>
+						<div class="col-3">
+							<label class="col-form-label col-form-label-sm" for="background-gen-image">
+								Image
+							</label>
+						</div>
+						<div class="col-7">
+							<input type="file" class="form-control-file form-control-sm pl-0" id="background-gen-image" accept="image/*">
+						</div>
+					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">
+						Close
+					</button>
 				</div>
 			</div>
 		</form>

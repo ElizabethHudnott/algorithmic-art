@@ -155,17 +155,17 @@
 				<label class="col-form-label col-form-label-sm">Rotation</label>
 			</div>
 			<div class="col-3">
-				<select class="form-control form-control-sm">
-					<option value="h">Hue</option>
-					<option value="s">Saturation</option>
-					<option value="l">Lightness</option>
-					<option value="a">Opacity</option>
+				<select class="form-control form-control-sm" id="phyllotaxis-color-field">
+					<option value="0">Hue</option>
+					<option value="1">Saturation</option>
+					<option value="2">Lightness</option>
+					<option value="3">Opacity</option>
 					<option value="all" selected>All</option>
 				</select>
 			</div>
 			<div class="col-3">
 				<div class="input-group input-group-sm">
-					<input class="form-control" type="number" min="1" value="61" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
+					<input class="form-control" type="number" min="1" value="256" id="phyllotaxis-color-mod" aria-describedby="phyllotaxis-color-mod-unit">
 					<div class="input-group-append">
 						<span class="input-group-text" id="phyllotaxis-color-mod-unit">&deg;</span>
 					</div>

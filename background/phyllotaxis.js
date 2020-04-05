@@ -7,6 +7,8 @@
 		this.hasRandomness = false;
 
 		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {
+			const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
+			const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
 
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
@@ -84,10 +86,24 @@
 				});
 			});
 
-			optionsDoc.getElementById('phyllotaxis-color-mod').addEventListener('input', function (event) {
+			colorFieldSelect.addEventListener('input', function (event) {
+				const field = this.value;
+				if (field === 'all') {
+					colorModInput.value = '';
+				} else {
+					colorModInput.value = me.colorMod[parseInt(field)];
+				}
+			});
+
+			colorModInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
-				if (Number.isFinite(value) && value !== 0) {
-					me.colorMod = value;
+				if (value > 0) {
+					const field = colorFieldSelect.value;
+					if (field === 'all') {
+						me.colorMod.fill(value);
+					} else {
+						me.colorMod[parseInt(field)] = value;
+					}
 					progressiveBackgroundGen(me, false);
 				}
 			});
@@ -170,7 +186,8 @@
 		this.petalEnlargement = 0;
 		this.maxPetals = 10000;
 
-		this.colorMod = 61;
+		this.colorMod = new Array(4);
+		this.colorMod.fill(256);
 
 		this.hueMin = 30;
 		this.hueMax = 360;
@@ -269,7 +286,7 @@
 
 			switch (this.hueMode) {
 			case 'a':
-				hue = (degrees % colorMod) * hueRange / colorMod + this.hueMin;
+				hue = (degrees % colorMod[0]) * hueRange / colorMod[0] + this.hueMin;
 				break;
 			case 'r':
 				hue = this.hueMin + hueRange * radialValue;
@@ -278,7 +295,7 @@
 
 			switch (this.saturationMode) {
 			case 'a':
-				saturation = (degrees % colorMod) * saturationRange / colorMod + this.saturationMin;
+				saturation = (degrees % colorMod[1]) * saturationRange / colorMod[1] + this.saturationMin;
 				break;
 			case 'r':
 				saturation = this.saturationMin + saturationRange * radialValue;
@@ -287,7 +304,7 @@
 
 			switch (this.lightnessMode) {
 			case 'a':
-				lightness = (degrees % colorMod) * lightnessRange / colorMod + this.lightnessMin;
+				lightness = (degrees % colorMod[2]) * lightnessRange / colorMod[2] + this.lightnessMin;
 				break;
 			case 'r':
 				lightness = this.lightnessMin + lightnessRange * radialValue;
@@ -296,7 +313,7 @@
 
 			switch (this.opacityMode) {
 			case 'a':
-				opacity = (degrees % colorMod) * opacityRange / colorMod + this.opacityMin;
+				opacity = (degrees % colorMod[3]) * opacityRange / colorMod[3] + this.opacityMin;
 				break;
 			case 'r':
 				opacity = this.opacityMin + opacityRange * radialValue;

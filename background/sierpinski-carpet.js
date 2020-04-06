@@ -63,7 +63,7 @@
 
 			optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
-				if (value >= 1) {
+				if (value >= 0) {
 					me.centreEmphasis = value - 1;
 					progressiveBackgroundGen(me, false);
 				}
@@ -79,7 +79,9 @@
 					const alpha = parseFloat(opacitySliders[index].value);
 					me.colors[index] = rgba(r, g, b, alpha);
 					if (index === 4) {
-						me.colors[9] = color;
+						me.colors[11] = color;
+					} else if (index === 9) {
+						me.colors[10] = color;
 					}
 					progressiveBackgroundGen(me, preview);
 				};
@@ -93,6 +95,11 @@
 				opacitySliders[i].addEventListener('input', changeColor(i, true));
 				opacitySliders[i].addEventListener('mouseup', fullRedraw);
 			};
+
+			optionsDoc.getElementById('carpet-bipartite').addEventListener('input', function (event) {
+				me.bipartite = this.checked;
+				progressiveBackgroundGen(me, false);
+			});
 
 			const fgSpacingSlider = optionsDoc.getElementById('carpet-relative-spacing');
 			fgSpacingSlider.addEventListener('input', function (event) {
@@ -115,12 +122,14 @@
 
 		this.fgSpacingFraction = 0.5;
 
-		const colors = new Array(11);
+		const colors = new Array(13);
 		colors.fill('#ffffff80');
-		colors[4] = 'black';
-		colors[9] = colors[4];
-		colors[10] = 'transparent';
-		colors[11] = colors[10];
+		colors[4] = 'black';		// centre
+		colors[9] = '#000066';		// second centre color
+		colors[10] = colors[9]		// second centre color with emphasis
+		colors[11] = colors[4];		// centre with emphasis
+		colors[12] = 'transparent';	// depth zero
+		this.bipartite = false;
 
 
 		/*
@@ -133,8 +142,10 @@
 		 *	6	Bottom left
 		 *	7	Bottom centre
 		 *	8	Bottom right
-		 *	9	Centre (emphasis)
-		 *	10	Centre (depth zero background)
+		 *  9	Second centre color
+		 * 10	Second centre color (emphasis)
+		 * 11	Centre (emphasis)
+		 * 12	Centre (depth zero background)
 		*/
 
 		this.colors = colors;
@@ -152,7 +163,7 @@
 		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
 		const filling = this.filling;
-		let queue = [new Tile(0, 0, 10)];
+		let queue = [new Tile(0, 0, 12)];
 		let nextQueue = [];
 		let prevSideLength = outerSize;
 		let numProcessed = 0;
@@ -180,6 +191,20 @@
 				const x = tile.x;
 				const y = tile.y;
 				const relationship = tile.relationship;
+				let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
+				let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
+				if (relationship === 12) {
+					const patternedCentre = this.patternedCentre
+					if (this.bipartite) {
+						if (this.patternLocations === 2) {
+							bipartiteColoring = Number(patternedCentre);
+						} else {
+							bipartiteColoring = Number(!patternedCentre);
+						}
+					}
+					patternLocation = patternedCentre;
+				}
+
 				context.fillStyle = colors[relationship];
 				const roundedX = Math.round(x);
 				const roundedY = Math.round(y);
@@ -200,12 +225,10 @@
 				}
 				if (emphasize) {
 					context.globalCompositeOperation = 'source-over';
-					context.fillStyle = colors[9];
+					context.fillStyle = colors[10 + bipartiteColoring];
 				} else {
-					context.fillStyle = colors[4];
+					context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
 				}
-				const patternLocation = relationship === 10 ? this.patternedCentre :
-					(this.patternLocations & (2 ** (relationship % 2))) !== 0;
 				if (drawPattern && patternLocation) {
 					if (filling === 1) {
 						this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,

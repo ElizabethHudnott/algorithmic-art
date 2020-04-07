@@ -83,7 +83,7 @@
 
 			optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]').forEach(function (item) {
 				item.addEventListener('input', function (event) {
-					me.stack = parseInt(this.value);
+					me.stacking = parseInt(this.value);
 					progressiveBackgroundGen(me, false);
 				});
 			});
@@ -188,16 +188,26 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-lighting').addEventListener('input', function (event) {
+				me.lighting = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-contrast').addEventListener('input', function (event) {
+				me.contrast = Math.sqrt(parseFloat(this.value));
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
 		this.exponent = 0.5;
-		this.angle = 2 * Math.PI * 0.618;
+		this.angle = 2 * Math.PI * 0.382;
 		this.spread = 1;
 		this.scale = 20;
 		this.start = 1;
 		this.step = 1;
-		this.stack = -1;
+		this.stacking = -1;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
 		this.maxPetals = 10000;
@@ -222,6 +232,9 @@
 		this.opacityMin = 1;
 		this.opacityMax = 0;
 		this.opacityMode = 'c';
+
+		this.lighting = 0;
+		this.contrast = 0;
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
@@ -260,13 +273,6 @@
 		const petalEnlargement = this.petalEnlargement;
 		const maxPetals = this.maxPetals;
 
-		const hueRange = this.hueMax - this.hueMin;
-		const saturationRange = this.saturationMax - this.saturationMin;
-		const lightnessRange = this.lightnessMax - this.lightnessMin;
-		const opacityRange = this.opacityMax - this.opacityMin;
-
-		context.translate(canvasWidth / 2, canvasHeight / 2);
-
 		const points = [];
 		let n = this.start;
 		let numPetals = 0;
@@ -299,22 +305,30 @@
 			}
 		}
 
-		const stack = this.stack;
+		const stacking = this.stacking;
 		const numPoints = points.length;
 		const lastRSquared = lastR * lastR;
+
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
 		let lightness = this.lightnessMin;
 		let opacity = this.opacityMin;
+		const hueRange = this.hueMax - this.hueMin;
+		const saturationRange = this.saturationMax - this.saturationMin;
+		const lightnessRange = this.lightnessMax - this.lightnessMin;
+		const opacityRange = this.opacityMax - this.opacityMin;
 
-		for (let i = stack > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stack) {
+		context.translate(canvasWidth / 2, canvasHeight / 2);
+
+		for (let i = stacking > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stacking) {
 			const point = points[i];
 			const r = point.r;
 			const theta = point.theta;
 			const x = r * Math.cos(theta);
 			const y = r * Math.sin(theta);
+			const petalSize = point.radius;
 			context.beginPath();
-			context.arc(x, y, point.radius, 0, TWO_PI);
+			context.arc(x, y, petalSize, 0, TWO_PI);
 			const degrees = theta / Math.PI * 180;
 			const radialValue = (r * r) / lastRSquared;
 
@@ -354,9 +368,12 @@
 				break;
 			}
 
-			//hue = i % 120;
-			//hue = (theta / Math.PI * 180 - r);
-			context.fillStyle = hsla(hue, saturation, lightness, opacity);
+			const gradient = context.createRadialGradient(x, y, 0, x, y, petalSize);
+			const innerColor = hsla(hue, saturation, lightness, opacity);
+			const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);
+			gradient.addColorStop(this.lighting, innerColor);
+			gradient.addColorStop(1, outerColor);
+			context.fillStyle = gradient;
 			context.fill();
 		}
 	};

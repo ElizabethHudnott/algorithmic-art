@@ -271,24 +271,69 @@
 		<div class="form-row form-group">
 			<div class="col-1"></div>
 			<div class="col-2">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-contrast">
+					Contrast
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-contrast">
+			</div>
+			<div class="col-3 pl-4">
 				<label class="col-form-label col-form-label-sm" for="phyllotaxis-lighting">
 					Lighting
 				</label>
 			</div>
-			<div class="col-6">
+			<div class="col-3">
 				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-lighting">
 			</div>
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-1"></div>
-			<div class="col-2">
-				<label class="col-form-label col-form-label-sm" for="phyllotaxis-contrast">
-					Contrast
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-shadow-offset">
+					Shadow Offset
 				</label>
 			</div>
-			<div class="col-6">
-				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-contrast">
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-shadow-offset">
+			</div>
+			<div class="col-3 pl-4">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-spot-offset">
+					Spot Offset
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-spot-offset">
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-shadow-angle">
+					Shadow Angle
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="2" step="any" value="0.75" id="phyllotaxis-shadow-angle">
+			</div>
+			<div class="col-3 pl-4">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-shadow-blur">
+					Shadow Blur
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control form-control-sm" type="number" min="0" step="any" value="0" id="phyllotaxis-shadow-blur">
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="phyllotaxis-shadow-color">
+					Shadow Intensity
+				</label>
+			</div>
+			<div class="col-3">
+				<input class="form-control-range mt-1" type="range" min="0" max="220" value="220" id="phyllotaxis-shadow-color">
 			</div>
 		</div>
 

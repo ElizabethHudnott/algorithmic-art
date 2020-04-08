@@ -198,6 +198,35 @@
 				progressiveBackgroundGen(me, false);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-shadow-angle').addEventListener('input', function (event) {
+				me.shadowAngle = (parseFloat(this.value) - 0.5) * Math.PI;
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-shadow-blur').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0) {
+					me.shadowBlur = value;
+					progressiveBackgroundGen(me, false);
+				}
+			});
+
+			optionsDoc.getElementById('phyllotaxis-shadow-offset').addEventListener('input', function (event) {
+				me.shadowOffset = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-spot-offset').addEventListener('input', function (event) {
+				me.spotOffset = parseFloat(this.value);
+				progressiveBackgroundGen(me, false);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-shadow-color').addEventListener('input', function (event) {
+				const shade = parseInt(this.max) - parseInt(this.value);
+				me.shadowColor = rgba(shade, shade, shade, 1);
+				progressiveBackgroundGen(me, false);
+			});
+
 			return optionsDoc;
 		});
 
@@ -235,6 +264,11 @@
 
 		this.lighting = 0;
 		this.contrast = 0;
+		this.shadowColor = 'black';
+		this.shadowAngle = 0.25 * Math.PI;
+		this.shadowBlur = 0;
+		this.shadowOffset = 0;
+		this.spotOffset = 0;
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
@@ -319,6 +353,8 @@
 		const opacityRange = this.opacityMax - this.opacityMin;
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
+		context.shadowColor = this.shadowColor;
+		context.shadowBlur = this.shadowBlur;
 
 		for (let i = stacking > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stacking) {
 			const point = points[i];
@@ -368,12 +404,22 @@
 				break;
 			}
 
-			const gradient = context.createRadialGradient(x, y, 0, x, y, petalSize);
+			const shadowR = petalSize * this.shadowOffset;
+			const shadowAngle = this.shadowAngle;
+			const cos = Math.cos(shadowAngle);
+			const sin = Math.sin(shadowAngle);
+			context.shadowOffsetX = shadowR * cos;
+			context.shadowOffsetY = shadowR * sin;
+
+			const spotX = x - this.spotOffset * petalSize * cos;
+			const spotY = y - this.spotOffset * petalSize * sin;
+			const gradient = context.createRadialGradient(spotX, spotY, 0, x, y, petalSize);
 			const innerColor = hsla(hue, saturation, lightness, opacity);
 			const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);
 			gradient.addColorStop(this.lighting, innerColor);
 			gradient.addColorStop(1, outerColor);
 			context.fillStyle = gradient;
+
 			context.fill();
 		}
 	};

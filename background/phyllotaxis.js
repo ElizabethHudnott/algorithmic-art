@@ -12,24 +12,30 @@
 			const angleModeSelect = optionsDoc.getElementById('phyllotaxis-angle-mode');
 			const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
 
+			function fullRedraw() {
+				progressiveBackgroundGen(me, 0);
+			}
+
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value > 0) {
 					me.maxPetals = value * 1000;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
-			optionsDoc.getElementById('phyllotaxis-angle-range').addEventListener('input', function (event) {
+			const angleSlider = optionsDoc.getElementById('phyllotaxis-angle-range');
+			angleSlider.addEventListener('input', function (event) {
 				me.angle = parseFloat(this.value) * TWO_PI;
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 1);
 			});
+			angleSlider.addEventListener('mouseup', fullRedraw);
 
 			optionsDoc.getElementById('phyllotaxis-spread').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.spread = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -37,7 +43,7 @@
 				const value = parseFloat(this.value);
 				if (value > 0) {
 					me.exponent = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -45,7 +51,7 @@
 				const value = parseFloat(this.value);
 				if (value > 0) {
 					me.scale = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -53,7 +59,7 @@
 				const value = parseInt(this.value);
 				if (value >= 0) {
 					me.start = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -61,7 +67,7 @@
 				const value = parseInt(this.value);
 				if (value >= 0) {
 					me.skip = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -69,7 +75,7 @@
 				const value = parseFloat(this.value);
 				if (value > 0) {
 					me.petalSize = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -77,14 +83,14 @@
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.petalEnlargement = parseFloat(this.value);
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
 			optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]').forEach(function (item) {
 				item.addEventListener('input', function (event) {
 					me.stacking = parseInt(this.value);
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				});
 			});
 
@@ -96,7 +102,7 @@
 				} else {
 					me.angleMode[parseInt(field)] = value;
 				}
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			colorFieldSelect.addEventListener('input', function (event) {
@@ -120,115 +126,117 @@
 					} else {
 						me.colorMod[parseInt(field)] = value;
 					}
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 2);
 				}
 			});
 
 			optionsDoc.getElementById('phyllotaxis-hue-min').addEventListener('input', function (event) {
 				me.hueMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-hue-max').addEventListener('input', function (event) {
 				me.hueMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
 				me.hueMode = this.value;
 				$('#phyllotaxis-hue-max').collapse(this.value === 'c' ? 'hide' : 'show');
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-saturation-min').addEventListener('input', function (event) {
 				me.saturationMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-saturation-max').addEventListener('input', function (event) {
 				me.saturationMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
 				me.saturationMode = this.value;
 				$('#phyllotaxis-saturation-max').collapse(this.value === 'c' ? 'hide' : 'show');
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-lightness-min').addEventListener('input', function (event) {
 				me.lightnessMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-lightness-max').addEventListener('input', function (event) {
 				me.lightnessMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
 				me.lightnessMode = this.value;
 				$('#phyllotaxis-lightness-max').collapse(this.value === 'c' ? 'hide' : 'show');
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-opacity-min').addEventListener('input', function (event) {
 				me.opacityMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-opacity-max').addEventListener('input', function (event) {
 				me.opacityMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
 				me.opacityMode = this.value;
 				$('#phyllotaxis-opacity-max').collapse(this.value === 'c' ? 'hide' : 'show');
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-lighting').addEventListener('input', function (event) {
 				me.lighting = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-contrast').addEventListener('input', function (event) {
 				me.contrast = Math.sqrt(parseFloat(this.value));
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-shadow-angle').addEventListener('input', function (event) {
 				me.shadowAngle = (parseFloat(this.value) - 0.5) * Math.PI;
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-shadow-blur').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 0) {
 					me.shadowBlur = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 2);
 				}
 			});
 
 			optionsDoc.getElementById('phyllotaxis-shadow-offset').addEventListener('input', function (event) {
 				me.shadowOffset = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-spot-offset').addEventListener('input', function (event) {
 				me.spotOffset = parseFloat(this.value);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			optionsDoc.getElementById('phyllotaxis-shadow-color').addEventListener('input', function (event) {
 				const shade = parseInt(this.max) - parseInt(this.value);
 				me.shadowColor = rgba(shade, shade, shade, 1);
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			return optionsDoc;
 		});
+
+		this.points = undefined;
 
 		this.exponent = 0.5;
 		this.angle = 2 * Math.PI * 0.382;
@@ -298,50 +306,55 @@
 		return (value % mod) * range / mod + min;
 	};
 
-	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight) {
-		const angle = this.angle;
-		const maxR = Math.max(canvasWidth, canvasHeight) / 2;
-		const exponent = this.exponent;
-		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
-		const petalSize = this.petalSize;
-		const petalEnlargement = this.petalEnlargement;
-		const maxPetals = this.maxPetals;
+	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
 
-		const points = [];
-		let n = this.start;
-		let numPetals = 0;
-		let r = scale * n ** exponent;
-		let lastR;
-		const skip = this.skip;
+		if (preview < 2 || this.points === undefined) {
+			const angle = this.angle;
+			const maxR = Math.max(canvasWidth, canvasHeight) / 2;
+			const exponent = this.exponent;
+			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
+			const petalSize = this.petalSize;
+			const petalEnlargement = this.petalEnlargement;
+			const maxPetals = preview === 1 ? 5000 : this.maxPetals;
 
-		let currentPetalSize;
-		if (petalEnlargement >= 0) {
-			currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
-		} else {
-			currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
-		}
+			this.points = []
+			let n = this.start;
+			let numPetals = 0;
+			let r = scale * n ** exponent;
+			const skip = this.skip;
 
-		while (numPetals <= maxPetals && r + currentPetalSize < maxR) {
-			const phi = n * angle;
-			if (numPetals % skip !== skip - 1) {
-				points.push(new Petal(r, phi, currentPetalSize));
-				lastR = r;
-			}
-			numPetals++;
-			const inc = n === 0 ? 1 : 1 / (n ** ((1 - this.spread) * exponent));
-			n += inc;
-			r = scale * n ** exponent;
-			let radius
+			let currentPetalSize;
 			if (petalEnlargement >= 0) {
 				currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
 			} else {
 				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 			}
+
+			while (numPetals <= maxPetals && r + currentPetalSize < maxR) {
+				const phi = n * angle;
+				if (numPetals % skip !== skip - 1) {
+					this.points.push(new Petal(r, phi, currentPetalSize));
+				}
+				numPetals++;
+				const inc = n === 0 ? 1 : 1 / (n ** ((1 - this.spread) * exponent));
+				n += inc;
+				r = scale * n ** exponent;
+				let radius
+				if (petalEnlargement >= 0) {
+					currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
+				} else {
+					currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
+				}
+			}
 		}
 
-		const stacking = this.stacking;
-		const numPoints = points.length;
+		const numPoints = this.points.length;
+		if (numPoints === 0) {
+			return;
+		}
+		const lastR = this.points[numPoints - 1].r;
 		const lastRSquared = lastR * lastR;
+		const stacking = this.stacking;
 
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
@@ -357,7 +370,7 @@
 		context.shadowBlur = this.shadowBlur;
 
 		for (let i = stacking > 0 ? 0 : numPoints - 1; i >= 0 && i < numPoints; i += stacking) {
-			const point = points[i];
+			const point = this.points[i];
 			const r = point.r;
 			const theta = point.theta;
 			const x = r * Math.cos(theta);

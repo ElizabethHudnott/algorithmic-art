@@ -11,7 +11,7 @@
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 
 			function fullRedraw() {
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 0);
 			}
 
 			const concentricOpts = optionsDoc.getElementById('carpet-concentric-opts');
@@ -20,7 +20,7 @@
 				const value = parseInt(this.value);
 				if (value >= 1) {
 					me.maxDepth = value - 1;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -28,13 +28,13 @@
 				const value = parseInt(this.value);
 				if (value >= 1) {
 					me.patternDepth = value - 1;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
 			optionsDoc.getElementById('carpet-composition-op').addEventListener('input', function (event) {
 				me.compositionOp = this.value;
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 0);
 			});
 
 			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
@@ -44,7 +44,7 @@
 					const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
 					$(patternOptsSelector).collapse(filling > 0 ? 'show' : 'hide');
 					$(concentricOpts).collapse(filling === 1 ? 'show' : 'hide');
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				})
 			});
 
@@ -52,20 +52,20 @@
 				item.addEventListener('input', function (event) {
 					const locations = parseInt(this.value);
 					me.patternLocations = locations;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				})
 			});
 
 			optionsDoc.getElementById('carpet-patterned-centre').addEventListener('input', function (event) {
 				me.patternedCentre = this.checked;
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 0);
 			});
 
 			optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 0) {
 					me.centreEmphasis = value - 1;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
@@ -88,45 +88,45 @@
 			}
 
 			colorControls.forEach(function (item, index) {
-				item.addEventListener('input', changeColor(index, false));
+				item.addEventListener('input', changeColor(index, 0));
 			});
 
 			for (let i = 0; i < opacitySliders.length; i++) {
-				opacitySliders[i].addEventListener('input', changeColor(i, true));
+				opacitySliders[i].addEventListener('input', changeColor(i, 1));
 				opacitySliders[i].addEventListener('mouseup', fullRedraw);
 			};
 
 			optionsDoc.getElementById('carpet-bipartite').addEventListener('input', function (event) {
 				me.bipartite = this.checked;
-				progressiveBackgroundGen(me, false);
+				progressiveBackgroundGen(me, 0);
 			});
 
 			optionsDoc.getElementById('carpet-concentric-density').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 2) {
 					me.concentricDensity = value;
-					progressiveBackgroundGen(me, false);
+					progressiveBackgroundGen(me, 0);
 				}
 			});
 
 			const fgSpacingSlider = optionsDoc.getElementById('carpet-relative-spacing');
 			fgSpacingSlider.addEventListener('input', function (event) {
 				me.fgSpacingFraction = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 			fgSpacingSlider.addEventListener('mouseup', fullRedraw);
 
 			const llCornerSlider = optionsDoc.getElementById('carpet-ll-corner');
 			llCornerSlider.addEventListener('input', function (event) {
 				me.lowerLeftCorner = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 			llCornerSlider.addEventListener('mouseup', fullRedraw);
 
 			const lrCornerSlider = optionsDoc.getElementById('carpet-lr-corner');
 			lrCornerSlider.addEventListener('input', function (event) {
 				me.lowerRightCorner = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 			lrCornerSlider.addEventListener('mouseup', fullRedraw);
 
@@ -194,7 +194,7 @@
 		let numProcessed = 0;
 
 		let maxDepth = this.maxDepth;
-		if (preview && maxDepth > 3) {
+		if (preview > 0 && maxDepth > 3) {
 			maxDepth = 3;
 		}
 

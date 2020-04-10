@@ -14,33 +14,33 @@
 		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
 			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
 				me.zoomOut = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 
 			optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
 				me.angle = parseFloat(this.value) * Math.PI / 180;
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 
 			optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
 				me.strokeRatio = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 
 			optionsDoc.getElementById('ten-print-gap-probability').addEventListener('input', function (event) {
 				me.blankProbability = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 
 			optionsDoc.getElementById('ten-print-probability').addEventListener('input', function (event) {
 				me.probability = parseFloat(this.value);
-				progressiveBackgroundGen(me, true);
+				progressiveBackgroundGen(me, 1);
 			});
 
 			function changeColor(index) {
 				return function (event) {
 					me.colors[index] = this.value;
-					progressiveBackgroundGen(me, true);
+					progressiveBackgroundGen(me, 1);
 				};
 			}
 

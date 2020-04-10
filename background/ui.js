@@ -9,7 +9,7 @@ canvas.getContext('2d').save();
 function generateBackground() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	progressiveBackgroundGen(bgGenerator, false);
+	progressiveBackgroundGen(bgGenerator, 0);
 }
 
 const bgGeneratorImage = new Image();

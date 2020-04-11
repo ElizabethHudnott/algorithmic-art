@@ -408,6 +408,10 @@
 		const saturationRange = this.saturationMax - this.saturationMin;
 		const lightnessRange = this.lightnessMax - this.lightnessMin;
 		const opacityRange = this.opacityMax - this.opacityMin;
+		const contrast = this.contrast;
+		const shadowOffset = this.shadowOffset
+		const spotOffset = this.spotOffset;
+		const hasLightingEffects = shadowOffset > 0 || (contrast > 0 && spotOffset > 0);
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		context.shadowColor = this.shadowColor;
@@ -461,10 +465,9 @@
 				break;
 			}
 
-			const shadowR = petalSize * this.shadowOffset;
-			const spotOffset = this.spotOffset;
 			let spotX = x, spotY = y;
-			if (shadowR > 0 || spotOffset > 0) {
+			if (hasLightingEffects) {
+				const shadowR = petalSize * shadowOffset;
 				const shadowAngle = this.shadowAngle;
 				const cos = Math.cos(shadowAngle);
 				const sin = Math.sin(shadowAngle);
@@ -473,13 +476,16 @@
 				spotX -= spotOffset * petalSize * cos;
 				spotY -= spotOffset * petalSize * sin;
 			}
-
-			const gradient = context.createRadialGradient(spotX, spotY, 0, x, y, petalSize);
 			const innerColor = hsla(hue, saturation, lightness, opacity);
-			const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);
-			gradient.addColorStop(this.lighting, innerColor);
-			gradient.addColorStop(1, outerColor);
-			context.fillStyle = gradient;
+			if (contrast === 0) {
+				context.fillStyle = innerColor;
+			} else {
+				const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);
+				const gradient = context.createRadialGradient(spotX, spotY, 0, x, y, petalSize);
+				gradient.addColorStop(this.lighting, innerColor);
+				gradient.addColorStop(1, outerColor);
+				context.fillStyle = gradient;
+			}
 
 			context.fill();
 		}

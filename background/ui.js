@@ -57,6 +57,9 @@ function progressiveBackgroundGen(generator, preview) {
 
 	function switchBackgroundGenerator(name) {
 		backgroundGeneratorFactory(name).then(function (gen) {
+			if (bgGenerator && bgGenerator.purgeCache) {
+				bgGenerator.purgeCache();
+			}
 			bgGenerator = gen;
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;

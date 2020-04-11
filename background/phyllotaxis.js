@@ -16,6 +16,10 @@
 				progressiveBackgroundGen(me, 0);
 			}
 
+			function fullRecolor() {
+				progressiveBackgroundGen(me, 2);
+			}
+
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value > 0) {
@@ -130,15 +134,19 @@
 				}
 			});
 
-			optionsDoc.getElementById('phyllotaxis-hue-min').addEventListener('input', function (event) {
+			const hueMinInput = optionsDoc.getElementById('phyllotaxis-hue-min');
+			hueMinInput.addEventListener('input', function (event) {
 				me.hueMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			hueMinInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-hue-max').addEventListener('input', function (event) {
+			const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
+			hueMaxInput.addEventListener('input', function (event) {
 				me.hueMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			hueMaxInput.addEventListener('mouseup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
 				me.hueMode = this.value;
@@ -146,15 +154,19 @@
 				progressiveBackgroundGen(me, 2);
 			});
 
-			optionsDoc.getElementById('phyllotaxis-saturation-min').addEventListener('input', function (event) {
+			const saturationMinInput = optionsDoc.getElementById('phyllotaxis-saturation-min');
+			saturationMinInput.addEventListener('input', function (event) {
 				me.saturationMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			saturationMinInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-saturation-max').addEventListener('input', function (event) {
+			const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
+			saturationMaxInput.addEventListener('input', function (event) {
 				me.saturationMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			saturationMaxInput.addEventListener('mouseup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
 				me.saturationMode = this.value;
@@ -162,15 +174,19 @@
 				progressiveBackgroundGen(me, 2);
 			});
 
-			optionsDoc.getElementById('phyllotaxis-lightness-min').addEventListener('input', function (event) {
+			const lightnessMinInput = optionsDoc.getElementById('phyllotaxis-lightness-min');
+			lightnessMinInput.addEventListener('input', function (event) {
 				me.lightnessMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			lightnessMinInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-lightness-max').addEventListener('input', function (event) {
+			const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
+			lightnessMaxInput.addEventListener('input', function (event) {
 				me.lightnessMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			lightnessMaxInput.addEventListener('mouseup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
 				me.lightnessMode = this.value;
@@ -178,15 +194,19 @@
 				progressiveBackgroundGen(me, 2);
 			});
 
-			optionsDoc.getElementById('phyllotaxis-opacity-min').addEventListener('input', function (event) {
+			const opacityMinInput = optionsDoc.getElementById('phyllotaxis-opacity-min');
+			opacityMinInput.addEventListener('input', function (event) {
 				me.opacityMin = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			opacityMinInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-opacity-max').addEventListener('input', function (event) {
+			const opacityMaxInput = optionsDoc.getElementById('phyllotaxis-opacity-max');
+			opacityMaxInput.addEventListener('input', function (event) {
 				me.opacityMax = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			opacityMaxInput.addEventListener('mouseup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
 				me.opacityMode = this.value;
@@ -194,44 +214,58 @@
 				progressiveBackgroundGen(me, 2);
 			});
 
-			optionsDoc.getElementById('phyllotaxis-lighting').addEventListener('input', function (event) {
+			const lightingInput = optionsDoc.getElementById('phyllotaxis-lighting');
+			lightingInput.addEventListener('input', function (event) {
 				me.lighting = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			lightingInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-contrast').addEventListener('input', function (event) {
+			const contrastInput = optionsDoc.getElementById('phyllotaxis-contrast');
+			contrastInput.addEventListener('input', function (event) {
 				me.contrast = Math.sqrt(parseFloat(this.value));
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			contrastInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-shadow-angle').addEventListener('input', function (event) {
+			const shadowAngleInput = optionsDoc.getElementById('phyllotaxis-shadow-angle');
+			shadowAngleInput.addEventListener('input', function (event) {
 				me.shadowAngle = (parseFloat(this.value) - 0.5) * Math.PI;
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			shadowAngleInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-shadow-blur').addEventListener('input', function (event) {
+			const shadowBlurInput = optionsDoc.getElementById('phyllotaxis-shadow-blur');
+			shadowBlurInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 0) {
 					me.shadowBlur = value;
-					progressiveBackgroundGen(me, 2);
+					progressiveBackgroundGen(me, 3);
 				}
 			});
+			shadowBlurInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-shadow-offset').addEventListener('input', function (event) {
+			const shadowOffsetInput = optionsDoc.getElementById('phyllotaxis-shadow-offset');
+			shadowOffsetInput.addEventListener('input', function (event) {
 				me.shadowOffset = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			shadowOffsetInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-spot-offset').addEventListener('input', function (event) {
+			const spotOffsetInput = optionsDoc.getElementById('phyllotaxis-spot-offset');
+			spotOffsetInput.addEventListener('input', function (event) {
 				me.spotOffset = parseFloat(this.value);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			spotOffsetInput.addEventListener('mouseup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-shadow-color').addEventListener('input', function (event) {
+			const shadowColorInput = optionsDoc.getElementById('phyllotaxis-shadow-color');
+			shadowColorInput.addEventListener('input', function (event) {
 				const shade = parseInt(this.max) - parseInt(this.value);
 				me.shadowColor = rgba(shade, shade, shade, 1);
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			shadowColorInput.addEventListener('mouseup', fullRecolor);
 
 			return optionsDoc;
 		});
@@ -279,6 +313,10 @@
 		this.spotOffset = 0;
 	}
 
+	Phyllotaxis.prototype.purgeCache = function () {
+		this.points = undefined;
+	}
+
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 
 	class Petal {
@@ -307,6 +345,7 @@
 	};
 
 	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
+		const previewMaxPetals = 1500;
 
 		if (preview < 2 || this.points === undefined) {
 			const angle = this.angle;
@@ -315,7 +354,7 @@
 			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 			const petalSize = this.petalSize;
 			const petalEnlargement = this.petalEnlargement;
-			const maxPetals = preview === 1 ? 5000 : this.maxPetals;
+			const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 
 			this.points = []
 			let n = this.start;
@@ -348,11 +387,16 @@
 			}
 		}
 
-		const numPoints = this.points.length;
+		let numPoints = this.points.length;
 		if (numPoints === 0) {
 			return;
 		}
+		const maxR = this.points[numPoints - 1].r
+		if (preview >= 3) {
+			numPoints = Math.min(numPoints, previewMaxPetals);
+		}
 		const lastR = this.points[numPoints - 1].r;
+		const zoom = maxR / lastR;
 		const lastRSquared = lastR * lastR;
 		const stacking = this.stacking;
 
@@ -373,9 +417,9 @@
 			const point = this.points[i];
 			const r = point.r;
 			const theta = point.theta;
-			const x = r * Math.cos(theta);
-			const y = r * Math.sin(theta);
-			const petalSize = point.radius;
+			const x = zoom * r * Math.cos(theta);
+			const y = zoom * r * Math.sin(theta);
+			const petalSize = zoom * point.radius;
 			context.beginPath();
 			context.arc(x, y, petalSize, 0, TWO_PI);
 			const degrees = theta / Math.PI * 180;
@@ -418,14 +462,18 @@
 			}
 
 			const shadowR = petalSize * this.shadowOffset;
-			const shadowAngle = this.shadowAngle;
-			const cos = Math.cos(shadowAngle);
-			const sin = Math.sin(shadowAngle);
-			context.shadowOffsetX = shadowR * cos;
-			context.shadowOffsetY = shadowR * sin;
+			const spotOffset = this.spotOffset;
+			let spotX = x, spotY = y;
+			if (shadowR > 0 || spotOffset > 0) {
+				const shadowAngle = this.shadowAngle;
+				const cos = Math.cos(shadowAngle);
+				const sin = Math.sin(shadowAngle);
+				context.shadowOffsetX = shadowR * cos;
+				context.shadowOffsetY = shadowR * sin;
+				spotX -= spotOffset * petalSize * cos;
+				spotY -= spotOffset * petalSize * sin;
+			}
 
-			const spotX = x - this.spotOffset * petalSize * cos;
-			const spotY = y - this.spotOffset * petalSize * sin;
 			const gradient = context.createRadialGradient(spotX, spotY, 0, x, y, petalSize);
 			const innerColor = hsla(hue, saturation, lightness, opacity);
 			const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);

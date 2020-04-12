@@ -107,6 +107,31 @@
 		<div class="form-row form-group">
 			<div class="col-1"></div>
 			<div class="col-3">
+				<label class="col-form-label col-form-label-sm">
+					Petal Shape
+				</label>
+			</div>
+			<div class="col-2">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-circle" value="0" checked>
+					<label class="form-check-label small" for="phyllotaxis-shape-circle">
+						Circle
+					</label>
+				</div>
+			</div>
+			<div class="col-2">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-image" value="1">
+					<label class="form-check-label small" for="phyllotaxis-shape-image">
+						Image
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row form-group">
+			<div class="col-1"></div>
+			<div class="col-3">
 				<label class="col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
 					Petal Size
 				</label>
@@ -268,7 +293,7 @@
 			</div>
 		</div>
 
-		<div class="form-row form-group">
+		<div class="form-row form-group phyllotaxis-polygon-opts">
 			<div class="col-1"></div>
 			<div class="col-2">
 				<label class="col-form-label col-form-label-sm" for="phyllotaxis-contrast">
@@ -297,12 +322,12 @@
 			<div class="col-3">
 				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-shadow-offset">
 			</div>
-			<div class="col-3 pl-4">
+			<div class="col-3 pl-4 phyllotaxis-polygon-opts">
 				<label class="col-form-label col-form-label-sm" for="phyllotaxis-spot-offset">
 					Spot Offset
 				</label>
 			</div>
-			<div class="col-3">
+			<div class="col-3 phyllotaxis-polygon-opts">
 				<input class="form-control-range mt-1" type="range" min="0" max="1" step="any" value="0" id="phyllotaxis-spot-offset">
 			</div>
 		</div>

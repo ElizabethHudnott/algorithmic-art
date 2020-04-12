@@ -75,6 +75,21 @@
 				}
 			});
 
+			const polygonOpts = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
+			function setShape(event) {
+				const shape = parseInt(this.value);
+				me.petalShape = shape;
+				const hide = shape === 1;
+				polygonOpts.forEach(function (item) {
+					item.classList.toggle('d-none', hide);
+				});
+				progressiveBackgroundGen(me, 0);
+			}
+
+			optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]').forEach(function (item) {
+				item.addEventListener('input', setShape);
+			});
+
 			optionsDoc.getElementById('phyllotaxis-petal-size').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value > 0) {
@@ -91,11 +106,13 @@
 				}
 			});
 
+			function setStacking(event) {
+				me.stacking = parseInt(this.value);
+				progressiveBackgroundGen(me, 0);
+			}
+
 			optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]').forEach(function (item) {
-				item.addEventListener('input', function (event) {
-					me.stacking = parseInt(this.value);
-					progressiveBackgroundGen(me, 0);
-				});
+				item.addEventListener('input', setStacking);
 			});
 
 			angleModeSelect.addEventListener('input', function (event) {
@@ -279,6 +296,7 @@
 		this.start = 1;
 		this.step = 1;
 		this.stacking = -1;
+		this.petalShape = 0;
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
 		this.maxPetals = 10000;
@@ -400,6 +418,10 @@
 		const lastRSquared = lastR * lastR;
 		const stacking = this.stacking;
 
+		const imageWidth = bgGeneratorImage.width;
+		const imageHeight = bgGeneratorImage.height;
+		const imageAspect = imageWidth / imageHeight;
+
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
 		let lightness = this.lightnessMin;
@@ -412,6 +434,11 @@
 		const shadowOffset = this.shadowOffset
 		const spotOffset = this.spotOffset;
 		const hasLightingEffects = shadowOffset > 0 || (contrast > 0 && spotOffset > 0);
+		const applyFilters = preview === 0 || preview === 2;
+		const variesRegExp = /[ar]/;
+		const saturationVaries = variesRegExp.test(this.saturationMode);
+		const lightnessVaries = variesRegExp.test(this.lightnessMode);
+		const opacityVaries = variesRegExp.test(this.opacityMode);
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		context.shadowColor = this.shadowColor;
@@ -424,8 +451,7 @@
 			const x = zoom * r * Math.cos(theta);
 			const y = zoom * r * Math.sin(theta);
 			const petalSize = zoom * point.radius;
-			context.beginPath();
-			context.arc(x, y, petalSize, 0, TWO_PI);
+
 			const degrees = theta / Math.PI * 180;
 			const radialValue = (r * r) / lastRSquared;
 
@@ -487,7 +513,48 @@
 				context.fillStyle = gradient;
 			}
 
-			context.fill();
+			switch (this.petalShape) {
+			case 0:
+				context.beginPath();
+				context.arc(x, y, petalSize, 0, TWO_PI);
+				context.fill();
+				break;
+			case 1:
+				let imageTranslateX, imageTranslateY, imageResizedWidth, imageResizedHeight;
+				if (imageWidth >= imageHeight) {
+					imageResizedHeight = 2 * petalSize;
+					imageResizedWidth = imageResizedHeight * imageAspect;
+					imageTranslateX = imageResizedWidth - petalSize;
+					imageTranslateY = imageResizedHeight / 2;
+				} else {
+					imageResizedWidth = 2 * petalSize;
+					imageResizedHeight = imageResizedWidth / imageAspect;
+					imageTranslateX = imageResizedWidth / 2;
+					imageTranslateY = imageResizedHeight - petalSize;
+				}
+				let filter = '';
+				if (applyFilters) {
+					if (saturationVaries) {
+						filter += 'saturate(' + saturation + ') ';
+					}
+					if (lightnessVaries) {
+						const brightness = lightness * 2;
+						filter += 'brightness(' + brightness + ') ';
+					}
+					if (opacityVaries) {
+						filter += 'opacity(' + opacity + ') ';
+					}
+				}
+				context.save();
+				context.translate(x, y);
+				context.rotate(theta + HALF_PI);
+				context.translate(-imageTranslateX, -imageTranslateY);
+				if (filter !== '') {
+					context.filter = filter;
+				}
+				context.drawImage(bgGeneratorImage, 0, 0, imageResizedWidth, imageResizedHeight);
+				context.restore();
+			}
 		}
 	};
 

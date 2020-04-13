@@ -78,11 +78,3 @@ function parseFraction(text) {
 
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;
-
-class Point {
-	constructor(x, y) {
-		this.x = x;
-		this.y = y;
-	}
-
-}

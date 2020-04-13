@@ -95,7 +95,7 @@ function progressiveBackgroundGen(generator, preview) {
 			} else {
 				const optionsDocPromise = gen.optionsDocument;
 				if (optionsDocPromise === undefined) {
-					optionsButton.disabled = true;
+					optionsButton.disabled = !gen.hasCustomImage;
 				} else {
 					optionsDocPromise.then(function (optionsDoc) {
 						const dom = optionsDoc.body;

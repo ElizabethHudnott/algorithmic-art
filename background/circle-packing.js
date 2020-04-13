@@ -5,6 +5,7 @@
 			this.x = x;
 			this.y = y;
 			this.r = r;
+			this.originalR = r;
 		}
 	}
 
@@ -12,12 +13,12 @@
 		const me = this;
 		this.title = 'Shape Packing';
 		this.hasRandomness = true;
-		this.hasCustomImage = false;
+		this.hasCustomImage = true;
 
-		this.startPoints = [];
-		this.numStartPoints = 10;
-		this.meanStartRadius = 200;
-		this.startRadiusRange = 100;
+		this.seedShapes = [];
+		this.numSeeds = 20;
+		this.meanSeedRadius = 200;
+		this.seedRadiusRange = 100;
 		this.minRadius = 8;
 		this.circular = false;
 		this.bufferSize = 5;
@@ -29,13 +30,43 @@
 	backgroundGenerators.set('circle-packing', new CirclePacking);
 
 	CirclePacking.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
-		this.startPoints = [];
-		for (let i = 0; i < this.numStartPoints; i++) {
-			this.startPoints.push(new Point(Math.random() * canvasWidth, Math.random() * canvasHeight));
-		}
-		this.shapes = this.generateStartingShapes(canvasWidth, canvasHeight);
+		let shapes = this.seedShapes.slice();
 
-		const shapes = this.shapes;
+		const seedRadius = this.meanSeedRadius;
+		const radiusRange = this.seedRadiusRange;
+		const minRadius = this.minRadius;
+		const edgeBuffer = this.edgeBufferSize;
+
+		if (this.circular) {
+			const centreX = canvasWidth / 2;
+			const centreY = canvasHeight / 2;
+			const boundaryR = Math.min(centreX, centreY);
+			context.beginPath();
+			context.arc(centreX, centreY, boundaryR, 0, TWO_PI);
+			context.stroke();
+			for (let i = shapes.length; i < this.numSeeds; i++) {
+				const theta = Math.random() * 2 * Math.PI;
+				const radius = Math.max(minRadius, seedRadius + radiusRange * Math.random() - radiusRange / 2);
+				const maxR = boundaryR - edgeBuffer - radius;
+				const r = Math.sqrt(Math.random()) * maxR;
+				const x = centreX + r * Math.cos(theta);
+				const y = centreY + r * Math.sin(theta);
+				shapes.push(new Shape(x, y, radius));
+			}
+		} else {
+			const innerWidth = canvasWidth - 2 * edgeBuffer;
+			const innerHeight = canvasHeight - 2 * edgeBuffer;
+			for (let i = shapes.length; i < this.numSeeds; i++) {
+				const radius = Math.max(minRadius, seedRadius + radiusRange * Math.random() - radiusRange / 2);
+				const xRange = innerWidth - 2 * radius;
+				const yRange = innerHeight - 2 * radius;
+				const x = Math.random() * xRange + edgeBuffer + radius;
+				const y = Math.random() * yRange + edgeBuffer + radius;
+				shapes.push(new Shape(x, y, radius));
+			}
+		}
+		this.removeOverlaps(shapes, canvasWidth, canvasHeight);
+
 		for (let i = 0; i < shapes.length; i++) {
 			const shape = shapes[i];
 			context.beginPath();
@@ -44,47 +75,9 @@
 		}
 	}
 
-	CirclePacking.prototype.generateStartingShapes = function (width, height) {
-		const startPoints = this.startPoints;
-		const numStartPoints = startPoints.length;
-		const startRadius = this.meanStartRadius;
-		const radiusRange = this.startRadiusRange;
+	CirclePacking.prototype.removeOverlaps = function (shapes, width, height) {
 		const minRadius = this.minRadius;
 		const buffer = this.bufferSize;
-		const edgeBuffer = this.edgeBufferSize;
-		const shapes = [];
-
-		if (this.circular) {
-			const centreX = width / 2;
-			const centreY = height / 2;
-			const maxRadius = Math.min(centreX, centreY);
-			for (let i = 0; i < numStartPoints; i++) {
-				const point = startPoints[i];
-				const x = point.x;
-				const y = point.y;
-				const dist = Math.sqrt(x * x + y * y);
-				let radius = startRadius + radiusRange * Math.random() - radiusRange / 2;
-				radius = Math.min(radius, maxRadius - dist);
-				if (radius >= edgeBuffer) {
-					shapes.push(new Shape(x, y, radius));
-				}
-			}
-		} else {
-			for (let i = 0; i < numStartPoints; i++) {
-				const point = startPoints[i];
-				const x = point.x;
-				const y = point.y;
-				const leftDistance = x - edgeBuffer;
-				const rightDistance = width - edgeBuffer - x;
-				const topDistance = y - edgeBuffer;
-				const bottomDistance = height - edgeBuffer - y;
-				let radius = startRadius + radiusRange * Math.random() - radiusRange / 2;
-				radius = Math.min(radius, leftDistance, topDistance, rightDistance, bottomDistance);
-				if (radius >= minRadius) {
-					shapes.push(new Shape(x, y, radius));
-				}
-			}
-		}
 
 		let numShapes = shapes.length;
 		let i = 1;
@@ -93,7 +86,6 @@
 			const x1 = shape1.x;
 			const y1 = shape1.y;
 			let r1 = shape1.r;
-			let r1Squared = r1 * r1;
 			let removed = false;
 			for (let j = 0; j < i; j++) {
 				const shape2 = shapes[j];
@@ -106,17 +98,17 @@
 				const rSum = r1 + r2 + buffer;
 				const excessRadius = rSum - dist;
 				if (excessRadius > 0) {
-					const r2Squared = r2 * r2;
-					shape2Weighting = r2Squared / (r1Squared + r2Squared);
-					r2 = Math.max(minRadius, r2 - shape2Weighting * excessRadius);
-					r1 = dist - r2 - buffer;
-					if (r1 < minRadius) {
+					const shape2Weighting = r2 / (r1 + r2);
+					const maxR2 = dist - buffer - minRadius;
+					if (maxR2 < minRadius) {
 						shapes.splice(i, 1);
 						numShapes--;
 						removed = true;
 						break;
 					}
-					r1Squared = r1 * r1;
+					const idealR2 = r2 - shape2Weighting * excessRadius;
+					r2 = Math.max(minRadius, Math.min(idealR2, maxR2));
+					r1 = dist - r2 - buffer;
 					shape1.r = r1;
 					shape2.r = r2;
 				}
@@ -125,7 +117,42 @@
 				i++;
 			}
 		}
-		return shapes;
+
+		const seedRadius = this.meanSeedRadius;
+		const radiusRange = this.seedRadiusRange;
+		const smallestIdealR = seedRadius - radiusRange / 2;
+		const centreX = width / 2;
+		const centreY = height / 2;
+		const boundaryR = Math.min(centreX, centreY);
+		for (i = 0; i < numShapes; i++) {
+			const shape1 = shapes[i];
+			if (shape1.r !== shape1.originalR) {
+				const x = shape1.x;
+				const y = shape1.y;
+				let minDistance;
+				if (this.circular) {
+					const xDist = x - centreX;
+					const yDist = y - centreY;
+					const r = Math.sqrt(xDist * xDist + yDist * yDist);
+					minDistance = boundaryR - r;
+				} else {
+					minDistance = Math.min(x, y, width - x, height - y);
+				}
+				for (let j = 0; j < numShapes; j++) {
+					if (i === j) {
+						continue;
+					}
+					const shape2 = shapes[j];
+					const xDist = shape2.x - shape1.x;
+					const yDist = shape2.y - shape1.y;
+					const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r;
+					if (dist < minDistance) {
+						minDistance = dist;
+					}
+				}
+				shape1.r = Math.min(minDistance - buffer, shape1.originalR);
+			}
+		}
 	}
 
 }

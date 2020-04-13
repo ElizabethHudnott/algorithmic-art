@@ -116,6 +116,20 @@
 			});
 			fgSpacingSlider.addEventListener('mouseup', fullRedraw);
 
+			const tlxCornerSlider = optionsDoc.getElementById('carpet-tlx-corner');
+			tlxCornerSlider.addEventListener('input', function (event) {
+				me.topLeftCornerX = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			tlxCornerSlider.addEventListener('mouseup', fullRedraw);
+
+			const tlyCornerSlider = optionsDoc.getElementById('carpet-tly-corner');
+			tlyCornerSlider.addEventListener('input', function (event) {
+				me.topLeftCornerY = parseFloat(this.max) - parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			tlyCornerSlider.addEventListener('mouseup', fullRedraw);
+
 			const llCornerSlider = optionsDoc.getElementById('carpet-ll-corner');
 			llCornerSlider.addEventListener('input', function (event) {
 				me.lowerLeftCorner = parseFloat(this.value);
@@ -146,6 +160,8 @@
 		this.concentricDensity = 7;
 		this.lowerLeftCorner = 0.35;
 		this.lowerRightCorner = 0.75;
+		this.topLeftCornerX = 0.5;
+		this.topLeftCornerY = 0.02;
 
 		const colors = new Array(13);
 		colors.fill('#ffffff80');
@@ -216,6 +232,7 @@
 			const bgSpacing = Math.max(combinedSpacing - fgSpacing, 1);
 			const lowerRightCorner = Math.max(Math.round(this.lowerRightCorner * fgSpacing), 1);
 			const lowerLeftCorner = Math.max(Math.round(this.lowerLeftCorner * lowerRightCorner), 1);
+			const topLeftCornerX = Math.max(Math.round(this.topLeftCornerX * (combinedSpacing - 1)), 1);
 
 			for (let tile of queue) {
 				const x = tile.x;
@@ -262,7 +279,7 @@
 				if (drawPattern && patternLocation) {
 					if (filling === 1) {
 						this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
-							fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner);
+							fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX);
 					} else {
 						context.drawImage(bgGeneratorImage, roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 					}
@@ -291,14 +308,15 @@
 		}
 	};
 
-	SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, size, fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner) {
+	SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, size, fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX) {
 		let combinedSpacing;
 		let currentSize = size;
 		let leftX = x;
 		let bottomY = y + size;
 		const originalLLCorner = lowerLeftCorner, originalLRCorner = lowerRightCorner;
+		const originalTLCornerX = topLeftCornerX;
 		let decrements = 0;
-		let rightX, topY, prevSpacing, corner1, corner2;
+		let rightX, topY, prevSpacing, corner1X, corner1Y, corner2;
 		context.beginPath();
 		while (currentSize >= 2 * fgSpacing) {
 			combinedSpacing = fgSpacing + bgSpacing;
@@ -310,8 +328,9 @@
 			context.lineTo(leftX, topY);
 			context.lineTo(leftX, bottomY);
 			context.lineTo(leftX + lowerLeftCorner, bottomY);
-			corner1 = topY + fgSpacing - Math.round(0.02 * fgSpacing * fgSpacing);
-			context.lineTo(leftX + fgSpacing, corner1);
+			corner1X = leftX + topLeftCornerX;
+			corner1Y = topY + Math.max(fgSpacing - this.topLeftCornerY * fgSpacing * fgSpacing, 1);
+			context.lineTo(corner1X, corner1Y);
 			context.lineTo(rightX - fgSpacing, topY + fgSpacing);
 			corner2 = bottomY - lowerRightCorner;
 			context.lineTo(rightX - fgSpacing, corner2);
@@ -322,8 +341,9 @@
 			if (fgSpacing > 1) {
 				fgSpacing--;
 				decrements++;
-				lowerLeftCorner = Math.max(Math.round(originalLLCorner - this.lowerLeftCorner * decrements), 1);
-				lowerRightCorner = Math.max(Math.round(originalLRCorner - this.lowerRightCorner * decrements), 1);
+				lowerLeftCorner = Math.max(originalLLCorner - decrements, 1);
+				lowerRightCorner = Math.max(originalLRCorner - decrements, 1);
+				topLeftCornerX = Math.max(originalTLCornerX - decrements, 1);
 			}
 			leftX += combinedSpacing;
 			bottomY -= combinedSpacing;
@@ -332,9 +352,9 @@
 		bottomY += combinedSpacing;
 		context.moveTo(rightX - prevSpacing, corner2);
 		context.lineTo(leftX + prevSpacing, corner2);
-		context.lineTo(leftX + prevSpacing, topY + prevSpacing);
+		context.lineTo(Math.max(leftX + prevSpacing, corner1X), topY + prevSpacing);
 		context.lineTo(rightX - prevSpacing, topY + prevSpacing);
-		context.lineTo(leftX + prevSpacing, corner1);
+		context.lineTo(corner1X, corner1Y);
 		context.lineTo(leftX, bottomY);
 		context.fill();
 	};

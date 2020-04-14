@@ -10,24 +10,113 @@
 		}
 	}
 
+	class Rendering {
+		constructor(n, star) {
+			this.numSides = n;
+			this.star = star;
+			this.innerColor = 'yellow';
+			this.outerColor = 'black';
+			this.outlineFraction = 0.03;
+			this.frequency = 1;
+			/*	1  Outline only
+			 *	2  Fill only
+			 *	3  Outline & fill, separate
+			 *	7  Separate outline and fill, no outline in centre (4+3)
+			 *	11 Gradient (8+3)
+			 *	14 Image, no outline (12+2)
+			 *	15 Image, with outline (12+3)
+			 */
+			this.mode = 1;
+
+			this.exteriorAngle = TWO_PI / n;
+		}
+
+		draw(context, x, y, r, rotationFraction) {
+			const n = this.numSides;
+			const mode = this.mode;
+
+			let lineWidth;
+			if ((mode & 1) === 0) {
+				// No outline
+				lineWidth = 0;
+			} else {
+				lineWidth = Math.max(Math.round(r * this.outlineFraction), 1);
+			}
+
+			const radius = r - lineWidth / 2;
+			let paths = [];
+
+			const star = this.star;
+
+			let rotation;
+			if (n % 2 === 0 && n !== 4) {
+				rotation = Math.PI * (1 / n - 0.5);
+			} else {
+				rotation = Math.PI * ((1 + Math.random() * 0.5) * 2 / n - 0.5);
+			}
+
+
+		}
+	}
+
 	function CirclePacking() {
 		const me = this;
 		this.title = 'Circle Packing';
 		this.hasRandomness = true;
 		this.hasCustomImage = true;
 
+		this.optionsDocument = downloadDocument('circle-packing.html').then(function (optionsDoc) {
+
+			function setShape(event) {
+				me.circular = this.value === 'true';
+				progressiveBackgroundGen(me, 0);
+			}
+
+			optionsDoc.querySelectorAll('input[name=circle-pack-shape]').forEach(function (item) {
+				item.addEventListener('input', setShape);
+			});
+
+			optionsDoc.getElementById('circle-pack-num-seeds').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.numSeeds = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-avg-seed').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0.5) {
+					me.meanSeedRadius = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-seed-range').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.seedRadiusRange = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			return optionsDoc;
+		});
+
 		this.seedShapes = [];
-		this.numSeeds = 20;
+		this.numSeeds = 4;
 		this.meanSeedRadius = 200;
 		this.seedRadiusRange = 100;
-		this.minRadius = 6;
+		this.minRadius = 3;
 		this.circular = false;
 		this.bufferSize = 4;
 		this.edgeBufferSize = 6;
 
 		this.maxShapes = 2000;
 		this.maxNewRadius = 36;
+		this.maxAttempts = 10000;
 		this.growthRate = 4;
+		this.maxGrowth = 150;
 		this.numNewShapes = 5;
 		this.shapes = [];
 	}
@@ -39,6 +128,7 @@
 
 		const seedRadius = this.meanSeedRadius;
 		const radiusRange = this.seedRadiusRange;
+		const smallestIdealSeedR = seedRadius - radiusRange / 2;
 		const minRadius = this.minRadius;
 		const edgeBuffer = this.edgeBufferSize;
 
@@ -50,9 +140,6 @@
 		const innerHeight = canvasHeight - 2 * edgeBuffer;
 
 		if (this.circular) {
-			context.beginPath();
-			context.arc(centreX, centreY, boundaryR, 0, TWO_PI);
-			context.stroke();
 			for (let i = shapes.length; i < this.numSeeds; i++) {
 				const theta = Math.random() * 2 * Math.PI;
 				const radius = Math.max(minRadius, seedRadius + radiusRange * Math.random() - radiusRange / 2);
@@ -72,12 +159,12 @@
 				shapes.push(new Shape(x, y, radius, false));
 			}
 		}
-		this.removeOverlaps(shapes, canvasWidth, canvasHeight);
+		let numFullSize = this.removeOverlaps(shapes, canvasWidth, canvasHeight);
 
 		const buffer = this.bufferSize;
 		const maxShapes = this.maxShapes;
 		const maxNewRadius = this.maxNewRadius;
-		const maxAttempts = 10000;
+		const maxAttempts = this.maxAttempts;
 
 		let numGrowing = 0;
 		let attempts = 0;
@@ -112,10 +199,19 @@
 							minDistance = dist;
 						}
 					}
-					shape1.r = Math.min(shape1.r + this.growthRate, minDistance - buffer);
-					if (shape1.r === minDistance - buffer) {
+					const oldRadius = shape1.r;
+					const grownRadius = oldRadius + this.growthRate;
+					let newRadius = Math.min(grownRadius, minDistance - buffer, this.maxGrowth);
+					if (newRadius >= smallestIdealSeedR && numFullSize >= this.numSeeds) {
+						newRadius = oldRadius;
+					}
+					shape1.r = newRadius;
+					if (newRadius !== grownRadius) {
 						shape1.growing = false;
 						numGrowing--;
+						if (newRadius >= smallestIdealSeedR) {
+							numFullSize++;
+						}
 					}
 				}
 			}
@@ -218,6 +314,7 @@
 		const centreX = width / 2;
 		const centreY = height / 2;
 		const boundaryR = Math.min(centreX, centreY);
+		let fullSize = 0;
 		for (i = 0; i < numShapes; i++) {
 			const shape1 = shapes[i];
 			if (shape1.r !== shape1.originalR) {
@@ -246,7 +343,11 @@
 				}
 				shape1.r = Math.min(minDistance - buffer, shape1.originalR);
 			}
+			if (shape1.r >= smallestIdealR) {
+				fullSize++;
+			}
 		}
+		return fullSize;
 	}
 
 }

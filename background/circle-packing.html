@@ -49,20 +49,18 @@
 
 		<div class="form-row form-group">
 			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-avg-seed">
-					Mean Seed Size
+				<label class="col-form-label col-form-label-sm" for="circle-pack-min-seed-size">
+					Seed Size
 				</label>
 			</div>
-			<div class="col-3">
-				<input type="number" min="10" step="10" value="200" class="form-control form-control-sm" id="circle-pack-avg-seed">
-			</div>
-			<div class="col-3 pl-4">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-seed-range">
-					Range
-				</label>
-			</div>
-			<div class="col-3">
-				<input type="number" min="0" step="10" value="100" class="form-control form-control-sm" id="circle-pack-seed-range">
+			<div class="col-6">
+				<div class="input-group input-group-sm">
+					<input type="number" min="10" step="10" value="130" class="form-control" id="circle-pack-min-seed-size">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="circle-pack-max-seed-size-label">to</span>
+					</div>
+					<input type="number" min="10" step="10" value="180" class="form-control" id="circle-pack-max-seed-size" aria-describedby="circle-pack-max-seed-size-label">
+				</div>
 			</div>
 		</div>
 

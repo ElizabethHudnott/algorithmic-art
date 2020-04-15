@@ -67,6 +67,8 @@
 
 		this.optionsDocument = downloadDocument('circle-packing.html').then(function (optionsDoc) {
 
+			const maxGrowthInput = optionsDoc.getElementById('circle-pack-max-growth');
+
 			function setShape(event) {
 				me.circular = this.value === 'true';
 				progressiveBackgroundGen(me, 0);
@@ -92,13 +94,53 @@
 				}
 			});
 
-			optionsDoc.getElementById('circle-pack-max-seed-size').addEventListener('input', function (event) {
+
+			const maxSeedSizeInput = optionsDoc.getElementById('circle-pack-max-seed-size');
+			maxSeedSizeInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 0.5) {
 					me.maxSeedSize = value;
-					if (this.maxGrowth > value) {
-						this.maxGrowth = value;
-					}
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			maxSeedSizeInput.addEventListener('change', function (event) {
+				const value = me.maxSeedSize;
+				if (me.maxGrowth > value) {
+					maxGrowthInput.value = value;
+					me.maxGrowth = value;
+				}
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('circle-pack-min-size').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0.5) {
+					me.minSize = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-max-new-size').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0.5) {
+					me.maxNewSize = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-growth-rate').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0.5) {
+					me.growthRate = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			maxGrowthInput.addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0.5) {
+					me.maxGrowth = value;
 					progressiveBackgroundGen(me, 0);
 				}
 			});
@@ -107,7 +149,7 @@
 		});
 
 		this.seedShapes = [];
-		this.numSeeds = 4;
+		this.numSeeds = 5;
 		this.minSeedSize = 130;
 		this.maxSeedSize = 180;
 		this.minSize = 3;
@@ -119,7 +161,7 @@
 		this.maxNewSize = 36;
 		this.maxAttempts = 1000;
 		this.growthRate = 0.5;
-		this.maxGrowth = 100;
+		this.maxGrowth = 90;
 		this.numNewShapes = 25;
 		this.shapes = [];
 	}
@@ -207,14 +249,19 @@
 					if ((newRadius >= minSeedSize && numFullSize >= this.numSeeds)) {
 						newRadius = oldRadius;
 					}
-					shape1.r = newRadius;
 					if (newRadius !== grownRadius) {
+						/*
+						if (this.maxGrowth < oldRadius) {
+							newRadius = oldRadius;
+						}
+						*/
 						shape1.growing = false;
 						numGrowing--;
 						if (newRadius >= minSeedSize) {
 							numFullSize++;
 						}
 					}
+					shape1.r = newRadius;
 				}
 			}
 			if (shapes.length < maxShapes && attempts < maxAttempts) {

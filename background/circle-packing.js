@@ -145,6 +145,38 @@
 				}
 			});
 
+			optionsDoc.getElementById('circle-pack-gap').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0) {
+					me.bufferSize = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-edge-gap').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0) {
+					me.edgeBufferSize = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-max-shapes').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0) {
+					me.maxShapes = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('circle-pack-max-attempts').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 1) {
+					me.maxAttempts = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
 			return optionsDoc;
 		});
 
@@ -155,7 +187,7 @@
 		this.minSize = 3;
 		this.circular = false;
 		this.bufferSize = 4;
-		this.edgeBufferSize = 12;
+		this.edgeBufferSize = 8;
 
 		this.maxShapes = 2000;
 		this.maxNewSize = 36;
@@ -227,9 +259,9 @@
 						const xDist = x - centreX;
 						const yDist = y - centreY;
 						const r = Math.sqrt(xDist * xDist + yDist * yDist);
-						minDistance = boundaryR - r;
+						minDistance = boundaryR - edgeBuffer - r;
 					} else {
-						minDistance = Math.min(x, y, canvasWidth - x, canvasHeight - y);
+						minDistance = Math.min(x, y, canvasWidth - x, canvasHeight - y) - edgeBuffer;
 					}
 					for (let j = 0; j < shapes.length; j++) {
 						if (i === j) {
@@ -238,14 +270,14 @@
 						const shape2 = shapes[j];
 						const xDist = shape2.x - shape1.x;
 						const yDist = shape2.y - shape1.y;
-						const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r;
+						const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r - buffer;
 						if (dist < minDistance) {
 							minDistance = dist;
 						}
 					}
 					const oldRadius = shape1.r;
 					const grownRadius = oldRadius + this.growthRate;
-					let newRadius = Math.min(grownRadius, minDistance - buffer, this.maxGrowth);
+					let newRadius = Math.min(grownRadius, minDistance, this.maxGrowth);
 					if ((newRadius >= minSeedSize && numFullSize >= this.numSeeds)) {
 						newRadius = oldRadius;
 					}
@@ -320,6 +352,10 @@
 	CirclePacking.prototype.removeOverlaps = function (shapes, width, height) {
 		const minSize = this.minSize;
 		const buffer = this.bufferSize;
+		const edgeBuffer = this.edgeBufferSize;
+		const centreX = width / 2;
+		const centreY = height / 2;
+		const boundaryR = Math.min(centreX, centreY);
 
 		let numShapes = shapes.length;
 		let i = 1;
@@ -362,10 +398,6 @@
 		}
 
 		const minSeedSize = this.minSeedSize;
-		const seedSizeRange = Math.max(this.maxSeedSize - minSeedSize);
-		const centreX = width / 2;
-		const centreY = height / 2;
-		const boundaryR = Math.min(centreX, centreY);
 		let fullSize = 0;
 		for (i = 0; i < numShapes; i++) {
 			const shape1 = shapes[i];
@@ -377,9 +409,9 @@
 					const xDist = x - centreX;
 					const yDist = y - centreY;
 					const r = Math.sqrt(xDist * xDist + yDist * yDist);
-					minDistance = boundaryR - r;
+					minDistance = boundaryR - edgeBuffer - r;
 				} else {
-					minDistance = Math.min(x, y, width - x, height - y);
+					minDistance = Math.min(x, y, width - x, height - y) - edgeBuffer;
 				}
 				for (let j = 0; j < numShapes; j++) {
 					if (i === j) {
@@ -388,12 +420,12 @@
 					const shape2 = shapes[j];
 					const xDist = shape2.x - shape1.x;
 					const yDist = shape2.y - shape1.y;
-					const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r;
+					const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r - buffer;
 					if (dist < minDistance) {
 						minDistance = dist;
 					}
 				}
-				shape1.r = Math.min(minDistance - buffer, shape1.originalR);
+				shape1.r = Math.min(minDistance, shape1.originalR);
 			}
 			if (shape1.r >= minSeedSize) {
 				fullSize++;

@@ -195,13 +195,18 @@
 		this.growthRate = 0.5;
 		this.maxGrowth = 90;
 		this.numNewShapes = 25;
-		this.shapes = [];
+		this.shapes = undefined;
+	}
+
+	CirclePacking.prototype.purgeCache = function () {
+		this.shapes = undefined;
 	}
 
 	backgroundGenerators.set('circle-packing', new CirclePacking);
 
-	CirclePacking.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
-		let shapes = this.seedShapes.slice();
+	CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
+		const shapes = this.seedShapes.slice();
+		this.shapes = shapes;
 
 		const minSeedSize = this.minSeedSize;
 		const seedSizeRange = Math.max(this.maxSeedSize - minSeedSize, 0);

@@ -16,14 +16,13 @@ const bgGeneratorImage = new Image();
 bgGeneratorImage.onload = generateBackground;
 
 function progressiveBackgroundGen(generator, preview) {
-	const beginTime = performance.now();
 	const context = canvas.getContext('2d');
 	const width = canvas.width;
 	const height = canvas.height;
 	context.restore();
 	context.clearRect(0, 0, width, height);
 	context.save();
-	const redraw = generator.generate(beginTime, context, width, height, preview);
+	const redraw = generator.generate(context, width, height, preview);
 	backgroundRedraw = redraw;
 	let done = false;
 	function drawSection() {
@@ -210,4 +209,57 @@ function progressiveBackgroundGen(generator, preview) {
 		}
 	});
 
+}
+
+let startFrame, endFrame, videoStartTime, videoLength;
+
+function captureFrameData() {
+	const frame = new Map();
+	for (let property of bgGenerator.animatable) {
+		frame.set(property, bgGenerator[property]);
+	}
+	return frame;
+}
+
+function renderFrame(tween) {
+	for (let [property, startValue] of startFrame.entries()) {
+		const endValue = endFrame.get(property);
+		const value = (endValue - startValue) * tween + startValue;
+		bgGenerator[property] = value;
+	}
+	bgGenerator.animate();
+	const context = canvas.getContext('2d');
+	const width = canvas.width;
+	const height = canvas.height;
+	const bgColor = document.body.style.backgroundColor;
+	context.restore();
+	if (bgColor === '') {
+		context.clearRect(0, 0, width, height);
+	} else {
+		context.fillStyle = bgColor;
+		context.fillRect(0, 0, width, height);
+		context.fillStyle = 'black';
+	}
+	context.save();
+	const redraw = bgGenerator.generate(context, width, height, 0);
+	backgroundRedraw = redraw;
+	let done;
+	do {
+		done = redraw.next().done;
+	} while (!done);
+}
+
+function renderFrames() {
+	const tween = (performance.now() - videoStartTime) / videoLength;
+	renderFrame(tween);
+	if (tween < 1) {
+		requestAnimationFrame(renderFrames);
+	}
+}
+
+function animate(width, height) {
+	canvas.width = width;
+	canvas.height = height;
+	videoStartTime = performance.now();
+	renderFrames();
 }

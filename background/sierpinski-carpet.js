@@ -200,7 +200,8 @@
 		this.relationship = relationship;
 	}
 
-	SierpinskiCarpet.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
+	SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
+		const beginTime = performance.now();
 		const outerSize = Math.min(canvasWidth, canvasHeight);
 		const colors = this.colors;
 		const filling = this.filling;
@@ -299,6 +300,7 @@
 				numProcessed++;
 				if ((numProcessed & 500) === 499 && performance.now() >= beginTime + 20) {
 					yield;
+					beginTime = performance.now();
 				}
 
 			}

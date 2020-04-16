@@ -64,7 +64,8 @@
 
 	backgroundGenerators.set('ten-print', new TenPrint());
 
-	TenPrint.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
+	TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
+		let beginTime = performance.now();
 		const cellsDownScreen = 25;
 		const tan = Math.tan(Math.max(this.angle, 0.0001));
 		const sqrTan = Math.min(Math.sqrt(tan), 1);
@@ -169,6 +170,7 @@
 			}
 			if (cellY % 20 === 19 && performance.now() >= beginTime + 20) {
 				yield;
+				beginTime = performance.now();
 			}
 		}
 	}

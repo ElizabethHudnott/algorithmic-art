@@ -335,6 +335,17 @@
 		this.points = undefined;
 	}
 
+	Phyllotaxis.prototype.animatable = Object.freeze([
+		'exponent', 'angle', 'spread', 'scale', 'start', 'step', 'petalSize',
+		'petalEnlargement', 'maxPetals', 'hueMin', 'hueMax', 'saturationMin',
+		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
+		'lighting', 'contrast', 'shadowAngle', 'shadowBlur', 'shadowOffset', 'spotOffset'
+	]);
+
+	Phyllotaxis.prototype.animate = function () {
+		// Changing the animatable properties doesn't require updating any other properties.
+	}
+
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 
 	class Petal {
@@ -352,7 +363,7 @@
 			value = degrees;
 			break;
 		case 1:
-			value = n;
+			value = n + this.start;
 			break;
 		case 2:
 			value = degrees - r;
@@ -362,7 +373,7 @@
 		return (value % mod) * range / mod + min;
 	};
 
-	Phyllotaxis.prototype.generate = function* (beginTime, context, canvasWidth, canvasHeight, preview) {
+	Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const previewMaxPetals = 1500;
 
 		if (preview < 2 || this.points === undefined) {

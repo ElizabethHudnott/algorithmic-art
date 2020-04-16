@@ -211,7 +211,7 @@ function progressiveBackgroundGen(generator, preview) {
 
 }
 
-let startFrame, endFrame, videoStartTime, videoLength;
+let startFrame, endFrame;
 
 function captureFrameData() {
 	const frame = new Map();
@@ -221,25 +221,21 @@ function captureFrameData() {
 	return frame;
 }
 
-function renderFrame(tween) {
+function renderFrame(context, tween) {
 	for (let [property, startValue] of startFrame.entries()) {
 		const endValue = endFrame.get(property);
 		const value = (endValue - startValue) * tween + startValue;
 		bgGenerator[property] = value;
 	}
 	bgGenerator.animate();
-	const context = canvas.getContext('2d');
+	const canvas = context.canvas;
 	const width = canvas.width;
 	const height = canvas.height;
-	const bgColor = document.body.style.backgroundColor;
+	const bgColor = document.body.style.backgroundColor || 'white';
 	context.restore();
-	if (bgColor === '') {
-		context.clearRect(0, 0, width, height);
-	} else {
-		context.fillStyle = bgColor;
-		context.fillRect(0, 0, width, height);
-		context.fillStyle = 'black';
-	}
+	context.fillStyle = bgColor;
+	context.fillRect(0, 0, width, height);
+	context.fillStyle = 'black';
 	context.save();
 	const redraw = bgGenerator.generate(context, width, height, 0);
 	backgroundRedraw = redraw;
@@ -249,17 +245,36 @@ function renderFrame(tween) {
 	} while (!done);
 }
 
-function renderFrames() {
-	const tween = (performance.now() - videoStartTime) / videoLength;
-	renderFrame(tween);
-	if (tween < 1) {
-		requestAnimationFrame(renderFrames);
-	}
+function animate(canvas, length, capturer) {
+	const context = canvas.getContext('2d');
+	let startTime;
+	const render = function (time) {
+		if (startTime === undefined) {
+			startTime = time;
+		}
+		const tween = (time - startTime) / length;
+		renderFrame(context, tween);
+		const moreFrames = tween < 1;
+		if (moreFrames) {
+			requestAnimationFrame(render);
+		}
+		if (capturer) {
+			capturer.capture(canvas);
+			if (!moreFrames) {
+				capturer.stop();
+				console.log(capturer.save());
+			}
+		}
+	};
+	requestAnimationFrame(render);
 }
 
-function animate(width, height) {
-	canvas.width = width;
-	canvas.height = height;
-	videoStartTime = performance.now();
-	renderFrames();
+function captureVideo(width, height, length, properties) {
+	const captureCanvas = document.createElement('canvas');
+	captureCanvas.width = width;
+	captureCanvas.height = height;
+	properties.format = 'webm';
+	const capturer = new CCapture(properties);
+	animate(captureCanvas, length, capturer);
+	capturer.start();
 }

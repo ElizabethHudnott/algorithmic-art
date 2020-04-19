@@ -20,6 +20,12 @@ button[disabled], input[type=color][disabled] {
 	width: fit-content !important;
 }
 
+.drop-align-right {
+	left: unset !important;
+	right: 0 !important;
+	transform: translate(0%, calc(-100% - 5px)) !important;
+}
+
 .floating {
 	opacity: 0.85;
 	position: absolute;

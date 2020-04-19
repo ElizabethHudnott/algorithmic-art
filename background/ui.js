@@ -2,6 +2,7 @@
 
 const backgroundGenerators = new Map();
 let bgGenerator, backgroundRedraw;
+let startFrame, endFrame;
 
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
@@ -30,10 +31,89 @@ function progressiveBackgroundGen(generator, preview) {
 			done = redraw.next().done;
 			if (!done) {
 				setTimeout(drawSection, 0);
+			} else if (startFrame === undefined) {
+				startFrame = captureFrameData();
+				endFrame = startFrame;
 			}
 		}
 	}
 	drawSection();
+}
+
+function captureFrameData() {
+	const frame = new Map();
+	for (let property of bgGenerator.animatable) {
+		frame.set(property, bgGenerator[property]);
+	}
+	return frame;
+}
+
+function setFrameData(tween) {
+	for (let [property, startValue] of startFrame.entries()) {
+		const endValue = endFrame.get(property);
+		const value = (endValue - startValue) * tween + startValue;
+		bgGenerator[property] = value;
+	}
+	bgGenerator.animate();
+}
+
+function renderFrame(context, tween, backgroundColor) {
+	setFrameData(tween);
+	const canvas = context.canvas;
+	const width = canvas.width;
+	const height = canvas.height;
+	context.restore();
+	if (backgroundColor) {
+		context.fillStyle = backgroundColor;
+		context.fillRect(0, 0, width, height);
+		context.fillStyle = 'black';
+	} else {
+		context.clearRect(0, 0, width, height);
+	}
+	context.save();
+	const redraw = bgGenerator.generate(context, width, height, 0);
+	backgroundRedraw = redraw;
+	let done;
+	do {
+		done = redraw.next().done;
+	} while (!done);
+}
+
+function animate(canvas, length, backgroundColor, capturer) {
+	const context = canvas.getContext('2d');
+	let startTime;
+	const render = function (time) {
+		if (startTime === undefined) {
+			startTime = time;
+		}
+		const tween = Math.min((time - startTime) / length, 1);
+		renderFrame(context, tween, backgroundColor);
+		const moreFrames = tween < 1;
+		if (moreFrames) {
+			requestAnimationFrame(render);
+		}
+		if (capturer) {
+			capturer.capture(canvas);
+			if (!moreFrames) {
+				capturer.stop();
+				capturer.save();
+			}
+		}
+	};
+	requestAnimationFrame(render);
+}
+
+function captureVideo(width, height, length, properties) {
+	const backgroundColor = document.body.style.backgroundColor || 'white';
+	const captureCanvas = document.createElement('canvas');
+	captureCanvas.width = width;
+	captureCanvas.height = height;
+	if (!('format' in properties)) {
+		properties.format = 'webm';
+	}
+	const capturer = new CCapture(properties);
+	animate(captureCanvas, length, backgroundColor, capturer);
+	capturer.start();
 }
 
 {
@@ -62,6 +142,7 @@ function progressiveBackgroundGen(generator, preview) {
 			bgGenerator = gen;
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;
+			startFrame = undefined;
 			generateBackground();
 
 			const optionsButton = document.getElementById('btn-background-gen-options');
@@ -90,22 +171,23 @@ function progressiveBackgroundGen(generator, preview) {
 			const dom = backgroundGenOptionsDOM.get(name);
 			if (dom !== undefined) {
 				attachOptionsDOM(dom);
-				optionsButton.disabled = false;
+				optionsButton.classList.remove('d-none');
 			} else {
 				const optionsDocPromise = gen.optionsDocument;
 				if (optionsDocPromise === undefined) {
-					optionsButton.disabled = !gen.hasCustomImage;
+					optionsButton.classList.toggle('d-none', !gen.hasCustomImage);
 				} else {
 					optionsDocPromise.then(function (optionsDoc) {
 						const dom = optionsDoc.body;
 						attachOptionsDOM(dom);
-						optionsButton.disabled = false;
+						optionsButton.classList.remove('d-none');
 						backgroundGenOptionsDOM.set(name, dom);
 					});
 				}
 			}
-			document.getElementById('btn-generate-background').disabled = !gen.hasRandomness;
 			document.getElementById('background-gen-image-controls').classList.toggle('d-none', !gen.hasCustomImage);
+			document.getElementById('anim-btns').classList.toggle('d-none', gen.animatable === undefined);
+			document.getElementById('btn-generate-background').classList.toggle('d-none', !gen.hasRandomness);
 
 			urlParameters.set('gen', name);
 			let url = document.location;
@@ -141,6 +223,32 @@ function progressiveBackgroundGen(generator, preview) {
 	// Changing background colour.
 	document.getElementById('paper-color').addEventListener('input', function (event) {
 		document.body.style.backgroundColor = this.value;
+	});
+
+	// Animation controls
+	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
+		startFrame = captureFrameData();
+		document.getElementById('anim-position').value = 0;
+	});
+
+	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
+		endFrame = captureFrameData();
+		document.getElementById('anim-position').value = 1;
+	});
+
+	document.getElementById('btn-play').addEventListener('click', function (event) {
+		if (startFrame !== endFrame) {
+			const length = parseFloat(document.getElementById('anim-length').value);
+			if (length > 0) {
+				animate(canvas, length * 1000);
+			}
+		}
+	});
+
+	document.getElementById('anim-position').addEventListener('input', function (event) {
+		const tween = parseFloat(this.value);
+		setFrameData(tween);
+		progressiveBackgroundGen(bgGenerator, 1);
 	});
 
 	// Generate new background button.
@@ -209,72 +317,4 @@ function progressiveBackgroundGen(generator, preview) {
 		}
 	});
 
-}
-
-let startFrame, endFrame;
-
-function captureFrameData() {
-	const frame = new Map();
-	for (let property of bgGenerator.animatable) {
-		frame.set(property, bgGenerator[property]);
-	}
-	return frame;
-}
-
-function renderFrame(context, tween) {
-	for (let [property, startValue] of startFrame.entries()) {
-		const endValue = endFrame.get(property);
-		const value = (endValue - startValue) * tween + startValue;
-		bgGenerator[property] = value;
-	}
-	bgGenerator.animate();
-	const canvas = context.canvas;
-	const width = canvas.width;
-	const height = canvas.height;
-	const bgColor = document.body.style.backgroundColor || 'white';
-	context.restore();
-	context.fillStyle = bgColor;
-	context.fillRect(0, 0, width, height);
-	context.fillStyle = 'black';
-	context.save();
-	const redraw = bgGenerator.generate(context, width, height, 0);
-	backgroundRedraw = redraw;
-	let done;
-	do {
-		done = redraw.next().done;
-	} while (!done);
-}
-
-function animate(canvas, length, capturer) {
-	const context = canvas.getContext('2d');
-	let startTime;
-	const render = function (time) {
-		if (startTime === undefined) {
-			startTime = time;
-		}
-		const tween = (time - startTime) / length;
-		renderFrame(context, tween);
-		const moreFrames = tween < 1;
-		if (moreFrames) {
-			requestAnimationFrame(render);
-		}
-		if (capturer) {
-			capturer.capture(canvas);
-			if (!moreFrames) {
-				capturer.stop();
-				console.log(capturer.save());
-			}
-		}
-	};
-	requestAnimationFrame(render);
-}
-
-function captureVideo(width, height, length, properties) {
-	const captureCanvas = document.createElement('canvas');
-	captureCanvas.width = width;
-	captureCanvas.height = height;
-	properties.format = 'webm';
-	const capturer = new CCapture(properties);
-	animate(captureCanvas, length, capturer);
-	capturer.start();
 }

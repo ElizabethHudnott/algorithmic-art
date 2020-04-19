@@ -7,11 +7,11 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="ui.css">
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous" defer></script>
-	<script src="../lib/CCapture.all.min.js" defer></script>
 	<script src="../util.js" defer></script>
 	<script src="ui.js" defer></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous" defer></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous" defer></script>
+	<script src="../lib/CCapture.all.min.js" async></script>
 </head>
 <body>
 
@@ -24,13 +24,13 @@
 
 <canvas id="background-canvas"></canvas>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 1em; right: 8px; z-index: 1100;">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1100;">
 	<div class="mt-auto mr-2">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
 
-	<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		<img src="../img/module.png" alt="Pattern" title="Change background generator">
+	<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Change background generator">
+		<img src="../img/module.png" alt="Pattern">
 	</button>
 	<div class="dropdown-menu p-0 emphasize-active" aria-labelledby="btn-generator">
 		<div id="generators" class="btn-group-toggle p-0 bg-white opaque" data-toggle="buttons">
@@ -48,14 +48,45 @@
 			</label>
 		</div>
 	</div>
-	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" data-backdrop="false">
-		<img src="../img/gear_in.png" alt="Options" title="Set options">
+	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" data-backdrop="false" title="Set options">
+		<img src="../img/gear_in.png" alt="Options">
 	</button>
-	<div class="btn btn-light p-0 bg-center" style="background-image: url(../img/color_wheel.png)">
-		<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0 " title="Change background colour" style="opacity: 0">
+	<div class="btn btn-light p-0 bg-center" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
+		<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0" style="opacity: 0">
 	</div>
-	<button type="button" class="btn btn-light" id="btn-generate-background">
-		<img src="../img/brick.png" alt="Generate" title="Generate new background">
+	<div class="btn-group" role="group" aria-label="Animation controls" id="anim-btns">
+		<button type="button" class="btn btn-light" id="btn-start-frame" title="Mark start frame">
+			<img src="../img/flag_green.png" alt="Start Frame">
+		</button>
+		<button type="button" class="btn btn-light" id="btn-end-frame" title="Mark end frame">
+			<img src="../img/flag_finish.png" alt="End Frame">
+		</button>
+		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
+			<img src="../img/control_play_blue.png" alt="Play">
+		</button>
+		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			<span class="sr-only">Toggle playback options</span>
+ 		</button>
+ 		<div class="dropdown-menu drop-align-right" style="width: 500px">
+ 			<form class="form-row px-2 bg-white opaque">
+ 				<div class="col-9">
+ 					<label for="anim-position">Position</label>
+ 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="anim-position">
+ 				</div>
+ 				<div class="col-3">
+ 					<label for="anim-length">Length</label>
+ 					<div class="input-group input-group-sm">
+ 						<input type="number" min="1" value="10" class="form-control" id="anim-length" aria-describedby="anim-length-units">
+ 						<div class="input-group-append">
+ 							<span class="input-group-text" id="anim-length-units">s</span>
+ 						</div>
+ 					</div>
+ 				</div>
+ 			</form>
+ 		</div>
+  	</div>
+	<button type="button" class="btn btn-light" id="btn-generate-background" title="Generate new background">
+		<img src="../img/brick.png" alt="Generate">
 	</button>
 </div>
 

@@ -22,7 +22,7 @@
 
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
-				if (value > 0) {
+				if (value >= 0) {
 					me.maxPetals = value * 1000;
 					progressiveBackgroundGen(me, 0);
 				}
@@ -398,7 +398,7 @@
 				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 			}
 
-			while (numPetals <= maxPetals && r + currentPetalSize < maxR) {
+			while (numPetals < maxPetals && r + currentPetalSize < maxR) {
 				const phi = n * angle;
 				if (numPetals % skip !== skip - 1) {
 					this.points.push(new Petal(r, phi, currentPetalSize));

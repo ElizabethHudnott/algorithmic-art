@@ -79,16 +79,18 @@ function renderFrame(context, tween, backgroundColor) {
 	} while (!done);
 }
 
+const progressBar = document.getElementById('progress');
 let animController;
 
 function animate(canvas, length, backgroundColor, capturer) {
 	const context = canvas.getContext('2d');
 	const newAnimController = new AnimationController({});
 	const promise = new Promise(function (resolve, reject) {
-		function render(time) {
+		function render() {
 			if (newAnimController.status === 'aborted') {
 				return;
 			}
+			const time = performance.now();
 			let beginTime = newAnimController.beginTime;
 			if (beginTime === undefined) {
 				newAnimController.setup(render, reject, time);
@@ -100,6 +102,11 @@ function animate(canvas, length, backgroundColor, capturer) {
 
 			if (capturer) {
 				capturer.capture(canvas);
+				let percent = tween * 100;
+				progressBar.style.width = percent + '%';
+				percent = Math.trunc(percent);
+				progressBar.innerHTML = percent + '%';
+				progressBar.setAttribute('aria-valuenow', percent)
 			}
 			if (tween < 1) {
 				requestAnimationFrame(render);
@@ -107,7 +114,7 @@ function animate(canvas, length, backgroundColor, capturer) {
 				newAnimController.finish(resolve);
 			}
 		};
-		requestAnimationFrame(render);
+		newAnimController.start = render;
 	});
 	newAnimController.promise = promise;
 	return newAnimController;
@@ -121,18 +128,28 @@ function captureVideo(width, height, length, properties) {
 	if (!('format' in properties)) {
 		properties.format = 'webm';
 	}
+
+	const dialog = $('#progress-modal');
 	const capturer = new CCapture(properties);
 	animController = animate(captureCanvas, length, backgroundColor, capturer);
 	animController.promise = animController.promise.then(
 		function () {
 			capturer.stop();
+			dialog.modal('hide');
 			capturer.save();
 		},
 		function () {
-			console.log('Video rendering aborted.')
+			dialog.modal('hide');
+			capturer.stop();
 		}
 	);
+
+	progressBar.style.width = '0';
+	progressBar.innerHTML = '0%';
+	progressBar.setAttribute('aria-valuenow', '0');
+	dialog.modal('show');
 	capturer.start();
+	animController.start();
 }
 
 {
@@ -275,6 +292,7 @@ function captureVideo(width, height, length, properties) {
 				this.children[0].src = '../img/control_stop_blue.png';
 				animController = animate(canvas, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
+				animController.start();
 			}
 		}
 	});
@@ -283,6 +301,19 @@ function captureVideo(width, height, length, properties) {
 		const tween = parseFloat(this.value);
 		setFrameData(tween);
 		progressiveBackgroundGen(bgGenerator, 1);
+	});
+
+	document.getElementById('btn-render-video').addEventListener('click', function (event) {
+		if (startFrame !== endFrame) {
+			const length = parseFloat(document.getElementById('anim-length').value);
+			if (length > 0) {
+				captureVideo(canvas.width, canvas.width, length * 1000, {});
+			}
+		}
+	});
+
+	document.getElementById('btn-cancel-progress').addEventListener('click', function (event) {
+		animController.abort();
 	});
 
 	// Generate new background button.

@@ -208,37 +208,6 @@ function setAnimSpeed(newSpeed) {
 	}
 }
 
-class AnimationController {
-	constructor(startDistance, longestTimeStep) {
-		this.startDistance = startDistance;
-		this.longestTimeStep = longestTimeStep;
-		this.status = 'running';
-	}
-
-	setAbort(f) {
-		const me = this;
-		this.abort = function () {
-			if (me.status === 'running') {
-				me.status = 'aborted';
-				f.call(me);
-			}
-		}
-	}
-
-	setContinue(f) {
-		const me = this;
-		this.continue = function () {
-			if (me.status === 'running') {
-				f.call(me);
-			}
-		}
-	}
-
-	finish() {
-		this.status = 'finished';
-	}
-}
-
 function saveCanvas() {
 	saveContext.clearRect(0, 0, savedCanvas.width, savedCanvas.height);
 	saveContext.drawImage(spiroCanvas, 0, 0);
@@ -409,19 +378,21 @@ function drawSpirograph(description) {
 	saveCanvas();
 	spiroContext.setTransform(scale, 0, 0, scale, scale, scale);
 	currentPath = new Path2D();
-	const beginTime = performance.now();
 
-	const newAnimController = new AnimationController(startDistance, maxRotationTime);
-	let animFunction;
+	const newAnimController = new AnimationController({
+		startDistance: startDistance,
+		longestTimeStep: maxRotationTime,
+	});
 
 	const promise = new Promise(function (resolve, reject) {
-		animFunction = function animate(time) {
-			if (newAnimController.status === 'aborted') {
-				reject();
+		function animate(time) {
+			if (newAnimController.status === 'aborted' || animSpeed === 0) {
 				return;
 			}
-			if (animSpeed === 0) {
-				return;
+			let beginTime = newAnimController.beginTime;
+			if (beginTime === undefined) {
+				newAnimController.setup(animate, reject, time);
+				beginTime = time;
 			}
 
 			let maxStep;
@@ -489,21 +460,13 @@ function drawSpirograph(description) {
 			if (stepNumber <= numSteps) {
 				requestAnimationFrame(animate);
 			} else {
-				newAnimController.finish();
-				resolve();
+				newAnimController.finish(resolve);
 			}
 		};
-		requestAnimationFrame(animFunction);
+		requestAnimationFrame(animate);
 	}); // end of Promise definition
 
 	newAnimController.promise = promise;
-
-	function requestAnim() {
-		requestAnimationFrame(animFunction);
-	}
-
-	newAnimController.setContinue(requestAnim);
-	newAnimController.setAbort(requestAnim);
 
 	return newAnimController;
 }
@@ -1719,7 +1682,7 @@ spiroCanvas.addEventListener('pointerdown', function (event) {
 });
 
 spiroCanvas.addEventListener('pointerup', function (event) {
-	if (event.button !== 0) {
+	if (event.button !== 0 || nextPath === undefined) {
 		return;
 	}
 	if (mouseClickedX !== undefined) {

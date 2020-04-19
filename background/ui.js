@@ -31,7 +31,7 @@ function progressiveBackgroundGen(generator, preview) {
 			done = redraw.next().done;
 			if (!done) {
 				setTimeout(drawSection, 0);
-			} else if (startFrame === undefined) {
+			} else if (generator.animatable && startFrame === undefined) {
 				startFrame = captureFrameData();
 				endFrame = startFrame;
 			}
@@ -79,28 +79,38 @@ function renderFrame(context, tween, backgroundColor) {
 	} while (!done);
 }
 
+let animController;
+
 function animate(canvas, length, backgroundColor, capturer) {
 	const context = canvas.getContext('2d');
-	let startTime;
-	const render = function (time) {
-		if (startTime === undefined) {
-			startTime = time;
-		}
-		const tween = Math.min((time - startTime) / length, 1);
-		renderFrame(context, tween, backgroundColor);
-		const moreFrames = tween < 1;
-		if (moreFrames) {
-			requestAnimationFrame(render);
-		}
-		if (capturer) {
-			capturer.capture(canvas);
-			if (!moreFrames) {
-				capturer.stop();
-				capturer.save();
+	const newAnimController = new AnimationController({});
+	const promise = new Promise(function (resolve, reject) {
+		function render(time) {
+			if (newAnimController.status === 'aborted') {
+				return;
 			}
-		}
-	};
-	requestAnimationFrame(render);
+			let beginTime = newAnimController.beginTime;
+			if (beginTime === undefined) {
+				newAnimController.setup(render, reject, time);
+				beginTime = time;
+			}
+
+			const tween = Math.min((time - beginTime) / length, 1);
+			renderFrame(context, tween, backgroundColor);
+
+			if (capturer) {
+				capturer.capture(canvas);
+			}
+			if (tween < 1) {
+				requestAnimationFrame(render);
+			} else {
+				newAnimController.finish(resolve);
+			}
+		};
+		requestAnimationFrame(render);
+	});
+	newAnimController.promise = promise;
+	return newAnimController;
 }
 
 function captureVideo(width, height, length, properties) {
@@ -112,7 +122,16 @@ function captureVideo(width, height, length, properties) {
 		properties.format = 'webm';
 	}
 	const capturer = new CCapture(properties);
-	animate(captureCanvas, length, backgroundColor, capturer);
+	animController = animate(captureCanvas, length, backgroundColor, capturer);
+	animController.promise = animController.promise.then(
+		function () {
+			capturer.stop();
+			capturer.save();
+		},
+		function () {
+			console.log('Video rendering aborted.')
+		}
+	);
 	capturer.start();
 }
 
@@ -236,11 +255,26 @@ function captureVideo(width, height, length, properties) {
 		document.getElementById('anim-position').value = 1;
 	});
 
+
+	function animFinished() {
+		document.getElementById('btn-play').children[0].src = '../img/control_play_blue.png';
+		if (animController.status === 'finished') {
+			document.getElementById('anim-position').value = 1;
+		}
+	}
+
 	document.getElementById('btn-play').addEventListener('click', function (event) {
+		if (animController && animController.status === 'running') {
+			animController.abort();
+			return;
+		}
+
 		if (startFrame !== endFrame) {
 			const length = parseFloat(document.getElementById('anim-length').value);
 			if (length > 0) {
-				animate(canvas, length * 1000);
+				this.children[0].src = '../img/control_stop_blue.png';
+				animController = animate(canvas, length * 1000);
+				animController.promise = animController.promise.then(animFinished, animFinished);
 			}
 		}
 	});

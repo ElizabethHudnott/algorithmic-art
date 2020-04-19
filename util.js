@@ -1,3 +1,46 @@
+'use strict';
+
+class AnimationController {
+	constructor(properties) {
+		for (let property in properties) {
+			this[property] = properties[property];
+		}
+		this.beginTime = undefined;
+		this.status = 'running';
+	}
+
+	setAbort(reject) {
+		const me = this;
+		this.abort = function () {
+			if (me.status === 'running') {
+				me.status = 'aborted';
+				reject.call(me);
+			}
+		}
+	}
+
+	setContinue(work) {
+		const me = this;
+		this.continue = function () {
+			if (me.status === 'running') {
+				requestAnimationFrame(work);
+			}
+		}
+	}
+
+	setup(work, reject, beginTime) {
+		this.beginTime = beginTime;
+		this.setContinue(work);
+		this.setAbort(reject);
+	}
+
+	finish(resolve) {
+		this.status = 'finished';
+		resolve();
+	}
+
+}
+
 function injectScript(src) {
 	return new Promise(function (resolve, reject) {
 		const script = document.createElement('script');

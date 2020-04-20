@@ -472,6 +472,10 @@ function progressiveBackgroundGen(generator, preview) {
 		}
 	});
 
+	$(modal).on('show.bs.modal', function (event) {
+		$('#background-gen-modal-content').collapse('show');
+	});
+
 	$(modal).on('shown.bs.modal', function (event) {
 		const child = modal.children[0];
 		const classList = child.classList;

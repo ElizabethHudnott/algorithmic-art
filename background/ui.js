@@ -71,11 +71,12 @@ function progressiveBackgroundGen(generator, preview) {
 		}
 	}
 
-	function captureFrameData() {
+	function captureFrameData(backgroundElement) {
 		const frame = new Map();
 		for (let property of bgGenerator.animatable) {
 			frame.set(property, bgGenerator[property]);
 		}
+		frame.set('backgroundColor', backgroundElement.style.backgroundColor);
 		return frame;
 	}
 
@@ -88,7 +89,7 @@ function progressiveBackgroundGen(generator, preview) {
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;
 			if (gen.animatable) {
-				startFrame = captureFrameData();
+				startFrame = captureFrameData(document.body);
 				endFrame = startFrame;
 				document.getElementById('anim-position').disabled = true;
 			}
@@ -145,27 +146,83 @@ function progressiveBackgroundGen(generator, preview) {
 		});
 	}
 
+	const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
+	const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
 	function setFrameData(tween) {
+		let backgroundColor;
 		for (let [property, startValue] of startFrame.entries()) {
+			const type = typeof(startValue);
 			const endValue = endFrame.get(property);
-			const value = (endValue - startValue) * tween + startValue;
-			bgGenerator[property] = value;
+			let value;
+			if (type === 'number') {
+				value = (endValue - startValue) * tween + startValue;
+			} else if (type === 'string') {
+				let colorSys, startComponents, endComponents;
+				let match = startValue.match(colorFuncRE);
+				if (match !== null) {
+					colorSys = match[1];
+					startComponents = match.slice(2, 6);
+				} else {
+					match = startValue.match(hexColorRE);
+					if (match !== null) {
+						colorSys = 'rgb';
+						startComponents = match.slice(1, 5);
+					}
+				}
+				if (match !== null) {
+					if (startComponents[3] === undefined) {
+						startComponents[3] = '1';
+					}
+					match = endValue.match(colorFuncRE);
+					if (match !== null) {
+						endComponents = match.slice(2, 6);
+					} else {
+						match = endValue.match(hexColorRE);
+						if (match !== null) {
+							endComponents = match.slice(1, 5);
+						}
+					}
+					if (endComponents[3] === undefined) {
+						endComponents[3] = '1';
+					}
+					const tweened = new Array(4);
+					for (let i = 0; i < 4; i++) {
+						const componentStart = parseFloat(startComponents[i]);
+						const componentEnd = parseFloat(endComponents[i]);
+						tweened[i] = (componentEnd - componentStart) * tween + componentStart;
+					}
+					if (colorSys === 'rgb') {
+						value = 'rgb(' + tweened.join(',') + ')';
+					} else {
+						value = 'hsl(' + tweened[0] + ',' + tweened[1] +'%,' + tweened[2] + '%,' + tweened[3] + ')';
+					}
+				}
+
+			}
+
+			if (property === 'backgroundColor') {
+				backgroundColor = value;
+			} else {
+				bgGenerator[property] = value;
+			}
 		}
 		bgGenerator.animate();
+		return backgroundColor;
 	}
 
-	function renderFrame(context, tween, backgroundColor) {
-		setFrameData(tween);
+	function renderFrame(backgroundElement, context, tween) {
+		const backgroundColor = setFrameData(tween);
 		const canvas = context.canvas;
 		const width = canvas.width;
 		const height = canvas.height;
 		context.restore();
-		if (backgroundColor) {
+		if (backgroundElement) {
+			backgroundElement.style.backgroundColor = backgroundColor;
+			context.clearRect(0, 0, width, height);
+		} else {
 			context.fillStyle = backgroundColor;
 			context.fillRect(0, 0, width, height);
 			context.fillStyle = 'black';
-		} else {
-			context.clearRect(0, 0, width, height);
 		}
 		context.save();
 		const redraw = bgGenerator.generate(context, width, height, 0);
@@ -179,7 +236,13 @@ function progressiveBackgroundGen(generator, preview) {
 	const progressBar = document.getElementById('progress');
 	let animController;
 
-	function animate(canvas, length, backgroundColor, capturer) {
+	function animate(obj, canvas, length) {
+		let capturer, backgroundElement;
+		if (obj instanceof Element) {
+			backgroundElement = obj;
+		} else {
+			capturer = obj;
+		}
 		const context = canvas.getContext('2d');
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
@@ -195,7 +258,7 @@ function progressiveBackgroundGen(generator, preview) {
 				}
 
 				const tween = Math.min((time - beginTime) / length, 1);
-				renderFrame(context, tween, backgroundColor);
+				renderFrame(backgroundElement, context, tween);
 
 				if (capturer) {
 					capturer.capture(canvas);
@@ -228,7 +291,7 @@ function progressiveBackgroundGen(generator, preview) {
 
 		const dialog = $('#progress-modal');
 		const capturer = new CCapture(properties);
-		animController = animate(captureCanvas, length, backgroundColor, capturer);
+		animController = animate(capturer, captureCanvas, length);
 		animController.promise = animController.promise.then(
 			function () {
 				capturer.stop();
@@ -280,14 +343,14 @@ function progressiveBackgroundGen(generator, preview) {
 
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
-		startFrame = captureFrameData();
+		startFrame = captureFrameData(document.body);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
-		endFrame = captureFrameData();
+		endFrame = captureFrameData(document.body);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
@@ -313,7 +376,7 @@ function progressiveBackgroundGen(generator, preview) {
 			const length = parseFloat(document.getElementById('anim-length').value);
 			if (length > 0) {
 				this.children[0].src = '../img/control_stop_blue.png';
-				animController = animate(canvas, length * 1000);
+				animController = animate(document.body, canvas, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
 			} else {

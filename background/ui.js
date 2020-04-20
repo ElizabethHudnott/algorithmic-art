@@ -2,7 +2,6 @@
 
 const backgroundGenerators = new Map();
 let bgGenerator, backgroundRedraw;
-let startFrame, endFrame;
 
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
@@ -31,131 +30,33 @@ function progressiveBackgroundGen(generator, preview) {
 			done = redraw.next().done;
 			if (!done) {
 				setTimeout(drawSection, 0);
-			} else if (generator.animatable && startFrame === undefined) {
-				startFrame = captureFrameData();
-				endFrame = startFrame;
 			}
 		}
 	}
 	drawSection();
 }
 
-function captureFrameData() {
-	const frame = new Map();
-	for (let property of bgGenerator.animatable) {
-		frame.set(property, bgGenerator[property]);
-	}
-	return frame;
-}
-
-function setFrameData(tween) {
-	for (let [property, startValue] of startFrame.entries()) {
-		const endValue = endFrame.get(property);
-		const value = (endValue - startValue) * tween + startValue;
-		bgGenerator[property] = value;
-	}
-	bgGenerator.animate();
-}
-
-function renderFrame(context, tween, backgroundColor) {
-	setFrameData(tween);
-	const canvas = context.canvas;
-	const width = canvas.width;
-	const height = canvas.height;
-	context.restore();
-	if (backgroundColor) {
-		context.fillStyle = backgroundColor;
-		context.fillRect(0, 0, width, height);
-		context.fillStyle = 'black';
-	} else {
-		context.clearRect(0, 0, width, height);
-	}
-	context.save();
-	const redraw = bgGenerator.generate(context, width, height, 0);
-	backgroundRedraw = redraw;
-	let done;
-	do {
-		done = redraw.next().done;
-	} while (!done);
-}
-
-const progressBar = document.getElementById('progress');
-let animController;
-
-function animate(canvas, length, backgroundColor, capturer) {
-	const context = canvas.getContext('2d');
-	const newAnimController = new AnimationController({});
-	const promise = new Promise(function (resolve, reject) {
-		function render() {
-			if (newAnimController.status === 'aborted') {
-				return;
-			}
-			const time = performance.now();
-			let beginTime = newAnimController.beginTime;
-			if (beginTime === undefined) {
-				newAnimController.setup(render, reject, time);
-				beginTime = time;
-			}
-
-			const tween = Math.min((time - beginTime) / length, 1);
-			renderFrame(context, tween, backgroundColor);
-
-			if (capturer) {
-				capturer.capture(canvas);
-				let percent = tween * 100;
-				progressBar.style.width = percent + '%';
-				percent = Math.trunc(percent);
-				progressBar.innerHTML = percent + '%';
-				progressBar.setAttribute('aria-valuenow', percent)
-			}
-			if (tween < 1) {
-				requestAnimationFrame(render);
-			} else {
-				newAnimController.finish(resolve);
-			}
-		};
-		newAnimController.start = render;
-	});
-	newAnimController.promise = promise;
-	return newAnimController;
-}
-
-function captureVideo(width, height, length, properties) {
-	const backgroundColor = document.body.style.backgroundColor || 'white';
-	const captureCanvas = document.createElement('canvas');
-	captureCanvas.width = width;
-	captureCanvas.height = height;
-	if (!('format' in properties)) {
-		properties.format = 'webm';
-	}
-
-	const dialog = $('#progress-modal');
-	const capturer = new CCapture(properties);
-	animController = animate(captureCanvas, length, backgroundColor, capturer);
-	animController.promise = animController.promise.then(
-		function () {
-			capturer.stop();
-			dialog.modal('hide');
-			capturer.save();
-		},
-		function () {
-			dialog.modal('hide');
-			capturer.stop();
-		}
-	);
-
-	progressBar.style.width = '0';
-	progressBar.innerHTML = '0%';
-	progressBar.setAttribute('aria-valuenow', '0');
-	dialog.modal('show');
-	capturer.start();
-	animController.start();
-}
-
 {
 	const urlParameters = new URLSearchParams(document.location.search);
 	const backgroundGenOptionsDOM = new Map();
 	let bgGeneratorName;
+	let startFrame, endFrame;
+
+	function removeAlert(id) {
+		const alertElement = document.getElementById(id);
+		if (alertElement !== null) {
+			alertElement.classList.remove('show');
+		}
+	}
+
+	const alertDOM = document.getElementById('error-alert');
+	function showErrorAlert(message) {
+		alertDOM.querySelector('#error-alert-message').innerHTML = message;
+		document.body.append(alertDOM);
+		alertDOM.classList.add('show');
+		clearTimeout(alertDOM.timeout);
+		alertDOM.timeout = setTimeout(removeAlert, 5000, 'error-alert');
+	}
 
 	function backgroundGeneratorFactory(name) {
 		let generator = backgroundGenerators.get(name);
@@ -170,6 +71,14 @@ function captureVideo(width, height, length, properties) {
 		}
 	}
 
+	function captureFrameData() {
+		const frame = new Map();
+		for (let property of bgGenerator.animatable) {
+			frame.set(property, bgGenerator[property]);
+		}
+		return frame;
+	}
+
 	function switchBackgroundGenerator(name) {
 		backgroundGeneratorFactory(name).then(function (gen) {
 			if (bgGenerator && bgGenerator.purgeCache) {
@@ -178,7 +87,11 @@ function captureVideo(width, height, length, properties) {
 			bgGenerator = gen;
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;
-			startFrame = undefined;
+			if (gen.animatable) {
+				startFrame = captureFrameData();
+				endFrame = startFrame;
+				document.getElementById('anim-position').disabled = true;
+			}
 			generateBackground();
 
 			const optionsButton = document.getElementById('btn-background-gen-options');
@@ -232,6 +145,110 @@ function captureVideo(width, height, length, properties) {
 		});
 	}
 
+	function setFrameData(tween) {
+		for (let [property, startValue] of startFrame.entries()) {
+			const endValue = endFrame.get(property);
+			const value = (endValue - startValue) * tween + startValue;
+			bgGenerator[property] = value;
+		}
+		bgGenerator.animate();
+	}
+
+	function renderFrame(context, tween, backgroundColor) {
+		setFrameData(tween);
+		const canvas = context.canvas;
+		const width = canvas.width;
+		const height = canvas.height;
+		context.restore();
+		if (backgroundColor) {
+			context.fillStyle = backgroundColor;
+			context.fillRect(0, 0, width, height);
+			context.fillStyle = 'black';
+		} else {
+			context.clearRect(0, 0, width, height);
+		}
+		context.save();
+		const redraw = bgGenerator.generate(context, width, height, 0);
+		backgroundRedraw = redraw;
+		let done;
+		do {
+			done = redraw.next().done;
+		} while (!done);
+	}
+
+	const progressBar = document.getElementById('progress');
+	let animController;
+
+	function animate(canvas, length, backgroundColor, capturer) {
+		const context = canvas.getContext('2d');
+		const newAnimController = new AnimationController({});
+		const promise = new Promise(function (resolve, reject) {
+			function render() {
+				if (newAnimController.status === 'aborted') {
+					return;
+				}
+				const time = performance.now();
+				let beginTime = newAnimController.beginTime;
+				if (beginTime === undefined) {
+					newAnimController.setup(render, reject, time);
+					beginTime = time;
+				}
+
+				const tween = Math.min((time - beginTime) / length, 1);
+				renderFrame(context, tween, backgroundColor);
+
+				if (capturer) {
+					capturer.capture(canvas);
+					let percent = tween * 100;
+					progressBar.style.width = percent + '%';
+					percent = Math.trunc(percent);
+					progressBar.innerHTML = percent + '%';
+					progressBar.setAttribute('aria-valuenow', percent)
+				}
+				if (tween < 1) {
+					requestAnimationFrame(render);
+				} else {
+					newAnimController.finish(resolve);
+				}
+			};
+			newAnimController.start = render;
+		});
+		newAnimController.promise = promise;
+		return newAnimController;
+	}
+
+	function captureVideo(width, height, length, properties) {
+		const backgroundColor = document.body.style.backgroundColor || 'white';
+		const captureCanvas = document.createElement('canvas');
+		captureCanvas.width = width;
+		captureCanvas.height = height;
+		if (!('format' in properties)) {
+			properties.format = 'webm';
+		}
+
+		const dialog = $('#progress-modal');
+		const capturer = new CCapture(properties);
+		animController = animate(captureCanvas, length, backgroundColor, capturer);
+		animController.promise = animController.promise.then(
+			function () {
+				capturer.stop();
+				dialog.modal('hide');
+				capturer.save();
+			},
+			function () {
+				dialog.modal('hide');
+				capturer.stop();
+			}
+		);
+
+		progressBar.style.width = '0';
+		progressBar.innerHTML = '0%';
+		progressBar.setAttribute('aria-valuenow', '0');
+		dialog.modal('show');
+		capturer.start();
+		animController.start();
+	}
+
 	// Select a background generator based on URL.
 	const firstGenName = urlParameters.get('gen') || 'ten-print';
 	const generatorButtonContainer = document.getElementById('generators');
@@ -264,14 +281,17 @@ function captureVideo(width, height, length, properties) {
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = captureFrameData();
-		document.getElementById('anim-position').value = 0;
+		const positionSlider = document.getElementById('anim-position')
+		positionSlider.value = 0;
+		positionSlider.disabled = false;
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
 		endFrame = captureFrameData();
-		document.getElementById('anim-position').value = 1;
+		const positionSlider = document.getElementById('anim-position')
+		positionSlider.value = 1;
+		positionSlider.disabled = false;
 	});
-
 
 	function animFinished() {
 		document.getElementById('btn-play').children[0].src = '../img/control_play_blue.png';
@@ -286,14 +306,24 @@ function captureVideo(width, height, length, properties) {
 			return;
 		}
 
-		if (startFrame !== endFrame) {
+		let errorMsg;
+		if (startFrame === endFrame) {
+			errorMsg = 'The start and end frames are the same. Nothing to animate.';
+		} else {
 			const length = parseFloat(document.getElementById('anim-length').value);
 			if (length > 0) {
 				this.children[0].src = '../img/control_stop_blue.png';
 				animController = animate(canvas, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
+			} else {
+				errorMsg = 'Invalid animation duration.'
 			}
+		}
+		if (errorMsg === undefined) {
+			removeAlert('error-alert');
+		} else {
+			showErrorAlert(errorMsg);
 		}
 	});
 
@@ -304,11 +334,21 @@ function captureVideo(width, height, length, properties) {
 	});
 
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
-		if (startFrame !== endFrame) {
+		let errorMsg;
+		if (startFrame === endFrame) {
+			errorMsg = 'The start and end frames are the same. Nothing to animate.';
+		} else {
 			const length = parseFloat(document.getElementById('anim-length').value);
 			if (length > 0) {
 				captureVideo(canvas.width, canvas.width, length * 1000, {});
+			} else {
+				errorMsg = 'Invalid animation duration.'
 			}
+		}
+		if (errorMsg === undefined) {
+			removeAlert('error-alert');
+		} else {
+			showErrorAlert(errorMsg);
 		}
 	});
 
@@ -319,15 +359,14 @@ function captureVideo(width, height, length, properties) {
 	// Generate new background button.
 	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
 
-	// Remove initial instructions prompt after a few seconds.
 	function removeInstructions() {
-		const instructions = document.getElementById('instructions');
-		if (instructions !== null) {
-			instructions.classList.remove('show');
-		}
+		removeAlert('instructions-alert');
 	}
 
-	document.getElementById('btn-background-gen-options').addEventListener('click', removeInstructions);
+	document.querySelectorAll('#background-gen-toolbar button').forEach(function (item) {
+		item.addEventListener('click', removeInstructions);
+	})
+
 	setTimeout(removeInstructions, 10000);
 
 	// After resizing, generate a new background to fit the new window size.

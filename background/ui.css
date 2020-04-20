@@ -20,8 +20,9 @@ button[disabled], input[type=color][disabled] {
 	background-position: center center;
 }
 
-.w-fit {
-	width: fit-content !important;
+.center-x {
+	left: 50%;
+	transform: translateX(-50%);
 }
 
 .drop-align-right {
@@ -38,6 +39,11 @@ button[disabled], input[type=color][disabled] {
 .opaque {
 	opacity: 1;
 }
+
+.top-2 {
+	top: 0.5em;
+}
+
 .emphasize-active .active {
 	font-weight: bold;
 }

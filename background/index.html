@@ -15,16 +15,23 @@
 </head>
 <body>
 
-<div class="alert alert-dark alert-dismissible fade show position-absolute w-fit mx-auto" role="alert" style="top: 0.5em; left: 0; right: 0" id="instructions">
-  Controls are in the lower right corner.
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
+<div class="alert alert-dark alert-dismissible fade show position-absolute top-2 center-x" role="alert" id="instructions-alert">
+	Controls are in the lower right corner.
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+<div class="alert alert-danger alert-dismissible fade position-absolute top-2 center-x" role="alert" id="error-alert">
+	<strong>Error:</strong> <span id="error-alert-message"></span>
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
 
 <canvas id="background-canvas"></canvas>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1100;">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1100;" id="background-gen-toolbar">
 	<div class="mt-auto mr-2">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
@@ -71,7 +78,7 @@
  			<form class="form-row px-2 bg-white opaque">
  				<div class="col-9">
  					<label for="anim-position">Position</label>
- 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="anim-position">
+ 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="anim-position" disabled>
  				</div>
  				<div class="col-3">
  					<label for="anim-length">Length</label>

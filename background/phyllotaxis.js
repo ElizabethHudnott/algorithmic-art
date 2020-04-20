@@ -294,7 +294,7 @@
 		this.spread = 1;
 		this.scale = 20;
 		this.start = 1;
-		this.step = 1;
+		this.skip = 0;
 		this.stacking = -1;
 		this.petalShape = 0;
 		this.petalSize = 15;
@@ -324,7 +324,7 @@
 
 		this.lighting = 0;
 		this.contrast = 0;
-		this.shadowColor = 'black';
+		this.shadowColor = '#000000';
 		this.shadowAngle = 0.25 * Math.PI;
 		this.shadowBlur = 0;
 		this.shadowOffset = 0;
@@ -336,14 +336,15 @@
 	}
 
 	Phyllotaxis.prototype.animatable = Object.freeze([
-		'exponent', 'angle', 'spread', 'scale', 'start', 'step', 'petalSize',
-		'petalEnlargement', 'maxPetals', 'hueMin', 'hueMax', 'saturationMin',
+		'exponent', 'angle', 'spread', 'scale', 'start', 'skip', 'petalSize',
+		'petalEnlargement', 'maxPetals', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
-		'lighting', 'contrast', 'shadowAngle', 'shadowBlur', 'shadowOffset', 'spotOffset'
+		'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
+		'spotOffset'
 	]);
 
 	Phyllotaxis.prototype.animate = function () {
-		// Changing the animatable properties doesn't require updating any other properties.
+		this.skip = Math.trunc(this.skip);
 	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());

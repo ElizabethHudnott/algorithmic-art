@@ -7,6 +7,7 @@ class AnimationController {
 		}
 		this.beginTime = undefined;
 		this.status = 'running';
+		this.progress = 0;
 	}
 
 	setAbort(reject) {

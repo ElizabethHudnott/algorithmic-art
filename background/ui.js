@@ -74,7 +74,11 @@ function progressiveBackgroundGen(generator, preview) {
 	function captureFrameData(backgroundElement) {
 		const frame = new Map();
 		for (let property of bgGenerator.animatable) {
-			frame.set(property, bgGenerator[property]);
+			let value = bgGenerator[property];
+			if (Array.isArray(value)) {
+				value = value.slice();
+			}
+			frame.set(property, value);
 		}
 		frame.set('backgroundColor', backgroundElement.style.backgroundColor);
 		return frame;
@@ -148,58 +152,67 @@ function progressiveBackgroundGen(generator, preview) {
 
 	const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
 	const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
+
+	function interpolateValue(startValue, endValue, tween) {
+		const type = typeof(startValue);
+		if (type === 'number') {
+			return (endValue - startValue) * tween + startValue;
+		} else if (type === 'string') {
+			let colorSys, startComponents, endComponents;
+			let match = startValue.match(colorFuncRE);
+			if (match !== null) {
+				colorSys = match[1];
+				startComponents = match.slice(2, 6);
+			} else {
+				match = startValue.match(hexColorRE);
+				if (match !== null) {
+					colorSys = 'rgb';
+					startComponents = match.slice(1, 5);
+				}
+			}
+			if (match !== null) {
+				if (startComponents[3] === undefined) {
+					startComponents[3] = '1';
+				}
+				match = endValue.match(colorFuncRE);
+				if (match !== null) {
+					endComponents = match.slice(2, 6);
+				} else {
+					match = endValue.match(hexColorRE);
+					if (match !== null) {
+						endComponents = match.slice(1, 5);
+					}
+				}
+				if (endComponents[3] === undefined) {
+					endComponents[3] = '1';
+				}
+				const tweened = new Array(4);
+				for (let i = 0; i < 4; i++) {
+					const componentStart = parseFloat(startComponents[i]);
+					const componentEnd = parseFloat(endComponents[i]);
+					tweened[i] = (componentEnd - componentStart) * tween + componentStart;
+				}
+				if (colorSys === 'rgb') {
+					return 'rgba(' + tweened.join(',') + ')';
+				} else {
+					return hsla(...tweened);
+				}
+			}
+		} else if (Array.isArray(startValue)) {
+			const numComponents = startValue.length;
+			const output = new Array(numComponents);
+			for (let i = 0; i < numComponents; i++) {
+				output[i] = interpolateValue(startValue[i], endValue[i], tween);
+			}
+			return output;
+		}
+	}
+
 	function setFrameData(tween) {
 		let backgroundColor;
 		for (let [property, startValue] of startFrame.entries()) {
-			const type = typeof(startValue);
 			const endValue = endFrame.get(property);
-			let value;
-			if (type === 'number') {
-				value = (endValue - startValue) * tween + startValue;
-			} else if (type === 'string') {
-				let colorSys, startComponents, endComponents;
-				let match = startValue.match(colorFuncRE);
-				if (match !== null) {
-					colorSys = match[1];
-					startComponents = match.slice(2, 6);
-				} else {
-					match = startValue.match(hexColorRE);
-					if (match !== null) {
-						colorSys = 'rgb';
-						startComponents = match.slice(1, 5);
-					}
-				}
-				if (match !== null) {
-					if (startComponents[3] === undefined) {
-						startComponents[3] = '1';
-					}
-					match = endValue.match(colorFuncRE);
-					if (match !== null) {
-						endComponents = match.slice(2, 6);
-					} else {
-						match = endValue.match(hexColorRE);
-						if (match !== null) {
-							endComponents = match.slice(1, 5);
-						}
-					}
-					if (endComponents[3] === undefined) {
-						endComponents[3] = '1';
-					}
-					const tweened = new Array(4);
-					for (let i = 0; i < 4; i++) {
-						const componentStart = parseFloat(startComponents[i]);
-						const componentEnd = parseFloat(endComponents[i]);
-						tweened[i] = (componentEnd - componentStart) * tween + componentStart;
-					}
-					if (colorSys === 'rgb') {
-						value = 'rgb(' + tweened.join(',') + ')';
-					} else {
-						value = 'hsl(' + tweened[0] + ',' + tweened[1] +'%,' + tweened[2] + '%,' + tweened[3] + ')';
-					}
-				}
-
-			}
-
+			const value = interpolateValue(startValue, endValue, tween);
 			if (property === 'backgroundColor') {
 				backgroundColor = value;
 			} else {
@@ -247,9 +260,6 @@ function progressiveBackgroundGen(generator, preview) {
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
 			function render() {
-				if (newAnimController.status === 'aborted') {
-					return;
-				}
 				const time = performance.now();
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
@@ -258,6 +268,10 @@ function progressiveBackgroundGen(generator, preview) {
 				}
 
 				const tween = Math.min((time - beginTime) / length, 1);
+				newAnimController.progress = tween;
+				if (newAnimController.status === 'aborted') {
+					return;
+				}
 				renderFrame(backgroundElement, context, tween);
 
 				if (capturer) {
@@ -358,9 +372,7 @@ function progressiveBackgroundGen(generator, preview) {
 
 	function animFinished() {
 		document.getElementById('btn-play').children[0].src = '../img/control_play_blue.png';
-		if (animController.status === 'finished') {
-			document.getElementById('anim-position').value = 1;
-		}
+		document.getElementById('anim-position').value = animController.progress;
 	}
 
 	document.getElementById('btn-play').addEventListener('click', function (event) {

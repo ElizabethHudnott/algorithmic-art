@@ -1,10 +1,16 @@
 'use strict';
 
 const backgroundGenerators = new Map();
-let bgGenerator, backgroundRedraw;
+let bgGenerator, backgroundRedraw, bgGeneratorRotation = 0;
 
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
+
+function rotateCanvas(context, width, height, rotation) {
+		context.translate(width / 2, height / 2);
+		context.rotate(rotation);
+		context.translate(-width / 2, -height / 2);
+}
 
 function generateBackground() {
 	canvas.width = window.innerWidth;
@@ -22,6 +28,7 @@ function progressiveBackgroundGen(generator, preview) {
 	context.restore();
 	context.clearRect(0, 0, width, height);
 	context.save();
+	rotateCanvas(context, width, height, bgGeneratorRotation);
 	const redraw = generator.generate(context, width, height, preview);
 	backgroundRedraw = redraw;
 	let done = false;
@@ -143,6 +150,9 @@ function progressiveBackgroundGen(generator, preview) {
 			document.getElementById('anim-btns').classList.toggle('d-none', gen.animatable === undefined);
 			document.getElementById('btn-generate-background').classList.toggle('d-none', !gen.hasRandomness);
 
+			const credits = gen.credits ? '<hr>' + gen.credits : '';
+			document.getElementById('background-gen-credits').innerHTML = credits;
+
 			urlParameters.set('gen', name);
 			let url = document.location;
 			url = url.origin + url.pathname + '?' + urlParameters.toString();
@@ -209,22 +219,27 @@ function progressiveBackgroundGen(generator, preview) {
 	}
 
 	function setFrameData(tween) {
-		let backgroundColor;
+		let backgroundColor, rotation = 0;
 		for (let [property, startValue] of startFrame.entries()) {
 			const endValue = endFrame.get(property);
 			const value = interpolateValue(startValue, endValue, tween);
-			if (property === 'backgroundColor') {
+			switch (property) {
+			case 'backgroundColor':
 				backgroundColor = value;
-			} else {
+				break;
+			case 'frameRotation':
+				rotation = value;
+				break;
+			default:
 				bgGenerator[property] = value;
 			}
 		}
 		bgGenerator.animate();
-		return backgroundColor;
+		return [backgroundColor, rotation];
 	}
 
 	function renderFrame(backgroundElement, context, tween) {
-		const backgroundColor = setFrameData(tween);
+		const [backgroundColor, rotation] = setFrameData(tween);
 		const canvas = context.canvas;
 		const width = canvas.width;
 		const height = canvas.height;
@@ -238,6 +253,7 @@ function progressiveBackgroundGen(generator, preview) {
 			context.fillStyle = 'black';
 		}
 		context.save();
+		rotateCanvas(context,width, height, rotation);
 		const redraw = bgGenerator.generate(context, width, height, 0);
 		backgroundRedraw = redraw;
 		let done;
@@ -350,6 +366,11 @@ function progressiveBackgroundGen(generator, preview) {
 		button.addEventListener('click', generatorSwitcher);
 	}
 
+	document.getElementById('background-rotation').addEventListener('input', function (event) {
+		bgGeneratorRotation = 2 * Math.PI * parseFloat(this.value);
+		progressiveBackgroundGen(bgGenerator, 0);
+	})
+
 	// Changing background colour.
 	document.getElementById('paper-color').addEventListener('input', function (event) {
 		document.body.style.backgroundColor = this.value;
@@ -358,6 +379,7 @@ function progressiveBackgroundGen(generator, preview) {
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = captureFrameData(document.body);
+		startFrame.set('frameRotation', bgGeneratorRotation);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
@@ -365,6 +387,7 @@ function progressiveBackgroundGen(generator, preview) {
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
 		endFrame = captureFrameData(document.body);
+		endFrame.set('frameRotation', bgGeneratorRotation);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
@@ -497,6 +520,7 @@ function progressiveBackgroundGen(generator, preview) {
 				URL.revokeObjectURL(bgGeneratorImage.src);
 			}
 			bgGeneratorImage.src = URL.createObjectURL(file);
+			document.getElementById('background-gen-image-label').innerText = file.name;
 		}
 	});
 

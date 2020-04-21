@@ -75,19 +75,30 @@
 			<span class="sr-only">Toggle playback options</span>
  		</button>
  		<div class="dropdown-menu drop-align-right" style="width: 500px">
- 			<form class="form-row px-2 bg-white opaque">
- 				<div class="col-9">
- 					<label for="anim-position">Position</label>
- 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="anim-position" disabled>
- 				</div>
- 				<div class="col-3">
- 					<label for="anim-length">Length</label>
- 					<div class="input-group input-group-sm">
- 						<input type="number" min="1" value="10" class="form-control" id="anim-length" aria-describedby="anim-length-units">
- 						<div class="input-group-append">
- 							<span class="input-group-text" id="anim-length-units">s</span>
- 						</div>
+ 			<form class="px-2 bg-white opaque">
+ 				<div class="form-row">
+ 					<div class="col-8">
+	 					<label for="anim-position">Position</label>
  					</div>
+ 					<div class="col-3">
+	 					<label for="anim-length">Length</label>
+ 					</div>
+ 				</div>
+ 				<div class="form-row">
+	 				<div class="col-8">
+	 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="anim-position" disabled>
+	 				</div>
+	 				<div class="col-3">
+	 					<div class="input-group input-group-sm">
+	 						<input type="number" min="1" value="10" class="form-control" id="anim-length" aria-describedby="anim-length-units">
+	 						<div class="input-group-append">
+	 							<span class="input-group-text" id="anim-length-units">s</span>
+	 						</div>
+	 					</div>
+	 				</div>
+	 				<div class="col-1">
+	 					<button type="button" class="btn btn-light" data-toggle="modal" data-target="#anim-opts-modal">&hellip;</button>
+	 				</div>
  				</div>
  			</form>
  		</div>
@@ -103,27 +114,37 @@
 <div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered mx-0" role="document">
 		<form id="background-gen-form" class="modal-content">
-			<div class="modal-header" id="background-gen-modal-header">
+			<div class="modal-header" id="background-gen-modal-header" title="Double click to collapse">
 				<h5 class="modal-title" id="background-gen-modal-label"></h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" title="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="collapse show" id="background-gen-modal-content">
 				<div class="modal-body">
 					<div id="background-gen-options">
+						<!-- JavaScript generated content goes here.-->
 					</div>
-					<div id="background-gen-image-controls" class="form-row form-group">
+					<div class="form-row">
 						<div class="col-1"></div>
-						<div class="col-3">
-							<label class="col-form-label col-form-label-sm" for="background-gen-image">
-								Image
+						<div class="col-2">
+							<label class="col-form-label col-form-label-sm" for="background-rotation">
+								Rotation
 							</label>
 						</div>
-						<div class="col-7">
-							<input type="file" class="form-control-file form-control-sm pl-0" id="background-gen-image" accept="image/*">
+						<div style="flex-grow: 1; max-width: 67%">
+							<input type="range" min="0" max="1" value="0" step="any" class="form-control-range mt-1" id="background-rotation">
+						</div>
+						<div class="col-5" id="background-gen-image-controls">
+							<div class="custom-file small">
+								<input type="file" class="custom-file-input" id="background-gen-image" accept="image/*">
+								<label class="custom-file-label" for="background-gen-image" id="background-gen-image-label">
+									Image
+								</label>
+							</div>
 						</div>
 					</div>
+					<div id="background-gen-credits" class="small"></div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">
@@ -132,6 +153,24 @@
 				</div>
 			</div>
 		</form>
+	</div>
+</div>
+
+<div class="modal fade" id="anim-opts-modal" tabindex="-1" role="dialog" aria-labelledby="anim-opts-modal-title" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="anim-opts-modal-title">Animation Options</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
 	</div>
 </div>
 

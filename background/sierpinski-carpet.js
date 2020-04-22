@@ -6,7 +6,6 @@
 		const me = this;
 		this.title = 'Sierpinski Carpet';
 		this.hasRandomness = false;
-		this.hasCustomImage = true;
 
 		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
 

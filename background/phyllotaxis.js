@@ -5,7 +5,6 @@
 		const me = this;
 		this.title = 'Phyllotaxis';
 		this.hasRandomness = false;
-		this.hasCustomImage = true;
 
 		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {
 			const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');

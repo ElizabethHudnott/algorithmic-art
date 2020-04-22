@@ -67,9 +67,6 @@
 	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" title="Set options">
 		<img src="../img/gear_in.png" alt="Options">
 	</button>
-	<div class="btn btn-light p-0 bg-center" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
-		<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0" style="opacity: 0">
-	</div>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls">
 		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
 			<img src="../img/control_play_blue.png" alt="Play">
@@ -77,7 +74,7 @@
 		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-right" style="width: 500px">
+ 		<div class="dropdown-menu drop-align-right" style="width: 500px" id="anim-controls">
  			<form class="px-2 bg-white opaque">
  				<div class="form-row">
  					<div class="col-8">
@@ -131,22 +128,19 @@
 					<div id="background-gen-options">
 						<!-- JavaScript generated content goes here.-->
 					</div>
-					<div class="form-row">
+					<div class="form-row" style="min-height: 34px">
 						<div class="col-1"></div>
 						<div class="col-2">
 							<label class="col-form-label col-form-label-sm" for="background-rotation">
 								Rotation
 							</label>
 						</div>
-						<div style="flex-grow: 1; max-width: 67%">
+						<div class="col-8">
 							<input type="range" min="0" max="1" value="0" step="any" class="form-control-range mt-1" id="background-rotation">
 						</div>
-						<div class="col-5" id="background-gen-image-controls">
-							<div class="custom-file small">
-								<input type="file" class="custom-file-input" id="background-gen-image" accept="image/*">
-								<label class="custom-file-label" for="background-gen-image" id="background-gen-image-label">
-									Image
-								</label>
+						<div class="col-1">
+							<div class="btn btn-light p-0 bg-center h-100" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
+								<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0" style="opacity: 0">
 							</div>
 						</div>
 					</div>
@@ -166,6 +160,13 @@
 			</div>
 		</form>
 	</div>
+</div>
+
+<div class="custom-file small d-none" id="background-gen-image">
+	<input type="file" class="custom-file-input" id="background-gen-image-upload" accept="image/*">
+	<label class="custom-file-label" for="background-gen-image-upload" id="background-gen-image-label">
+		No image
+	</label>
 </div>
 
 <div class="modal fade" id="anim-opts-modal" tabindex="-1" role="dialog" aria-labelledby="anim-opts-modal-title" aria-hidden="true">

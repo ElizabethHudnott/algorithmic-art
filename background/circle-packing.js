@@ -63,7 +63,6 @@
 		const me = this;
 		this.title = 'Circle Packing';
 		this.hasRandomness = true;
-		this.hasCustomImage = true;
 
 		this.optionsDocument = downloadDocument('circle-packing.html').then(function (optionsDoc) {
 

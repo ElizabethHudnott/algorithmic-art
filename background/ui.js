@@ -60,6 +60,10 @@ function showBackgroundOptions() {
 	const successAlert = $('#success-alert');
 	const videoErrorAlert = $('#video-error');
 
+	const imageUpload = document.getElementById('background-gen-image');
+	imageUpload.remove();
+	imageUpload.classList.remove('d-none');
+
 	function hideAlert(jquery) {
 		jquery.alert('close');
 	}
@@ -68,7 +72,7 @@ function showBackgroundOptions() {
 		const elem = jquery.get(0);
 		elem.children[0].innerHTML = message;
 		elem.classList.add('show');
-		parent.append(elem);
+		parent.appendChild(elem);
 		clearTimeout(elem.timeout);
 		elem.timeout = setTimeout(hideAlert, 6000, jquery);
 	}
@@ -122,6 +126,10 @@ function showBackgroundOptions() {
 				while (elements.length > 0) {
 					container.appendChild(elements[0]);
 				}
+				const imageCtrlLocation = container.querySelector('[data-attach=image]');
+				if (imageCtrlLocation !== null) {
+					imageCtrlLocation.appendChild(imageUpload);
+				}
 			}
 
 			// Switch out previous DOM
@@ -149,7 +157,6 @@ function showBackgroundOptions() {
 					});
 				}
 			}
-			document.getElementById('background-gen-image-controls').classList.toggle('d-none', !gen.hasCustomImage);
 			document.getElementById('btn-generate-background').classList.toggle('d-none', !gen.hasRandomness);
 
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
@@ -358,7 +365,7 @@ function showBackgroundOptions() {
 		if (currentSelection !== null) {
 			currentSelection.classList.remove('active');
 		}
-		generatorButton.parentNode.classList.add('active');
+		generatorButton.parentElement.classList.add('active');
 	} catch (e) {
 		console.log(`Loaded experimental background generator ${firstGenName}. There is no UI button for activating this generator.`)
 	}
@@ -423,7 +430,8 @@ function showBackgroundOptions() {
 		if (startFrame === endFrame) {
 			errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
 		} else {
-			const length = parseFloat(document.getElementById('anim-length').value);
+			const lengthInput = document.getElementById('anim-length');
+			const length = parseFloat(lengthInput.value);
 			if (length > 0) {
 				$(modal).modal('hide');
 				this.children[0].src = '../img/control_stop_blue.png';
@@ -434,13 +442,17 @@ function showBackgroundOptions() {
 				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
 			} else {
-				errorMsg = 'Invalid animation duration.'
+				errorMsg = 'Invalid animation duration.';
 			}
 		}
 		if (errorMsg !== undefined) {
 			showAlert(errorAlert, errorMsg, document.body);
 		}
 	});
+
+	document.getElementById('anim-controls').addEventListener('click', function (event) {
+		event.stopPropagation();
+	})
 
 	document.getElementById('anim-position').addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
@@ -491,7 +503,7 @@ function showBackgroundOptions() {
 			const element = videoErrorAlert.get(0);
 			element.innerHTML = errorMsg;
 			element.classList.add('show');
-			document.getElementById('video-modal-body').append(element);
+			document.getElementById('video-modal-body').appendChild(element);
 		}
 	});
 
@@ -565,14 +577,14 @@ function showBackgroundOptions() {
 		$('#background-gen-modal-content').collapse('toggle');
 	});
 
-	document.getElementById('background-gen-image').addEventListener('input', function (event) {
+	imageUpload.querySelector('#background-gen-image-upload').addEventListener('input', function (event) {
 		const file = this.files[0];
 		if (file) {
 			if (bgGeneratorImage.src) {
 				URL.revokeObjectURL(bgGeneratorImage.src);
 			}
 			bgGeneratorImage.src = URL.createObjectURL(file);
-			document.getElementById('background-gen-image-label').innerText = file.name;
+			this.parentElement.querySelector('#background-gen-image-label').innerText = file.name;
 		}
 	});
 

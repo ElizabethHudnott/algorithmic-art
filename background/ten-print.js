@@ -9,7 +9,6 @@
 		const me = this;
 		this.title = '10 PRINT';
 		this.hasRandomness = true;
-		this.hasCustomImage = false;
 		this.credits = 'Inspired by Daniel Sheefmahhnnn\'s <a href="https://thecodingtrain.com/CodingChallenges/076-10print.html" target="_blank">Coding Challenge #76</a>, which he developed from the book <a href="https://10print.org" target="_blank">10 PRINT</a> by Montfort et al.'
 
 		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {

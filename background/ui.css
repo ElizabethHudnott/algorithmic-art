@@ -23,6 +23,7 @@ button[disabled], input[type=color][disabled] {
 .center-x {
 	left: 50%;
 	transform: translateX(-50%);
+	width: fit-content;
 }
 
 .drop-align-right {

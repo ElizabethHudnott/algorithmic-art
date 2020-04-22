@@ -43,23 +43,25 @@
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
 
-	<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Change background generator">
-		<img src="../img/module.png" alt="Pattern">
-	</button>
-	<div class="dropdown-menu p-0 emphasize-active" aria-labelledby="btn-generator">
-		<div id="generators" class="btn-group-toggle p-0 bg-white opaque" data-toggle="buttons">
-			<label class="btn d-block text-left pl-3">
-				<input type="radio" name="generator" value="ten-print">10 PRINT
-			</label>
-			<label class="btn d-block text-left pl-3">
-				<input type="radio" name="generator" value="circle-packing">Circle Packing
-			</label>
-			<label class="btn d-block text-left pl-3">
-				<input type="radio" name="generator" value="phyllotaxis">Phyllotaxis
-			</label>
-			<label class="btn d-block text-left pl-3">
-				<input type="radio" name="generator" value="sierpinski-carpet">Sierpinski Carpet
-			</label>
+	<div class="dropdown">
+		<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Change background generator">
+			<img src="../img/module.png" alt="Pattern">
+		</button>
+		<div class="dropdown-menu p-0 emphasize-active" aria-labelledby="btn-generator">
+			<div id="generators" class="btn-group-toggle p-0 bg-white opaque" data-toggle="buttons">
+				<label class="btn d-block text-left pl-3">
+					<input type="radio" name="generator" value="ten-print">10 PRINT
+				</label>
+				<label class="btn d-block text-left pl-3">
+					<input type="radio" name="generator" value="circle-packing">Circle Packing
+				</label>
+				<label class="btn d-block text-left pl-3">
+					<input type="radio" name="generator" value="phyllotaxis">Phyllotaxis
+				</label>
+				<label class="btn d-block text-left pl-3">
+					<input type="radio" name="generator" value="sierpinski-carpet">Sierpinski Carpet
+				</label>
+			</div>
 		</div>
 	</div>
 	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" title="Set options">
@@ -68,13 +70,7 @@
 	<div class="btn btn-light p-0 bg-center" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
 		<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0" style="opacity: 0">
 	</div>
-	<div class="btn-group" role="group" aria-label="Animation controls" id="anim-btns">
-		<button type="button" class="btn btn-light" id="btn-start-frame" title="Mark start frame">
-			<img src="../img/flag_green.png" alt="Start Frame">
-		</button>
-		<button type="button" class="btn btn-light" id="btn-end-frame" title="Mark end frame">
-			<img src="../img/flag_finish.png" alt="End Frame">
-		</button>
+	<div class="btn-group position-static" role="group" aria-label="Animation controls">
 		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
 			<img src="../img/control_play_blue.png" alt="Play">
 		</button>
@@ -109,10 +105,10 @@
  				</div>
  			</form>
  		</div>
- 		<button type="button" class="btn btn-light" id="btn-video" title="Render video" data-toggle="modal" data-target="#video-modal">
- 			<img src="../img/film.png" alt="Video">
- 		</button>
   	</div>
+	<button type="button" class="btn btn-light" id="btn-video" title="Render video" data-toggle="modal" data-target="#video-modal">
+		<img src="../img/film.png" alt="Video">
+	</button>
   	<a class="btn btn-light" href="#" id="btn-download" role="button" title="Download picture">
   		<img src="../img/picture_save.png" alt="Download">
   	</a>
@@ -157,6 +153,12 @@
 					<div id="background-gen-credits" class="small"></div>
 				</div>
 				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary btn-sm" id="btn-start-frame">
+						Set Start Frame
+					</button>
+					<button type="button" class="btn btn-secondary btn-sm" id="btn-end-frame">
+						Set End Frame
+					</button>
 					<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">
 						Close
 					</button>

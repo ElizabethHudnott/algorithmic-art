@@ -43,6 +43,12 @@ function progressiveBackgroundGen(generator, preview) {
 	drawSection();
 }
 
+function showBackgroundOptions() {
+	$('#video-modal').modal('hide');
+	$('#error-alert').alert('close');
+	$('#background-gen-modal').modal('show');
+}
+
 {
 	const urlParameters = new URLSearchParams(document.location.search);
 	const backgroundGenOptionsDOM = new Map();
@@ -64,7 +70,7 @@ function progressiveBackgroundGen(generator, preview) {
 		elem.classList.add('show');
 		parent.append(elem);
 		clearTimeout(elem.timeout);
-		elem.timeout = setTimeout(hideAlert, 5000, jquery);
+		elem.timeout = setTimeout(hideAlert, 6000, jquery);
 	}
 
 	function backgroundGeneratorFactory(name) {
@@ -108,7 +114,6 @@ function progressiveBackgroundGen(generator, preview) {
 			}
 			generateBackground();
 
-			const optionsButton = document.getElementById('btn-background-gen-options');
 			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
 
 			function attachOptionsDOM(dom) {
@@ -134,22 +139,17 @@ function progressiveBackgroundGen(generator, preview) {
 			const dom = backgroundGenOptionsDOM.get(name);
 			if (dom !== undefined) {
 				attachOptionsDOM(dom);
-				optionsButton.classList.remove('d-none');
 			} else {
 				const optionsDocPromise = gen.optionsDocument;
-				if (optionsDocPromise === undefined) {
-					optionsButton.classList.toggle('d-none', !gen.hasCustomImage);
-				} else {
+				if (optionsDocPromise !== undefined) {
 					optionsDocPromise.then(function (optionsDoc) {
 						const dom = optionsDoc.body;
 						attachOptionsDOM(dom);
-						optionsButton.classList.remove('d-none');
 						backgroundGenOptionsDOM.set(name, dom);
 					});
 				}
 			}
 			document.getElementById('background-gen-image-controls').classList.toggle('d-none', !gen.hasCustomImage);
-			document.getElementById('anim-btns').classList.toggle('d-none', gen.animatable === undefined);
 			document.getElementById('btn-generate-background').classList.toggle('d-none', !gen.hasRandomness);
 
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
@@ -407,7 +407,9 @@ function progressiveBackgroundGen(generator, preview) {
 	});
 
 	function animFinished() {
-		document.getElementById('btn-play').children[0].src = '../img/control_play_blue.png';
+		const playStopButton = document.getElementById('btn-play');
+		playStopButton.children[0].src = '../img/control_play_blue.png';
+		playStopButton.title = 'Play animation';
 		document.getElementById('anim-position').value = animController.progress;
 	}
 
@@ -419,11 +421,15 @@ function progressiveBackgroundGen(generator, preview) {
 
 		let errorMsg;
 		if (startFrame === endFrame) {
-			errorMsg = 'The start and end frames are the same. Nothing to animate.';
+			errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
 		} else {
 			const length = parseFloat(document.getElementById('anim-length').value);
 			if (length > 0) {
+				$(modal).modal('hide');
 				this.children[0].src = '../img/control_stop_blue.png';
+				this.title = 'Stop animation';
+				successAlert.alert('close');
+				errorAlert.alert('close');
 				animController = animate(document.body, canvas, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
@@ -431,9 +437,7 @@ function progressiveBackgroundGen(generator, preview) {
 				errorMsg = 'Invalid animation duration.'
 			}
 		}
-		if (errorMsg === undefined) {
-			errorAlert.alert('close');
-		} else {
+		if (errorMsg !== undefined) {
 			showAlert(errorAlert, errorMsg, document.body);
 		}
 	});
@@ -461,7 +465,7 @@ function progressiveBackgroundGen(generator, preview) {
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
 		let errorMsg, length, framerate, format;
 		if (startFrame === endFrame) {
-			errorMsg = 'The start and end frames are the same. Nothing to render.';
+			errorMsg = '<p>The start and end frames are the same. Nothing to render.</p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button>';
 		}
 		if (errorMsg === undefined) {
 			length = parseFloat(document.getElementById('anim-length').value);

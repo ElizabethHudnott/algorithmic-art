@@ -1386,24 +1386,7 @@ gradientDirectionInput.addEventListener('input', function (event) {
 	}
 })
 
-{
-	function clear() {
-		this.savedValue = this.value;
-		this.value = '';
-	}
-
-	function restore() {
-		if (this.value === '') {
-			this.value = this.savedValue;
-		}
-	}
-
-	const comboboxes = document.querySelectorAll('input[list]');
-	for (let combobox of comboboxes) {
-		combobox.addEventListener('focus', clear);
-		combobox.addEventListener('blur', restore);
-	}
-}
+clearComboboxesOnFocus();
 
 function floodFill(width, height, data, filled, startX, startY, newColor, transparency) {
 	[startX, startY] = untransformPoint(startX, startY);

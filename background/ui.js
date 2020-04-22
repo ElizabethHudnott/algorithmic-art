@@ -49,20 +49,22 @@ function progressiveBackgroundGen(generator, preview) {
 	let bgGeneratorName;
 	let startFrame, endFrame;
 
-	function removeAlert(id) {
-		const alertElement = document.getElementById(id);
-		if (alertElement !== null) {
-			alertElement.classList.remove('show');
-		}
+	const instructions = $('#instructions-alert');
+	const errorAlert = $('#error-alert');
+	const successAlert = $('#success-alert');
+	const videoErrorAlert = $('#video-error');
+
+	function hideAlert(jquery) {
+		jquery.alert('close');
 	}
 
-	const alertDOM = document.getElementById('error-alert');
-	function showErrorAlert(message) {
-		alertDOM.querySelector('#error-alert-message').innerHTML = message;
-		document.body.append(alertDOM);
-		alertDOM.classList.add('show');
-		clearTimeout(alertDOM.timeout);
-		alertDOM.timeout = setTimeout(removeAlert, 5000, 'error-alert');
+	function showAlert(jquery, message, parent) {
+		const elem = jquery.get(0);
+		elem.children[0].innerHTML = message;
+		elem.classList.add('show');
+		parent.append(elem);
+		clearTimeout(elem.timeout);
+		elem.timeout = setTimeout(hideAlert, 5000, jquery);
 	}
 
 	function backgroundGeneratorFactory(name) {
@@ -262,7 +264,7 @@ function progressiveBackgroundGen(generator, preview) {
 		} while (!done);
 	}
 
-	const progressBar = document.getElementById('progress');
+	const progressBar = document.getElementById('video-progress');
 	let animController;
 
 	function animate(obj, canvas, length) {
@@ -311,33 +313,38 @@ function progressiveBackgroundGen(generator, preview) {
 	}
 
 	function captureVideo(width, height, length, properties) {
-		const backgroundColor = document.body.style.backgroundColor || 'white';
-		const captureCanvas = document.createElement('canvas');
-		captureCanvas.width = width;
-		captureCanvas.height = height;
-		if (!('format' in properties)) {
-			properties.format = 'webm';
-		}
-
-		const dialog = $('#progress-modal');
-		const capturer = new CCapture(properties);
-		animController = animate(capturer, captureCanvas, length);
-		animController.promise = animController.promise.then(
-			function () {
-				capturer.stop();
-				dialog.modal('hide');
-				capturer.save();
-			},
-			function () {
-				dialog.modal('hide');
-				capturer.stop();
-			}
-		);
-
 		progressBar.style.width = '0';
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
-		dialog.modal('show');
+		const progressRow = document.getElementById('video-progress-row');
+		progressRow.classList.remove('d-none');
+
+		const stopButton = document.getElementById('btn-stop-video-render');
+		const renderButton = document.getElementById('btn-render-video');
+		renderButton.disabled = true;
+		stopButton.disabled = false;
+
+		const captureCanvas = document.createElement('canvas');
+		captureCanvas.width = width;
+		captureCanvas.height = height;
+
+		const capturer = new CCapture(properties);
+		animController = animate(capturer, captureCanvas, length);
+		function reset() {
+			stopButton.disabled = true;
+			capturer.stop();
+			progressRow.classList.add('d-none');
+			renderButton.disabled = false;
+		}
+		animController.promise = animController.promise.then(
+			function () {
+				capturer.save();
+				$('#video-modal').modal('hide');
+				reset();
+			},
+			reset
+		);
+
 		capturer.start();
 		animController.start();
 	}
@@ -356,6 +363,8 @@ function progressiveBackgroundGen(generator, preview) {
 		console.log(`Loaded experimental background generator ${firstGenName}. There is no UI button for activating this generator.`)
 	}
 	switchBackgroundGenerator(firstGenName);
+
+	const modal = document.getElementById('background-gen-modal');
 
 	// Add events for switching between background generators.
 	function generatorSwitcher(event) {
@@ -383,6 +392,8 @@ function progressiveBackgroundGen(generator, preview) {
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
+		showAlert(successAlert, 'Start frame set.', document.body)
+		videoErrorAlert.alert('close');
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
@@ -391,6 +402,8 @@ function progressiveBackgroundGen(generator, preview) {
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
+		showAlert(successAlert, 'End frame set.', document.body)
+		videoErrorAlert.alert('close');
 	});
 
 	function animFinished() {
@@ -419,9 +432,9 @@ function progressiveBackgroundGen(generator, preview) {
 			}
 		}
 		if (errorMsg === undefined) {
-			removeAlert('error-alert');
+			errorAlert.alert('close');
 		} else {
-			showErrorAlert(errorMsg);
+			showAlert(errorAlert, errorMsg, document.body);
 		}
 	});
 
@@ -431,26 +444,54 @@ function progressiveBackgroundGen(generator, preview) {
 		progressiveBackgroundGen(bgGenerator, 1);
 	});
 
-	document.getElementById('btn-render-video').addEventListener('click', function (event) {
-		let errorMsg;
-		if (startFrame === endFrame) {
-			errorMsg = 'The start and end frames are the same. Nothing to animate.';
-		} else {
-			const length = parseFloat(document.getElementById('anim-length').value);
-			if (length > 0) {
-				captureVideo(canvas.width, canvas.width, length * 1000, {});
-			} else {
-				errorMsg = 'Invalid animation duration.'
-			}
-		}
-		if (errorMsg === undefined) {
-			removeAlert('error-alert');
-		} else {
-			showErrorAlert(errorMsg);
+	document.getElementById('anim-length').addEventListener('input', function (event) {
+		const length = parseFloat(this.value);
+		if (length > 0) {
+			videoErrorAlert.alert('close');
 		}
 	});
 
-	document.getElementById('btn-cancel-progress').addEventListener('click', function (event) {
+	function hideConfig() {
+		$('#background-gen-modal').modal('hide');
+	}
+
+	$('#anim-opts-modal').on('show.bs.modal', hideConfig);
+	$('#video-modal').on('show.bs.modal', hideConfig);
+
+	document.getElementById('btn-render-video').addEventListener('click', function (event) {
+		let errorMsg, length, framerate, format;
+		if (startFrame === endFrame) {
+			errorMsg = 'The start and end frames are the same. Nothing to render.';
+		}
+		if (errorMsg === undefined) {
+			length = parseFloat(document.getElementById('anim-length').value);
+			if (!(length > 0)) {
+				errorMsg = 'Invalid video duration.'
+			}
+		}
+		if (errorMsg === undefined) {
+			framerate = parseInt(document.getElementById('video-framerate').value);
+			if (!(framerate > 0)) {
+				errorMsg = 'Invalid frame rate.'
+			}
+		}
+
+		if (errorMsg === undefined) {
+			const properties = {
+				framerate: framerate,
+				format: document.getElementById('video-format').value,
+				workersPath: '../lib/'
+			};
+			captureVideo(canvas.width, canvas.width, length * 1000, properties);
+		} else {
+			const element = videoErrorAlert.get(0);
+			element.innerHTML = errorMsg;
+			element.classList.add('show');
+			document.getElementById('video-modal-body').append(element);
+		}
+	});
+
+	document.getElementById('btn-stop-video-render').addEventListener('click', function (event) {
 		animController.abort();
 	});
 
@@ -458,7 +499,7 @@ function progressiveBackgroundGen(generator, preview) {
 	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
 
 	function removeInstructions() {
-		removeAlert('instructions-alert');
+		instructions.alert('close');
 	}
 
 	document.querySelectorAll('#background-gen-toolbar button').forEach(function (item) {
@@ -474,13 +515,15 @@ function progressiveBackgroundGen(generator, preview) {
 		resizeTimer = setTimeout(generateBackground, 100);
 	});
 
-	const modal = document.getElementById('background-gen-modal');
 	modal.style.left = Math.max(Math.round(window.innerWidth - 508), 0) + 'px';
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	let modalDrag;
 
 	modalHeader.addEventListener('mousedown', function (event) {
-		modalDrag = [event.offsetX, event.offsetY];
+		const target = event.target;
+		if (target === this || target.tagName === 'H5') {
+			modalDrag = [event.offsetX, event.offsetY];
+		}
 	});
 
 	modalHeader.addEventListener('mouseup', function (event) {
@@ -523,5 +566,7 @@ function progressiveBackgroundGen(generator, preview) {
 			document.getElementById('background-gen-image-label').innerText = file.name;
 		}
 	});
+
+	clearComboboxesOnFocus();
 
 }

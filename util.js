@@ -83,6 +83,25 @@ function focusFirst() {
 	}
 }
 
+function clearComboboxesOnFocus() {
+	function clear() {
+		this.savedValue = this.value;
+		this.value = '';
+	}
+
+	function restore() {
+		if (this.value === '') {
+			this.value = this.savedValue;
+		}
+	}
+
+	const comboboxes = document.querySelectorAll('input[list]');
+	for (let combobox of comboboxes) {
+		combobox.addEventListener('focus', clear);
+		combobox.addEventListener('blur', restore);
+	}
+}
+
 function queryChecked(ancestor, name) {
 	return ancestor.querySelector(`:checked[name=${name}]`);
 }

@@ -23,7 +23,14 @@
 </div>
 
 <div class="alert alert-danger alert-dismissible fade position-absolute top-2 center-x" role="alert" id="error-alert">
-	<span id="error-alert-message"></span>
+	<span></span>
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+<div class="alert alert-success alert-dismissible fade position-absolute top-2 center-x" role="alert" id="success-alert">
+	<span></span>
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>
@@ -31,7 +38,7 @@
 
 <canvas id="background-canvas"></canvas>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1100;" id="background-gen-toolbar">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1;" id="background-gen-toolbar">
 	<div class="mt-auto mr-2">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
@@ -55,7 +62,7 @@
 			</label>
 		</div>
 	</div>
-	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" data-backdrop="false" title="Set options">
+	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" title="Set options">
 		<img src="../img/gear_in.png" alt="Options">
 	</button>
 	<div class="btn btn-light p-0 bg-center" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
@@ -102,7 +109,7 @@
  				</div>
  			</form>
  		</div>
- 		<button type="button" class="btn btn-light" id="btn-render-video" title="Render video">
+ 		<button type="button" class="btn btn-light" id="btn-video" title="Render video" data-toggle="modal" data-target="#video-modal">
  			<img src="../img/film.png" alt="Video">
  		</button>
   	</div>
@@ -111,7 +118,7 @@
 	</button>
 </div>
 
-<div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true">
+<div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false" style="z-index: 0">
 	<div class="modal-dialog modal-dialog-centered mx-0" role="document">
 		<form id="background-gen-form" class="modal-content">
 			<div class="modal-header" id="background-gen-modal-header" title="Double click to collapse">
@@ -157,7 +164,7 @@
 </div>
 
 <div class="modal fade" id="anim-opts-modal" tabindex="-1" role="dialog" aria-labelledby="anim-opts-modal-title" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="anim-opts-modal-title">Animation Options</h5>
@@ -174,19 +181,89 @@
 	</div>
 </div>
 
-<div class="modal fade" id="progress-modal" tabindex="-1" role="dialog" aria-labelledby="progress-modal-title" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal fade" id="video-modal" tabindex="-1" role="dialog" aria-labelledby="video-modal-title" aria-hidden="true">
+	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="progress-modal-title">Video Rendering</h5>
+				<h5 class="modal-title" id="video-modal-title">Video Rendering</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
 			</div>
-			<div class="modal-body">
-				<div class="progress bg-dark" style="height: 20px">
-				  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0" id="progress">0%</div>
+			<div class="modal-body" id="video-modal-body">
+				<div class="form-row form-group">
+					<div class="col-1"></div>
+					<div class="col-3">
+						<label class="col-form-label col-form-label-sm" for="video-framerate">
+							Frame Rate
+						</label>
+					</div>
+					<div class="col-4">
+						<div class="input-group input-group-sm">
+							<input type="number" min="1" value="50" class="form-control" id="video-framerate" list="framerate-list">
+							<datalist id="framerate-list">
+								<option>60</option>
+								<option>50</option>
+								<option>30</option>
+								<option>25</option>
+								<option>20</option>
+								<option>15</option>
+								<option>12</option>
+								<option>10</option>
+								<option>6</option>
+								<option>5</option>
+								<option>4</option>
+								<option>3</option>
+								<option>2</option>
+								<option>1</option>
+							</datalist>
+							<div class="input-group-append">
+								<span class="input-group-text">FPS</span>
+							</div>
+						</div>
+					</div>
 				</div>
+				<div class="form-row form-group">
+					<div class="col-1"></div>
+					<div class="col-3">
+						<label class="col-form-label col-form-label-sm" for="video-format">
+							Output
+						</label>
+					</div>
+					<div class="col-4">
+						<select class="form-control form-control-sm" id="video-format">
+							<option value="webm" selected>WebM Video</option>
+							<option value="gif">Animated GIF</option>
+							<option value="png">PNG Stills</option>
+							<option value="jpg">JPEG Stills</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row form-group d-none" id="video-progress-row">
+					<div class="col-1"></div>
+					<div class="col-3">
+						<span class="col-form-label col-form-label-sm">
+							Progress
+						</span>
+					</div>
+					<div class="col-8">
+						<div class="progress bg-dark" style="height: 20px">
+						  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0; transition: unset" id="video-progress">0%</div>
+						</div>
+					</div>
+				</div>
+				<div class="alert alert-danger fade" id="video-error"></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" id="btn-cancel-progress" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-danger" id="btn-stop-video-render" data-dismiss="modal" disabled>
+					Abort
+				</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">
+					Close
+				</button>
+				<button type="button" class="btn btn-primary" id="btn-render-video">
+					Render
+				</button>
 			</div>
 		</div>
 	</div>

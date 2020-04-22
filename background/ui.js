@@ -495,6 +495,11 @@ function progressiveBackgroundGen(generator, preview) {
 		animController.abort();
 	});
 
+	document.getElementById('btn-download').addEventListener('click', function (event) {
+		this.download = bgGeneratorName + '.png';
+		this.href = canvas.toDataURL();
+	});
+
 	// Generate new background button.
 	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
 

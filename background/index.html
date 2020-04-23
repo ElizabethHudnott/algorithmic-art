@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Algorithmic Background Generator</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 	<link rel="icon" href="../img/spirograph.png">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="ui.css">
@@ -12,6 +12,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous" defer></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous" defer></script>
 	<script src="../lib/CCapture.all.min.js" async></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="background-color: #ffffff">
 
@@ -37,8 +38,12 @@
 </div>
 
 <canvas id="background-canvas"></canvas>
+<form class="position-absolute">
+	<div class="form-row form-group">
+	</div>
+</form>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 6px; right: 7px; z-index: 1;" id="background-gen-toolbar">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 0; right: 5px; z-index: 1;" id="background-gen-toolbar">
 	<div class="mt-auto mr-2">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>

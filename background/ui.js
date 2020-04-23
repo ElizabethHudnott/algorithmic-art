@@ -41,7 +41,7 @@ function drawSignature(paintBackground) {
 		context.fillStyle = backgroundElement.style.backgroundColor;
 		context.fillRect(0, canvas.height - signatureHeight, signatureWidth, signatureHeight);
 	} else {
-		textHeight += 1; // Allow for Anti-aliasing when drawing over.
+		signatureHeight += 1; // Allow for Anti-aliasing when drawing over.
 		context.clearRect(0, canvas.height - signatureHeight, signatureWidth, signatureHeight);
 	}
 	context.fillStyle = 'black';

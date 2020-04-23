@@ -15,11 +15,11 @@
 	<div class="tab-pane active pt-3" id="circle-pack-layout" role="tabpanel" aria-labelledby="circle-pack-layout-tab">
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<span class="col-form-label col-form-label-sm">Shape</span>
+			<div class="col-3 col-form-label col-form-label-sm">
+				Shape
 			</div>
 			<div class="col-3">
-				<div class="form-check">
+				<div class="form-check mt-1">
 					<input class="form-check-input" type="radio" name="circle-pack-shape" id="circle-pack-shape-rect" value="false" checked>
 					<label class="form-check-label small" for="circle-pack-shape-rect">
 						Rectangle
@@ -27,7 +27,7 @@
 				</div>
 			</div>
 			<div class="col-3 pl-4">
-				<div class="form-check">
+				<div class="form-check mt-1">
 					<input class="form-check-input" type="radio" name="circle-pack-shape" id="circle-pack-shape-circle" value="true">
 					<label class="form-check-label small" for="circle-pack-shape-circle">
 						Circle
@@ -37,22 +37,18 @@
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-num-seeds">
-					Seeds
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-num-seeds">
+				Seeds
+			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="5" class="form-control form-control-sm" id="circle-pack-num-seeds">
 			</div>
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-min-seed-size">
-					Seed Sizes
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-min-seed-size">
+				Seed Sizes
+			</label>
 			<div class="col-7">
 				<div class="input-group input-group-sm">
 					<input type="number" min="10" step="10" value="130" class="form-control" id="circle-pack-min-seed-size">
@@ -65,11 +61,9 @@
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-min-size">
-					New Shape Sizes
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-min-size">
+				New Shape Sizes
+			</label>
 			<div class="col-7">
 				<div class="input-group input-group-sm">
 					<input type="number" min="1" value="3" class="form-control" id="circle-pack-min-size">
@@ -82,57 +76,45 @@
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-growth-rate">
-					Growth Rate
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-growth-rate">
+				Growth Rate
+			</label>
 			<div class="col-3">
 				<input type="number" min="0.5" step="0.5" value="0.5" class="form-control form-control-sm" id="circle-pack-growth-rate">
 			</div>
-			<div class="col-3 pl-4">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-max-growth">
-					Growth Limit
-				</label>
-			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="circle-pack-max-growth">
+				Growth Limit
+			</label>
 			<div class="col-3">
 				<input type="number" min="1" value="90" class="form-control form-control-sm" id="circle-pack-max-growth">
 			</div>
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-gap">
-					Minimum Gap
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-gap">
+				Minimum Gap
+			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="4" class="form-control form-control-sm" id="circle-pack-gap">
 			</div>
-			<div class="col-3 pl-4">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-edge-gap">
-					Edge Gap
-				</label>
-			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="circle-pack-edge-gap">
+				Edge Gap
+			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="8" class="form-control form-control-sm" id="circle-pack-edge-gap">
 			</div>
 		</div>
 
 		<div class="form-row form-group">
-			<div class="col-3">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-max-shapes">
-					Max Shapes
-				</label>
-			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="circle-pack-max-shapes">
+				Max Shapes
+			</label>
 			<div class="col-3">
 				<input type="number" min="0" step="100" value="2000" class="form-control form-control-sm" id="circle-pack-max-shapes">
 			</div>
-			<div class="col-3 pl-4">
-				<label class="col-form-label col-form-label-sm" for="circle-pack-max-attempts">
-					Max Attempts
-				</label>
-			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="circle-pack-max-attempts">
+				Max Attempts
+			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="1000" step="100" class="form-control form-control-sm" id="circle-pack-max-attempts">
 			</div>

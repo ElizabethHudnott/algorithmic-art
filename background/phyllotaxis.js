@@ -80,7 +80,7 @@
 				me.petalShape = shape;
 				const hide = shape === 1;
 				polygonOpts.forEach(function (item) {
-					item.classList.toggle('d-none', hide);
+					item.hidden = hide;
 				});
 				progressiveBackgroundGen(me, 0);
 			}

@@ -112,6 +112,31 @@ function checkInput(ancestor, name, value) {
 	return input;
 }
 
+const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
+const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
+
+function parseColor(str) {
+	let colorSystem, components;
+	let match = str.match(colorFuncRE);
+	if (match !== null) {
+		colorSystem = match[1];
+		components = match.slice(2, 6);
+	} else {
+		match = str.match(hexColorRE);
+		if (match !== null) {
+			colorSystem = 'rgb';
+			components = match.slice(1, 5);
+		}
+	}
+	if (match === null) {
+		return [undefined, undefined];
+	}
+	if (components[3] === undefined) {
+		components[3] = '1';
+	}
+	return [colorSystem, components];
+}
+
 function hexToRGB(color) {
 	const r = parseInt(color.slice(1, 3), 16);
 	const g = parseInt(color.slice(3, 5), 16);
@@ -127,6 +152,10 @@ function hsla(hue, saturation, lightness, alpha) {
 	const s = saturation * 100;
 	const l = lightness * 100;
 	return `hsla(${hue}, ${s}%, ${l}%, ${alpha})`;
+}
+
+function rgbToLuma(r, g, b) {
+	return (r * 0.2126 + g * 0.7152 + b * 0.0722) / 255;
 }
 
 function parseFraction(text) {

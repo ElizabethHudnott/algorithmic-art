@@ -25,27 +25,53 @@ bgGeneratorImage.onload = generateBackground;
 
 const signatureFont = 'italic 20px "Pacifico", cursive';
 let signatureWidth, signatureHeight;
+let author = '';
 
-function drawSignature(paintBackground) {
-	const context = canvas.getContext('2d');
+function drawSignature(context, backgroundColor) {
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.font = signatureFont;
 	context.textBaseline = 'bottom';
-	const text = 'Elizabeth Hudnott';
+	const text = 'Elizabeth Hudnott' + (author === '' ? '' : ' & ' + author);
 	const metrics = context.measureText(text);
 	const paddingX = 3;
-	const paddingY = 3;
+	const paddingY = 4;
 	signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
 	signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
-	if (paintBackground) {
-		context.fillStyle = backgroundElement.style.backgroundColor;
-		context.fillRect(0, canvas.height - signatureHeight, signatureWidth, signatureHeight);
+	const canvasHeight = context.canvas.height;
+	if (backgroundColor === undefined) {
+		context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
+		backgroundColor = backgroundElement.style.backgroundColor;
 	} else {
-		signatureHeight += 1; // Allow for Anti-aliasing when drawing over.
-		context.clearRect(0, canvas.height - signatureHeight, signatureWidth, signatureHeight);
+		context.fillStyle = backgroundColor;
+		context.fillRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
 	}
-	context.fillStyle = 'black';
-	context.fillText(text, paddingX, canvas.height);
+	const [colorSystem, colorComponents] = parseColor(backgroundColor);
+	const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
+	context.fillStyle = luma >= 0.5 ? 'black' : 'white';
+	context.fillText(text, paddingX, canvasHeight);
+}
+
+function progressiveBackgroundDraw(generator, context, width, height, preview) {
+	const redraw = generator.generate(context, width, height, preview);
+	backgroundRedraw = redraw;
+	let done = false;
+	function drawSection() {
+		if (backgroundRedraw === redraw) {
+			done = redraw.next().done;
+			if (done) {
+				if (document.fonts.check(signatureFont)) {
+					drawSignature(context);
+				} else {
+					document.fonts.load(signatureFont).then(function () {
+						drawSignature(context);
+					});
+				}
+			} else {
+				setTimeout(drawSection, 0);
+			}
+		}
+	}
+	drawSection();
 }
 
 function progressiveBackgroundGen(generator, preview) {
@@ -56,24 +82,7 @@ function progressiveBackgroundGen(generator, preview) {
 	context.clearRect(0, 0, width, height);
 	context.save();
 	rotateCanvas(context, width, height, bgGeneratorRotation);
-	const redraw = generator.generate(context, width, height, preview);
-	backgroundRedraw = redraw;
-	let done = false;
-	function drawSection() {
-		if (backgroundRedraw === redraw) {
-			done = redraw.next().done;
-			if (done) {
-				if (document.fonts.check(signatureFont)) {
-					drawSignature(false);
-				} else {
-					document.fonts.load(signatureFont).then(drawSignature);
-				}
-			} else {
-				setTimeout(drawSection, 0);
-			}
-		}
-	}
-	drawSection();
+	progressiveBackgroundDraw(generator, context, width, height, preview);
 }
 
 function showBackgroundOptions() {
@@ -92,12 +101,15 @@ function showBackgroundOptions() {
 	const successAlert = $('#success-alert');
 	const videoErrorAlert = $('#video-error');
 
+	const authorForm = document.getElementById('author-form');
+	const authorInput = document.getElementById('author');
+
 	const modal = document.getElementById('background-gen-modal');
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const progressBar = document.getElementById('video-progress');
 	const imageUpload = document.getElementById('background-gen-image');
 	imageUpload.remove();
-	imageUpload.classList.remove('d-none');
+	imageUpload.removeAttribute('hidden');
 
 	function hideAlert(jquery) {
 		jquery.alert('close');
@@ -192,7 +204,7 @@ function showBackgroundOptions() {
 					});
 				}
 			}
-			document.getElementById('btn-generate-background').classList.toggle('d-none', !gen.hasRandomness);
+			document.getElementById('btn-generate-background').hidden = !gen.hasRandomness;
 
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
 			document.getElementById('background-gen-credits').innerHTML = credits;
@@ -204,49 +216,21 @@ function showBackgroundOptions() {
 		});
 	}
 
-	const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
-	const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
-
 	function interpolateValue(startValue, endValue, tween) {
 		const type = typeof(startValue);
 		if (type === 'number') {
 			return (endValue - startValue) * tween + startValue;
 		} else if (type === 'string') {
-			let colorSys, startComponents, endComponents;
-			let match = startValue.match(colorFuncRE);
-			if (match !== null) {
-				colorSys = match[1];
-				startComponents = match.slice(2, 6);
-			} else {
-				match = startValue.match(hexColorRE);
-				if (match !== null) {
-					colorSys = 'rgb';
-					startComponents = match.slice(1, 5);
-				}
-			}
-			if (match !== null) {
-				if (startComponents[3] === undefined) {
-					startComponents[3] = '1';
-				}
-				match = endValue.match(colorFuncRE);
-				if (match !== null) {
-					endComponents = match.slice(2, 6);
-				} else {
-					match = endValue.match(hexColorRE);
-					if (match !== null) {
-						endComponents = match.slice(1, 5);
-					}
-				}
-				if (endComponents[3] === undefined) {
-					endComponents[3] = '1';
-				}
+			let [colorSystem, startComponents] = parseColor(startValue);
+			if (colorSystem !== undefined) {
+				let [, endComponents] = parseColor(endValue);
 				const tweened = new Array(4);
 				for (let i = 0; i < 4; i++) {
 					const componentStart = parseFloat(startComponents[i]);
 					const componentEnd = parseFloat(endComponents[i]);
 					tweened[i] = (componentEnd - componentStart) * tween + componentStart;
 				}
-				if (colorSys === 'rgb') {
+				if (colorSystem === 'rgb') {
 					return 'rgba(' + tweened.join(',') + ')';
 				} else {
 					return hsla(...tweened);
@@ -262,7 +246,7 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function setFrameData(tween) {
+	function renderFrame(context, tween, paintBackground, preview) {
 		let backgroundColor, rotation = 0;
 		for (let [property, startValue] of startFrame.entries()) {
 			const endValue = endFrame.get(property);
@@ -279,11 +263,7 @@ function showBackgroundOptions() {
 			}
 		}
 		bgGenerator.animate();
-		return [backgroundColor, rotation];
-	}
 
-	function renderFrame(context, tween, paintBackground) {
-		const [backgroundColor, rotation] = setFrameData(tween);
 		const canvas = context.canvas;
 		const width = canvas.width;
 		const height = canvas.height;
@@ -298,13 +278,18 @@ function showBackgroundOptions() {
 		}
 		context.save();
 		rotateCanvas(context,width, height, rotation);
-		const redraw = bgGenerator.generate(context, width, height, 0);
-		backgroundRedraw = redraw;
-		let done;
-		do {
-			done = redraw.next().done;
-		} while (!done);
-		drawSignature(paintBackground);
+		if (preview === 0) {
+			// Draw everything in one go when animating
+			const redraw = bgGenerator.generate(context, width, height, 0);
+			backgroundRedraw = redraw;
+			let done;
+			do {
+				done = redraw.next().done;
+			} while (!done);
+			drawSignature(context, backgroundColor);
+		} else {
+			progressiveBackgroundDraw(bgGenerator, context, width, height, preview);
+		}
 	}
 
 	function animate(canvas, length, capturer) {
@@ -325,7 +310,7 @@ function showBackgroundOptions() {
 				if (newAnimController.status === 'aborted') {
 					return;
 				}
-				renderFrame(context, tween, paintBackground);
+				renderFrame(context, tween, paintBackground, 0);
 
 				if (capturer) {
 					capturer.capture(canvas);
@@ -352,7 +337,7 @@ function showBackgroundOptions() {
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
 		const progressRow = document.getElementById('video-progress-row');
-		progressRow.classList.remove('d-none');
+		progressRow.hidden = false;
 
 		const stopButton = document.getElementById('btn-stop-video-render');
 		const renderButton = document.getElementById('btn-render-video');
@@ -368,7 +353,7 @@ function showBackgroundOptions() {
 		function reset() {
 			stopButton.disabled = true;
 			capturer.stop();
-			progressRow.classList.add('d-none');
+			progressRow.hidden = true;
 			renderButton.disabled = false;
 		}
 		animController.promise = animController.promise.then(
@@ -405,10 +390,26 @@ function showBackgroundOptions() {
 		const y = event.clientY;
 		if (x < signatureWidth && y > canvas.height - signatureHeight) {
 			if (mouseZone !== 'signature') {
+				authorForm.hidden = false;
+				authorInput.focus();
 				mouseZone = 'signature';
 			}
 		} else if (mouseZone !== '') {
 			mouseZone = '';
+		}
+	});
+
+	authorForm.addEventListener('submit', function (event) {
+		event.preventDefault();
+		author = authorInput.value;
+		this.hidden = true;
+		progressiveBackgroundGen(bgGenerator, 0);
+	});
+
+	authorForm.addEventListener('focusout', function (event) {
+		if (!this.contains(event.relatedTarget)) {
+			authorForm.hidden = true;
+			authorInput.value = author;
 		}
 	});
 
@@ -429,7 +430,7 @@ function showBackgroundOptions() {
 	// Changing background colour.
 	document.getElementById('paper-color').addEventListener('input', function (event) {
 		backgroundElement.style.backgroundColor = this.value;
-		drawSignature();
+		drawSignature(canvas.getContext('2d'));
 	});
 
 	// Animation controls
@@ -496,8 +497,7 @@ function showBackgroundOptions() {
 
 	document.getElementById('anim-position').addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
-		setFrameData(tween);
-		progressiveBackgroundGen(bgGenerator, 1);
+		renderFrame(canvas.getContext('2d'), tween, false, 1);
 	});
 
 	document.getElementById('anim-length').addEventListener('input', function (event) {
@@ -538,7 +538,7 @@ function showBackgroundOptions() {
 				format: document.getElementById('video-format').value,
 				workersPath: '../lib/'
 			};
-			captureVideo(canvas.width, canvas.width, length * 1000, properties);
+			captureVideo(canvas.width, canvas.height, length * 1000, properties);
 		} else {
 			const element = videoErrorAlert.get(0);
 			element.innerHTML = errorMsg;

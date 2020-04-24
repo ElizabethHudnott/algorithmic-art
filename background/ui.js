@@ -95,6 +95,7 @@ function showBackgroundOptions() {
 	const urlParameters = new URLSearchParams(document.location.search);
 	const backgroundGenOptionsDOM = new Map();
 	let bgGeneratorName, startFrame, endFrame, animController;
+	let fullRotations = 0;
 
 	const instructions = $('#instructions-alert');
 	const errorAlert = $('#error-alert');
@@ -249,17 +250,17 @@ function showBackgroundOptions() {
 	function renderFrame(context, tween, paintBackground, preview) {
 		let backgroundColor, rotation = 0;
 		for (let [property, startValue] of startFrame.entries()) {
-			const endValue = endFrame.get(property);
-			const value = interpolateValue(startValue, endValue, tween);
+			let endValue = endFrame.get(property);
 			switch (property) {
 			case 'backgroundColor':
-				backgroundColor = value;
+				backgroundColor = interpolateValue(startValue, endValue, tween);
 				break;
 			case 'frameRotation':
-				rotation = value;
+				endValue += TWO_PI * fullRotations;
+				rotation = interpolateValue(startValue, endValue, tween);
 				break;
 			default:
-				bgGenerator[property] = value;
+				bgGenerator[property] = interpolateValue(startValue, endValue, tween);
 			}
 		}
 		bgGenerator.animate();
@@ -504,6 +505,17 @@ function showBackgroundOptions() {
 		const length = parseFloat(this.value);
 		if (length > 0) {
 			videoErrorAlert.alert('close');
+		}
+	});
+
+	document.getElementById('btn-anim-opts').addEventListener('click', function (event) {
+		$('#anim-opts-modal').modal('show');
+	});
+
+	document.getElementById('background-rotations').addEventListener('input', function (event) {
+		const value = parseFloat(this.value);
+		if (Number.isFinite(value)) {
+			fullRotations = value;
 		}
 	});
 

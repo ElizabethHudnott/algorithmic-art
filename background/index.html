@@ -113,7 +113,7 @@
 	 					</div>
 	 				</div>
 	 				<div class="col-1">
-	 					<button type="button" class="btn btn-light" data-toggle="modal" data-target="#anim-opts-modal" title="Advanced animation options">&hellip;</button>
+	 					<button type="button" class="btn btn-light" id="btn-anim-opts" title="Advanced animation options">&hellip;</button>
 	 				</div>
  				</div>
  			</form>
@@ -193,6 +193,15 @@
 				</button>
 			</div>
 			<div class="modal-body">
+				<div class="form-row form-group">
+					<div class="col-1"></div>
+					<label class="col-3 col-form-label">
+						Full Rotations
+					</label>
+					<div class="col-3">
+						<input type="number" value="0" id="background-rotations" class="form-control">
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

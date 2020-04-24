@@ -140,13 +140,16 @@ function showBackgroundOptions() {
 
 	function captureFrameData() {
 		const frame = new Map();
-		for (let property of bgGenerator.animatable) {
-			let value = bgGenerator[property];
-			if (Array.isArray(value)) {
-				value = value.slice();
+		if (bgGenerator.animatable) {
+			for (let property of bgGenerator.animatable) {
+				let value = bgGenerator[property];
+				if (Array.isArray(value)) {
+					value = value.slice();
+				}
+				frame.set(property, value);
 			}
-			frame.set(property, value);
 		}
+		frame.set('frameRotation', bgGeneratorRotation);
 		frame.set('backgroundColor', backgroundElement.style.backgroundColor);
 		return frame;
 	}
@@ -159,11 +162,9 @@ function showBackgroundOptions() {
 			bgGenerator = gen;
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;
-			if (gen.animatable) {
-				startFrame = captureFrameData();
-				endFrame = startFrame;
-				document.getElementById('anim-position').disabled = true;
-			}
+			startFrame = captureFrameData();
+			endFrame = startFrame;
+			document.getElementById('anim-position').disabled = true;
 			generateBackground();
 
 			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
@@ -263,7 +264,9 @@ function showBackgroundOptions() {
 				bgGenerator[property] = interpolateValue(startValue, endValue, tween);
 			}
 		}
-		bgGenerator.animate();
+		if (bgGenerator.animate) {
+			bgGenerator.animate();
+		}
 
 		const canvas = context.canvas;
 		const width = canvas.width;
@@ -437,7 +440,6 @@ function showBackgroundOptions() {
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = captureFrameData();
-		startFrame.set('frameRotation', bgGeneratorRotation);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
@@ -447,7 +449,6 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
 		endFrame = captureFrameData();
-		endFrame.set('frameRotation', bgGeneratorRotation);
 		const positionSlider = document.getElementById('anim-position')
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
@@ -527,26 +528,28 @@ function showBackgroundOptions() {
 	$('#video-modal').on('show.bs.modal', hideConfig);
 
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
-		let errorMsg, length, framerate, format;
+		let errorMsg = '';
 		if (startFrame === endFrame) {
-			errorMsg = '<p>The start and end frames are the same. Nothing to render.</p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button>';
+			errorMsg += '<p>The start and end frames are the same. Nothing to render.</p><p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button></p>';
 		}
-		if (errorMsg === undefined) {
-			length = parseFloat(document.getElementById('anim-length').value);
-			if (!(length > 0)) {
-				errorMsg = 'Invalid video duration.'
-			}
+		const length = parseFloat(document.getElementById('anim-length').value);
+		if (!(length > 0)) {
+			errorMsg += '<p>Invalid video duration.</p>'
 		}
-		if (errorMsg === undefined) {
-			framerate = parseInt(document.getElementById('video-framerate').value);
-			if (!(framerate > 0)) {
-				errorMsg = 'Invalid frame rate.'
-			}
+		const framerate = parseInt(document.getElementById('video-framerate').value);
+		if (!(framerate > 0)) {
+			errorMsg += '<p>Invalid frame rate.</p>'
+		}
+		const motionBlur = parseInt(document.getElementById('motion-blur').value) + 1;
+		if (!(motionBlur >= 1)) {
+			errorMsg += '<p>Invalid number of motion blur frames.</p>';
 		}
 
-		if (errorMsg === undefined) {
+		if (errorMsg === '') {
+			videoErrorAlert.alert('close');
 			const properties = {
 				framerate: framerate,
+				motionBlurFrames: motionBlur,
 				format: document.getElementById('video-format').value,
 				workersPath: '../lib/'
 			};

@@ -227,7 +227,7 @@
 					</label>
 					<div class="col-4">
 						<div class="input-group input-group-sm">
-							<input type="number" min="1" value="50" class="form-control" id="video-framerate" list="framerate-list">
+							<input type="number" min="1" value="50" class="form-control" id="video-framerate" list="framerate-list" aria-describedby="framerate-units">
 							<datalist id="framerate-list">
 								<option>60</option>
 								<option>50</option>
@@ -245,7 +245,7 @@
 								<option>1</option>
 							</datalist>
 							<div class="input-group-append">
-								<span class="input-group-text">FPS</span>
+								<span class="input-group-text" id="framerate-units">FPS</span>
 							</div>
 						</div>
 					</div>
@@ -262,6 +262,20 @@
 							<option value="png">PNG Stills</option>
 							<option value="jpg">JPEG Stills</option>
 						</select>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-1"></div>
+					<label class="col-3 col-form-label col-form-label-sm" for="motion-blur">
+						Motion Blur
+					</label>
+					<div class="col-4">
+						<div class="input-group input-group-sm">
+							<input type="number" min="0" value="0" class="form-control" id="motion-blur" aria-describedby="motion-blur-units">
+							<div class="input-group-append">
+								<span class="input-group-text" id="motion-blur-units">frames</span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="form-row form-group" hidden id="video-progress-row">

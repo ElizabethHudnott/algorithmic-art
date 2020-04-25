@@ -93,8 +93,11 @@
  		<div class="dropdown-menu drop-align-right" style="width: 500px" id="anim-controls">
  			<form class="px-2 bg-white opaque">
  				<div class="form-row">
- 					<div class="col-8">
+ 					<div class="col-7">
 	 					<label for="anim-position">Position</label>
+ 					</div>
+ 					<div class="col-1">
+ 						<output id="anim-position-readout">0s</output>
  					</div>
  					<div class="col-3">
 	 					<label for="anim-length">Length</label>
@@ -266,6 +269,18 @@
 				</div>
 				<div class="form-row form-group">
 					<div class="col-1"></div>
+					<label class="col-3 col-form-label col-form-label-sm" for="video-quality">
+						Quality
+					</label>
+					<div class="col-4">
+						<input type="range" min="0" max="100" value="70" class="form-control-range mt-1" id="video-quality" aria-describedby="video-quality-readout">
+					</div>
+					<div class="col-1">
+						<output id="video-quality-readout" class="small">70%</output>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-1"></div>
 					<label class="col-3 col-form-label col-form-label-sm" for="motion-blur">
 						Motion Blur
 					</label>
@@ -278,10 +293,27 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-row form-group" hidden id="video-progress-row">
+				<div class="form-row form-group">
 					<div class="col-1"></div>
-					<div class="col-3 col-form-label col-form-label-sm">
+					<label class="col-3 col-form-label col-form-label-sm" for="video-start">
+						Start
+					</label>
+					<div class="col-4">
+						<div class="input-group input-group-sm">
+							<input type="number" min="0" value="0" class="form-control" placeholder="seconds" id="video-start" aria-describedby="video-start-units">
+							<div class="input-group-append">
+								<span class="input-group-text" id="video-start-units">s</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group align-items-center" hidden id="video-progress-row">
+					<div class="col-1"></div>
+					<div class="col-2 col-form-label col-form-label-sm">
 						Progress
+					</div>
+					<div class="col-1">
+						<img src="../img/record.png" width="16" height="16" alt="Recording" id="recording-indicator">
 					</div>
 					<div class="col-8">
 						<div class="progress bg-dark" style="height: 20px">

@@ -36,15 +36,21 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
-			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
-				item.addEventListener('input', function (event) {
-					const filling = parseInt(this.value);
-					me.filling = filling;
-					const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
-					$(patternOptsSelector).collapse(filling > 0 ? 'show' : 'hide');
-					$(concentricOpts).collapse(filling === 1 ? 'show' : 'hide');
+			function setFilling(event) {
+				const filling = parseInt(this.value);
+				me.filling = filling;
+				const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
+				$(patternOptsSelector).collapse(filling > 0 ? 'show' : 'hide');
+				$(concentricOpts).collapse(filling === 1 ? 'show' : 'hide');
+				if (filling === 2 && bgGeneratorImage.src === '') {
+					document.getElementById('background-gen-image-upload').click();
+				} else {
 					progressiveBackgroundGen(me, 0);
-				})
+				}
+			}
+
+			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
+				item.addEventListener('input', setFilling);
 			});
 
 			optionsDoc.querySelectorAll('input[name=carpet-pattern-location]').forEach(function (item) {

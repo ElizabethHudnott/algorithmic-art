@@ -78,11 +78,15 @@
 			function setShape(event) {
 				const shape = parseInt(this.value);
 				me.petalShape = shape;
-				const hide = shape === 1;
+				const shapeIsImage = shape === 1;
 				polygonOpts.forEach(function (item) {
-					item.hidden = hide;
+					item.hidden = shapeIsImage;
 				});
-				progressiveBackgroundGen(me, 0);
+				if (shapeIsImage && bgGeneratorImage.src === '') {
+					document.getElementById('background-gen-image-upload').click();
+				} else {
+					progressiveBackgroundGen(me, 0);
+				}
 			}
 
 			optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]').forEach(function (item) {

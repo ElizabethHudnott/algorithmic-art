@@ -99,6 +99,7 @@
 			for (let i = 0; i < opacitySliders.length; i++) {
 				opacitySliders[i].addEventListener('input', changeColor(i, 1));
 				opacitySliders[i].addEventListener('mouseup', fullRedraw);
+				opacitySliders[i].addEventListener('keyup', fullRedraw);
 			};
 
 			optionsDoc.getElementById('carpet-bipartite').addEventListener('input', function (event) {
@@ -120,6 +121,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			fgSpacingSlider.addEventListener('mouseup', fullRedraw);
+			fgSpacingSlider.addEventListener('keyup', fullRedraw);
 
 			const tlxCornerSlider = optionsDoc.getElementById('carpet-tlx-corner');
 			tlxCornerSlider.addEventListener('input', function (event) {
@@ -127,6 +129,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			tlxCornerSlider.addEventListener('mouseup', fullRedraw);
+			tlxCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const tlyCornerSlider = optionsDoc.getElementById('carpet-tly-corner');
 			tlyCornerSlider.addEventListener('input', function (event) {
@@ -134,6 +137,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			tlyCornerSlider.addEventListener('mouseup', fullRedraw);
+			tlyCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const llCornerSlider = optionsDoc.getElementById('carpet-ll-corner');
 			llCornerSlider.addEventListener('input', function (event) {
@@ -141,6 +145,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			llCornerSlider.addEventListener('mouseup', fullRedraw);
+			llCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const lrCornerSlider = optionsDoc.getElementById('carpet-lr-corner');
 			lrCornerSlider.addEventListener('input', function (event) {
@@ -148,6 +153,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			lrCornerSlider.addEventListener('mouseup', fullRedraw);
+			lrCornerSlider.addEventListener('keyup', fullRedraw);
 
 			return optionsDoc;
 		});
@@ -170,13 +176,12 @@
 
 		const colors = new Array(13);
 		colors.fill('#ffffff80');
-		colors[4] = 'black';		// centre
+		colors[4] = '#000000';		// centre
 		colors[9] = '#000066';		// second centre color
 		colors[10] = colors[9]		// second centre color with emphasis
 		colors[11] = colors[4];		// centre with emphasis
-		colors[12] = 'transparent';	// depth zero
+		colors[12] = '#ffffff00';	// depth zero (transparent)
 		this.bipartite = false;
-
 
 		/*
 		 *	0	Top left
@@ -193,9 +198,13 @@
 		 * 11	Centre (emphasis)
 		 * 12	Centre (depth zero background)
 		*/
-
 		this.colors = colors;
 	}
+
+	SierpinskiCarpet.prototype.animatable = Object.freeze([
+		'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
+		'topLeftCornerX', 'topLeftCornerY', 'colors'
+	]);
 
 	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 

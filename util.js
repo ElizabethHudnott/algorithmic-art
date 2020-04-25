@@ -115,24 +115,37 @@ function checkInput(ancestor, name, value) {
 const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
 const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
 
+/** Parses color values written rgb, rgba, hsl, hsla and 6 and 8 digit hexadecimal notations.
+ *	Red, green and blue values must be given using numbers between 0 and 255 and not as percentages.
+ *	Alpha values must be written using decimal values between 0 and 1 and not as percentages.
+ *	Hue values must be stated in degrees without units.
+ *	Saturation and lightness values must be written as percentages (as per the CSS specification).
+ */
 function parseColor(str) {
 	let colorSystem, components;
 	let match = str.match(colorFuncRE);
 	if (match !== null) {
 		colorSystem = match[1];
-		components = match.slice(2, 6);
+		components = [
+			parseFloat(match[2]),
+			parseFloat(match[3]),
+			parseFloat(match[4]),
+			match[5] === undefined ? 1 : parseFloat(match[5])
+		];
 	} else {
 		match = str.match(hexColorRE);
 		if (match !== null) {
 			colorSystem = 'rgb';
-			components = match.slice(1, 5);
+			components = [
+				parseInt(match[1], 16),
+				parseInt(match[2], 16),
+				parseInt(match[3], 16),
+				match[4] === undefined ? 1 : parseInt(match[4], 16)
+			];
 		}
 	}
 	if (match === null) {
 		return [undefined, undefined];
-	}
-	if (components[3] === undefined) {
-		components[3] = '1';
 	}
 	return [colorSystem, components];
 }

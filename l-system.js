@@ -159,14 +159,16 @@ class GrammarSymbol {
 
 		let moreSpecific = false;
 		for (let i = numOtherParams; i < numThisParams; i++) {
-			if (thisParams[i].value !== undefined || thisParams.indexOf(thisParams[i]) < i) {
+			const thisParam = thisParams[i];
+			if (thisParam.value !== undefined || thisParams.indexOf(thisParam) < i) {
 				moreSpecific = true;
 				break;
 			}
 		}
 		let lessSpecific = false;
 		for (let i = numThisParams; i < numOtherParams; i++) {
-			if (otherParams[i].value !== undefined || otherParams.indexOf(otherParams[i]) < i) {
+			const otherParam = otherParams[i];
+			if (otherParam.value !== undefined || otherParams.indexOf(otherParam) < i) {
 				lessSpecific = true;
 				break;
 			}
@@ -182,8 +184,6 @@ class GrammarSymbol {
 						return Specificity.INCOMPARABLE;
 					}
 					lessSpecific = true;
-				} else {
-
 				}
 			} else {
 				if (otherValue === undefined) {

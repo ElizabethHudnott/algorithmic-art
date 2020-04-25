@@ -33,6 +33,7 @@
 				progressiveBackgroundGen(me, 1);
 			});
 			angleSlider.addEventListener('mouseup', fullRedraw);
+			angleSlider.addEventListener('keyup', fullRedraw);
 
 			optionsDoc.getElementById('phyllotaxis-spread').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
@@ -160,6 +161,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			hueMinInput.addEventListener('mouseup', fullRecolor);
+			hueMinInput.addEventListener('keyup', fullRecolor);
 
 			const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
 			hueMaxInput.addEventListener('input', function (event) {
@@ -167,6 +169,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			hueMaxInput.addEventListener('mouseup', fullRecolor);
+			hueMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
 				me.hueMode = this.value;
@@ -180,6 +183,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			saturationMinInput.addEventListener('mouseup', fullRecolor);
+			saturationMinInput.addEventListener('keyup', fullRecolor);
 
 			const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
 			saturationMaxInput.addEventListener('input', function (event) {
@@ -187,6 +191,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			saturationMaxInput.addEventListener('mouseup', fullRecolor);
+			saturationMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
 				me.saturationMode = this.value;
@@ -200,6 +205,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			lightnessMinInput.addEventListener('mouseup', fullRecolor);
+			lightnessMinInput.addEventListener('keyup', fullRecolor);
 
 			const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
 			lightnessMaxInput.addEventListener('input', function (event) {
@@ -207,6 +213,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			lightnessMaxInput.addEventListener('mouseup', fullRecolor);
+			lightnessMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
 				me.lightnessMode = this.value;
@@ -220,6 +227,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			opacityMinInput.addEventListener('mouseup', fullRecolor);
+			opacityMinInput.addEventListener('keyup', fullRecolor);
 
 			const opacityMaxInput = optionsDoc.getElementById('phyllotaxis-opacity-max');
 			opacityMaxInput.addEventListener('input', function (event) {
@@ -227,6 +235,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			opacityMaxInput.addEventListener('mouseup', fullRecolor);
+			opacityMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
 				me.opacityMode = this.value;
@@ -240,6 +249,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			lightingInput.addEventListener('mouseup', fullRecolor);
+			lightingInput.addEventListener('keyup', fullRecolor);
 
 			const contrastInput = optionsDoc.getElementById('phyllotaxis-contrast');
 			contrastInput.addEventListener('input', function (event) {
@@ -247,6 +257,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			contrastInput.addEventListener('mouseup', fullRecolor);
+			contrastInput.addEventListener('keyup', fullRecolor);
 
 			const shadowAngleInput = optionsDoc.getElementById('phyllotaxis-shadow-angle');
 			shadowAngleInput.addEventListener('input', function (event) {
@@ -254,6 +265,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			shadowAngleInput.addEventListener('mouseup', fullRecolor);
+			shadowAngleInput.addEventListener('keyup', fullRecolor);
 
 			const shadowBlurInput = optionsDoc.getElementById('phyllotaxis-shadow-blur');
 			shadowBlurInput.addEventListener('input', function (event) {
@@ -264,6 +276,7 @@
 				}
 			});
 			shadowBlurInput.addEventListener('mouseup', fullRecolor);
+			shadowBlurInput.addEventListener('keyup', fullRecolor);
 
 			const shadowOffsetInput = optionsDoc.getElementById('phyllotaxis-shadow-offset');
 			shadowOffsetInput.addEventListener('input', function (event) {
@@ -271,6 +284,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			shadowOffsetInput.addEventListener('mouseup', fullRecolor);
+			shadowOffsetInput.addEventListener('keyup', fullRecolor);
 
 			const spotOffsetInput = optionsDoc.getElementById('phyllotaxis-spot-offset');
 			spotOffsetInput.addEventListener('input', function (event) {
@@ -278,6 +292,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			spotOffsetInput.addEventListener('mouseup', fullRecolor);
+			spotOffsetInput.addEventListener('keyup', fullRecolor);
 
 			const shadowColorInput = optionsDoc.getElementById('phyllotaxis-shadow-color');
 			shadowColorInput.addEventListener('input', function (event) {
@@ -286,6 +301,7 @@
 				progressiveBackgroundGen(me, 3);
 			});
 			shadowColorInput.addEventListener('mouseup', fullRecolor);
+			shadowColorInput.addEventListener('keyup', fullRecolor);
 
 			return optionsDoc;
 		});
@@ -293,7 +309,7 @@
 		this.points = undefined;
 
 		this.exponent = 0.5;
-		this.angle = 2 * Math.PI * 0.382;
+		this.angle = TWO_PI * 0.382;
 		this.spread = 1;
 		this.scale = 20;
 		this.start = 1;
@@ -339,16 +355,12 @@
 	}
 
 	Phyllotaxis.prototype.animatable = Object.freeze([
-		'exponent', 'angle', 'spread', 'scale', 'start', 'skip', 'petalSize',
+		'exponent', 'angle', 'spread', 'scale', 'start', 'petalSize',
 		'petalEnlargement', 'maxPetals', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 		'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
 		'spotOffset'
 	]);
-
-	Phyllotaxis.prototype.animate = function () {
-		this.skip = Math.trunc(this.skip);
-	}
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 

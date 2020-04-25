@@ -220,7 +220,7 @@
 
 		if (this.circular) {
 			for (let i = shapes.length; i < this.numSeeds; i++) {
-				const theta = Math.random() * 2 * Math.PI;
+				const theta = Math.random() * TWO_PI;
 				const radius = minSeedSize + Math.random() * seedSizeRange;
 				const maxR = boundaryR - edgeBuffer - radius;
 				const r = Math.sqrt(Math.random()) * maxR;
@@ -262,7 +262,7 @@
 					if (this.circular) {
 						const xDist = x - centreX;
 						const yDist = y - centreY;
-						const r = Math.sqrt(xDist * xDist + yDist * yDist);
+						const r = Math.hypot(xDist, yDist);
 						minDistance = boundaryR - edgeBuffer - r;
 					} else {
 						minDistance = Math.min(x, y, canvasWidth - x, canvasHeight - y) - edgeBuffer;
@@ -274,7 +274,7 @@
 						const shape2 = shapes[j];
 						const xDist = shape2.x - shape1.x;
 						const yDist = shape2.y - shape1.y;
-						const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r - buffer;
+						const dist = Math.hypot(xDist, yDist) - shape2.r - buffer;
 						if (dist < minDistance) {
 							minDistance = dist;
 						}
@@ -307,7 +307,7 @@
 					do {
 						radius =  minSize + Math.random() + newSizeRange;
 						if (this.circular) {
-							const theta = Math.random() * 2 * Math.PI;
+							const theta = Math.random() * TWO_PI;
 							const maxR = boundaryR - edgeBuffer;
 							const r = Math.sqrt(Math.random()) * maxR;
 							x = centreX + r * Math.cos(theta);
@@ -325,7 +325,7 @@
 								const shape = shapes[j];
 								const xDist = x - shape.x;
 								const yDist = y - shape.y;
-								const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape.r;
+								const dist = Math.hypot(xDist, yDist) - shape.r;
 								radius = Math.min(radius, dist - buffer);
 								if (radius < minSize) {
 									break;
@@ -376,7 +376,7 @@
 				let r2 = shape2.r;
 				const xDist = x2 - x1;
 				const yDist = y2 - y1;
-				const dist = Math.sqrt(xDist * xDist + yDist * yDist);
+				const dist = Math.hypot(xDist, yDist);
 				const rSum = r1 + r2 + buffer;
 				const excessRadius = rSum - dist;
 				if (excessRadius > 0) {
@@ -412,7 +412,7 @@
 				if (this.circular) {
 					const xDist = x - centreX;
 					const yDist = y - centreY;
-					const r = Math.sqrt(xDist * xDist + yDist * yDist);
+					const r = Math.hypot(xDist, yDist);
 					minDistance = boundaryR - edgeBuffer - r;
 				} else {
 					minDistance = Math.min(x, y, width - x, height - y) - edgeBuffer;
@@ -424,7 +424,7 @@
 					const shape2 = shapes[j];
 					const xDist = shape2.x - shape1.x;
 					const yDist = shape2.y - shape1.y;
-					const dist = Math.sqrt(xDist * xDist + yDist * yDist) - shape2.r - buffer;
+					const dist = Math.hypot(xDist, yDist) - shape2.r - buffer;
 					if (dist < minDistance) {
 						minDistance = dist;
 					}

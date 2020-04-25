@@ -112,6 +112,8 @@ function showBackgroundOptions() {
 	imageUpload.remove();
 	imageUpload.removeAttribute('hidden');
 
+	const animPositionSlider = document.getElementById('anim-position');
+
 	function hideAlert(jquery) {
 		jquery.alert('close');
 	}
@@ -164,7 +166,7 @@ function showBackgroundOptions() {
 			bgGeneratorName = name;
 			startFrame = captureFrameData();
 			endFrame = startFrame;
-			document.getElementById('anim-position').disabled = true;
+			animPositionSlider.disabled = true;
 			generateBackground();
 
 			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
@@ -228,8 +230,8 @@ function showBackgroundOptions() {
 				let [, endComponents] = parseColor(endValue);
 				const tweened = new Array(4);
 				for (let i = 0; i < 4; i++) {
-					const componentStart = parseFloat(startComponents[i]);
-					const componentEnd = parseFloat(endComponents[i]);
+					const componentStart = startComponents[i];
+					const componentEnd = endComponents[i];
 					tweened[i] = (componentEnd - componentStart) * tween + componentStart;
 				}
 				if (colorSystem === 'rgb') {
@@ -264,9 +266,6 @@ function showBackgroundOptions() {
 				bgGenerator[property] = interpolateValue(startValue, endValue, tween);
 			}
 		}
-		if (bgGenerator.animate) {
-			bgGenerator.animate();
-		}
 
 		const canvas = context.canvas;
 		const width = canvas.width;
@@ -281,7 +280,7 @@ function showBackgroundOptions() {
 			context.clearRect(0, 0, width, height);
 		}
 		context.save();
-		rotateCanvas(context,width, height, rotation);
+		rotateCanvas(context, width, height, rotation);
 		if (preview === 0) {
 			// Draw everything in one go when animating
 			const redraw = bgGenerator.generate(context, width, height, 0);
@@ -443,7 +442,7 @@ function showBackgroundOptions() {
 	}
 
 	document.getElementById('background-rotation').addEventListener('input', function (event) {
-		bgGeneratorRotation = 2 * Math.PI * parseFloat(this.value);
+		bgGeneratorRotation = TWO_PI * parseFloat(this.value);
 		progressiveBackgroundGen(bgGenerator, 0);
 	})
 
@@ -456,7 +455,7 @@ function showBackgroundOptions() {
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = captureFrameData();
-		const positionSlider = document.getElementById('anim-position')
+		const positionSlider = animPositionSlider
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
 		updateAnimPositionReadout(0);
@@ -466,7 +465,7 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
 		endFrame = captureFrameData();
-		const positionSlider = document.getElementById('anim-position')
+		const positionSlider = animPositionSlider
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
 		updateAnimPositionReadout(1);
@@ -497,8 +496,9 @@ function showBackgroundOptions() {
 		playStopButton.children[0].src = '../img/control_play_blue.png';
 		playStopButton.title = 'Play animation';
 		const position = animController.progress;
-		document.getElementById('anim-position').value = position;
+		animPositionSlider.value = position;
 		updateAnimPositionReadout(position);
+		syncToPosition();
 	}
 
 	document.getElementById('btn-play').addEventListener('click', function (event) {
@@ -535,11 +535,27 @@ function showBackgroundOptions() {
 		event.stopPropagation();
 	})
 
-	document.getElementById('anim-position').addEventListener('input', function (event) {
+	animPositionSlider.addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
 		renderFrame(canvas.getContext('2d'), tween, false, 1);
 		updateAnimPositionReadout(tween);
 	});
+
+	function syncToPosition() {
+		const tween = parseFloat(animPositionSlider.value);
+		const startRotation = startFrame.get('frameRotation');
+		const endRotation = endFrame.get('frameRotation');
+		bgGeneratorRotation = interpolateValue(startRotation, endRotation, tween);
+		document.getElementById('background-rotation').value = bgGeneratorRotation / TWO_PI;
+	}
+
+	function syncAndDraw() {
+		syncToPosition();
+		progressiveBackgroundGen(bgGenerator, 0);
+	}
+
+	animPositionSlider.addEventListener('mouseup', syncAndDraw);
+	animPositionSlider.addEventListener('keyup', syncAndDraw);
 
 	document.getElementById('anim-length').addEventListener('input', function (event) {
 		const length = parseFloat(this.value);

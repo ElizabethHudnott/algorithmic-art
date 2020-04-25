@@ -36,7 +36,7 @@ let symmetry = parseInt(symmetryInput.value);
 if (!Number.isFinite(symmetry)) {
 	symmetry = 1;
 }
-let symmetryAngle = 2 * Math.PI / symmetry;
+let symmetryAngle = TWO_PI / symmetry;
 const numPointsSpan = document.getElementById('num-points');
 const numRevsSpan = document.getElementById('num-revolutions');
 const lengthSpan = document.getElementById('length');
@@ -89,7 +89,7 @@ function maxLength(rotor, penX, penY) {
 	if (penY === 0) {
 		return rotor.radiusA + penX;
 	}
-	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
+	const distanceFromCentre = Math.hypot(penX, penY);
 	// Sort of assume a rectangular bounding box but no chord through the shape can be longer than radiusA.
 	const distanceFromEdge = Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA);
 	return distanceFromCentre + distanceFromEdge;
@@ -99,7 +99,7 @@ function minLength(rotor, penX, penY) {
 	if (penY === 0) {
 		return rotor.radiusA - penX;
 	}
-	const distanceFromCentre = Math.sqrt(penX * penX + penY * penY);
+	const distanceFromCentre = Math.hypot(penX, penY);
 	return Math.min(rotor.radiusB / penY * distanceFromCentre, rotor.radiusA) - distanceFromCentre;
 }
 
@@ -150,7 +150,7 @@ function setFillStyle() {
 				gradientDirectionInput.reportValidity();
 				return false;
 			}
-			const theta = 2 * Math.PI * direction - HALF_PI;
+			const theta = TWO_PI * direction - HALF_PI;
 			const xDistance = maxRadiusA * Math.cos(theta);
 			const yDistance = maxRadiusB * Math.sin(theta);
 			const x1 = translateX - xDistance;
@@ -251,7 +251,7 @@ function drawTools(stator, rotor, penX, penY) {
 		toolContext.translate(rotorX, rotorY);
 		toolContext.rotate(rotorAngle);
 		rotor.draw(toolContext, 0, 0);
-		toolContext.arc(penX, penY, Math.max(lineWidth / 2, 5) / scale, 0, 2 * Math.PI);
+		toolContext.arc(penX, penY, Math.max(lineWidth / 2, 5) / scale, 0, TWO_PI);
 		toolContext.fill('evenodd');
 		toolContext.setTransform(scale, 0, 0, scale, scale, scale);
 	}
@@ -423,7 +423,7 @@ function drawSpirograph(description) {
 				if (swirlAmount !== 0) {
 					const dx = plotX - translateX;
 					const dy = plotY - translateY;
-					const r = Math.sqrt(dx * dx + dy * dy);
+					const r = Math.hypot(dx, dy);
 					let theta = Math.atan2(dy, dx);
 					theta -= swirlCompensation;
 					if (swirlRate === 1) {
@@ -503,10 +503,10 @@ class CircularGear extends Gear {
 	constructor(numTeeth, arg2) {
 		super(numTeeth, arg2, 1);
 		if (arg2 instanceof Gear) {
-			this.radiusA = numTeeth * arg2.toothSize / (2 * Math.PI);
+			this.radiusA = numTeeth * arg2.toothSize / (TWO_PI);
 			this.radiusB = this.radiusA;
 		} else {
-			this.toothSize = 2 * Math.PI * arg2 / numTeeth;
+			this.toothSize = TWO_PI * arg2 / numTeeth;
 		}
 	}
 
@@ -521,7 +521,7 @@ class CircularGear extends Gear {
 
 	draw(context, x, y) {
 		context.beginPath();
-		context.ellipse(x, y, this.radiusA, this.radiusB, 0, 0, 2 * Math.PI);
+		context.ellipse(x, y, this.radiusA, this.radiusB, 0, 0, TWO_PI);
 		context.stroke();
 	}
 
@@ -540,10 +540,10 @@ class RackGear extends Gear {
 	constructor(numTeeth, arg2, aspectRatio) {
 		super(numTeeth, arg2, aspectRatio);
 		if (arg2 instanceof Gear) {
-			this.radiusA = numTeeth / (4 * (1 - aspectRatio) + 2 * Math.PI * aspectRatio) * this.toothSize;
+			this.radiusA = numTeeth / (4 * (1 - aspectRatio) + TWO_PI * aspectRatio) * this.toothSize;
 			this.radiusB = this.radiusA * aspectRatio;
 		} else {
-			this.toothSize = (4 * (arg2 - this.radiusB) + 2 * Math.PI * this.radiusB) / numTeeth;
+			this.toothSize = (4 * (arg2 - this.radiusB) + TWO_PI * this.radiusB) / numTeeth;
 		}
 	}
 
@@ -617,7 +617,7 @@ gearConstructors.set('rack', RackGear);
 
 function calcMaxHole() {
 	// Semi-arbitrary "Number of teeth" is modelled on the typical circular wheel.
-	const numTeeth = 2 * Math.PI * rotor.radiusA / stator.toothSize;
+	const numTeeth = TWO_PI * rotor.radiusA / stator.toothSize;
 	maxHole = Math.max(Math.round(0.5 * numTeeth) - 6, 2);
 	penXSlider.max = maxHole;
 	const hole1Fraction = 1 - hole1Distance / rotor.radiusA;
@@ -1525,7 +1525,7 @@ function floodFill(width, height, data, filled, startX, startY, newColor, transp
 symmetryInput.addEventListener('input', function (event) {
 	if (this.value !== '') {
 		symmetry = parseInt(this.value);
-		symmetryAngle = 2 * Math.PI / symmetry;
+		symmetryAngle = TWO_PI / symmetry;
 	}
 });
 
@@ -1549,7 +1549,7 @@ function untransformPoint(x, y) {
 function rectToPolar(x, y) {
 	const dx = x - translateX;
 	const dy = y - translateY;
-	const r = Math.sqrt(dx * dx + dy * dy);
+	const r = Math.hypot(dx, dy);
 	const theta = Math.atan2(dy, dx);
 	return [r, theta];
 }
@@ -1671,7 +1671,7 @@ spiroCanvas.addEventListener('pointerup', function (event) {
 	if (mouseClickedX !== undefined) {
 		const dx = mouseX - currentClickX;
 		const dy = mouseY - currentClickY;
-		const distance = Math.sqrt(dx * dx + dy * dy);
+		const distance = Math.hypot(dx, dy);
 		if (distance > 10 / scale) {
 			mouseClickedX = undefined;
 			currentPath = nextPath;
@@ -1721,7 +1721,7 @@ function drawWithMouse(event) {
 
 	const dx = mouseX - mouseClickedX;
 	const dy = mouseY - mouseClickedY;
-	const distance = Math.sqrt(dx * dx + dy * dy);
+	const distance = Math.hypot(dx, dy);
 
 	const numPoints = Math.abs(mouseClickedR) < 1 / scale ? 1 : symmetry;
 
@@ -1785,13 +1785,13 @@ function drawWithMouse(event) {
 				let centreX = translateX + mouseClickedR * Math.cos(angle);
 				let centreY = translateY + mouseClickedR * Math.sin(angle);
 				nextPath.moveTo(centreX + distance, centreY);
-				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+				nextPath.arc(centreX, centreY, distance, 0, TWO_PI);
 				if (!clickedOnMirrorLine) {
 					angle = thisMirrorAngle - mirrorMouseStartAngle;
 					centreX = translateX + mouseClickedR * Math.cos(angle);
 					centreY = translateY + mouseClickedR * Math.sin(angle);
 					nextPath.moveTo(centreX + distance, centreY);
-					nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+					nextPath.arc(centreX, centreY, distance, 0, TWO_PI);
 				}
 			}
 		} else {
@@ -1800,7 +1800,7 @@ function drawWithMouse(event) {
 				const centreX = translateX + mouseClickedR * Math.cos(angle);
 				const centreY = translateY + mouseClickedR * Math.sin(angle);
 				nextPath.moveTo(centreX + distance, centreY);
-				nextPath.arc(centreX, centreY, distance, 0, 2 * Math.PI);
+				nextPath.arc(centreX, centreY, distance, 0, TWO_PI);
 			}
 		}
 		spiroContext.stroke(nextPath);

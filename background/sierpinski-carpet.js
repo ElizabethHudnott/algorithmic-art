@@ -25,7 +25,7 @@
 
 			optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
-				if (value >= 1) {
+				if (value >= 0) {
 					me.patternDepth = value - 1;
 					progressiveBackgroundGen(me, 0);
 				}
@@ -37,12 +37,12 @@
 			});
 
 			function setFilling(event) {
-				const filling = parseInt(this.value);
+				const filling = this.value;
 				me.filling = filling;
 				const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
-				$(patternOptsSelector).collapse(filling > 0 ? 'show' : 'hide');
-				$(concentricOpts).collapse(filling === 1 ? 'show' : 'hide');
-				if (filling === 2 && bgGeneratorImage.src === '') {
+				$(patternOptsSelector).collapse(filling !== 'b' ? 'show' : 'hide');
+				$(concentricOpts).collapse(filling === 'c' ? 'show' : 'hide');
+				if (filling === 'i' && bgGeneratorImage.src === '') {
 					document.getElementById('background-gen-image-upload').click();
 				} else {
 					progressiveBackgroundGen(me, 0);
@@ -85,8 +85,10 @@
 					me.colors[index] = rgba(r, g, b, alpha);
 					if (index === 4) {
 						me.colors[11] = color;
+						me.patternOpacities[1] = alpha;
 					} else if (index === 9) {
 						me.colors[10] = color;
+						me.patternOpacities[0] = alpha;
 					}
 					progressiveBackgroundGen(me, preview);
 				};
@@ -162,7 +164,7 @@
 		this.maxDepth = 4;
 		this.patternDepth = 3;
 		this.compositionOp = 'source-over';
-		this.filling = 0;
+		this.filling = 'b';
 		this.patternLocations = 3;
 		this.patternedCentre = true;
 		this.centreEmphasis = 0;
@@ -181,6 +183,7 @@
 		colors[10] = colors[9]		// second centre color with emphasis
 		colors[11] = colors[4];		// centre with emphasis
 		colors[12] = '#ffffff00';	// depth zero (transparent)
+		this.patternOpacities = [1, 1];
 		this.bipartite = false;
 
 		/*
@@ -201,10 +204,15 @@
 		this.colors = colors;
 	}
 
-	SierpinskiCarpet.prototype.animatable = Object.freeze([
-		'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
-		'topLeftCornerX', 'topLeftCornerY', 'colors'
-	]);
+	SierpinskiCarpet.prototype.animatable = [
+		[
+			'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
+			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities'
+		],
+		[
+			'maxDepth', 'patternDepth', 'patternLocations', 'centreEmphasis'
+		]
+	];
 
 	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 
@@ -238,7 +246,7 @@
 			}
 			const div = 3 ** depth;
 			const emphasize = depth <= this.centreEmphasis;
-			const drawPattern = filling > 0 && depth <= this.patternDepth && prevSideLength >= 2;
+			const drawPattern = filling !== 'b' && depth <= this.patternDepth && prevSideLength >= 2;
 			const combinedSpacing = Math.round(spacingNumerator / div);
 			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
 			if (fgSpacing === 0) {
@@ -292,11 +300,15 @@
 					context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
 				}
 				if (drawPattern && patternLocation) {
-					if (filling === 1) {
+					if (filling === 'c') {
 						this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
 							fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX);
 					} else {
+						if (!emphasize) {
+							context.globalAlpha = this.patternOpacities[bipartiteColoring];
+						}
 						context.drawImage(bgGeneratorImage, roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+						context.globalAlpha = 1;
 					}
 				} else {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);

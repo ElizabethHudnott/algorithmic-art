@@ -140,7 +140,7 @@ function parseColor(str) {
 				parseInt(match[1], 16),
 				parseInt(match[2], 16),
 				parseInt(match[3], 16),
-				match[4] === undefined ? 1 : parseInt(match[4], 16)
+				match[4] === undefined ? 1 : parseInt(match[4], 16) / 255
 			];
 		}
 	}

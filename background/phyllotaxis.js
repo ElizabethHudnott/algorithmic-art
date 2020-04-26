@@ -77,9 +77,9 @@
 
 			const polygonOpts = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
 			function setShape(event) {
-				const shape = parseInt(this.value);
+				const shape = this.value;
 				me.petalShape = shape;
-				const shapeIsImage = shape === 1;
+				const shapeIsImage = shape === 'i';
 				polygonOpts.forEach(function (item) {
 					item.hidden = shapeIsImage;
 				});
@@ -314,8 +314,8 @@
 		this.scale = 20;
 		this.start = 1;
 		this.skip = 0;
-		this.stacking = -1;
-		this.petalShape = 0;
+		this.stacking = 0;
+		this.petalShape = 'c';
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
 		this.maxPetals = 10000;
@@ -354,13 +354,18 @@
 		this.points = undefined;
 	}
 
-	Phyllotaxis.prototype.animatable = Object.freeze([
-		'exponent', 'angle', 'spread', 'scale', 'start', 'petalSize',
-		'petalEnlargement', 'maxPetals', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
-		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
-		'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
-		'spotOffset'
-	]);
+	Phyllotaxis.prototype.animatable = [
+		[
+			'exponent', 'angle', 'spread', 'scale', 'petalSize',
+			'petalEnlargement', 'maxPetals', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
+			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
+			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
+			'spotOffset'
+		],
+		[
+			'start', 'skip', 'stacking'
+		]
+	];
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 
@@ -405,7 +410,10 @@
 			let n = this.start;
 			let numPetals = 0;
 			let r = scale * n ** exponent;
-			const skip = this.skip;
+			let skip = this.skip;
+			if (skip === 1) {
+				skip = 0;
+			}
 
 			let currentPetalSize;
 			if (petalEnlargement >= 0) {
@@ -443,7 +451,10 @@
 		const lastR = this.points[numPoints - 1].r;
 		const zoom = maxR / lastR;
 		const lastRSquared = lastR * lastR;
-		const stacking = this.stacking;
+		let stacking = this.stacking;
+		if (stacking == 0) {
+			stacking = -1; // iterate from outermost to innermost
+		}
 
 		const imageWidth = bgGeneratorImage.width;
 		const imageHeight = bgGeneratorImage.height;
@@ -541,12 +552,12 @@
 			}
 
 			switch (this.petalShape) {
-			case 0:
+			case 'c':	// Circle
 				context.beginPath();
 				context.arc(x, y, petalSize, 0, TWO_PI);
 				context.fill();
 				break;
-			case 1:
+			case 'i':	// Image
 				let imageTranslateX, imageTranslateY, imageResizedWidth, imageResizedHeight;
 				if (imageWidth >= imageHeight) {
 					imageResizedHeight = 2 * petalSize;

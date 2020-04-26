@@ -29,6 +29,7 @@ let author = '';
 
 function drawSignature(context, backgroundColor) {
 	context.setTransform(1, 0, 0, 1, 0, 0);
+	context.globalCompositeOperation = 'source-over';
 	context.font = signatureFont;
 	context.textAlign = 'left';
 	context.textBaseline = 'bottom';
@@ -115,6 +116,32 @@ function showBackgroundOptions() {
 
 	const animPositionSlider = document.getElementById('anim-position');
 
+	class FrameData {
+		constructor(generator, rotation, backgroundElement) {
+			this.continuous = new Map();
+			this.stepped = new Map();
+			if (generator.animatable) {
+				for (let property of generator.animatable[0]) {
+					let value = generator[property];
+					if (Array.isArray(value)) {
+						value = value.slice();
+					}
+					this.continuous.set(property, value);
+				}
+				for (let property of generator.animatable[1]) {
+					let value = generator[property];
+					if (Array.isArray(value)) {
+						value = value.slice();
+					}
+					this.stepped.set(property, value);
+				}
+			}
+			this.rotation = rotation;
+			this.backgroundColor = backgroundElement.style.backgroundColor;
+		}
+
+	}
+
 	function hideAlert(jquery) {
 		jquery.alert('close');
 	}
@@ -141,22 +168,6 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function captureFrameData() {
-		const frame = new Map();
-		if (bgGenerator.animatable) {
-			for (let property of bgGenerator.animatable) {
-				let value = bgGenerator[property];
-				if (Array.isArray(value)) {
-					value = value.slice();
-				}
-				frame.set(property, value);
-			}
-		}
-		frame.set('frameRotation', bgGeneratorRotation);
-		frame.set('backgroundColor', backgroundElement.style.backgroundColor);
-		return frame;
-	}
-
 	function switchBackgroundGenerator(name) {
 		backgroundGeneratorFactory(name).then(function (gen) {
 			if (bgGenerator && bgGenerator.purgeCache) {
@@ -165,7 +176,7 @@ function showBackgroundOptions() {
 			bgGenerator = gen;
 			const prevGenName = bgGeneratorName;
 			bgGeneratorName = name;
-			startFrame = captureFrameData();
+			startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 			endFrame = startFrame;
 			animPositionSlider.disabled = true;
 			generateBackground();
@@ -251,22 +262,39 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function renderFrame(context, tween, paintBackground, preview) {
-		let backgroundColor, rotation = 0;
-		for (let [property, startValue] of startFrame.entries()) {
-			let endValue = endFrame.get(property);
-			switch (property) {
-			case 'backgroundColor':
-				backgroundColor = interpolateValue(startValue, endValue, tween);
-				break;
-			case 'frameRotation':
-				endValue += TWO_PI * fullRotations;
-				rotation = interpolateValue(startValue, endValue, tween);
-				break;
-			default:
-				bgGenerator[property] = interpolateValue(startValue, endValue, tween);
+	function interpolateStep(startValue, endValue, tween) {
+		if (tween === 1 || startValue === endValue) {
+			return endValue;
+		} else if (Array.isArray(startValue)) {
+			const numComponents = startValue.length;
+			const output = new Array(numComponents);
+			for (let i = 0; i < numComponents; i++) {
+				output[i] = interpolateStep(startValue[i], endValue[i], tween);
 			}
+			return output;
+		} else {
+			let steps = endValue - startValue;
+			if (steps > 0) {
+				steps++;
+			} else {
+				steps--;
+			}
+			return Math.floor(steps * tween + startValue);
 		}
+	}
+
+	function renderFrame(context, tween, paintBackground, preview) {
+		for (let [property, startValue] of startFrame.continuous.entries()) {
+			let endValue = endFrame.continuous.get(property);
+			bgGenerator[property] = interpolateValue(startValue, endValue, tween);
+		}
+		for (let [property, startValue] of startFrame.stepped.entries()) {
+			let endValue = endFrame.stepped.get(property);
+			bgGenerator[property] = interpolateStep(startValue, endValue, tween);
+		}
+
+		const rotation = interpolateValue(startFrame.rotation, endFrame.rotation + TWO_PI * fullRotations, tween);
+		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween);
 
 		const canvas = context.canvas;
 		const width = canvas.width;
@@ -455,7 +483,7 @@ function showBackgroundOptions() {
 
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
-		startFrame = captureFrameData();
+		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 		const positionSlider = animPositionSlider
 		positionSlider.value = 0;
 		positionSlider.disabled = false;
@@ -465,7 +493,7 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
-		endFrame = captureFrameData();
+		endFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 		const positionSlider = animPositionSlider
 		positionSlider.value = 1;
 		positionSlider.disabled = false;
@@ -544,9 +572,9 @@ function showBackgroundOptions() {
 
 	function syncToPosition() {
 		const tween = parseFloat(animPositionSlider.value);
-		const startRotation = startFrame.get('frameRotation');
-		const endRotation = endFrame.get('frameRotation');
-		bgGeneratorRotation = interpolateValue(startRotation, endRotation, tween);
+		const startRotation = startFrame.rotation;
+		const endRotation = endFrame.rotation + TWO_PI * fullRotations;
+		bgGeneratorRotation = interpolateValue(startFrame, endRotation, tween);
 		document.getElementById('background-rotation').value = bgGeneratorRotation / TWO_PI;
 	}
 

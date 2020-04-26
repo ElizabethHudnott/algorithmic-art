@@ -4,7 +4,7 @@ Environment
 Help & credits button
 Option to export an image with or without transparency
 Static image rotation for non-animatable sketches
-Ability to animate integer parameters
+Ability to animate boolean values, string values & named colors?
 Ability to animate image parameters
 Video sizing
 Add directionality to rotation
@@ -15,8 +15,11 @@ Ability to incorporate video data
 
 Existing Sketches
 -----------------
-Carpet
-	Opacity should apply to images
+Phyllotaxis
+	Mirrored radial colour transitions
+	Fade hue through black or white
+	Hue rotation of images
+	Improve performance with images
 
 
 New Sketches

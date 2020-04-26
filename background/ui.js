@@ -30,6 +30,7 @@ let author = '';
 function drawSignature(context, backgroundColor) {
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.font = signatureFont;
+	context.textAlign = 'left';
 	context.textBaseline = 'bottom';
 	const text = 'Elizabeth Hudnott' + (author === '' ? '' : ' & ' + author);
 	const metrics = context.measureText(text);
@@ -381,10 +382,10 @@ function showBackgroundOptions() {
 	function generateFilename() {
 		const now = new Date();
 		const year = now.getFullYear();
-		const month = now.getMonth() + 1;
-		const day = now.getDate();
-		const hour = now.getHours();
-		const minute = now.getMinutes();
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const day = String(now.getDate()).padStart(2, '0');
+		const hour = String(now.getHours()).padStart(2, '0');
+		const minute = String(now.getMinutes()).padStart(2, '0');
 		return `${bgGeneratorName} ${year}-${month}-${day} ${hour}${minute}`;
 	}
 

@@ -1,0 +1,24 @@
+
+Environment
+-----------
+Help & credits button
+Option to export an image with or without transparency
+Static image rotation for non-animatable sketches
+Ability to animate integer parameters
+Ability to animate image parameters
+Video sizing
+Add directionality to rotation
+Ability to animate sketches that use random numbers
+Gallery
+Ability to incorporate video data
+
+
+Existing Sketches
+-----------------
+Carpet
+	Opacity should apply to images
+
+
+New Sketches
+------------
+Copy machine

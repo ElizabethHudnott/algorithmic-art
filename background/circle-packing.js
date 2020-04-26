@@ -10,12 +10,12 @@
 		}
 	}
 
-	class Rendering {
+	class PolygonRendering {
 		constructor(n, star) {
 			this.numSides = n;
 			this.star = star;
-			this.innerColor = 'yellow';
-			this.outerColor = 'black';
+			this.fillStyle = 'yellow';
+			this.strokeStyle = 'black';
 			this.outlineFraction = 0.03;
 			this.frequency = 1;
 			/*	1  Outline only

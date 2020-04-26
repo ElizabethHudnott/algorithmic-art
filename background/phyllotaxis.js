@@ -363,7 +363,8 @@
 			'spotOffset'
 		],
 		[
-			'start', 'skip', 'stacking'
+			'start', 'skip', 'stacking', 'petalShape', 'angleMode', 'hueMode',
+			'saturationMode', 'lightnessMode', 'opacityMode'
 		]
 	];
 

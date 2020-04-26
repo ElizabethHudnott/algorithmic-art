@@ -117,7 +117,7 @@ const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
 
 /** Parses color values written rgb, rgba, hsl, hsla and 6 and 8 digit hexadecimal notations.
  *	Red, green and blue values must be given using numbers between 0 and 255 and not as percentages.
- *	Alpha values must be written using decimal values between 0 and 1 and not as percentages.
+ *	Alpha values must be written using hexadecimal notation or as decimal values between 0 and 1 and not as percentages.
  *	Hue values must be stated in degrees without units.
  *	Saturation and lightness values must be written as percentages (as per the CSS specification).
  */

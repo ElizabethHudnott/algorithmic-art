@@ -237,20 +237,18 @@ function showBackgroundOptions() {
 		if (type === 'number') {
 			return (endValue - startValue) * tween + startValue;
 		} else if (type === 'string') {
-			let [colorSystem, startComponents] = parseColor(startValue);
-			if (colorSystem !== undefined) {
-				let [, endComponents] = parseColor(endValue);
-				const tweened = new Array(4);
-				for (let i = 0; i < 4; i++) {
-					const componentStart = startComponents[i];
-					const componentEnd = endComponents[i];
-					tweened[i] = (componentEnd - componentStart) * tween + componentStart;
-				}
-				if (colorSystem === 'rgb') {
-					return 'rgba(' + tweened.join(',') + ')';
-				} else {
-					return hsla(...tweened);
-				}
+			const [colorSystem, startComponents] = parseColor(startValue);
+			const [, endComponents] = parseColor(endValue);
+			const tweened = new Array(4);
+			for (let i = 0; i < 4; i++) {
+				const componentStart = startComponents[i];
+				const componentEnd = endComponents[i];
+				tweened[i] = (componentEnd - componentStart) * tween + componentStart;
+			}
+			if (colorSystem === 'rgb') {
+				return 'rgba(' + tweened.join(',') + ')';
+			} else {
+				return hsla(...tweened);
 			}
 		} else if (Array.isArray(startValue)) {
 			const numComponents = startValue.length;
@@ -272,7 +270,7 @@ function showBackgroundOptions() {
 				output[i] = interpolateStep(startValue[i], endValue[i], tween);
 			}
 			return output;
-		} else {
+		} else if (typeof(startValue) === 'number') {
 			let steps = endValue - startValue;
 			if (steps > 0) {
 				steps++;
@@ -280,6 +278,8 @@ function showBackgroundOptions() {
 				steps--;
 			}
 			return Math.floor(steps * tween + startValue);
+		} else {
+			return tween < 0.5 ? startValue : endValue;
 		}
 	}
 

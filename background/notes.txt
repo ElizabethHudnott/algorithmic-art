@@ -7,6 +7,8 @@ Static image rotation for non-animatable sketches
 Ability to animate boolean values, string values?
 Ability to animate image parameters
 Video sizing
+	Resolutions: 360p, 480p, 720p, 1080p, 2160p
+	Pad vs extend
 Add directionality to rotation
 Ability to animate sketches that use random numbers
 Gallery
@@ -16,6 +18,7 @@ Ability to incorporate video data
 Existing Sketches
 -----------------
 Phyllotaxis
+	Animation bug: circles spontaneously appearing
 	Mirrored radial colour transitions
 	Fade hue through black or white
 	Hue rotation of images

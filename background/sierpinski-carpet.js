@@ -210,7 +210,8 @@
 			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities'
 		],
 		[
-			'maxDepth', 'patternDepth', 'patternLocations', 'centreEmphasis'
+			'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
+			'patternedCentre', 'centreEmphasis', 'bipartite'
 		]
 	];
 

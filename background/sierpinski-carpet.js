@@ -100,7 +100,7 @@
 
 			for (let i = 0; i < opacitySliders.length; i++) {
 				opacitySliders[i].addEventListener('input', changeColor(i, 1));
-				opacitySliders[i].addEventListener('mouseup', fullRedraw);
+				opacitySliders[i].addEventListener('pointerup', fullRedraw);
 				opacitySliders[i].addEventListener('keyup', fullRedraw);
 			};
 
@@ -122,7 +122,7 @@
 				me.fgSpacingFraction = parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
 			});
-			fgSpacingSlider.addEventListener('mouseup', fullRedraw);
+			fgSpacingSlider.addEventListener('pointerup', fullRedraw);
 			fgSpacingSlider.addEventListener('keyup', fullRedraw);
 
 			const tlxCornerSlider = optionsDoc.getElementById('carpet-tlx-corner');
@@ -130,7 +130,7 @@
 				me.topLeftCornerX = parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
 			});
-			tlxCornerSlider.addEventListener('mouseup', fullRedraw);
+			tlxCornerSlider.addEventListener('pointerup', fullRedraw);
 			tlxCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const tlyCornerSlider = optionsDoc.getElementById('carpet-tly-corner');
@@ -138,7 +138,7 @@
 				me.topLeftCornerY = parseFloat(this.max) - parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
 			});
-			tlyCornerSlider.addEventListener('mouseup', fullRedraw);
+			tlyCornerSlider.addEventListener('pointerup', fullRedraw);
 			tlyCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const llCornerSlider = optionsDoc.getElementById('carpet-ll-corner');
@@ -146,7 +146,7 @@
 				me.lowerLeftCorner = parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
 			});
-			llCornerSlider.addEventListener('mouseup', fullRedraw);
+			llCornerSlider.addEventListener('pointerup', fullRedraw);
 			llCornerSlider.addEventListener('keyup', fullRedraw);
 
 			const lrCornerSlider = optionsDoc.getElementById('carpet-lr-corner');
@@ -154,7 +154,7 @@
 				me.lowerRightCorner = parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
 			});
-			lrCornerSlider.addEventListener('mouseup', fullRedraw);
+			lrCornerSlider.addEventListener('pointerup', fullRedraw);
 			lrCornerSlider.addEventListener('keyup', fullRedraw);
 
 			return optionsDoc;

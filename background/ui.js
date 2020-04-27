@@ -426,7 +426,7 @@ function showBackgroundOptions() {
 	switchBackgroundGenerator(firstGenName);
 
 	let mouseZone;
-	canvas.addEventListener('mousemove', function (event) {
+	function checkMouseZone(event) {
 		const x = event.clientX;
 		const y = event.clientY;
 		if (x < signatureWidth && y > canvas.height - signatureHeight) {
@@ -438,7 +438,9 @@ function showBackgroundOptions() {
 		} else if (mouseZone !== '') {
 			mouseZone = '';
 		}
-	});
+	}
+	canvas.addEventListener('pointermove', checkMouseZone);
+	canvas.addEventListener('click', checkMouseZone);
 
 	authorForm.addEventListener('submit', function (event) {
 		event.preventDefault();
@@ -576,7 +578,7 @@ function showBackgroundOptions() {
 		progressiveBackgroundGen(bgGenerator, 0);
 	}
 
-	animPositionSlider.addEventListener('mouseup', syncAndDraw);
+	animPositionSlider.addEventListener('pointerup', syncAndDraw);
 	animPositionSlider.addEventListener('keyup', syncAndDraw);
 
 	document.getElementById('anim-length').addEventListener('input', function (event) {
@@ -718,18 +720,18 @@ function showBackgroundOptions() {
 	modal.style.left = Math.max(Math.round(window.innerWidth - 508), 0) + 'px';
 	let modalDrag;
 
-	modalHeader.addEventListener('mousedown', function (event) {
+	modalHeader.addEventListener('pointerdown', function (event) {
 		const target = event.target;
 		if (target === this || target.tagName === 'H5') {
 			modalDrag = [event.offsetX, event.offsetY];
 		}
 	});
 
-	modalHeader.addEventListener('mouseup', function (event) {
+	modalHeader.addEventListener('pointerup', function (event) {
 		modalDrag = undefined;
 	});
 
-	window.addEventListener('mousemove', function (event) {
+	window.addEventListener('pointermove', function (event) {
 		if (modalDrag !== undefined) {
 			modal.children[0].classList.remove('modal-dialog-centered');
 			modal.style.left = Math.round(event.clientX - modalDrag[0]) + 'px';

@@ -32,7 +32,7 @@
 				me.angle = parseFloat(this.value) * TWO_PI;
 				progressiveBackgroundGen(me, 1);
 			});
-			angleSlider.addEventListener('mouseup', fullRedraw);
+			angleSlider.addEventListener('pointerup', fullRedraw);
 			angleSlider.addEventListener('keyup', fullRedraw);
 
 			optionsDoc.getElementById('phyllotaxis-spread').addEventListener('input', function (event) {
@@ -160,7 +160,7 @@
 				me.hueMin = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			hueMinInput.addEventListener('mouseup', fullRecolor);
+			hueMinInput.addEventListener('pointerup', fullRecolor);
 			hueMinInput.addEventListener('keyup', fullRecolor);
 
 			const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
@@ -168,7 +168,7 @@
 				me.hueMax = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			hueMaxInput.addEventListener('mouseup', fullRecolor);
+			hueMaxInput.addEventListener('pointerup', fullRecolor);
 			hueMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
@@ -182,7 +182,7 @@
 				me.saturationMin = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			saturationMinInput.addEventListener('mouseup', fullRecolor);
+			saturationMinInput.addEventListener('pointerup', fullRecolor);
 			saturationMinInput.addEventListener('keyup', fullRecolor);
 
 			const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
@@ -190,7 +190,7 @@
 				me.saturationMax = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			saturationMaxInput.addEventListener('mouseup', fullRecolor);
+			saturationMaxInput.addEventListener('pointerup', fullRecolor);
 			saturationMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
@@ -204,7 +204,7 @@
 				me.lightnessMin = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			lightnessMinInput.addEventListener('mouseup', fullRecolor);
+			lightnessMinInput.addEventListener('pointerup', fullRecolor);
 			lightnessMinInput.addEventListener('keyup', fullRecolor);
 
 			const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
@@ -212,7 +212,7 @@
 				me.lightnessMax = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			lightnessMaxInput.addEventListener('mouseup', fullRecolor);
+			lightnessMaxInput.addEventListener('pointerup', fullRecolor);
 			lightnessMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
@@ -226,7 +226,7 @@
 				me.opacityMin = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			opacityMinInput.addEventListener('mouseup', fullRecolor);
+			opacityMinInput.addEventListener('pointerup', fullRecolor);
 			opacityMinInput.addEventListener('keyup', fullRecolor);
 
 			const opacityMaxInput = optionsDoc.getElementById('phyllotaxis-opacity-max');
@@ -234,7 +234,7 @@
 				me.opacityMax = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			opacityMaxInput.addEventListener('mouseup', fullRecolor);
+			opacityMaxInput.addEventListener('pointerup', fullRecolor);
 			opacityMaxInput.addEventListener('keyup', fullRecolor);
 
 			optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
@@ -248,7 +248,7 @@
 				me.lighting = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			lightingInput.addEventListener('mouseup', fullRecolor);
+			lightingInput.addEventListener('pointerup', fullRecolor);
 			lightingInput.addEventListener('keyup', fullRecolor);
 
 			const contrastInput = optionsDoc.getElementById('phyllotaxis-contrast');
@@ -256,7 +256,7 @@
 				me.contrast = Math.sqrt(parseFloat(this.value));
 				progressiveBackgroundGen(me, 3);
 			});
-			contrastInput.addEventListener('mouseup', fullRecolor);
+			contrastInput.addEventListener('pointerup', fullRecolor);
 			contrastInput.addEventListener('keyup', fullRecolor);
 
 			const shadowAngleInput = optionsDoc.getElementById('phyllotaxis-shadow-angle');
@@ -264,7 +264,7 @@
 				me.shadowAngle = (parseFloat(this.value) - 0.5) * Math.PI;
 				progressiveBackgroundGen(me, 3);
 			});
-			shadowAngleInput.addEventListener('mouseup', fullRecolor);
+			shadowAngleInput.addEventListener('pointerup', fullRecolor);
 			shadowAngleInput.addEventListener('keyup', fullRecolor);
 
 			const shadowBlurInput = optionsDoc.getElementById('phyllotaxis-shadow-blur');
@@ -275,7 +275,7 @@
 					progressiveBackgroundGen(me, 3);
 				}
 			});
-			shadowBlurInput.addEventListener('mouseup', fullRecolor);
+			shadowBlurInput.addEventListener('pointerup', fullRecolor);
 			shadowBlurInput.addEventListener('keyup', fullRecolor);
 
 			const shadowOffsetInput = optionsDoc.getElementById('phyllotaxis-shadow-offset');
@@ -283,7 +283,7 @@
 				me.shadowOffset = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			shadowOffsetInput.addEventListener('mouseup', fullRecolor);
+			shadowOffsetInput.addEventListener('pointerup', fullRecolor);
 			shadowOffsetInput.addEventListener('keyup', fullRecolor);
 
 			const spotOffsetInput = optionsDoc.getElementById('phyllotaxis-spot-offset');
@@ -291,7 +291,7 @@
 				me.spotOffset = parseFloat(this.value);
 				progressiveBackgroundGen(me, 3);
 			});
-			spotOffsetInput.addEventListener('mouseup', fullRecolor);
+			spotOffsetInput.addEventListener('pointerup', fullRecolor);
 			spotOffsetInput.addEventListener('keyup', fullRecolor);
 
 			const shadowColorInput = optionsDoc.getElementById('phyllotaxis-shadow-color');
@@ -300,7 +300,7 @@
 				me.shadowColor = rgba(shade, shade, shade, 1);
 				progressiveBackgroundGen(me, 3);
 			});
-			shadowColorInput.addEventListener('mouseup', fullRecolor);
+			shadowColorInput.addEventListener('pointerup', fullRecolor);
 			shadowColorInput.addEventListener('keyup', fullRecolor);
 
 			return optionsDoc;

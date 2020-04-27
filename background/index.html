@@ -54,14 +54,14 @@
 	</div>
 </form>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 0; right: 5px; z-index: 1;" id="background-gen-toolbar">
-	<div class="mt-auto mb-1 mr-2">
+<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 0; right: 5px; z-index: 1" id="background-gen-toolbar">
+	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
 
 	<div class="dropdown">
-		<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Change background generator">
-			<img src="../img/module.png" alt="Pattern">
+		<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose another sketch">
+			<img src="../img/module.png" alt="Sketch">
 		</button>
 		<div class="dropdown-menu p-0 emphasize-active" aria-labelledby="btn-generator">
 			<div id="generators" class="btn-group-toggle p-0 bg-white opaque" data-toggle="buttons">
@@ -80,11 +80,11 @@
 			</div>
 		</div>
 	</div>
-	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" title="Set options">
-		<img src="../img/gear_in.png" alt="Options">
+	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" data-focus="false" title="Change parameters">
+		<img src="../img/gear_in.png" alt="Parameters">
 	</button>
-	<button type="button" class="btn btn-light" id="btn-generate-background" title="Generate new background">
-		<img src="../img/brick.png" alt="Generate">
+	<button type="button" class="btn btn-light" id="btn-generate-background" title="Build new background">
+		<img src="../img/brick.png" alt="Build">
 	</button>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls">
 		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
@@ -125,7 +125,7 @@
  			</form>
  		</div>
   	</div>
-	<button type="button" class="btn btn-light" id="btn-video" title="Render video" data-toggle="modal" data-target="#video-modal">
+	<button type="button" class="btn btn-light" id="btn-video" title="Create video" data-toggle="modal" data-target="#video-modal">
 		<img src="../img/film.png" alt="Video">
 	</button>
   	<a class="btn btn-light" href="#" id="btn-download" role="button" title="Download picture">

@@ -3,6 +3,8 @@ Environment
 -----------
 Help & credits button
 Option to export an image with or without transparency
+Responsiveness issues
+	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
 Ability to animate image parameters
 Video sizing

@@ -30,7 +30,7 @@
 		this.title = 'Copy Machine';
 		this.hasRandomness = true;
 
-		this.depth = 2;
+		this.depth = 5;
 		this.sizes = [300, 300, 300];
 		const renderings = [
 			new TextRendering('T'),
@@ -41,11 +41,21 @@
 		renderings[1].fillStyle = '#000080';
 		renderings[2].fillStyle = '#800000';
 
-		this.rotations = [0, HALF_PI, 3 * HALF_PI];
-		this.scalingsX = [0.7, 0.5, 0.5];
-		this.scalingsY = [0.5, 0.5, 0.5];
-		this.translationsX = [0, 20, 0];
-		this.translationsY = [220, 120, 130];
+		this.rotation = [0, HALF_PI, 3 * HALF_PI];
+		this.scaleX = [0.7, 0.5, 0.5];
+		this.scaleY = [0.5, 0.5, 0.5];
+		this.translationX = [
+			[0, 20, 0],
+			[0, 20, 0],
+			[0, 20, 0],
+		];
+		this.translationY = [
+			[230, 130, 140],
+			[220, 140, 130],
+			[220, 140, 130],
+		];
+		this.shearX = [0.1, 0.1, 0.1];
+		this.shearY = [0, 0, 0];
 
 	}
 
@@ -57,9 +67,15 @@
 			depth++;
 			for (let i = 0; i < this.renderings.length; i++) {
 				context.save();
-				context.rotate(this.rotations[i]);
-				context.translate(this.translationsX[i], -this.translationsY[i]);
-				context.scale(this.scalingsX[i], this.scalingsY[i]);
+				context.rotate(this.rotation[i]);
+				context.translate(this.translationX[shapeNum][i], -this.translationY[shapeNum][i]);
+				context.transform(
+					this.scaleX[i],
+					this.shearY[i],
+					-this.shearX[i],
+					this.scaleY[i],
+					0, 0
+				);
 				this.draw(context, i, depth);
 				context.restore();
 			}

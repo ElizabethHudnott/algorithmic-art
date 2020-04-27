@@ -4,13 +4,12 @@ Environment
 Help & credits button
 Option to export an image with or without transparency
 Static image rotation for non-animatable sketches
-Ability to animate boolean values, string values?
 Ability to animate image parameters
 Video sizing
-	Resolutions: 360p, 480p, 720p, 1080p, 2160p
 	Pad vs extend
 Add directionality to rotation
 Ability to animate sketches that use random numbers
+Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
 Ability to incorporate video data
 

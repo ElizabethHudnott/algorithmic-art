@@ -115,6 +115,7 @@ function showBackgroundOptions() {
 	imageUpload.removeAttribute('hidden');
 
 	const animPositionSlider = document.getElementById('anim-position');
+	const videoResolutionInput = document.getElementById('video-resolution');
 
 	class FrameData {
 		constructor(generator, rotation, backgroundElement) {
@@ -283,7 +284,7 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function renderFrame(context, tween, paintBackground, preview) {
+	function renderFrame(context, width, height, tween, paintBackground, preview) {
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
 			bgGenerator[property] = interpolateValue(startValue, endValue, tween);
@@ -296,9 +297,6 @@ function showBackgroundOptions() {
 		const rotation = interpolateValue(startFrame.rotation, endFrame.rotation + TWO_PI * fullRotations, tween);
 		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween);
 
-		const canvas = context.canvas;
-		const width = canvas.width;
-		const height = canvas.height;
 		context.restore();
 		if (paintBackground) {
 			context.fillStyle = backgroundColor;
@@ -324,9 +322,8 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function animate(canvas, startTween, length, capturer) {
+	function animate(context, width, height, startTween, length, capturer) {
 		const paintBackground = capturer !== undefined;
-		const context = canvas.getContext('2d');
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
 			const indicator = document.getElementById('recording-indicator');
@@ -345,10 +342,10 @@ function showBackgroundOptions() {
 				if (newAnimController.status === 'aborted') {
 					return;
 				}
-				renderFrame(context, tween, paintBackground, 0);
+				renderFrame(context, width, height, tween, paintBackground, 0);
 
 				if (capturer) {
-					capturer.capture(canvas);
+					capturer.capture(context.canvas);
 					let percent = (tween - startTween) / (1 - startTween) * 100;
 					progressBar.style.width = percent + '%';
 					percent = Math.trunc(percent);
@@ -370,7 +367,7 @@ function showBackgroundOptions() {
 		return newAnimController;
 	}
 
-	function captureVideo(width, height, startTween, length, properties) {
+	function captureVideo(context, width, height, startTween, length, properties) {
 		progressBar.style.width = '0';
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
@@ -382,12 +379,8 @@ function showBackgroundOptions() {
 		renderButton.disabled = true;
 		stopButton.disabled = false;
 
-		const captureCanvas = document.createElement('canvas');
-		captureCanvas.width = width;
-		captureCanvas.height = height;
-
 		const capturer = new CCapture(properties);
-		animController = animate(captureCanvas, startTween, length, capturer);
+		animController = animate(context, width, height, startTween, length, capturer);
 		function reset() {
 			stopButton.disabled = true;
 			capturer.stop();
@@ -548,7 +541,7 @@ function showBackgroundOptions() {
 				this.title = 'Stop animation';
 				successAlert.alert('close');
 				errorAlert.alert('close');
-				animController = animate(canvas, 0, length * 1000);
+				animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, 0, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
 			} else {
@@ -566,7 +559,7 @@ function showBackgroundOptions() {
 
 	animPositionSlider.addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
-		renderFrame(canvas.getContext('2d'), tween, false, 1);
+		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, false, 1);
 		updateAnimPositionReadout(tween);
 	});
 
@@ -611,6 +604,18 @@ function showBackgroundOptions() {
 	$('#anim-opts-modal').on('show.bs.modal', hideConfig);
 	$('#video-modal').on('show.bs.modal', hideConfig);
 
+	{
+		const currentResStr = screen.width + 'x' + screen.height;
+		let currentResOption = videoResolutionInput.querySelector('option[value="' + currentResStr +'"]');
+		if (currentResOption === null) {
+			currentResOption = document.createElement('OPTION');
+			currentResOption.value = currentResStr;
+			videoResolutionInput.appendChild(currentResOption);
+		}
+		currentResOption.innerHTML = 'Full Screen (' + screen.height + 'p)';
+		currentResOption.selected = true;
+	}
+
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
 		let errorMsg = '';
 		if (startFrame === endFrame) {
@@ -634,6 +639,7 @@ function showBackgroundOptions() {
 		}
 
 		if (errorMsg === '') {
+
 			videoErrorAlert.alert('close');
 			const properties = {
 				framerate: framerate,
@@ -644,12 +650,26 @@ function showBackgroundOptions() {
 				workersPath: '../lib/'
 			};
 			const startTween = startTime / length;
-			captureVideo(canvas.width, canvas.height, startTween, length * 1000, properties);
+
+			const resolutionStr = videoResolutionInput.value;
+			const videoWidth = parseInt(resolutionStr);
+			const videoHeight = parseInt(resolutionStr.slice(resolutionStr.indexOf('x') + 1));
+			const captureCanvas = document.createElement('canvas');
+			captureCanvas.width = videoWidth;
+			captureCanvas.height = videoHeight;
+			const context = captureCanvas.getContext('2d');
+			const scale = videoHeight / screen.height;
+			context.scale(scale, scale);
+			context.save();
+			captureVideo(context, videoWidth / scale, screen.height, startTween, length * 1000, properties);
+
 		} else {
+
 			const element = videoErrorAlert.get(0);
 			element.innerHTML = errorMsg;
 			element.classList.add('show');
 			document.getElementById('video-modal-body').appendChild(element);
+
 		}
 	});
 

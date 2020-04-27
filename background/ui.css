@@ -45,6 +45,10 @@ button[disabled], input[type=color][disabled] {
 	top: 0.5em;
 }
 
+.w-60 {
+	width: 60% !important;
+}
+
 .emphasize-active .active {
 	font-weight: bold;
 }

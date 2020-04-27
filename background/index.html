@@ -83,6 +83,9 @@
 	<button type="button" class="btn btn-light" id="btn-background-gen-options" data-toggle="modal" data-target="#background-gen-modal" title="Set options">
 		<img src="../img/gear_in.png" alt="Options">
 	</button>
+	<button type="button" class="btn btn-light" id="btn-generate-background" title="Generate new background">
+		<img src="../img/brick.png" alt="Generate">
+	</button>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls">
 		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
 			<img src="../img/control_play_blue.png" alt="Play">
@@ -128,9 +131,6 @@
   	<a class="btn btn-light" href="#" id="btn-download" role="button" title="Download picture">
   		<img src="../img/picture_save.png" alt="Download">
   	</a>
-	<button type="button" class="btn btn-light" id="btn-generate-background" title="Generate new background">
-		<img src="../img/brick.png" alt="Generate">
-	</button>
 </div>
 
 <div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false" style="z-index: 0">
@@ -225,10 +225,24 @@
 			<div class="modal-body" id="video-modal-body">
 				<div class="form-row form-group">
 					<div class="col-1"></div>
+					<label class="col-3 col-form-label col-form-label-sm" for="video-resolution">
+						Resolution
+					</label>
+					<div class="col-5">
+						<select class="form-control-sm w-100" id="video-resolution">
+							<option value="640x360">360p</option>
+							<option value="854x480">480p</option>
+							<option value="1280x720">720p</option>
+							<option value="1920x1080">1080p</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-1"></div>
 					<label class="col-3 col-form-label col-form-label-sm" for="video-framerate">
 						Frame Rate
 					</label>
-					<div class="col-4">
+					<div class="col-5">
 						<div class="input-group input-group-sm">
 							<input type="number" min="1" value="50" class="form-control" id="video-framerate" list="framerate-list" aria-describedby="framerate-units">
 							<datalist id="framerate-list">
@@ -247,8 +261,8 @@
 								<option>2</option>
 								<option>1</option>
 							</datalist>
-							<div class="input-group-append">
-								<span class="input-group-text" id="framerate-units">FPS</span>
+							<div class="input-group-append w-60">
+								<span class="input-group-text w-100" id="framerate-units">FPS</span>
 							</div>
 						</div>
 					</div>
@@ -258,7 +272,7 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-format">
 						Output
 					</label>
-					<div class="col-4">
+					<div class="col-5">
 						<select class="form-control form-control-sm" id="video-format">
 							<option value="webm" selected>WebM Video</option>
 							<option value="gif">Animated GIF</option>
@@ -284,11 +298,11 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="motion-blur">
 						Motion Blur
 					</label>
-					<div class="col-4">
+					<div class="col-5">
 						<div class="input-group input-group-sm">
 							<input type="number" min="0" value="0" class="form-control" id="motion-blur" aria-describedby="motion-blur-units">
-							<div class="input-group-append">
-								<span class="input-group-text" id="motion-blur-units">frames</span>
+							<div class="input-group-append w-60">
+								<span class="input-group-text w-100" id="motion-blur-units">frames</span>
 							</div>
 						</div>
 					</div>
@@ -298,11 +312,11 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-start">
 						Start
 					</label>
-					<div class="col-4">
+					<div class="col-5">
 						<div class="input-group input-group-sm">
 							<input type="number" min="0" value="0" class="form-control" placeholder="seconds" id="video-start" aria-describedby="video-start-units">
-							<div class="input-group-append">
-								<span class="input-group-text" id="video-start-units">s</span>
+							<div class="input-group-append w-60">
+								<span class="input-group-text w-100" id="video-start-units">s</span>
 							</div>
 						</div>
 					</div>

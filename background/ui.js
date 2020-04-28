@@ -41,8 +41,9 @@ let signatureWidth, signatureHeight;
 let author = '';
 
 function drawSignature(context, backgroundColor) {
-	context.setTransform(1, 0, 0, 1, 0, 0);
-	context.globalCompositeOperation = 'source-over';
+	context.restore();
+	context.save();
+	context.shadowColor = 'transparent';
 	context.font = signatureFont;
 	context.textAlign = 'left';
 	context.textBaseline = 'bottom';
@@ -345,16 +346,16 @@ function showBackgroundOptions() {
 				const time = performance.now();
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
-					newAnimController.setup(render, reject, time);
-					beginTime = time;
+					beginTime = time - newAnimController.progress * length;
+					newAnimController.setup(render, reject, beginTime);
 				}
 
 				const tween = Math.min(startTween + (time - beginTime) / length, 1);
-				newAnimController.progress = tween;
 				if (newAnimController.status === 'aborted') {
 					return;
 				}
 				renderFrame(context, width, height, tween, paintBackground, 0);
+				newAnimController.progress = tween;
 
 				if (capturer) {
 					capturer.capture(context.canvas);
@@ -366,6 +367,8 @@ function showBackgroundOptions() {
 					framesRendered++;
 					const iconFile = framesRendered % 2 === 0 ? 'record.png' : 'draw_ellipse.png';
 					indicator.src = '../img/' + iconFile;
+				} else {
+					animPositionSlider.value = tween;
 				}
 				if (tween < 1) {
 					requestAnimationFrame(render);
@@ -373,6 +376,7 @@ function showBackgroundOptions() {
 					newAnimController.finish(resolve);
 				}
 			};
+			newAnimController.progress = 0;
 			newAnimController.start = render;
 		});
 		newAnimController.promise = promise;
@@ -501,9 +505,8 @@ function showBackgroundOptions() {
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
-		const positionSlider = animPositionSlider
-		positionSlider.value = 0;
-		positionSlider.disabled = false;
+		animPositionSlider.value = 0;
+		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(0);
 		showAlert(successAlert, 'Start frame set.', document.body)
 		videoErrorAlert.alert('close');
@@ -511,9 +514,8 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
 		endFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
-		const positionSlider = animPositionSlider
-		positionSlider.value = 1;
-		positionSlider.disabled = false;
+		animPositionSlider.value = 1;
+		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(1);
 		showAlert(successAlert, 'End frame set.', document.body)
 		videoErrorAlert.alert('close');
@@ -541,9 +543,7 @@ function showBackgroundOptions() {
 		const playStopButton = document.getElementById('btn-play');
 		playStopButton.children[0].src = '../img/control_play_blue.png';
 		playStopButton.title = 'Play animation';
-		const position = animController.progress;
-		animPositionSlider.value = position;
-		updateAnimPositionReadout(position);
+		updateAnimPositionReadout(animController.progress);
 		syncToPosition();
 	}
 
@@ -565,8 +565,12 @@ function showBackgroundOptions() {
 				this.title = 'Stop animation';
 				successAlert.alert('close');
 				errorAlert.alert('close');
+				document.getElementById('anim-position-readout').innerHTML = '';
 				animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, 0, length * 1000);
 				animController.promise = animController.promise.then(animFinished, animFinished);
+				if (document.getElementById('anim-controls').classList.contains('show')) {
+					animController.progress = parseFloat(animPositionSlider.value);
+				}
 				animController.start();
 			} else {
 				errorMsg = 'Invalid animation duration.';
@@ -577,9 +581,10 @@ function showBackgroundOptions() {
 		}
 	});
 
-	document.getElementById('anim-controls').addEventListener('click', function (event) {
-		event.stopPropagation();
-	})
+
+	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
+		return document.activeElement === document.getElementById('btn-anim-controls');
+	});
 
 	animPositionSlider.addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
@@ -591,7 +596,7 @@ function showBackgroundOptions() {
 		const tween = parseFloat(animPositionSlider.value);
 		const startRotation = startFrame.rotation;
 		const endRotation = endFrame.rotation + TWO_PI * fullRotations;
-		bgGeneratorRotation = interpolateValue(startFrame, endRotation, tween);
+		bgGeneratorRotation = interpolateValue(startRotation, endRotation, tween);
 		document.getElementById('background-rotation').value = bgGeneratorRotation / TWO_PI;
 	}
 

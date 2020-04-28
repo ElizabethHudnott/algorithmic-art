@@ -6,6 +6,7 @@ Option to export an image with or without transparency
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
+Hide rotation for circular sketches
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
@@ -14,12 +15,14 @@ Ability to animate sketches that use random numbers
 Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
 Ability to incorporate video data
+	as component image and as background
+Background: color, picture, video or fix current image
 
 
 Existing Sketches
 -----------------
 Phyllotaxis
-	Animation bug: circles spontaneously appearing
+	Continued fractions
 	Mirrored radial colour transitions
 	Fade hue through black or white
 	Hue rotation of images
@@ -29,3 +32,8 @@ Phyllotaxis
 New Sketches
 ------------
 Copy machine
+
+
+spread
+
+spread / r 		spread >= 0

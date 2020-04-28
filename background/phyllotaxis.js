@@ -19,12 +19,37 @@
 				progressiveBackgroundGen(me, 2);
 			}
 
+			const radiusSlider = optionsDoc.getElementById('phyllotaxis-radius');
+
+			optionsDoc.getElementById('phyllotaxis-radius-preset').addEventListener('input', function (event) {
+				const value = this.value;
+				const isCustom = value === 'custom';
+				$(radiusSlider).collapse(isCustom ? 'show' : 'hide');
+				me.radiusPreset = value;
+				if (isCustom) {
+					me.radius = parseFloat(radiusSlider.value);
+				}
+				progressiveBackgroundGen(me, 0);
+			});
+
+			radiusSlider.addEventListener('input', function (event) {
+				me.radius = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			radiusSlider.addEventListener('pointerup', fullRedraw);
+			radiusSlider.addEventListener('keyup', fullRedraw);
+
 			optionsDoc.getElementById('phyllotaxis-max-petals').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 0) {
 					me.maxPetals = value * 1000;
 					progressiveBackgroundGen(me, 0);
 				}
+			});
+
+			optionsDoc.getElementById('phyllotaxis-clipping').addEventListener('input', function (event) {
+				me.clipping = this.checked ? 1 : -1;
+				progressiveBackgroundGen(me, 0);
 			});
 
 			const angleSlider = optionsDoc.getElementById('phyllotaxis-angle-range');
@@ -60,7 +85,7 @@
 			});
 
 			optionsDoc.getElementById('phyllotaxis-start').addEventListener('input', function (event) {
-				const value = parseInt(this.value);
+				const value = parseFloat(this.value);
 				if (value >= 0) {
 					me.start = value;
 					progressiveBackgroundGen(me, 0);
@@ -307,6 +332,9 @@
 		});
 
 		this.points = undefined;
+		this.radiusPreset = 'max';
+		this.radius = 1;
+		this.clipping = -1;
 
 		this.exponent = 0.5;
 		this.angle = TWO_PI * 0.382;
@@ -356,14 +384,14 @@
 
 	Phyllotaxis.prototype.animatable = [
 		[
-			'exponent', 'angle', 'spread', 'scale', 'petalSize',
-			'petalEnlargement', 'maxPetals', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
+			'radius', 'clipping', 'exponent', 'angle', 'spread', 'scale', 'petalSize',
+			'petalEnlargement', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
 			'spotOffset'
 		],
 		[
-			'start', 'skip', 'stacking', 'petalShape', 'angleMode', 'hueMode',
+			'start', 'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode', 'hueMode',
 			'saturationMode', 'lightnessMode', 'opacityMode'
 		]
 	];
@@ -397,15 +425,23 @@
 
 	Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const previewMaxPetals = 1500;
+		const hypotenuse = Math.hypot(canvasWidth, canvasHeight) / 2;
+		let maxR;
+		if (this.radiusPreset === 'custom') {
+			maxR = this.radius * hypotenuse;
+		} else {
+			maxR = Math[this.radiusPreset](canvasWidth, canvasHeight) / 2;
+			this.radius = maxR / hypotenuse;
+		}
 
 		if (preview < 2 || this.points === undefined) {
 			const angle = this.angle;
-			const maxR = Math.max(canvasWidth, canvasHeight) / 2;
 			const exponent = this.exponent;
 			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 			const petalSize = this.petalSize;
 			const petalEnlargement = this.petalEnlargement;
 			const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
+			const clipping = this.clipping;
 
 			this.points = []
 			let n = this.start;
@@ -423,16 +459,15 @@
 				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 			}
 
-			while (numPetals < maxPetals && r + currentPetalSize < maxR) {
+			while (numPetals < maxPetals && r < maxR + clipping * currentPetalSize) {
 				const phi = n * angle;
 				if (numPetals % skip !== skip - 1) {
 					this.points.push(new Petal(r, phi, currentPetalSize));
 				}
 				numPetals++;
-				const inc = n === 0 ? 1 : 1 / (n ** ((1 - this.spread) * exponent));
+				const inc = 1 / ((r / TWO_PI) ** (1 - this.spread));
 				n += inc;
 				r = scale * n ** exponent;
-				let radius
 				if (petalEnlargement >= 0) {
 					currentPetalSize = Math.max(petalSize, petalEnlargement * Math.sqrt(r));
 				} else {
@@ -445,12 +480,12 @@
 		if (numPoints === 0) {
 			return;
 		}
-		const maxR = this.points[numPoints - 1].r
+		const lastCalculatedR = this.points[numPoints - 1].r
 		if (preview >= 3) {
 			numPoints = Math.min(numPoints, previewMaxPetals);
 		}
 		const lastR = this.points[numPoints - 1].r;
-		const zoom = maxR / lastR;
+		const zoom = lastCalculatedR / lastR;
 		const lastRSquared = lastR * lastR;
 		let stacking = this.stacking;
 		if (stacking == 0) {
@@ -480,6 +515,9 @@
 		const opacityVaries = variesRegExp.test(this.opacityMode);
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
+		context.beginPath();
+		context.arc(0, 0, maxR, 0, TWO_PI);
+		context.clip();
 		context.shadowColor = this.shadowColor;
 		context.shadowBlur = this.shadowBlur;
 

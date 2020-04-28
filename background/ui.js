@@ -1,5 +1,18 @@
 'use strict';
 
+let store;
+try {
+	store = window.localStorage;
+	const showWelcome = store.getItem('no-welcome') !== 'true'
+	if (showWelcome) {
+		$('#help-modal').modal('show');
+	} else {
+		document.getElementById('show-welcome').checked = false;
+	}
+} catch (e) {
+	$('#help-modal').modal('show');
+}
+
 const backgroundElement = document.body;
 const backgroundGenerators = new Map();
 let bgGenerator, backgroundRedraw;
@@ -99,7 +112,6 @@ function showBackgroundOptions() {
 	let bgGeneratorName, startFrame, endFrame, animController;
 	let fullRotations = 0;
 
-	const instructions = $('#instructions-alert');
 	const errorAlert = $('#error-alert');
 	const successAlert = $('#success-alert');
 	const videoErrorAlert = $('#video-error');
@@ -425,6 +437,16 @@ function showBackgroundOptions() {
 	}
 	switchBackgroundGenerator(firstGenName);
 
+	if (store !== undefined) {
+		document.getElementById('show-welcome').addEventListener('input', function (event) {
+			try {
+				store.setItem('no-welcome', !this.checked);
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	}
+
 	let mouseZone;
 	function checkMouseZone(event) {
 		const x = event.clientX;
@@ -699,16 +721,6 @@ function showBackgroundOptions() {
 
 	// Generate new background button.
 	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
-
-	function removeInstructions() {
-		instructions.alert('close');
-	}
-
-	document.querySelectorAll('#background-gen-toolbar button').forEach(function (item) {
-		item.addEventListener('click', removeInstructions);
-	})
-
-	setTimeout(removeInstructions, 10000);
 
 	// After resizing, generate a new background to fit the new window size.
 	let resizeTimer;

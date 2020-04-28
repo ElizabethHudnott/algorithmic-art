@@ -1,7 +1,7 @@
 
 Environment
 -----------
-Help & credits button
+Add credits
 Option to export an image with or without transparency
 Responsiveness issues
 	toolbar too wide, modal too high

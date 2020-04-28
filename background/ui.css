@@ -64,3 +64,7 @@ button[disabled], input[type=color][disabled] {
 #background-gen-modal .modal-dialog {
 	margin-top: 0;
 }
+
+#help-modal p {
+	line-height: 1.8;
+}

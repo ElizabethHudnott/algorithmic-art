@@ -84,6 +84,14 @@
 				}
 			});
 
+			optionsDoc.getElementById('phyllotaxis-aspect-ratio').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.aspectRatio = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
 			optionsDoc.getElementById('phyllotaxis-start').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (value >= 0) {
@@ -135,6 +143,19 @@
 				}
 			});
 
+			optionsDoc.getElementById('phyllotaxis-petal-stretch').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.petalStretch = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('phyllotaxis-petal-rotation').addEventListener('input', function (event) {
+				me.petalRotation = parseFloat(this.value) * Math.PI;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			function setStacking(event) {
 				me.stacking = parseInt(this.value);
 				progressiveBackgroundGen(me, 0);
@@ -145,7 +166,7 @@
 			});
 
 			angleModeSelect.addEventListener('input', function (event) {
-				const value = parseFloat(this.value);
+				const value = this.value;
 				const field = colorFieldSelect.value;
 				if (field === 'all') {
 					me.angleMode.fill(value);
@@ -158,7 +179,7 @@
 			colorFieldSelect.addEventListener('input', function (event) {
 				const field = this.value;
 				if (field === 'all') {
-					me.angleMode.fill(parseInt(angleModeSelect.value));
+					me.angleMode.fill(angleModeSelect.value);
 					colorModInput.value = '';
 				} else {
 					const fieldNum = parseInt(field);
@@ -334,6 +355,7 @@
 		this.points = undefined;
 		this.radiusPreset = 'max';
 		this.radius = 1;
+		this.aspectRatio = 1;
 		this.clipping = -1;
 
 		this.exponent = 0.5;
@@ -343,13 +365,15 @@
 		this.start = 1;
 		this.skip = 0;
 		this.stacking = 0;
-		this.petalShape = 'c';
+		this.petalShape = 'e';
 		this.petalSize = 15;
 		this.petalEnlargement = 0;
+		this.petalStretch = 1;
+		this.petalRotation = 0;
 		this.maxPetals = 10000;
 
 		this.angleMode = new Array(4);
-		this.angleMode.fill(0);
+		this.angleMode.fill('t');
 		this.colorMod = new Array(4);
 		this.colorMod.fill(256);
 
@@ -384,8 +408,9 @@
 
 	Phyllotaxis.prototype.animatable = [
 		[
-			'radius', 'clipping', 'exponent', 'angle', 'spread', 'scale', 'petalSize',
-			'petalEnlargement', 'colorMod', 'hueMin', 'hueMax', 'saturationMin',
+			'radius', 'aspectRatio', 'clipping', 'exponent', 'angle', 'spread', 'scale',
+			'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
+			'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
 			'spotOffset'
@@ -409,13 +434,13 @@
 	Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, min) {
 		let value;
 		switch (this.angleMode[property]) {
-		case 0:
+		case 't': 	// Theta
 			value = degrees;
 			break;
-		case 1:
+		case 'n': 	// n
 			value = n + this.start;
 			break;
-		case 2:
+		case 'd': 	// Difference
 			value = degrees - r;
 			break;
 		}
@@ -425,20 +450,23 @@
 
 	Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const previewMaxPetals = 1500;
-		const hypotenuse = Math.hypot(canvasWidth, canvasHeight) / 2;
+		const aspectRatio = this.aspectRatio;
+		const hypotenuse = Math.hypot(canvasWidth / aspectRatio, canvasHeight) / 2;
 		let maxR;
 		if (this.radiusPreset === 'custom') {
 			maxR = this.radius * hypotenuse;
 		} else {
-			maxR = Math[this.radiusPreset](canvasWidth, canvasHeight) / 2;
+			maxR = Math[this.radiusPreset](canvasWidth / aspectRatio, canvasHeight) / 2;
 			this.radius = maxR / hypotenuse;
 		}
+
+		const petalStretch = this.petalStretch;
 
 		if (preview < 2 || this.points === undefined) {
 			const angle = this.angle;
 			const exponent = this.exponent;
 			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
-			const petalSize = this.petalSize;
+			const petalSize = this.petalSize * (this.petalShape === 'i' ? 2 : 1);
 			const petalEnlargement = this.petalEnlargement;
 			const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 			const clipping = this.clipping;
@@ -459,7 +487,7 @@
 				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 			}
 
-			while (numPetals < maxPetals && r < maxR + clipping * currentPetalSize) {
+			while (numPetals < maxPetals && r < maxR + clipping * currentPetalSize * petalStretch) {
 				const phi = n * angle;
 				if (numPetals % skip !== skip - 1) {
 					this.points.push(new Petal(r, phi, currentPetalSize));
@@ -516,7 +544,7 @@
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		context.beginPath();
-		context.arc(0, 0, maxR, 0, TWO_PI);
+		context.ellipse(0, 0, maxR * aspectRatio, maxR, 0, 0, TWO_PI);
 		context.clip();
 		context.shadowColor = this.shadowColor;
 		context.shadowBlur = this.shadowBlur;
@@ -525,7 +553,7 @@
 			const point = this.points[i];
 			const r = point.r;
 			const theta = point.theta;
-			const x = zoom * r * Math.cos(theta);
+			const x = zoom * r * aspectRatio * Math.cos(theta);
 			const y = zoom * r * Math.sin(theta);
 			const petalSize = zoom * point.radius;
 
@@ -591,24 +619,16 @@
 			}
 
 			switch (this.petalShape) {
-			case 'c':	// Circle
+			case 'e':	// Ellipse
 				context.beginPath();
-				context.arc(x, y, petalSize, 0, TWO_PI);
+				context.ellipse(x, y, petalSize * petalStretch, petalSize, theta + this.petalRotation, 0, TWO_PI);
 				context.fill();
 				break;
 			case 'i':	// Image
-				let imageTranslateX, imageTranslateY, imageResizedWidth, imageResizedHeight;
-				if (imageWidth >= imageHeight) {
-					imageResizedHeight = 2 * petalSize;
-					imageResizedWidth = imageResizedHeight * imageAspect;
-					imageTranslateX = imageResizedWidth - petalSize;
-					imageTranslateY = imageResizedHeight / 2;
-				} else {
-					imageResizedWidth = 2 * petalSize;
-					imageResizedHeight = imageResizedWidth / imageAspect;
-					imageTranslateX = imageResizedWidth / 2;
-					imageTranslateY = imageResizedHeight - petalSize;
-				}
+				const imageResizedHeight = petalSize * petalStretch;
+				const imageResizedWidth = petalSize * imageAspect;
+				const imageTranslateX = imageResizedWidth - petalSize / 2;
+				const imageTranslateY = imageResizedHeight / 2;
 				let filter = '';
 				if (applyFilters) {
 					if (saturationVaries) {
@@ -624,7 +644,7 @@
 				}
 				context.save();
 				context.translate(x, y);
-				context.rotate(theta + HALF_PI);
+				context.rotate(theta + HALF_PI + this.petalRotation);
 				context.translate(-imageTranslateX, -imageTranslateY);
 				if (filter !== '') {
 					context.filter = filter;

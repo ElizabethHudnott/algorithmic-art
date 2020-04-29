@@ -502,6 +502,9 @@ function showBackgroundOptions() {
 		drawSignature(canvas.getContext('2d'));
 	});
 
+	// Generate new background button.
+	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
+
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
 		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
@@ -720,12 +723,25 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('btn-download').addEventListener('click', function (event) {
-		this.download = generateFilename() + '.png';
-		this.href = canvas.toDataURL();
-	});
+		const downloadModal = document.getElementById('save-pic-modal');
+		const background = queryChecked(downloadModal, 'paper-type');
+		let saveCanvas;
+		if (background.value === 'transparent') {
+			saveCanvas = canvas;
+		} else {
+			saveCanvas = document.createElement('CANVAS');
+			saveCanvas.width = canvas.width;
+			saveCanvas.height = canvas.height;
+			const saveContext = saveCanvas.getContext('2d');
+			saveContext.fillStyle = backgroundElement.style.backgroundColor;
+			saveContext.fillRect(0, 0, canvas.width, canvas.height);
+			saveContext.drawImage(canvas, 0, 0);
+		}
 
-	// Generate new background button.
-	document.getElementById('btn-generate-background').addEventListener('click', generateBackground);
+		this.download = generateFilename() + '.png';
+		this.href = saveCanvas.toDataURL();
+		$(downloadModal).modal('hide');
+	});
 
 	// After resizing, generate a new background to fit the new window size.
 	let resizeTimer;

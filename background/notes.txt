@@ -2,11 +2,12 @@
 Environment
 -----------
 Add credits
-Option to export an image with or without transparency
+Thumbnail based new dialog
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
 Hide rotation for circular sketches
+Look into using ImageBitmap objects
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
@@ -22,19 +23,18 @@ Background: color, picture, video or fix current image
 Existing Sketches
 -----------------
 Phyllotaxis
-	Continued fractions
+	Ways to choose an angle: Continued fractions?
 	Mirrored radial colour transitions
 	Fade hue through black or white
 	Hue rotation of images
 	Improve performance with images
+	Alternative petal shapes:
+		Squares/Rectangles
+		Polygon: join adjacent points
+		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 
 New Sketches
 ------------
 Copy machine
-
-
-spread
-
-spread / r 		spread >= 0

@@ -118,12 +118,12 @@
  			</form>
  		</div>
   	</div>
-	<button type="button" class="btn btn-light" id="btn-video" title="Create video" data-toggle="modal" data-target="#video-modal">
+	<button type="button" class="btn btn-light" title="Create video" data-toggle="modal" data-target="#video-modal">
 		<img src="../img/film.png" alt="Video">
 	</button>
-  	<a class="btn btn-light" href="#" id="btn-download" role="button" title="Download picture">
-  		<img src="../img/picture_save.png" alt="Download">
-  	</a>
+	<button type="button" class="btn btn-light" title="Download picture" data-toggle="modal" data-target="#save-pic-modal">
+		<img src="../img/picture_save.png" alt="Download">
+	</button>
 	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#help-modal" title="Help">
 		<img src="../img/help_32.png" alt="Help">
 	</button>
@@ -334,7 +334,7 @@
 				<div class="alert alert-danger fade" id="video-error"></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" id="btn-stop-video-render" data-dismiss="modal" disabled>
+				<button type="button" class="btn btn-danger" id="btn-stop-video-render" disabled>
 					Abort
 				</button>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -345,6 +345,40 @@
 				</button>
 			</div>
 		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="save-pic-modal" tabindex="-1" role="dialog" aria-labelledby="save-pic-modal-title" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<form id="export-form" class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="save-pic-modal-title">Download Picture</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body form-row form-group">
+				<div class="col-1"></div>
+				<div class="col-11">
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color" checked>
+						<label class="form-check-label" for="paper-type-color">
+							Include background colour
+						</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent">
+						<label class="form-check-label" for="paper-type-transparent">
+							Transparent background
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			  	<a class="btn btn-primary" href="#" id="btn-download" role="button">Download</a>
+			</div>
+		</form>
 	</div>
 </div>
 

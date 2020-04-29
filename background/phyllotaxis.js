@@ -495,7 +495,7 @@
 					this.points.push(new Petal(r, phi, currentPetalSize));
 				}
 				numPetals++;
-				const inc = 1 / ((r / TWO_PI) ** (1 - this.spread));
+				const inc = r === 0 ? 1 : 1 / ((r / TWO_PI) ** (1 - this.spread));
 				n += inc;
 				r = scale * n ** exponent;
 				if (petalEnlargement >= 0) {
@@ -642,9 +642,6 @@
 						const brightness = lightness * 2;
 						filter += 'brightness(' + brightness + ') ';
 					}
-					if (opacityVaries) {
-						filter += 'opacity(' + opacity + ') ';
-					}
 				}
 				context.save();
 				context.translate(x, y);
@@ -653,6 +650,7 @@
 				if (filter !== '') {
 					context.filter = filter;
 				}
+				context.globalAlpha = opacity;
 				context.drawImage(bgGeneratorImage, 0, 0, imageResizedWidth, imageResizedHeight);
 				context.restore();
 			}

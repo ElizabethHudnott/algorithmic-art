@@ -525,6 +525,7 @@
 		const imageWidth = bgGeneratorImage.width;
 		const imageHeight = bgGeneratorImage.height;
 		const imageAspect = imageWidth / imageHeight;
+		const fillRadius = this.petalShape === 'r' ? Math.SQRT2 : 1;
 
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
@@ -534,13 +535,15 @@
 		const saturationRange = this.saturationMax - this.saturationMin;
 		const lightnessRange = this.lightnessMax - this.lightnessMin;
 		const opacityRange = this.opacityMax - this.opacityMin;
-		const contrast = this.contrast;
+		const contrast = this.lighting === 1 ? 0 : this.contrast;
 		const shadowOffset = this.shadowOffset * (petalStretch >= 1 ? 1 : petalStretch);
 		const shadowAngle = this.shadowAngle;
-		const cosShadowAngle = Math.cos(shadowAngle);
-		const sinShadowAngle = Math.sin(shadowAngle);
+		let cosShadowAngle = 0, sinShadowAngle = 0;
+		if (shadowOffset > 0) {
+			cosShadowAngle = Math.cos(shadowAngle);
+			sinShadowAngle = Math.sin(shadowAngle);
+		}
 		const spotOffset = this.spotOffset;
-		const hasLightingEffects = shadowOffset > 0 || (contrast > 0 && spotOffset > 0);
 		const applyFilters = preview === 0 || preview === 2;
 		const variesRegExp = /[ar]/;
 		const saturationVaries = variesRegExp.test(this.saturationMode);
@@ -603,41 +606,43 @@
 				break;
 			}
 
-			let spotX = x, spotY = y;
-			if (hasLightingEffects) {
-				const shadowR = petalSize * shadowOffset;
-				context.shadowOffsetX = shadowR * cosShadowAngle;
-				context.shadowOffsetY = shadowR * sinShadowAngle;
-				spotX -= spotOffset * petalSize * cosShadowAngle;
-				spotY -= spotOffset * petalSize * sinShadowAngle;
-			}
+			const petalRotation = theta + HALF_PI + this.petalRotation;
+			const shadowR = petalSize * shadowOffset;
+			context.shadowOffsetX = shadowR * cosShadowAngle;
+			context.shadowOffsetY = shadowR * sinShadowAngle;
+
 			const innerColor = hsla(hue, saturation, lightness, opacity);
 			if (contrast === 0) {
 				context.fillStyle = innerColor;
 			} else {
+				let spotX = 0, spotY = 0;
+				if (spotOffset > 0) {
+					spotX = spotOffset * petalSize * Math.cos(-HALF_PI - shadowAngle - petalRotation);
+					spotY = spotOffset * petalSize * Math.sin(-HALF_PI - shadowAngle - petalRotation);
+				}
+				const gradient = context.createRadialGradient(spotX, spotY, 0, 0, 0, petalSize * fillRadius);
 				const outerColor = hsla(hue, saturation, lightness * (1 - this.contrast), opacity);
-				const gradient = context.createRadialGradient(spotX, spotY, 0, x, y, petalSize);
-				gradient.addColorStop(this.lighting, innerColor);
 				gradient.addColorStop(1, outerColor);
+				gradient.addColorStop(this.lighting, innerColor);
 				context.fillStyle = gradient;
 			}
 
-			const petalLength = petalSize * petalStretch;
 			context.save();
 			context.translate(x, y);
-			context.rotate(theta + HALF_PI + this.petalRotation);
+			context.rotate(petalRotation);
 
 			switch (this.petalShape) {
 			case 'e':	// Ellipse
+				context.scale(1, petalStretch);
 				context.beginPath();
-				context.ellipse(0, 0, petalLength, petalSize, 0, 0, TWO_PI);
+				context.arc(0, 0, petalSize, 0, TWO_PI);
 				context.fill();
 				break;
 			case 'r': // Rectangle
-				context.fillRect(-petalSize, -petalLength, petalSize * 2, petalLength * 2);
+				context.fillRect(-petalSize, -petalSize, petalSize * 2, petalSize * 2);
 				break;
 			case 'i':	// Image
-				const imageResizedHeight = 2 * petalLength;
+				const imageResizedHeight = 2 * petalSize * petalStretch;
 				const imageResizedWidth = 2 * petalSize * imageAspect;
 				let filter = '';
 				if (applyFilters) {
@@ -653,7 +658,7 @@
 					context.filter = filter;
 				}
 				context.globalAlpha = opacity;
-				context.drawImage(bgGeneratorImage, -imageResizedWidth / 2, -petalLength, imageResizedWidth, imageResizedHeight);
+				context.drawImage(bgGeneratorImage, -imageResizedWidth / 2, -imageResizedHeight / 2, imageResizedWidth, imageResizedHeight);
 			}
 			context.restore();
 		}

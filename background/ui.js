@@ -111,7 +111,7 @@ function showBackgroundOptions() {
 	const urlParameters = new URLSearchParams(document.location.search);
 	const backgroundGenOptionsDOM = new Map();
 	let bgGeneratorName, startFrame, endFrame, animController;
-	let fullRotations = 0;
+	let fullRotations = 0, loopAnim = false;
 
 	const errorAlert = $('#error-alert');
 	const successAlert = $('#success-alert');
@@ -246,7 +246,14 @@ function showBackgroundOptions() {
 		});
 	}
 
-	function interpolateValue(startValue, endValue, tween) {
+	function interpolateValue(startValue, endValue, tween, loop) {
+		if (loop) {
+			if (tween > 0.5) {
+				tween = 1 - (tween - 0.5) * 2;
+			} else {
+				tween = tween * 2;
+			}
+		}
 		const type = typeof(startValue);
 		if (type === 'number') {
 			return (endValue - startValue) * tween + startValue;
@@ -268,47 +275,59 @@ function showBackgroundOptions() {
 			const numComponents = startValue.length;
 			const output = new Array(numComponents);
 			for (let i = 0; i < numComponents; i++) {
-				output[i] = interpolateValue(startValue[i], endValue[i], tween);
+				output[i] = interpolateValue(startValue[i], endValue[i], tween, loop);
 			}
 			return output;
 		}
 	}
 
-	function interpolateStep(startValue, endValue, tween) {
-		if (tween === 1 || startValue === endValue) {
+	function interpolateStep(startValue, endValue, tween, loop) {
+		if (!loop && (tween === 1 || startValue === endValue)) {
 			return endValue;
 		} else if (Array.isArray(startValue)) {
 			const numComponents = startValue.length;
 			const output = new Array(numComponents);
 			for (let i = 0; i < numComponents; i++) {
-				output[i] = interpolateStep(startValue[i], endValue[i], tween);
+				output[i] = interpolateStep(startValue[i], endValue[i], tween, loop);
 			}
 			return output;
 		} else if (typeof(startValue) === 'number') {
 			let steps = endValue - startValue;
-			if (steps > 0) {
-				steps++;
+			if (loop) {
+				if (tween <= 0.5) {
+					return Math.floor(steps * tween * 2 + startValue);
+				} else {
+					return Math.floor(steps * (1 - (tween - 0.5) * 2) + startValue);
+				}
 			} else {
-				steps--;
+				if (steps > 0) {
+					steps++;
+				} else {
+					// End value smaller than start value
+					steps--;
+				}
+				return Math.floor(steps * tween + startValue);
 			}
-			return Math.floor(steps * tween + startValue);
 		} else {
 			return tween < 0.5 ? startValue : endValue;
 		}
 	}
 
-	function renderFrame(context, width, height, tween, paintBackground, preview) {
+	function renderFrame(context, width, height, tween, loop, paintBackground, preview) {
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
-			bgGenerator[property] = interpolateValue(startValue, endValue, tween);
+			bgGenerator[property] = interpolateValue(startValue, endValue, tween, loop);
 		}
 		for (let [property, startValue] of startFrame.stepped.entries()) {
 			let endValue = endFrame.stepped.get(property);
-			bgGenerator[property] = interpolateStep(startValue, endValue, tween);
+			bgGenerator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
 
-		const rotation = interpolateValue(startFrame.rotation, endFrame.rotation + TWO_PI * fullRotations, tween);
-		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween);
+		const startRotation = startFrame.rotation;
+		const endRotation = endFrame.rotation;
+		const loopedRotation = loop && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
+		const rotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
+		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween, loop);
 
 		context.restore();
 		if (paintBackground) {
@@ -335,7 +354,7 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function animate(context, width, height, startTween, length, capturer) {
+	function animate(context, width, height, startTween, length, loop, capturer) {
 		const paintBackground = capturer !== undefined;
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
@@ -346,7 +365,7 @@ function showBackgroundOptions() {
 				const time = performance.now();
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
-					beginTime = time - newAnimController.progress * length;
+					beginTime = time;
 					newAnimController.setup(render, reject, beginTime);
 				}
 
@@ -354,7 +373,7 @@ function showBackgroundOptions() {
 				if (newAnimController.status === 'aborted') {
 					return;
 				}
-				renderFrame(context, width, height, tween, paintBackground, 0);
+				renderFrame(context, width, height, tween, loop, paintBackground, 0);
 				newAnimController.progress = tween;
 
 				if (capturer) {
@@ -396,7 +415,7 @@ function showBackgroundOptions() {
 		stopButton.disabled = false;
 
 		const capturer = new CCapture(properties);
-		animController = animate(context, width, height, startTween, length, capturer);
+		animController = animate(context, width, height, startTween, length, loopAnim, capturer);
 		function reset() {
 			stopButton.disabled = true;
 			capturer.stop();
@@ -569,11 +588,15 @@ function showBackgroundOptions() {
 				successAlert.alert('close');
 				errorAlert.alert('close');
 				document.getElementById('anim-position-readout').innerHTML = '';
-				animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, 0, length * 1000);
-				animController.promise = animController.promise.then(animFinished, animFinished);
+				let start = 0;
 				if (document.getElementById('anim-controls').classList.contains('show')) {
-					animController.progress = parseFloat(animPositionSlider.value);
+					start = parseFloat(animPositionSlider.value);
+					if (start === 1) {
+						start = 0;
+					}
 				}
+				animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, start, length * 1000, loopAnim);
+				animController.promise = animController.promise.then(animFinished, animFinished);
 				animController.start();
 			} else {
 				errorMsg = 'Invalid animation duration.';
@@ -591,15 +614,16 @@ function showBackgroundOptions() {
 
 	animPositionSlider.addEventListener('input', function (event) {
 		const tween = parseFloat(this.value);
-		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, false, 1);
+		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 1);
 		updateAnimPositionReadout(tween);
 	});
 
 	function syncToPosition() {
 		const tween = parseFloat(animPositionSlider.value);
 		const startRotation = startFrame.rotation;
-		const endRotation = endFrame.rotation + TWO_PI * fullRotations;
-		bgGeneratorRotation = interpolateValue(startRotation, endRotation, tween);
+		const endRotation = endFrame.rotation;
+		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
+		bgGeneratorRotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
 		document.getElementById('background-rotation').value = bgGeneratorRotation / TWO_PI;
 	}
 
@@ -627,6 +651,21 @@ function showBackgroundOptions() {
 		if (Number.isFinite(value)) {
 			fullRotations = value;
 		}
+	});
+
+	document.getElementById('anim-loop').addEventListener('input', function (event) {
+		loopAnim = this.checked;
+		const currentPosition = parseFloat(animPositionSlider.value);
+		let newPosition;
+		if (loopAnim) {
+			newPosition = currentPosition / 2;
+		} else if (currentPosition <= 0.5) {
+			newPosition = currentPosition * 2;
+		} else {
+			newPosition = (1 - currentPosition) * 2;
+		}
+		animPositionSlider.value = newPosition;
+		updateAnimPositionReadout(newPosition);
 	});
 
 	function hideConfig() {

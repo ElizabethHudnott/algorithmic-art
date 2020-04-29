@@ -2,7 +2,6 @@
 Environment
 -----------
 Link from home page
-Looping video
 Revise Patreon description
 Add credits
 Thumbnail creation dialog

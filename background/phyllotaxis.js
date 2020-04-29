@@ -622,17 +622,23 @@
 				context.fillStyle = gradient;
 			}
 
+			const petalLength = petalSize * petalStretch;
+			context.save();
+			context.translate(x, y);
+			context.rotate(theta + HALF_PI + this.petalRotation);
+
 			switch (this.petalShape) {
 			case 'e':	// Ellipse
 				context.beginPath();
-				context.ellipse(x, y, petalSize * petalStretch, petalSize, theta + this.petalRotation, 0, TWO_PI);
+				context.ellipse(0, 0, petalLength, petalSize, 0, 0, TWO_PI);
 				context.fill();
 				break;
+			case 'r': // Rectangle
+				context.fillRect(-petalSize, -petalLength, petalSize * 2, petalLength * 2);
+				break;
 			case 'i':	// Image
-				const imageResizedHeight = petalSize * petalStretch;
-				const imageResizedWidth = petalSize * imageAspect;
-				const imageTranslateX = imageResizedWidth - petalSize / 2;
-				const imageTranslateY = imageResizedHeight / 2;
+				const imageResizedHeight = 2 * petalLength;
+				const imageResizedWidth = 2 * petalSize * imageAspect;
 				let filter = '';
 				if (applyFilters) {
 					if (saturationVaries) {
@@ -643,17 +649,13 @@
 						filter += 'brightness(' + brightness + ') ';
 					}
 				}
-				context.save();
-				context.translate(x, y);
-				context.rotate(theta + HALF_PI + this.petalRotation);
-				context.translate(-imageTranslateX, -imageTranslateY);
 				if (filter !== '') {
 					context.filter = filter;
 				}
 				context.globalAlpha = opacity;
-				context.drawImage(bgGeneratorImage, 0, 0, imageResizedWidth, imageResizedHeight);
-				context.restore();
+				context.drawImage(bgGeneratorImage, -imageResizedWidth / 2, -petalLength, imageResizedWidth, imageResizedHeight);
 			}
+			context.restore();
 		}
 	};
 

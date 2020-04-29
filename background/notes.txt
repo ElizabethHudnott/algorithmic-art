@@ -1,16 +1,22 @@
 
 Environment
 -----------
+Link from home page
+Looping video
+Revise Patreon description
 Add credits
+Thumbnail creation dialog
 Thumbnail based new dialog
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
+	Use to speed up rotation slider
 Hide rotation for circular sketches
 Look into using ImageBitmap objects
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
+Download picture sizing
 Add directionality to rotation
 Ability to animate sketches that use random numbers
 Aspect ratio when rotating: height squared, as is, hypotenuse square
@@ -23,13 +29,13 @@ Background: color, picture, video or fix current image
 Existing Sketches
 -----------------
 Phyllotaxis
+	Add note to spread
 	Ways to choose an angle: Continued fractions?
 	Mirrored radial colour transitions
 	Fade hue through black or white
 	Hue rotation of images
 	Improve performance with images
 	Alternative petal shapes:
-		Squares/Rectangles
 		Polygon: join adjacent points
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio

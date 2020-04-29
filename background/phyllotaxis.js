@@ -153,7 +153,7 @@
 
 			optionsDoc.getElementById('phyllotaxis-petal-rotation').addEventListener('input', function (event) {
 				me.petalRotation = parseFloat(this.value) * Math.PI;
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 2);
 			});
 
 			function setStacking(event) {
@@ -461,6 +461,7 @@
 		}
 
 		const petalStretch = this.petalStretch;
+		const petalDistortion = aspectRatio >= 1 ? petalStretch : 1 / petalStretch;
 
 		if (preview < 2 || this.points === undefined) {
 			const angle = this.angle;
@@ -487,7 +488,8 @@
 				currentPetalSize = Math.max(0.5, petalSize + petalEnlargement * Math.sqrt(r));
 			}
 
-			while (numPetals < maxPetals && r < maxR + clipping * currentPetalSize * petalStretch) {
+			const loopConditionMultiplier = clipping *  petalDistortion;
+			while (numPetals < maxPetals && r < maxR + currentPetalSize * loopConditionMultiplier) {
 				const phi = n * angle;
 				if (numPetals % skip !== skip - 1) {
 					this.points.push(new Petal(r, phi, currentPetalSize));
@@ -533,7 +535,10 @@
 		const lightnessRange = this.lightnessMax - this.lightnessMin;
 		const opacityRange = this.opacityMax - this.opacityMin;
 		const contrast = this.contrast;
-		const shadowOffset = this.shadowOffset
+		const shadowOffset = this.shadowOffset * (petalStretch >= 1 ? 1 : petalStretch);
+		const shadowAngle = this.shadowAngle;
+		const cosShadowAngle = Math.cos(shadowAngle);
+		const sinShadowAngle = Math.sin(shadowAngle);
 		const spotOffset = this.spotOffset;
 		const hasLightingEffects = shadowOffset > 0 || (contrast > 0 && spotOffset > 0);
 		const applyFilters = preview === 0 || preview === 2;
@@ -543,8 +548,10 @@
 		const opacityVaries = variesRegExp.test(this.opacityMode);
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
+		const maxRX = maxR * aspectRatio;
+		const maxRY = maxR;
 		context.beginPath();
-		context.ellipse(0, 0, maxR * aspectRatio, maxR, 0, 0, TWO_PI);
+		context.ellipse(0, 0, maxRX, maxRY, 0, 0, TWO_PI);
 		context.clip();
 		context.shadowColor = this.shadowColor;
 		context.shadowBlur = this.shadowBlur;
@@ -599,13 +606,10 @@
 			let spotX = x, spotY = y;
 			if (hasLightingEffects) {
 				const shadowR = petalSize * shadowOffset;
-				const shadowAngle = this.shadowAngle;
-				const cos = Math.cos(shadowAngle);
-				const sin = Math.sin(shadowAngle);
-				context.shadowOffsetX = shadowR * cos;
-				context.shadowOffsetY = shadowR * sin;
-				spotX -= spotOffset * petalSize * cos;
-				spotY -= spotOffset * petalSize * sin;
+				context.shadowOffsetX = shadowR * cosShadowAngle;
+				context.shadowOffsetY = shadowR * sinShadowAngle;
+				spotX -= spotOffset * petalSize * cosShadowAngle;
+				spotY -= spotOffset * petalSize * sinShadowAngle;
 			}
 			const innerColor = hsla(hue, saturation, lightness, opacity);
 			if (contrast === 0) {

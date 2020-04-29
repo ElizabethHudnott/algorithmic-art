@@ -27,6 +27,7 @@ Phyllotaxis
 	Fade hue through black or white
 	Hue rotation of images
 	Improve performance with images
+	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 
 New Sketches

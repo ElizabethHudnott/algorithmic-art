@@ -609,7 +609,9 @@ function showBackgroundOptions() {
 
 
 	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
-		return document.activeElement === document.getElementById('btn-anim-controls');
+	 	const toolbar = document.getElementById('background-gen-toolbar');
+		const activeElement = document.activeElement;
+		return activeElement.dataset.toggle === 'dropdown' && toolbar.contains(this);
 	});
 
 	animPositionSlider.addEventListener('input', function (event) {

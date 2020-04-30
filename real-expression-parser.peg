@@ -1,0 +1,247 @@
+/*	Real Number Formulae Grammar
+	============================
+	Accepts expressions using:
+
+	 	Floating point numbers
+		+, -, *, /, ^
+		unary minus
+		% (modulo)
+		parentheses
+		|<expression>| (absolute value)
+		constants e and PI
+		variable names
+		function invocations from Math
+		implicit multiplication
+*/
+
+{
+
+	class CachingNode {
+		constructor() {
+			this.cachedValue = undefined;
+		}
+
+		eval(variables) {
+			if (this.cachedValue !== undefined) {
+				return this.cachedValue;
+			}
+			const result = this.evalImpl(variables);
+			if (this.isConstant) {
+				this.cachedValue = result;
+			}
+			return result;
+		}
+	}
+
+	class LeftToRightOperators extends CachingNode {
+		constructor(head, tail, func) {
+			super();
+			this.head = head;
+			this.tail = tail;
+			this.func = func;
+			const numOps = tail.length;
+			let isConstant = head.isConstant;
+			let i = 0;
+			while (isConstant && i < numOps) {
+				isConstant = tail[i][3].isConstant;
+				i++;
+			}
+			this.isConstant = isConstant;
+		}
+
+		evalImpl(variables) {
+			const headValue = this.head.eval(variables);
+			const func = this.func;
+			return this.tail.reduce(function (partialResult, element) {
+				return func(partialResult, element[1], element[3], variables);
+			}, headValue);
+		}
+	}
+
+	function operatorList(head, tail, func) {
+		if (tail.length === 0) {
+			return head;
+		} else {
+			return new LeftToRightOperators(head, tail, func);
+		}
+	}
+
+	class AbsInvocation extends CachingNode {
+		constructor(name, arg) {
+			super();
+			this.arg = arg;
+			this.isConstant = arg.isConstant;
+		}
+
+		evalImpl(variables) {
+			return Math.abs(this.arg.eval(variables));
+		}
+	}
+
+	class FunctionInvocation extends CachingNode {
+		constructor(name, args) {
+			super();
+			this.name = name;
+			this.args = args;
+			const numArgs = args.length;
+			let isConstant = numArgs > 0;
+			let i = 0;
+			while (isConstant && i < numArgs) {
+				isConstant = args[i].isConstant;
+				i++;
+			}
+			this.isConstant = isConstant;
+		}
+
+		evalImpl(variables) {
+			const numArgs = this.args.length;
+			const argValues = new Array(numArgs);
+			for (let i = 0; i < numArgs; i++) {
+				argValues[i] = this.args[i].eval(variables);
+			}
+			return Math[this.name](...argValues);
+		}
+	}
+
+	class ImplicitMultiply extends CachingNode {
+		constructor(multiplier, multiplicand) {
+			super();
+			this.multiplier = multiplier.eval();
+			this.multiplicand = multiplicand;
+			this.isConstant = multiplicand.isConstant;
+		}
+
+		evalImpl(variables) {
+			return this.multiplier * this.multiplicand.eval(variables);
+		}
+	}
+
+	class Constant {
+		static E = new Constant(Math.E);
+		static PI = new Constant(Math.PI);
+
+		constructor(value) {
+			this.value = value;
+			this.isConstant = true;
+		}
+
+		eval(variables) {
+			return this.value;
+		}
+	}
+
+	class Variable {
+		constructor(name) {
+			this.name = name;
+			this.isConstant = false;
+		}
+
+		eval(variables) {
+			return variables.get(this.name);
+		}
+	}
+}
+
+
+// Use this to test the grammar
+/*
+start
+	= expr:Expression {
+    	const variables = new Map();
+        variables.set('x', 42);
+        return expr.eval(variables);
+   }
+*/
+
+Expression
+	= head:Term tail:(_ ("+" / "-") _ Term)* {
+		return operatorList(
+			head, tail,
+			function (lhs, operator, rhs, variables) {
+				if (operator === '+') {
+					return lhs + rhs.eval(variables);
+				} else {
+					return lhs - rhs.eval(variables);
+				}
+			}
+		);
+	}
+
+Term
+	= head:Power tail:(_ ("*" / "/" / "%") _ Power)* {
+		return operatorList(
+			head, tail,
+			function (lhs, operator, rhs, variables) {
+				switch (operator) {
+				case '*': return lhs * rhs.eval(variables);
+				case '/': return lhs / rhs.eval(variables);
+				default: return lhs % rhs.eval(variables);
+				}
+			}
+		);
+	}
+
+Power
+	= base:Factor tail:(_ "^" _	Factor)* {
+		return operatorList(
+			base, tail,
+			function (base, operator, power, variables) {
+				return base ** power.eval(variables);
+			}
+		);
+	}
+
+Factor
+	= "(" _ expr:Expression _ ")" {
+		return expr;
+	}
+	/ "|" _ expr:Expression _ "|" {
+		return new AbsInvocation(expr);
+	}
+	/ Function
+	/ multiplier:Number multiplicand:(Factor)? {
+		if (multiplicand === null) {
+			return multiplier;
+		} else {
+			return new ImplicitMultiply(multiplier, multiplicand);
+		}
+	}
+	/ Constant
+	/ Variable
+
+Number
+	= _ "-"?[0-9]+("."[0-9]*)? {
+		return new Constant(parseFloat(text()));
+	}
+
+Constant
+	= "e" {
+		return Constant.E;
+	}
+	/ "PI" {
+		return Constant.PI;
+	}
+
+Variable
+	= _ name: Name _ {
+		return new Variable(name);
+	}
+
+Function
+	= _ name:Name _ "(" _ args:CommaList _ ")" {
+		return new FunctionInvocation(name, args);
+	}
+
+Name
+	= _ [a-z][a-zA-Z0-9]* { return text(); }
+
+CommaList
+	= head:Expression tail:(_ "," _ Expression)* {
+		return [head].concat(tail.map(function (element) {
+			return element[3];
+		}));
+	}
+	/ "" { return []; }
+
+_ "whitespace"
+	= [ \t\n\r]*

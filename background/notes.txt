@@ -29,12 +29,15 @@ Existing Sketches
 -----------------
 Phyllotaxis
 	Add note to spread
+	Centre piece?
+	Fill background with spokes?
 	Ways to choose an angle: Continued fractions?
 	Mirrored radial colour transitions
 	Fade hue through black or white
 	Hue rotation of images
 	Improve performance with images
 	Alternative petal shapes:
+		Curves
 		Polygon: join adjacent points
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio

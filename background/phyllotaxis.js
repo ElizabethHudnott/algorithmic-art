@@ -349,6 +349,11 @@
 			shadowColorInput.addEventListener('pointerup', fullRecolor);
 			shadowColorInput.addEventListener('keyup', fullRecolor);
 
+			optionsDoc.getElementById('phyllotaxis-outline').addEventListener('input', function (event) {
+				me.strokeStyle = 'rgba(0, 0, 0, ' + this.value + ')';
+				progressiveBackgroundGen(me, 2);
+			});
+
 			return optionsDoc;
 		});
 
@@ -371,6 +376,7 @@
 		this.petalStretch = 1;
 		this.petalRotation = 0;
 		this.maxPetals = 10000;
+		this.strokeStyle = 'rgba(0, 0, 0, 0)';
 
 		this.angleMode = new Array(4);
 		this.angleMode.fill('t');
@@ -413,11 +419,11 @@
 			'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
-			'spotOffset'
+			'spotOffset', 'strokeStyle'
 		],
 		[
-			'start', 'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode', 'hueMode',
-			'saturationMode', 'lightnessMode', 'opacityMode'
+			'start', 'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode',
+			'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 		]
 	];
 
@@ -448,6 +454,13 @@
 		return (value % mod) * range / mod + min;
 	};
 
+	/**
+	 *	Preview levels:
+	 *		0	Produce a full and accurate drawing.
+	 *		1	Draw only a limited number of petals.
+	 *		2	Don't recalculate the petal positions and sizes but redraw all of them.
+	 *		3	Don't recalculate the petal positions and sizes and redraw only a limited number of them.
+	 */
 	Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const previewMaxPetals = 1500;
 		const aspectRatio = this.aspectRatio;
@@ -522,10 +535,12 @@
 			stacking = -1; // iterate from outermost to innermost
 		}
 
+		const petalShape = this.petalShape;
 		const imageWidth = bgGeneratorImage.width;
 		const imageHeight = bgGeneratorImage.height;
 		const imageAspect = imageWidth / imageHeight;
-		const fillRadius = this.petalShape === 'r' ? Math.SQRT2 : 1;
+		const strokeStyle = this.strokeStyle;
+		const fillRadius = petalShape === 'r' ? Math.SQRT2 : 1;
 
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
@@ -535,7 +550,7 @@
 		const saturationRange = this.saturationMax - this.saturationMin;
 		const lightnessRange = this.lightnessMax - this.lightnessMin;
 		const opacityRange = this.opacityMax - this.opacityMin;
-		const contrast = this.lighting === 1 ? 0 : this.contrast;
+		const contrast = this.lighting === 1  || petalShape === 'i' ? 0 : this.contrast;
 		const shadowOffset = this.shadowOffset * (petalStretch >= 1 ? 1 : petalStretch);
 		const shadowAngle = this.shadowAngle;
 		let cosShadowAngle = 0, sinShadowAngle = 0;
@@ -556,6 +571,8 @@
 		context.beginPath();
 		context.ellipse(0, 0, maxRX, maxRY, 0, 0, TWO_PI);
 		context.clip();
+		const stroke = petalShape !== 'i' && strokeStyle !== 'rgba(0, 0, 0, 0)';
+		context.strokeStyle = strokeStyle;
 		context.shadowColor = this.shadowColor;
 		context.shadowBlur = this.shadowBlur;
 
@@ -631,7 +648,7 @@
 			context.translate(x, y);
 			context.rotate(petalRotation);
 
-			switch (this.petalShape) {
+			switch (petalShape) {
 			case 'e':	// Ellipse
 				context.scale(1, petalStretch);
 				context.beginPath();
@@ -639,7 +656,10 @@
 				context.fill();
 				break;
 			case 'r': // Rectangle
-				context.fillRect(-petalSize, -petalSize, petalSize * 2, petalSize * 2);
+				context.scale(1, petalStretch);
+				context.beginPath();
+				context.rect(-petalSize, -petalSize, petalSize * 2, petalSize * 2);
+				context.fill();
 				break;
 			case 'i':	// Image
 				const imageResizedHeight = 2 * petalSize * petalStretch;
@@ -659,6 +679,11 @@
 				}
 				context.globalAlpha = opacity;
 				context.drawImage(bgGeneratorImage, -imageResizedWidth / 2, -imageResizedHeight / 2, imageResizedWidth, imageResizedHeight);
+			}
+			if (stroke) {
+				context.shadowOffsetX = 0;
+				context.shadowOffsetY = 0;
+				context.stroke();
 			}
 			context.restore();
 		}

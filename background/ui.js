@@ -1,16 +1,11 @@
 'use strict';
 
-let store;
+let store, showWelcome;
 try {
 	store = window.localStorage;
-	const showWelcome = store.getItem('no-welcome') !== 'true'
-	if (showWelcome) {
-		$('#help-modal').modal('show');
-	} else {
-		document.getElementById('show-welcome').checked = false;
-	}
+	showWelcome = store.getItem('no-welcome') !== 'true'
 } catch (e) {
-	$('#help-modal').modal('show');
+	showWelcome = true;
 }
 
 const backgroundElement = document.body;
@@ -121,6 +116,7 @@ function showBackgroundOptions() {
 	const authorInput = document.getElementById('author');
 
 	const modal = document.getElementById('background-gen-modal');
+	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const progressBar = document.getElementById('video-progress');
 	const imageUpload = document.getElementById('background-gen-image');
@@ -182,6 +178,12 @@ function showBackgroundOptions() {
 		}
 	}
 
+	function repositionModal() {
+		const grandchild = modal.children[0].children[0];
+		const top = Math.max(Math.round((window.innerHeight - grandchild.clientHeight) / 2), 0);
+		modal.style.top = top + 'px';
+	}
+
 	function switchBackgroundGenerator(name) {
 		backgroundGeneratorFactory(name).then(function (gen) {
 			if (bgGenerator && bgGenerator.purgeCache) {
@@ -207,6 +209,7 @@ function showBackgroundOptions() {
 				if (imageCtrlLocation !== null) {
 					imageCtrlLocation.appendChild(imageUpload);
 				}
+				repositionModal();
 			}
 
 			// Switch out previous DOM
@@ -446,7 +449,18 @@ function showBackgroundOptions() {
 	}
 
 	// Select a background generator based on URL.
-	const firstGenName = urlParameters.get('gen') || 'ten-print';
+	let firstGenName = urlParameters.get('gen');
+	let nextStep;
+	if (firstGenName === null) {
+		firstGenName = 'ten-print';
+		nextStep = function () {
+			document.getElementById('btn-generator').click();
+		};
+	} else {
+		nextStep = function () {
+			$(modal).modal('show');
+		}
+	}
 	const generatorButtonContainer = document.getElementById('generators');
 	try {
 		const generatorButton = checkInput(generatorButtonContainer, 'generator', firstGenName);
@@ -509,6 +523,10 @@ function showBackgroundOptions() {
 	for (let button of generatorButtonContainer.querySelectorAll('input')) {
 		button.addEventListener('click', generatorSwitcher);
 	}
+
+	document.getElementById('btn-background-gen-options').addEventListener('click', function (event) {
+		$(modal).modal('show');
+	});
 
 	document.getElementById('background-rotation').addEventListener('input', function (event) {
 		bgGeneratorRotation = TWO_PI * parseFloat(this.value);
@@ -818,11 +836,10 @@ function showBackgroundOptions() {
 	});
 
 	$(modal).on('shown.bs.modal', function (event) {
-		const child = modal.children[0];
-		const classList = child.classList;
+		const classList = modal.children[0].classList;
 		if (classList.contains('modal-dialog-centered')) {
 			modal.style.left = modal.offsetLeft + 'px';
-			modal.style.top = Math.round((window.innerHeight - child.children[0].clientHeight) / 2) + 'px';
+			repositionModal();
 			classList.remove('modal-dialog-centered');
 		}
 	});
@@ -830,6 +847,21 @@ function showBackgroundOptions() {
 	modalHeader.addEventListener('dblclick', function (event) {
 		$('#background-gen-modal-content').collapse('toggle');
 	});
+
+	if (showWelcome) {
+		const helpModal = $('#help-modal');
+		helpModal.on('hidden.bs.modal', function (event) {
+			if (nextStep !== undefined) {
+				nextStep();
+				nextStep = undefined;
+			}
+		});
+		helpModal.modal('show');
+	} else {
+		document.getElementById('show-welcome').checked = false;
+		nextStep();
+		nextStep = undefined;
+	}
 
 	imageUpload.querySelector('#background-gen-image-upload').addEventListener('input', function (event) {
 		const file = this.files[0];

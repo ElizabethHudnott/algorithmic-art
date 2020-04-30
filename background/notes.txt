@@ -30,6 +30,7 @@ Existing Sketches
 Phyllotaxis
 	Add note to spread
 	Centre piece?
+	Primes
 	Fill background with spokes?
 	Ways to choose an angle: Continued fractions?
 	Mirrored radial colour transitions

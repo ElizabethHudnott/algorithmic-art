@@ -2,7 +2,7 @@
 
 {
 
-	class ParametricEquations {
+	class ParametricEquation {
 		constructor(xFormula, yFormula) {
 			this.xFormula = xFormula;
 			this.yFormula = yFormula;
@@ -34,22 +34,96 @@
 		const me = this;
 		this.title = 'Graphing Calculator';
 		this.hasRandomness = true;
+		this.optionsDocument = downloadDocument('graphing-calculator.html').then(function (optionsDoc) {
+			const parametricTemplate = optionsDoc.getElementById('parametric-equation');
+			parametricTemplate.remove();
+			const equations = optionsDoc.getElementById('calc-equations');
+			const errorBox = optionsDoc.getElementById('calc-error');
 
-		this.equations = [new ParametricEquations(
-			realParser.parse('16 * sin(t)^3'),
-			realParser.parse('13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)')
-		)];
-		this.min = [0];
-		this.max = [TWO_PI];
-		this.step = [1/360];
+			class ParametricEquationComponent extends HTMLElement {
+				constructor(index) {
+					super();
+					this.attachShadow({ mode: 'open' });
+					const shadowRoot = this.shadowRoot;
+					const node = document.importNode(parametricTemplate.content, true);
+					node.appendChild(bootstrapStyleSheet.cloneNode(false));
+					shadowRoot.appendChild(node);
+					const component = this;
+					shadowRoot.getElementById('equation-x-form').addEventListener('submit', function (event) {
+						event.preventDefault();
+						component.compileEquationX();
+					});
+					shadowRoot.getElementById('equation-y-form').addEventListener('submit', function (event) {
+						event.preventDefault();
+						component.compileEquationY();
+					});
+				}
 
-		this.rotation = [0];
-		this.scale = [1];
-		this.stretch = [1];
-		this.shear = [0];
+				compileEquationX() {
+					const index = indexOfChild(this);
+					const formulaText = this.shadowRoot.getElementById('equation-x').value;
+					try {
+						me.equations[index].xFormula = realParser.parse(formulaText);
+						errorBox.innerHTML = '';
+						progressiveBackgroundGen(me, 0);
+					} catch (e) {
+						errorBox.innerText = e.message;
+					}
+				}
 
-		this.minorAxisMin = -24;
-		this.minorAxisMax = 24;
+				compileEquationY() {
+					const index = indexOfChild(this);
+					const formulaText = this.shadowRoot.getElementById('equation-y').value;
+					try {
+						me.equations[index].yFormula = realParser.parse(formulaText);
+						errorBox.innerHTML = '';
+						progressiveBackgroundGen(me, 0);
+					} catch (e) {
+						errorBox.innerText = e.message;
+					}
+				}
+
+			}
+
+			customElements.define('parametric-equation', ParametricEquationComponent);
+
+			function addParametricEquation() {
+				const index = me.equations.length;
+
+				me.equations[index] = new ParametricEquation(
+					realParser.parse('cos(t)'),
+					realParser.parse('sin(t)')
+				);
+
+				me.min[index] = -Math.PI;
+				me.max[index] = Math.PI;
+				me.step[index] = 1 / 360;
+				me.rotation[index] = 0;
+				me.scale[index] = 1;
+				me.stretch[index] = 1;
+				me.shear[index] = 0;
+
+				equations.append(document.createElement('parametric-equation'));
+				progressiveBackgroundGen(me, 0);
+			}
+
+			addParametricEquation();
+
+			return optionsDoc;
+		});
+
+		this.equations = [];
+		this.min = [];
+		this.max = [];
+		this.step = [];
+
+		this.rotation = [];
+		this.scale = [];
+		this.stretch = [];
+		this.shear = [];
+
+		this.minorAxisMin = -Math.PI;
+		this.minorAxisMax = Math.PI;
 		this.majorAxisTranslation = 0;
 
 		this.lineWidth = 1;

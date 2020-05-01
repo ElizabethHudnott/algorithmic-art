@@ -1,5 +1,7 @@
 'use strict';
 
+const bootstrapStyleSheet = document.styleSheets[1].ownerNode;
+
 let store, showWelcome;
 try {
 	store = window.localStorage;

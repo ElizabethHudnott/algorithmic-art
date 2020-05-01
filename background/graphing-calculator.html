@@ -1,0 +1,39 @@
+<div id="calc-equations"></div>
+<output id="calc-error"></output>
+
+<template id="parametric-equation">
+	<form class="form-row form-group" id="equation-x-form">
+		<label class="col-3 col-form-label col-form-label-sm" for="equation-x">
+			Equations
+		</label>
+		<div class="col-9">
+			<div class="input-group input-group-sm">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="equation-x-lhs">x =</span>
+				</div>
+				<input type="text" value="cos(t)" class="form-control form-control-sm" id="equation-x" aria-describedby="equation-x-lhs">
+				<div class="input-group-append">
+					<button type="submit" class="btn btn-secondary">
+						Compile
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+	<form class="form-row form-group" id="equation-y-form">
+		<div class="col-3"></div>
+		<div class="col-9">
+			<div class="input-group input-group-sm">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="equation-y-lhs">y =</span>
+				</div>
+				<input type="text" value="sin(t)" class="form-control form-control-sm" id="equation-y" aria-describedby="equation-y-lhs">
+				<div class="input-group-append">
+					<button type="submit" class="btn btn-secondary">
+						Compile
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</template>

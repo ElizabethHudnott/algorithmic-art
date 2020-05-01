@@ -112,6 +112,17 @@ function checkInput(ancestor, name, value) {
 	return input;
 }
 
+function indexOfChild(child) {
+	const parent = child.parentElement;
+	const children = parent.children;
+	const numChildren = children.length;
+	for (let i = 0; i < children.length; i++) {
+		if (children[i] === child) {
+			return i;
+		}
+	}
+}
+
 const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
 const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
 

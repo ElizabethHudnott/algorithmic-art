@@ -3,12 +3,16 @@ body {
 	overflow: hidden;
 }
 
+button[disabled], input[type=color][disabled] {
+	cursor: auto;
+}
+
 input[type=color] {
 	cursor: pointer;
 }
 
-button[disabled], input[type=color][disabled] {
-	cursor: auto;
+legend {
+	font-size: 1.25rem;
 }
 
 .progress-bar {

@@ -47,3 +47,9 @@ Phyllotaxis
 New Sketches
 ------------
 Copy machine
+
+Parser Failures
+---------------
+2cos(0)^2
+|t^3|
+ending in whitespace

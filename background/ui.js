@@ -839,7 +839,6 @@ function showBackgroundOptions() {
 	$(modal).on('shown.bs.modal', function (event) {
 		const classList = modal.children[0].classList;
 		if (classList.contains('modal-dialog-centered')) {
-			modal.style.left = modal.offsetLeft + 'px';
 			repositionModal();
 			classList.remove('modal-dialog-centered');
 		}

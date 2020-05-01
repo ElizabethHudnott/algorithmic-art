@@ -54,8 +54,9 @@
 			[220, 140, 130],
 			[220, 140, 130],
 		];
-		this.shearX = [0.1, 0.1, 0.1];
-		this.shearY = [0, 0, 0];
+		this.shearX = [0.2, 0.2, 0.2];
+		this.shearY = [0.1, 0.1, 0.1];
+		this.shearDirection = [Math.PI / 3, 0, 0];
 
 	}
 
@@ -69,10 +70,11 @@
 				context.save();
 				context.rotate(this.rotation[i]);
 				context.translate(this.translationX[shapeNum][i], -this.translationY[shapeNum][i]);
+				const shearDirection = this.shearDirection[i];
 				context.transform(
 					this.scaleX[i],
-					this.shearY[i],
-					-this.shearX[i],
+					this.shearY[i] * Math.sin(shearDirection),
+					-this.shearX[i] * Math.cos(shearDirection),
 					this.scaleY[i],
 					0, 0
 				);

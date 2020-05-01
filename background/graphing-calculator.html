@@ -1,5 +1,13 @@
 <div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="calc-piece">
+	<label class="col-3 col-form-label col-form-label-sm" for="calc-shape">
+		Shape
+	</label>
+	<div class="col-3">
+		<select class="form-control form-control-sm" id="calc-shape">
+			<option>0</option>
+		</select>
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-piece">
 		Piece
 	</label>
 	<div class="col-3">
@@ -17,10 +25,10 @@
 			<div class="input-group-prepend">
 				<span class="input-group-text" id="calc-equation-x-lhs">x =</span>
 			</div>
-			<input type="text" value="cos(t)" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
+			<input type="text" value="16 * sin(t)^3" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
 			<div class="input-group-append">
 				<button type="submit" class="btn btn-secondary" tabindex="-1">
-					Compile
+					Set
 				</button>
 			</div>
 		</div>
@@ -33,13 +41,35 @@
 			<div class="input-group-prepend">
 				<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
 			</div>
-			<input type="text" value="sin(t)" class="form-control form-control-sm" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
+			<input type="text" value="13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)" class="form-control form-control-sm" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
 			<div class="input-group-append">
 				<button type="submit" class="btn btn-secondary" tabindex="-1">
-					Compile
+					Set
 				</button>
 			</div>
 		</div>
 	</div>
 </form>
 <output id="calc-error"></output>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="calc-scale">
+		Scale
+	</label>
+	<div class="col-3">
+		<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-scale">
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stretch">
+		Stretch
+	</label>
+	<div class="col-3">
+		<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-stretch">
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="calc-rotation">
+		Rotation
+	</label>
+	<div class="col-3">
+		<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="calc-rotation">
+	</div>
+</div>

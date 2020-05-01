@@ -8,7 +8,7 @@
 			this.yFormula = yFormula;
 		}
 
-		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shear) {
+		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
 			const xFormula = this.xFormula, yFormula = this.yFormula;
 			const xScale = yScale * stretch;
 			let i = 0;
@@ -18,8 +18,10 @@
 					break;
 				}
 				variables.set('t', t);
-				const y = yScale * yFormula.eval(variables);
-				const x = xScale * (xFormula.eval(variables) + shear * y);
+				const initialX = xScale * xFormula.eval(variables);
+				const initialY = yScale * yFormula.eval(variables);
+				const x = initialX + stretch * shearX * initialY;
+				const y = initialY + shearY * initialX;
 				if (i === 0 && firstSegment) {
 					context.moveTo(x, y);
 				} else {
@@ -39,30 +41,12 @@
 			const equationXInput = optionsDoc.getElementById('calc-equation-x');
 			const equationYInput = optionsDoc.getElementById('calc-equation-y');
 			const errorBox = optionsDoc.getElementById('calc-error');
-
-			function addParametricEquation() {
-				const index = me.equations.length;
-				me.equations[index] = new ParametricEquation(
-					realParser.parse('cos(t)'),
-					realParser.parse('sin(t)')
-				);
-				me.min[index] = -Math.PI;
-				me.max[index] = Math.PI;
-				me.step[index] = 1 / 360;
-				me.rotation[index] = 0;
-				me.scale[index] = 1;
-				me.stretch[index] = 1;
-				me.shear[index] = 0;
-				progressiveBackgroundGen(me, 0);
-			}
-
-			addParametricEquation();
+			let shapeNum = 0, pieceNum = 0;
 
 			function compileEquationX() {
-				const index = parseInt(pieceInput.value);
 				const formulaText = equationXInput.value;
 				try {
-					me.equations[index].xFormula = realParser.parse(formulaText);
+					me.equations[shapeNum][pieceNum].xFormula = realParser.parse(formulaText);
 					errorBox.innerHTML = '';
 					progressiveBackgroundGen(me, 0);
 				} catch (e) {
@@ -82,10 +66,9 @@
 			});
 
 			function compileEquationY() {
-				const index = parseInt(pieceInput.value);
 				const formulaText = equationYInput.value;
 				try {
-					me.equations[index].yFormula = realParser.parse(formulaText);
+					me.equations[shapeNum][pieceNum].yFormula = realParser.parse(formulaText);
 					errorBox.innerHTML = '';
 					progressiveBackgroundGen(me, 0);
 				} catch (e) {
@@ -104,28 +87,71 @@
 				}
 			});
 
+			optionsDoc.getElementById('calc-scale').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value)) {
+					me.scale[shapeNum] = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('calc-stretch').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value)) {
+					me.stretch[shapeNum] = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('calc-rotation').addEventListener('input', function (event) {
+				me.rotation[shapeNum] = parseFloat(this.value) * TWO_PI;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			return optionsDoc;
 		});
 
-		this.equations = [];
-		this.min = [];
-		this.max = [];
-		this.step = [];
+		this.equations = [];	// 2D array. Multiple shapes, multiple piecewise sections
+		this.min = [];			// Per shape, per piece
+		this.max = [];			// Per shape, per piece
+		this.step = [];			// Per shape, per piece
 
-		this.rotation = [];
-		this.scale = [];
-		this.stretch = [];
-		this.shear = [];
+		this.rotation = [];		// Per shape
+		this.scale = [];		// Per shape
+		this.stretch = [];		// Per shape
+		this.shearX = [];		// Per shape
+		this.shearY = [];		// Per shape
+		this.shearDirection = []; // Per shape
+		this.lineWidth = [];	// Per shape
+		this.strokeStyle = [];	// Per shape
 
-		this.minorAxisMin = -Math.PI;
-		this.minorAxisMax = Math.PI;
+		this.minorAxisMin = -25;
+		this.minorAxisMax = 25;
 		this.majorAxisTranslation = 0;
 
-		this.lineWidth = 1;
-		this.strokeStyle = '#000000';
+
+		this.addParametricEquation('16 * sin(t)^3', '13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)');
 	}
 
-	backgroundGenerators.set('graphing-calculator', new GraphingCalculator());
+	GraphingCalculator.prototype.addParametricEquation = function (xFormula, yFormula) {
+		const index = this.equations.length;
+		this.equations[index] = [new ParametricEquation(
+			realParser.parse(xFormula === undefined ? 'cos(t)' : xFormula),
+			realParser.parse(yFormula === undefined ? 'sin(t)' : yFormula)
+		)];
+		this.min[index] = [-Math.PI];
+		this.max[index] = [Math.PI];
+		this.step[index] = [Math.PI / 180];
+		this.rotation[index] = 0;
+		this.scale[index] = 1;
+		this.stretch[index] = 1;
+		this.shearX[index] = 0;
+		this.shearY[index] = 0;
+		this.shearDirection[index] = 0;
+		this.lineWidth[index] = 1;
+		this.strokeStyle[index] = '#000000';
+		progressiveBackgroundGen(this, 0);
+	};
 
 	GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		let minDimension = Math.min(canvasWidth, canvasHeight);
@@ -134,7 +160,6 @@
 		const scaledWidth = canvasWidth / scale;
 		const scaledHeight = canvasHeight / scale;
 		context.scale(scale, -scale);
-		context.lineWidth = this.lineWidth / scale;
 		let xTranslation, yTranslation;
 		if (canvasWidth >= canvasHeight) {
 			minDimension = canvasHeight;
@@ -151,14 +176,25 @@
 			context.save();
 			context.rotate(-this.rotation[i]);
 			context.translate(xTranslation, yTranslation);
-			this.equations[i].draw(
-				context, variables, i === 0, this.min[i], this.max[i], this.step[i],
-				this.scale[i], this.stretch[i], this.shear[i]
-			);
+			const equations = this.equations[i];
+			const shapeScale = this.scale[i];
+			const stretch = this.stretch[i];
+			const shearDirection = this.shearDirection[i];
+			const shearX = this.shearX[i] * Math.cos(shearDirection);
+			const shearY = this.shearY[i] * Math.sin(shearDirection);
+			for (let j = 0; j < equations.length; j++) {
+				equations[j].draw(
+					context, variables, j === 0, this.min[i][j], this.max[i][j],
+					this.step[i][j], shapeScale, stretch, shearX, shearY
+				);
+			}
+			context.lineWidth = this.lineWidth[i] / scale;
+			context.strokeStyle = this.strokeStyle[i];
+			context.stroke();
 			context.restore();
 		}
-		context.strokeStyle = this.strokeStyle;
-		context.stroke();
 	};
+
+	backgroundGenerators.set('graphing-calculator', new GraphingCalculator());
 
 }

@@ -35,66 +35,17 @@
 		this.title = 'Graphing Calculator';
 		this.hasRandomness = true;
 		this.optionsDocument = downloadDocument('graphing-calculator.html').then(function (optionsDoc) {
-			const parametricTemplate = optionsDoc.getElementById('parametric-equation');
-			parametricTemplate.remove();
-			const equations = optionsDoc.getElementById('calc-equations');
+			const pieceInput = optionsDoc.getElementById('calc-piece');
+			const equationXInput = optionsDoc.getElementById('calc-equation-x');
+			const equationYInput = optionsDoc.getElementById('calc-equation-y');
 			const errorBox = optionsDoc.getElementById('calc-error');
-
-			class ParametricEquationComponent extends HTMLElement {
-				constructor(index) {
-					super();
-					this.attachShadow({ mode: 'open' });
-					const shadowRoot = this.shadowRoot;
-					const node = document.importNode(parametricTemplate.content, true);
-					node.appendChild(bootstrapStyleSheet.cloneNode(false));
-					shadowRoot.appendChild(node);
-					const component = this;
-					shadowRoot.getElementById('equation-x-form').addEventListener('submit', function (event) {
-						event.preventDefault();
-						component.compileEquationX();
-					});
-					shadowRoot.getElementById('equation-y-form').addEventListener('submit', function (event) {
-						event.preventDefault();
-						component.compileEquationY();
-					});
-				}
-
-				compileEquationX() {
-					const index = indexOfChild(this);
-					const formulaText = this.shadowRoot.getElementById('equation-x').value;
-					try {
-						me.equations[index].xFormula = realParser.parse(formulaText);
-						errorBox.innerHTML = '';
-						progressiveBackgroundGen(me, 0);
-					} catch (e) {
-						errorBox.innerText = e.message;
-					}
-				}
-
-				compileEquationY() {
-					const index = indexOfChild(this);
-					const formulaText = this.shadowRoot.getElementById('equation-y').value;
-					try {
-						me.equations[index].yFormula = realParser.parse(formulaText);
-						errorBox.innerHTML = '';
-						progressiveBackgroundGen(me, 0);
-					} catch (e) {
-						errorBox.innerText = e.message;
-					}
-				}
-
-			}
-
-			customElements.define('parametric-equation', ParametricEquationComponent);
 
 			function addParametricEquation() {
 				const index = me.equations.length;
-
 				me.equations[index] = new ParametricEquation(
 					realParser.parse('cos(t)'),
 					realParser.parse('sin(t)')
 				);
-
 				me.min[index] = -Math.PI;
 				me.max[index] = Math.PI;
 				me.step[index] = 1 / 360;
@@ -102,12 +53,56 @@
 				me.scale[index] = 1;
 				me.stretch[index] = 1;
 				me.shear[index] = 0;
-
-				equations.append(document.createElement('parametric-equation'));
 				progressiveBackgroundGen(me, 0);
 			}
 
 			addParametricEquation();
+
+			function compileEquationX() {
+				const index = parseInt(pieceInput.value);
+				const formulaText = equationXInput.value;
+				try {
+					me.equations[index].xFormula = realParser.parse(formulaText);
+					errorBox.innerHTML = '';
+					progressiveBackgroundGen(me, 0);
+				} catch (e) {
+					errorBox.innerText = e.message;
+				}
+			}
+
+			const equationXForm = optionsDoc.getElementById('calc-equation-x-form');
+			equationXForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				compileEquationX();
+			});
+			equationXForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					compileEquationX();
+				}
+			});
+
+			function compileEquationY() {
+				const index = parseInt(pieceInput.value);
+				const formulaText = equationYInput.value;
+				try {
+					me.equations[index].yFormula = realParser.parse(formulaText);
+					errorBox.innerHTML = '';
+					progressiveBackgroundGen(me, 0);
+				} catch (e) {
+					errorBox.innerText = e.message;
+				}
+			}
+
+			const equationYForm = optionsDoc.getElementById('calc-equation-y-form');
+			equationYForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				compileEquationY();
+			});
+			equationYForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					compileEquationY();
+				}
+			});
 
 			return optionsDoc;
 		});

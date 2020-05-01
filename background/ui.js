@@ -1,7 +1,5 @@
 'use strict';
 
-const bootstrapStyleSheet = document.styleSheets[1].ownerNode;
-
 let store, showWelcome;
 try {
 	store = window.localStorage;
@@ -179,6 +177,8 @@ function showBackgroundOptions() {
 			})
 		}
 	}
+
+	modal.style.left = Math.max(Math.round(window.innerWidth - 508), 0) + 'px';
 
 	function repositionModal() {
 		const grandchild = modal.children[0].children[0];
@@ -811,7 +811,6 @@ function showBackgroundOptions() {
 		resizeTimer = setTimeout(generateBackground, 100);
 	});
 
-	modal.style.left = Math.max(Math.round(window.innerWidth - 508), 0) + 'px';
 	let modalDrag;
 
 	modalHeader.addEventListener('pointerdown', function (event) {

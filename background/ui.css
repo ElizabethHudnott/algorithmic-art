@@ -49,6 +49,10 @@ button[disabled], input[type=color][disabled] {
 	width: 60% !important;
 }
 
+.w-fit {
+	width: max-content;
+}
+
 .emphasize-active .active {
 	font-weight: bold;
 }

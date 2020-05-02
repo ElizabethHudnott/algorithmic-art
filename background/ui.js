@@ -44,11 +44,12 @@ function drawSignature(context, backgroundColor) {
 	context.textBaseline = 'bottom';
 	const text = 'Elizabeth Hudnott' + (author === '' ? '' : ' & ' + author);
 	const metrics = context.measureText(text);
-	const paddingX = 3;
-	const paddingY = 4;
+	const scale = context.savedScale || 1;
+	const paddingX = Math.ceil(3 / scale);
+	const paddingY = Math.ceil(4 / scale);
 	signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
 	signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
-	const canvasHeight = context.canvas.height;
+	const canvasHeight = context.canvas.height / scale;
 	if (backgroundColor === undefined) {
 		context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
 		backgroundColor = backgroundElement.style.backgroundColor;
@@ -134,14 +135,14 @@ function showBackgroundOptions() {
 				for (let property of generator.animatable[0]) {
 					let value = generator[property];
 					if (Array.isArray(value)) {
-						value = value.slice();
+						value = deepCopy(value);
 					}
 					this.continuous.set(property, value);
 				}
 				for (let property of generator.animatable[1]) {
 					let value = generator[property];
 					if (Array.isArray(value)) {
-						value = value.slice();
+						value = deepCopy(value);
 					}
 					this.stepped.set(property, value);
 				}
@@ -197,7 +198,12 @@ function showBackgroundOptions() {
 			bgGeneratorName = name;
 			startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 			endFrame = startFrame;
-			animPositionSlider.disabled = true;
+			if ('tween' in gen) {
+				gen.tween = parseFloat(animPositionSlider.value);
+				animPositionSlider.disabled = false;
+			} else {
+				animPositionSlider.disabled = true;
+			}
 			generateBackground();
 
 			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
@@ -562,6 +568,10 @@ function showBackgroundOptions() {
 		animPositionSlider.value = 0;
 		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(0);
+		if ('tween' in bgGenerator) {
+			bgGenerator.tween = 0;
+			progressiveBackgroundGen(bgGenerator, 0);
+		}
 		showAlert(successAlert, 'Start frame set.', document.body)
 		videoErrorAlert.alert('close');
 	});
@@ -571,6 +581,10 @@ function showBackgroundOptions() {
 		animPositionSlider.value = 1;
 		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(1);
+		if ('tween' in bgGenerator) {
+			bgGenerator.tween = 1;
+			progressiveBackgroundGen(bgGenerator, 0);
+		}
 		showAlert(successAlert, 'End frame set.', document.body)
 		videoErrorAlert.alert('close');
 	});
@@ -765,6 +779,7 @@ function showBackgroundOptions() {
 			const context = captureCanvas.getContext('2d');
 			const scale = videoHeight / screen.height;
 			context.scale(scale, scale);
+			context.savedScale = scale;
 			context.save();
 			captureVideo(context, videoWidth / scale, screen.height, startTween, length * 1000, properties);
 

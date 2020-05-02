@@ -415,14 +415,14 @@
 	Phyllotaxis.prototype.animatable = [
 		[
 			'radius', 'aspectRatio', 'clipping', 'exponent', 'angle', 'spread', 'scale',
-			'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
+			'start', 'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 			'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
 			'spotOffset', 'strokeStyle'
 		],
 		[
-			'start', 'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode',
+			'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode',
 			'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 		]
 	];

@@ -305,6 +305,17 @@
 		this.tween = 0;
 	}
 
+	GraphingCalculator.prototype.animatable = [
+		[
+			'min', 'max', 'step', 'rotation', 'translateX', 'translateY', 'scale',
+			'stretch', 'shearX', 'shearY', 'shearDirection', 'strokeColor', 'fillColor',
+			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
+		],
+		[
+			'lineWidth'
+		]
+	];
+
 	GraphingCalculator.prototype.addShape = function (index) {
 		this.equations.splice(index, 0, []);
 		this.min.splice(index, 0, []);
@@ -320,7 +331,7 @@
 		this.shearDirection.splice(index, 0, [0]);
 		this.lineWidth.splice(index, 0, 3);
 		this.strokeColor.splice(index, 0, '#000000ff');
-		this.fillColor.splice(index, 0, '#ffffffff');
+		this.fillColor.splice(index, 0, '#ff008090');
 	};
 
 	GraphingCalculator.prototype.addSubpath = function (shapeNum, index) {

@@ -112,6 +112,18 @@ function checkInput(ancestor, name, value) {
 	return input;
 }
 
+function deepCopy(arr) {
+	const length = arr.length;
+	const result = arr.slice();
+	for (let i = 0; i < length; i++) {
+		const element = result[i];
+		if (Array.isArray(element)) {
+			result[i] = deepCopy(element);
+		}
+	}
+	return result;
+}
+
 const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
 const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
 

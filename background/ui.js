@@ -188,6 +188,7 @@ function showBackgroundOptions() {
 
 	function switchBackgroundGenerator(name) {
 		backgroundGeneratorFactory(name).then(function (gen) {
+			document.title = gen.title;
 			if (bgGenerator && bgGenerator.purgeCache) {
 				bgGenerator.purgeCache();
 			}
@@ -326,6 +327,17 @@ function showBackgroundOptions() {
 		for (let [property, startValue] of startFrame.stepped.entries()) {
 			let endValue = endFrame.stepped.get(property);
 			bgGenerator[property] = interpolateStep(startValue, endValue, tween, loop);
+		}
+		if ('tween' in bgGenerator) {
+			if (loop) {
+				if (tween > 0.5) {
+					bgGenerator.tween = 1 - (tween - 0.5) * 2;
+				} else {
+					bgGenerator.tween = tween * 2;
+				}
+			} else {
+				bgGenerator.tween = tween;
+			}
 		}
 
 		const startRotation = startFrame.rotation;
@@ -596,7 +608,7 @@ function showBackgroundOptions() {
 		}
 
 		let errorMsg;
-		if (startFrame === endFrame) {
+		if (startFrame === endFrame && !('tween' in bgGenerator)) {
 			errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
 		} else {
 			const lengthInput = document.getElementById('anim-length');
@@ -711,7 +723,7 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
 		let errorMsg = '';
-		if (startFrame === endFrame) {
+		if (startFrame === endFrame && !('tween' in bgGenerator)) {
 			errorMsg += '<p>The start and end frames are the same. Nothing to render.</p><p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button></p>';
 		}
 		let length = parseFloat(document.getElementById('anim-length').value);

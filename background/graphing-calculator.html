@@ -64,7 +64,7 @@
 					<div class="input-group-prepend">
 						<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
 					</div>
-					<input type="text" value="13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)" class="form-control form-control-sm" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
+					<input type="text" value="13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
 					<div class="input-group-append">
 						<button type="submit" class="btn btn-secondary" tabindex="-1">
 							Set
@@ -73,9 +73,37 @@
 				</div>
 			</div>
 		</form>
+		<form class="form-row form-group" id="calc-range-form">
+			<label class="col-3 col-form-label col-form-label-sm" for="calc-min">
+				Range</span>
+			</label>
+			<div class="col-9">
+				<div class="input-group input-group-sm">
+					<input type="text" value="-1" class="form-control text-right" id="calc-min" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
+					<select class="form-control max-w-fit" id="calc-range-units">
+						<option value="1"></option>
+						<option value="PI" selected="">&pi;</option>
+					</select>
+					<div class="input-group-append input-group-prepend">
+						<span class="input-group-text">
+							&le;&nbsp;<span id="calc-variable">t</span>&nbsp;&lt;
+						</span>
+					</div>
+					<input type="text" value="1" class="form-control text-right" id="calc-max" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
+					<div class="input-group-append">
+						<span class="input-group-text bg-white calc-units">
+							&pi;
+						</span>
+						<button type="submit" class="btn btn-secondary">
+							Set
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
 		<output id="calc-error"></output>
 		<fieldset>
-			<legend>Post-Processing</legend>
+			<legend>Subpath Post-Processing</legend>
 			<div class="form-row form-group">
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-translate-x">
 					Translate X
@@ -128,6 +156,42 @@
 	</div>
 
 	<div class="tab-pane" id="calc-shapes" role="tabpanel" aria-labelledby="calc-shapes-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="calc-line-width">
+				Line Width
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="3" class="form-control form-control-sm" id="calc-line-width">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="calc-stroke-color">
+				Line Colour
+			</label>
+			<div class="col-3">
+				<input type="color" value="#000000" class="w-100" id="calc-stroke-color">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stroke-opacity">
+				Line Opacity
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="255" value="255" class="form-control-range mt-1" id="calc-stroke-opacity">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="calc-fill-color">
+				Fill Colour
+			</label>
+			<div class="col-3">
+				<input type="color" value="#ffffff" class="w-100" id="calc-fill-color">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-fill-opacity">
+				Fill Opacity
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="255" value="255" class="form-control-range mt-1" id="calc-fill-opacity">
+			</div>
+		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="calc-rotation">
 				Rotation

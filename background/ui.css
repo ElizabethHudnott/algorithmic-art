@@ -57,6 +57,10 @@ legend {
 	width: max-content;
 }
 
+.max-w-fit {
+	max-width: fit-content;
+}
+
 .emphasize-active .active {
 	font-weight: bold;
 }

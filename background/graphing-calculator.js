@@ -12,10 +12,11 @@
 			const xFormula = this.xFormula, yFormula = this.yFormula;
 			const xScale = yScale * stretch;
 			let i = 0;
-			while (true) {
-				const t = min + i * step;
+			let t;
+			do {
+				t = min + i * step;
 				if (t > max) {
-					break;
+					t = max;
 				}
 				variables.set('t', t);
 				const initialX = xScale * xFormula.eval(variables);
@@ -28,8 +29,9 @@
 					context.lineTo(x, y);
 				}
 				i++;
-			}
+			} while (t < max);
 		}
+
 	}
 
 	function GraphingCalculator() {
@@ -43,6 +45,10 @@
 			const pieceInput = optionsDoc.getElementById('calc-piece');
 			const equationXInput = optionsDoc.getElementById('calc-equation-x');
 			const equationYInput = optionsDoc.getElementById('calc-equation-y');
+			const minInput = optionsDoc.getElementById('calc-min');
+			const maxInput = optionsDoc.getElementById('calc-max');
+			const rangeUnitsInput = optionsDoc.getElementById('calc-range-units');
+			const unitDisplays = optionsDoc.querySelectorAll('.calc-units');
 			const errorBox = optionsDoc.getElementById('calc-error');
 			let shapeNum = 0, pathNum = 0, pieceNum = 0;
 
@@ -106,6 +112,53 @@
 				if (!this.contains(event.relatedTarget)) {
 					compileEquationY();
 				}
+			});
+
+			function updateRange() {
+				let min = parseFraction(minInput.value);
+				let max = parseFraction(maxInput.value);
+				const units = rangeUnitsInput.value;
+				if (units === 'PI') {
+					min *= Math.PI;
+					max *= Math.PI;
+				}
+				me.min[shapeNum][pathNum][pieceNum] = min;
+				me.max[shapeNum][pathNum][pieceNum] = max;
+				const isParametric = me.equations[shapeNum][pathNum][pieceNum] instanceof ParametricEquation;
+				if (!isParametric) {
+					if (pieceNum > 0) {
+						me.max[shapeNum][pathNum][pieceNum - 1] = min;
+					}
+					if (pieceNum < me.min[shapeNum][pathNum].length - 1) {
+						me.min[shapeNum][pathNum][pieceNum + 1] = max;
+					}
+				}
+				progressiveBackgroundGen(me, 0);
+			}
+
+			const rangeForm = optionsDoc.getElementById('calc-range-form');
+			rangeForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				updateRange();
+			});
+			rangeForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					updateRange();
+				}
+			});
+			optionsDoc.getElementById('calc-range-units').addEventListener('input', function (event) {
+				const options = this.children;
+				let units;
+				for (let i = 0; i < options.length; i++) {
+					const option = options[i];
+					if (option.value === this.value) {
+						units = option.innerHTML;
+						break;
+					}
+				}
+				unitDisplays.forEach(function (element) {
+					element.innerHTML = units;
+				});
 			});
 
 			optionsDoc.getElementById('calc-translate-x').addEventListener('input', function (event) {
@@ -173,6 +226,46 @@
 				item.addEventListener('input', setShearDirection);
 			});
 
+			optionsDoc.getElementById('calc-line-width').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.lineWidth[shapeNum] = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			const strokeColorInput = optionsDoc.getElementById('calc-stroke-color');
+			const strokeOpacityInput = optionsDoc.getElementById('calc-stroke-opacity');
+
+			strokeColorInput.addEventListener('input', function (event) {
+				const opacity = me.strokeColor[shapeNum].slice(7);
+				me.strokeColor[shapeNum] = this.value + opacity;
+				progressiveBackgroundGen(me, 0);
+			});
+
+			strokeOpacityInput.addEventListener('input', function (event) {
+				const color = me.strokeColor[shapeNum].slice(0, 7);
+				const opacity = parseInt(this.value).toString(16).padStart(2, '0');
+				me.strokeColor[shapeNum] = color + opacity;
+				progressiveBackgroundGen(me, 0);
+			});
+
+			const fillColorInput = optionsDoc.getElementById('calc-fill-color');
+			const fillOpacityInput = optionsDoc.getElementById('calc-fill-opacity');
+
+			fillColorInput.addEventListener('input', function (event) {
+				const opacity = me.fillColor[shapeNum].slice(7);
+				me.fillColor[shapeNum] = this.value + opacity;
+				progressiveBackgroundGen(me, 0);
+			});
+
+			fillOpacityInput.addEventListener('input', function (event) {
+				const color = me.fillColor[shapeNum].slice(0, 7);
+				const opacity = parseInt(this.value).toString(16).padStart(2, '0');
+				me.fillColor[shapeNum] = color + opacity;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			optionsDoc.getElementById('calc-rotation').addEventListener('input', function (event) {
 				me.rotation[shapeNum] = parseFloat(this.value) * TWO_PI;
 				progressiveBackgroundGen(me, 0);
@@ -195,7 +288,8 @@
 		this.shearY = [];		// Per shape & per subpath
 		this.shearDirection = []; // Per shape & per subpath
 		this.lineWidth = [];	// Per shape
-		this.strokeStyle = [];	// Per shape
+		this.strokeColor = [];	// Per shape
+		this.fillColor = [];	// Per shape
 
 		this.minorAxisMin = -25;
 		this.minorAxisMax = 25;
@@ -208,6 +302,7 @@
 		const equation = this.equations[0][0][0];
 		equation.xFormula = realParser.parse('16 * sin(t)^3');
 		equation.yFormula = realParser.parse('13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)');
+		this.tween = 0;
 	}
 
 	GraphingCalculator.prototype.addShape = function (index) {
@@ -224,7 +319,8 @@
 		this.shearY.splice(index, 0, [0]);
 		this.shearDirection.splice(index, 0, [0]);
 		this.lineWidth.splice(index, 0, 3);
-		this.strokeStyle.splice(index, 0, '#000000');
+		this.strokeColor.splice(index, 0, '#000000ff');
+		this.fillColor.splice(index, 0, '#ffffffff');
 	};
 
 	GraphingCalculator.prototype.addSubpath = function (shapeNum, index) {
@@ -270,8 +366,8 @@
 			yTranslation = this.majorAxisTranslation;
 		}
 		const variables = new Map();
+		variables.set('time', this.tween);
 		for (let shapeNum = 0; shapeNum < this.equations.length; shapeNum++) {
-			context.save();
 			context.beginPath();
 			const shapeEquations = this.equations[shapeNum];
 			const rotation = -this.rotation[shapeNum];
@@ -285,13 +381,13 @@
 
 			for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
 				context.save()
-				const translateX = this.translateX[shapeNum][subpathNum + 1];
-				const translateY = this.translateY[shapeNum][subpathNum + 1];
-				context.translate(shapeTranslateX + translateX, shapeTranslateY + translateY);
+				const translateX = shapeTranslateX + this.translateX[shapeNum][subpathNum + 1];
+				const translateY = shapeTranslateY + this.translateY[shapeNum][subpathNum + 1];
+				context.translate(translateX, translateY);
 				context.rotate(rotation);
 				context.translate(xTranslation, yTranslation);
-				const subpathScale = this.scale[shapeNum][subpathNum + 1];
-				const stretch = this.stretch[shapeNum][subpathNum + 1];
+				const subpathScale = shapeScale * this.scale[shapeNum][subpathNum + 1];
+				const stretch = shapeStretch * this.stretch[shapeNum][subpathNum + 1];
 				const shearDirection = this.shearDirection[shapeNum][subpathNum + 1];
 				const shearX = shapeShearX + this.shearX[shapeNum][subpathNum + 1] * Math.cos(shearDirection);
 				const shearY = shapeShearY + this.shearY[shapeNum][subpathNum + 1] * Math.sin(shearDirection);
@@ -301,17 +397,20 @@
 					const max = this.max[shapeNum][subpathNum][equationNum];
 					const step = this.step[shapeNum][subpathNum][equationNum];
 					subpathEquations[equationNum].draw(
-						context, variables, equationNum === 0, min, max, step,
+						context, new Map(variables), equationNum === 0, min, max, step,
 						subpathScale, stretch, shearX, shearY
 					);
 				}
-				context.closePath();
 				context.restore();
 			}
-			context.lineWidth = this.lineWidth[shapeNum] / scale;
-			context.strokeStyle = this.strokeStyle[shapeNum];
+			const fillColor = this.fillColor[shapeNum];
+			context.fillStyle = fillColor;
+			context.fill();
+			const lineWidth = this.lineWidth[shapeNum];
+			const strokeColor = this.strokeColor[shapeNum];
+			context.lineWidth = lineWidth / scale;
+			context.strokeStyle = strokeColor;
 			context.stroke();
-			context.restore();
 		}
 	};
 

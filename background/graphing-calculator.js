@@ -257,6 +257,13 @@
 				}
 			});
 
+			optionsDoc.getElementById('calc-dash').addEventListener('input', function (event) {
+				if (this.checkValidity()) {
+					me.dash[shapeNum] = parseLineDash(this.value);
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
 			const strokeColorInput = optionsDoc.getElementById('calc-stroke-color');
 			const strokeOpacityInput = optionsDoc.getElementById('calc-stroke-opacity');
 
@@ -312,6 +319,7 @@
 		this.shearDirection = []; // Per shape & per subpath
 		this.closePath = [];	// Per shape, per subpath
 		this.lineWidth = [];	// Per shape
+		this.dash = []			// Per shape
 		this.strokeColor = [];	// Per shape
 		this.fillColor = [];	// Per shape
 		this.fillRule = [];		// Per shape
@@ -336,7 +344,7 @@
 			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
 		],
 		[
-			'repeat', 'closePath', 'lineWidth', 'fillRule'
+			'repeat', 'closePath', 'lineWidth', 'dash', 'fillRule'
 		]
 	];
 
@@ -356,6 +364,7 @@
 		this.shearDirection.splice(index, 0, [0]);
 		this.closePath.splice(index, 0, []);
 		this.lineWidth.splice(index, 0, 3);
+		this.dash.splice(index, 0, [1, 0]);
 		this.strokeColor.splice(index, 0, '#000000ff');
 		this.fillColor.splice(index, 0, '#ff008092');
 		this.fillRule.splice(index, 0, 'nonzero');
@@ -409,13 +418,14 @@
 		const variables = new Map();
 		variables.set('time', this.tween);
 		for (let shapeNum = 0; shapeNum < this.equations.length; shapeNum++) {
+			context.save();
 			context.beginPath();
 			const shapeEquations = this.equations[shapeNum];
 			const rotation = -this.rotation[shapeNum];
 			const shapeTranslateX = this.translateX[shapeNum][0];
 			const shapeTranslateY = this.translateY[shapeNum][0];
 			const shapeScale = this.scale[shapeNum][0];
-			const shapeStretch = this.scale[shapeNum][0];
+			const shapeStretch = this.stretch[shapeNum][0];
 			const shapeShearDirection = this.shearDirection[shapeNum][0];
 			const shapeShearX = this.shearX[shapeNum][0] * Math.cos(shapeShearDirection);
 			const shapeShearY = this.shearY[shapeNum][0] * Math.sin(shapeShearDirection);
@@ -454,14 +464,23 @@
 				}
 				context.restore();
 			}
+			context.scale(shapeScale, shapeScale);
 			const fillColor = this.fillColor[shapeNum];
 			context.fillStyle = fillColor;
 			context.fill(this.fillRule[shapeNum]);
 			const lineWidth = this.lineWidth[shapeNum];
+			context.lineWidth = lineWidth / (scale * shapeScale);
+			const dash = this.dash[shapeNum];
+			const numDashLengths = dash.length;
+			const scaledDash = new Array(numDashLengths);
+			for (let i = 0; i < numDashLengths; i++) {
+				scaledDash[i] = dash[i] / scale;
+			}
+			context.setLineDash(scaledDash);
 			const strokeColor = this.strokeColor[shapeNum];
-			context.lineWidth = lineWidth / scale;
 			context.strokeStyle = strokeColor;
 			context.stroke();
+			context.restore();
 		}
 	};
 

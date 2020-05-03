@@ -193,5 +193,26 @@ function parseFraction(text) {
 	return numerator / denominator;
 }
 
+function parseLineDash(str) {
+	const lengthStrs = str.split(',');
+	let numValues = lengthStrs.length;
+	let lineDash = new Array(numValues);
+	for (let i = 0; i < numValues; i++) {
+		lineDash[i] = parseInt(lengthStrs[i]);
+	}
+	if (numValues === 1) {
+		if (lineDash[0] === 1) {
+			lineDash = [1, 0];
+		} else {
+			lineDash[1] = lineDash[0];
+		}
+	} else if (numValues % 2 === 1) {
+		for (let i = numValues - 2; i > 0; i--) {
+			lineDash.push(lineDash[i]);
+		}
+	}
+	return lineDash;
+}
+
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;

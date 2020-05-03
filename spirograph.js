@@ -1118,7 +1118,7 @@ penWidthInput.addEventListener('input', function (event) {
 	if (this.value !== '') {
 		lineWidth = parseInt(this.value);
 		spiroContext.lineWidth =  lineWidth / scale;
-		parseLineDash();
+		parseAndTrimLineDash();
 		calcTransform();
 		if (!isAnimating()) {
 			updateRotorPosition();
@@ -1127,43 +1127,30 @@ penWidthInput.addEventListener('input', function (event) {
 	}
 });
 
-function parseLineDash() {
+function parseAndTrimLineDash() {
 	if (lineDashInput.checkValidity()) {
-		const lengthStrs = lineDashInput.value.split(',');
-		let numValues = lengthStrs.length;
-		lineDash = new Array(numValues);
-		for (let i = 0; i < numValues; i++) {
-			lineDash[i] = parseInt(lengthStrs[i]);
-		}
-		if (numValues === 1) {
-			if (lineDash[0] === 1) {
-				lineDash = [];
-			} else {
-				lineDash[1] = lineDash[0];
-			}
-		} else if (numValues % 2 === 1) {
-			for (let i = numValues - 2; i > 0; i--) {
-				lineDash.push(lineDash[i]);
-			}
-		}
+		const lineDash = parseLineDash(lineDashInput.value);
 		const halfLineWidth = Math.ceil(lineWidth / 2);
-		numValues = lineDash.length;
+		const numValues = lineDash.length;
 		for (let i = 0; i < numValues; i += 2) {
 			lineDash[i] -= halfLineWidth;
 			if (lineDash[i] < 1) {
-				lineDash[i + 1] += 1 - lineDash[i];
+				if (lineDash[i + 1] > 0) {
+					lineDash[i + 1] += 1 - lineDash[i];
+				}
 				lineDash[i] = 1;
 			}
 		}
 		for (let i = 1; i < numValues; i += 2) {
-			lineDash[i] += halfLineWidth;
+			if (lineDash[i] > 0) {
+				lineDash[i] += halfLineWidth;
+			}
 		}
 		setLineDash();
 	}
 }
 
 function setLineDash() {
-	const lineWidth = spiroContext.lineWidth;
 	const numValues = lineDash.length;
 	const scaledLengths = new Array(numValues);
 	for (let i = 0; i < numValues; i++) {
@@ -1172,7 +1159,7 @@ function setLineDash() {
 	spiroContext.setLineDash(scaledLengths);
 }
 
-lineDashInput.addEventListener('change', parseLineDash);
+lineDashInput.addEventListener('change', parseAndTrimLineDash);
 
 translationXInput.addEventListener('change', function (event) {
 	const amount = parseFloat(this.value);
@@ -1847,7 +1834,7 @@ randomizeSpirographForm();
 updatePenXReadout();
 updatePenYReadout();
 setInitialRotation();
-parseLineDash();
+parseAndTrimLineDash();
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
 	if (animController.status === 'finished') {

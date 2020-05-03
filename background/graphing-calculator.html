@@ -107,7 +107,7 @@
 			</label>
 			<div class="col-3">
 				<div class="input-group input-group-sm">
-					<input type="text" value="1/180" class="form-control" id="calc-step">
+					<input type="text" value="1/180" class="form-control text-right" id="calc-step">
 					<div class="input-group-append">
 						<span class="input-group-text bg-white calc-units">
 							&pi;
@@ -192,6 +192,12 @@
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="3" class="form-control form-control-sm" id="calc-line-width">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-dash">
+				Dash
+			</label>
+			<div class="col-3">
+				<input type="text" value="1,0" class="form-control form-control-sm" id="calc-dash" pattern="\d+(,\s*\d+)*">
 			</div>
 		</div>
 		<div class="form-row form-group">

@@ -188,7 +188,7 @@ function parseFraction(text) {
 	let denominator = 1;
 	const slashPosition = text.indexOf('/');
 	if (slashPosition !== -1) {
-		denominator = parseInt(text.slice(slashPosition + 1));
+		denominator = parseFloat(text.slice(slashPosition + 1));
 	}
 	return numerator / denominator;
 }

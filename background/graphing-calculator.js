@@ -70,6 +70,14 @@
 				pieceSelection.hidden = true;
 			});
 
+			optionsDoc.getElementById('calc-repeat').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.repeat[shapeNum][pathNum] = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			})
+
 			function compileEquationX() {
 				const formulaText = equationXInput.value;
 				try {
@@ -292,6 +300,7 @@
 		this.min = [];			// Per shape, per subpath, per piece
 		this.max = [];			// Per shape, per subpath, per piece
 		this.step = [];			// Per shape, per subpath, per piece
+		this.repeat = [];		// Per shape, per subpath
 
 		this.rotation = [];		// Per shape
 		this.translateX = [];	// Per shape & per subpath
@@ -327,7 +336,7 @@
 			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
 		],
 		[
-			'equations', 'lineWidth', 'fillRule'
+			'repeat', 'closePath', 'lineWidth', 'fillRule'
 		]
 	];
 
@@ -336,6 +345,7 @@
 		this.min.splice(index, 0, []);
 		this.max.splice(index, 0, []);
 		this.step.splice(index, 0, []);
+		this.repeat.splice(index, 0, []);
 		this.rotation.splice(index, 0, 0);
 		this.translateX.splice(index, 0, [0]);
 		this.translateY.splice(index, 0, [0]);
@@ -356,6 +366,7 @@
 		this.min[shapeNum].splice(index, 0, []);
 		this.max[shapeNum].splice(index, 0, []);
 		this.step[shapeNum].splice(index, 0, []);
+		this.repeat[shapeNum].splice(index, 0, 1);
 		this.translateX[shapeNum].splice(index + 1, 0, 0);
 		this.translateY[shapeNum].splice(index + 1, 0, 0);
 		this.scale[shapeNum].splice(index + 1, 0, 1);
@@ -410,6 +421,10 @@
 			const shapeShearY = this.shearY[shapeNum][0] * Math.sin(shapeShearDirection);
 
 			for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
+				const pathRepeat = this.repeat[shapeNum][subpathNum];
+				if (pathRepeat === 0) {
+					continue;
+				}
 				context.save()
 				const translateX = shapeTranslateX + this.translateX[shapeNum][subpathNum + 1];
 				const translateY = shapeTranslateY + this.translateY[shapeNum][subpathNum + 1];
@@ -422,17 +437,20 @@
 				const shearX = shapeShearX + this.shearX[shapeNum][subpathNum + 1] * Math.cos(shearDirection);
 				const shearY = shapeShearY + this.shearY[shapeNum][subpathNum + 1] * Math.sin(shearDirection);
 				const subpathEquations = shapeEquations[subpathNum];
-				for (let equationNum = 0; equationNum < subpathEquations.length; equationNum++) {
-					const min = this.min[shapeNum][subpathNum][equationNum];
-					const max = this.max[shapeNum][subpathNum][equationNum];
-					const step = this.step[shapeNum][subpathNum][equationNum];
-					subpathEquations[equationNum].draw(
-						context, new Map(variables), equationNum === 0, min, max, step,
-						subpathScale, stretch, shearX, shearY
-					);
-				}
-				if (this.closePath[shapeNum][subpathNum]) {
-					context.closePath();
+				for (let n = 0; n < pathRepeat; n++) {
+					variables.set('n', n);
+					for (let equationNum = 0; equationNum < subpathEquations.length; equationNum++) {
+						const min = this.min[shapeNum][subpathNum][equationNum];
+						const max = this.max[shapeNum][subpathNum][equationNum];
+						const step = this.step[shapeNum][subpathNum][equationNum];
+						subpathEquations[equationNum].draw(
+							context, new Map(variables), equationNum === 0, min, max, step,
+							subpathScale, stretch, shearX, shearY
+						);
+					}
+					if (this.closePath[shapeNum][subpathNum]) {
+						context.closePath();
+					}
 				}
 				context.restore();
 			}

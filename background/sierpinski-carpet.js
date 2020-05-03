@@ -264,8 +264,9 @@
 				const relationship = tile.relationship;
 				let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
 				let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
+				let patternedCentre;
 				if (relationship === 12) {
-					const patternedCentre = this.patternedCentre
+					patternedCentre = this.patternedCentre
 					if (this.bipartite) {
 						if (this.patternLocations === 2) {
 							bipartiteColoring = Number(patternedCentre);
@@ -311,7 +312,7 @@
 						context.drawImage(bgGeneratorImage, roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 						context.globalAlpha = 1;
 					}
-				} else {
+				} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
 					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
 				}
 

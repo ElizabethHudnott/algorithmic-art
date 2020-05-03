@@ -37,7 +37,7 @@
 	function GraphingCalculator() {
 		const me = this;
 		this.title = 'Graphing Calculator';
-		this.hasRandomness = true;
+		this.hasRandomness = false;
 		this.optionsDocument = downloadDocument('graphing-calculator.html').then(function (optionsDoc) {
 			const shapeSelection = optionsDoc.getElementById('calc-shape-selection');
 			const subpathSelection = optionsDoc.getElementById('calc-subpath-selection');
@@ -77,7 +77,7 @@
 					errorBox.innerHTML = '';
 					progressiveBackgroundGen(me, 0);
 				} catch (e) {
-					errorBox.innerText = e.message;
+					errorBox.innerText = 'Error in equation for x. ' + e.message;
 				}
 			}
 
@@ -99,7 +99,7 @@
 					errorBox.innerHTML = '';
 					progressiveBackgroundGen(me, 0);
 				} catch (e) {
-					errorBox.innerText = e.message;
+					errorBox.innerText = 'Error in equation for y. ' + e.message;
 				}
 			}
 
@@ -159,6 +159,16 @@
 				unitDisplays.forEach(function (element) {
 					element.innerHTML = units;
 				});
+			});
+			optionsDoc.getElementById('calc-step').addEventListener('input', function (event) {
+				let value = Math.abs(parseFraction(this.value));
+				if (value > 0) {
+					if (rangeUnitsInput.value === 'PI') {
+						value *= Math.PI;
+					}
+					me.step[shapeNum][pathNum][pieceNum] = value;
+					progressiveBackgroundGen(me, 0);
+				}
 			});
 
 			optionsDoc.getElementById('calc-translate-x').addEventListener('input', function (event) {
@@ -226,6 +236,11 @@
 				item.addEventListener('input', setShearDirection);
 			});
 
+			optionsDoc.getElementById('calc-close-path').addEventListener('input', function (event) {
+				me.closePath[shapeNum][pathNum] = this.checked;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			optionsDoc.getElementById('calc-line-width').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 0) {
@@ -237,32 +252,31 @@
 			const strokeColorInput = optionsDoc.getElementById('calc-stroke-color');
 			const strokeOpacityInput = optionsDoc.getElementById('calc-stroke-opacity');
 
-			strokeColorInput.addEventListener('input', function (event) {
-				const opacity = me.strokeColor[shapeNum].slice(7);
-				me.strokeColor[shapeNum] = this.value + opacity;
+			function updateStrokeColor() {
+				const a = parseFloat(strokeOpacityInput.value);
+				const [r, g, b] = hexToRGB(strokeColorInput.value)
+				me.strokeColor[shapeNum] = rgba(r, g, b, a);
 				progressiveBackgroundGen(me, 0);
-			});
+			}
 
-			strokeOpacityInput.addEventListener('input', function (event) {
-				const color = me.strokeColor[shapeNum].slice(0, 7);
-				const opacity = parseInt(this.value).toString(16).padStart(2, '0');
-				me.strokeColor[shapeNum] = color + opacity;
-				progressiveBackgroundGen(me, 0);
-			});
+			strokeColorInput.addEventListener('input', updateStrokeColor);
+			strokeOpacityInput.addEventListener('input', updateStrokeColor);
 
 			const fillColorInput = optionsDoc.getElementById('calc-fill-color');
 			const fillOpacityInput = optionsDoc.getElementById('calc-fill-opacity');
 
-			fillColorInput.addEventListener('input', function (event) {
-				const opacity = me.fillColor[shapeNum].slice(7);
-				me.fillColor[shapeNum] = this.value + opacity;
+			function updateFillColor() {
+				const a = parseFloat(fillOpacityInput.value);
+				const [r, g, b] = hexToRGB(fillColorInput.value)
+				me.fillColor[shapeNum] = rgba(r, g, b, a);
 				progressiveBackgroundGen(me, 0);
-			});
+			}
 
-			fillOpacityInput.addEventListener('input', function (event) {
-				const color = me.fillColor[shapeNum].slice(0, 7);
-				const opacity = parseInt(this.value).toString(16).padStart(2, '0');
-				me.fillColor[shapeNum] = color + opacity;
+			fillColorInput.addEventListener('input', updateFillColor);
+			fillOpacityInput.addEventListener('input', updateFillColor);
+
+			optionsDoc.getElementById('calc-fill-rule').addEventListener('input', function (event) {
+				me.fillRule[shapeNum] = this.value;
 				progressiveBackgroundGen(me, 0);
 			});
 
@@ -287,14 +301,15 @@
 		this.shearX = [];		// Per shape & per subpath
 		this.shearY = [];		// Per shape & per subpath
 		this.shearDirection = []; // Per shape & per subpath
+		this.closePath = [];	// Per shape, per subpath
 		this.lineWidth = [];	// Per shape
 		this.strokeColor = [];	// Per shape
 		this.fillColor = [];	// Per shape
+		this.fillRule = [];		// Per shape
 
 		this.minorAxisMin = -25;
 		this.minorAxisMax = 25;
 		this.majorAxisTranslation = 0;
-
 
 		this.addShape(0);
 		this.addSubpath(0, 0);
@@ -312,7 +327,7 @@
 			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
 		],
 		[
-			'lineWidth'
+			'equations', 'lineWidth', 'fillRule'
 		]
 	];
 
@@ -329,9 +344,11 @@
 		this.shearX.splice(index, 0, [0]);
 		this.shearY.splice(index, 0, [0]);
 		this.shearDirection.splice(index, 0, [0]);
+		this.closePath.splice(index, 0, []);
 		this.lineWidth.splice(index, 0, 3);
 		this.strokeColor.splice(index, 0, '#000000ff');
-		this.fillColor.splice(index, 0, '#ff008090');
+		this.fillColor.splice(index, 0, '#ff008092');
+		this.fillRule.splice(index, 0, 'nonzero');
 	};
 
 	GraphingCalculator.prototype.addSubpath = function (shapeNum, index) {
@@ -346,6 +363,7 @@
 		this.shearX[shapeNum].splice(index + 1, 0, 0);
 		this.shearY[shapeNum].splice(index + 1, 0, 0);
 		this.shearDirection[shapeNum].splice(index + 1, 0, 0);
+		this.closePath[shapeNum].splice(index, 0, false);
 	}
 
 	GraphingCalculator.prototype.addParametricEquation = function (shapeNum, subpathNum, index) {
@@ -366,6 +384,7 @@
 		const scaledWidth = canvasWidth / scale;
 		const scaledHeight = canvasHeight / scale;
 		context.scale(scale, -scale);
+		context.lineJoin = 'bevel';
 		let xTranslation, yTranslation;
 		if (canvasWidth >= canvasHeight) {
 			minDimension = canvasHeight;
@@ -412,11 +431,14 @@
 						subpathScale, stretch, shearX, shearY
 					);
 				}
+				if (this.closePath[shapeNum][subpathNum]) {
+					context.closePath();
+				}
 				context.restore();
 			}
 			const fillColor = this.fillColor[shapeNum];
 			context.fillStyle = fillColor;
-			context.fill();
+			context.fill(this.fillRule[shapeNum]);
 			const lineWidth = this.lineWidth[shapeNum];
 			const strokeColor = this.strokeColor[shapeNum];
 			context.lineWidth = lineWidth / scale;

@@ -284,10 +284,21 @@ function showBackgroundOptions() {
 				return hsla(...tweened);
 			}
 		} else if (Array.isArray(startValue)) {
-			const numComponents = startValue.length;
+			const numStartComponents = startValue.length;
+			const numEndComponents = endValue.length;
+			const numComponents = Math.min(numStartComponents, numEndComponents);
 			const output = new Array(numComponents);
 			for (let i = 0; i < numComponents; i++) {
 				output[i] = interpolateValue(startValue[i], endValue[i], tween, loop);
+			}
+			if (numStartComponents > numEndComponents && tween < 0.5) {
+				for (let i = numEndComponents; i < numStartComponents; i++) {
+					output[i] = startValue[i];
+				}
+			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
+				for (let i = numStartComponents; i < numEndComponents; i++) {
+					output[i] = endValue[i];
+				}
 			}
 			return output;
 		}
@@ -297,10 +308,21 @@ function showBackgroundOptions() {
 		if (!loop && (tween === 1 || startValue === endValue)) {
 			return endValue;
 		} else if (Array.isArray(startValue)) {
-			const numComponents = startValue.length;
+			const numStartComponents = startValue.length;
+			const numEndComponents = endValue.length;
+			const numComponents = Math.min(numStartComponents, numEndComponents);
 			const output = new Array(numComponents);
 			for (let i = 0; i < numComponents; i++) {
 				output[i] = interpolateStep(startValue[i], endValue[i], tween, loop);
+			}
+			if (numStartComponents > numEndComponents && tween < 0.5) {
+				for (let i = numEndComponents; i < numStartComponents; i++) {
+					output[i] = startValue[i];
+				}
+			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
+				for (let i = numStartComponents; i < numEndComponents; i++) {
+					output[i] = endValue[i];
+				}
 			}
 			return output;
 		} else if (typeof(startValue) === 'number') {
@@ -309,7 +331,7 @@ function showBackgroundOptions() {
 				if (tween <= 0.5) {
 					return Math.floor(steps * tween * 2 + startValue);
 				} else {
-					return Math.floor(steps * (1 - (tween - 0.5) * 2) + startValue);
+					return Math.ceil(steps * (1 - (tween - 0.5) * 2) + startValue);
 				}
 			} else {
 				if (steps > 0) {

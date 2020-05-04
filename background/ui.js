@@ -409,22 +409,22 @@ function showBackgroundOptions() {
 					[value1[i], value2[i]] = interpolatePair(start1, end1, start2, end2, interpolate, tween);
 				}
 			}
+			const numEndComponents1 = endValue1.length;
+			const numEndComponents2 = endValue2.length;
 			if (numComponents1 > numComponents2) {
-				for (let i = numComponents2; i < numComponents1; i++) {
-					if (i >= endValue1.length) {
-						value1[i] = startValue1[i];
-					} else {
-						value1[i] = interpolate(startValue1[i], endValue1[i], tween, true);
-					}
+				for (let i = numComponents2; i < numComponents1 && i < numEndComponents1; i++) {
+					value1[i] = interpolate(startValue1[i], endValue1[i], tween, true);
 				}
 			} else if (numComponents2 > numComponents1) {
-				for (let i = numComponents1; i < numComponents2; i++) {
-					if (i >= endValue2.length) {
-						value2[i] = startValue2[i];
-					} else {
-						value2[i] = interpolate(startValue2[i], endValue2[i], tween, true);
-					}
+				for (let i = numComponents1; i < numComponents2 && i < numEndComponents2; i++) {
+					value2[i] = interpolate(startValue2[i], endValue2[i], tween, true);
 				}
+			}
+			for (let i = value1.length; i < numEndComponents1; i++) {
+				value1[i] = endValue1[i];
+			}
+			for (let i = value2.length; i < numEndComponents2; i++) {
+				value2[i] = endValue2[i];
 			}
 		} else {
 			if (startValue1 === startValue2) {

@@ -72,8 +72,9 @@
 
 			optionsDoc.getElementById('calc-repeat').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
+				me.minRepeat[shapeNum][pathNum] = 0;
 				if (value >= 0) {
-					me.repeat[shapeNum][pathNum] = value;
+					me.maxRepeat[shapeNum][pathNum] = value;
 					progressiveBackgroundGen(me, 0);
 				}
 			})
@@ -300,6 +301,15 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			const helpText = `
+<var>t</var> refers to the parameter in parametric equations and to the angle in polar equations.
+<var>x</var> and <var>y</var> refer to positions along the axes in other forms of equations.
+<var>time</var> refers to the proportion of time elapsed between 0 and 1.
+<var>N</var> refers to the number of repetitions.
+<var>n</var> refers to the current repetition number between 0 and <var>N</var>-1.
+			`;
+			errorBox.innerHTML = helpText;
+
 			return optionsDoc;
 		});
 
@@ -307,7 +317,8 @@
 		this.min = [];			// Per shape, per subpath, per piece
 		this.max = [];			// Per shape, per subpath, per piece
 		this.step = [];			// Per shape, per subpath, per piece
-		this.repeat = [];		// Per shape, per subpath
+		this.minRepeat = [];	// Per shape, per subpath
+		this.maxRepeat = [];	// Per shape, per subpath, range is min <= n < max
 
 		this.rotation = [];		// Per shape
 		this.translateX = [];	// Per shape & per subpath
@@ -344,10 +355,13 @@
 			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
 		],
 		stepped: [
-			'repeat', 'closePath', 'lineWidth', 'dash', 'fillRule'
+			'closePath', 'lineWidth', 'dash', 'fillRule'
 		],
 		pairedContinuous: [
 			['max', 'min']	// min catches up to max.
+		],
+		pairedStepped: [
+			['maxRepeat', 'minRepeat']
 		]
 	};
 
@@ -356,7 +370,8 @@
 		this.min.splice(index, 0, []);
 		this.max.splice(index, 0, []);
 		this.step.splice(index, 0, []);
-		this.repeat.splice(index, 0, []);
+		this.minRepeat.splice(index, 0, []);
+		this.maxRepeat.splice(index, 0, []);
 		this.rotation.splice(index, 0, 0);
 		this.translateX.splice(index, 0, [0]);
 		this.translateY.splice(index, 0, [0]);
@@ -378,7 +393,8 @@
 		this.min[shapeNum].splice(index, 0, []);
 		this.max[shapeNum].splice(index, 0, []);
 		this.step[shapeNum].splice(index, 0, []);
-		this.repeat[shapeNum].splice(index, 0, 1);
+		this.minRepeat[shapeNum].splice(index, 0, 0);
+		this.maxRepeat[shapeNum].splice(index, 0, 1);
 		this.translateX[shapeNum].splice(index + 1, 0, 0);
 		this.translateY[shapeNum].splice(index + 1, 0, 0);
 		this.scale[shapeNum].splice(index + 1, 0, 1);
@@ -434,11 +450,13 @@
 			const shapeShearY = this.shearY[shapeNum][0] * Math.sin(shapeShearDirection);
 
 			for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
-				const pathRepeat = this.repeat[shapeNum][subpathNum];
-				if (pathRepeat === 0) {
+				const pathMinRepeat = this.minRepeat[shapeNum][subpathNum];
+				const pathMaxRepeat = this.maxRepeat[shapeNum][subpathNum];
+				if (pathMaxRepeat <= pathMinRepeat) {
 					continue;
 				}
-				context.save()
+				variables.set('N', pathMaxRepeat);
+				context.save();
 				const translateX = shapeTranslateX + this.translateX[shapeNum][subpathNum + 1];
 				const translateY = shapeTranslateY + this.translateY[shapeNum][subpathNum + 1];
 				context.translate(translateX, translateY);
@@ -450,7 +468,7 @@
 				const shearX = shapeShearX + this.shearX[shapeNum][subpathNum + 1] * Math.cos(shearDirection);
 				const shearY = shapeShearY + this.shearY[shapeNum][subpathNum + 1] * Math.sin(shearDirection);
 				const subpathEquations = shapeEquations[subpathNum];
-				for (let n = 0; n < pathRepeat; n++) {
+				for (let n = pathMinRepeat; n < pathMaxRepeat; n++) {
 					variables.set('n', n);
 					for (let equationNum = 0; equationNum < subpathEquations.length; equationNum++) {
 						const min = this.min[shapeNum][subpathNum][equationNum];

@@ -233,7 +233,7 @@ Function
 	}
 
 Name
-	= _ [a-z][a-zA-Z0-9]* { return text(); }
+	= _ [a-zA-Z][a-zA-Z0-9]* { return text(); }
 
 CommaList
 	= head:Expression tail:(_ "," _ Expression)* {

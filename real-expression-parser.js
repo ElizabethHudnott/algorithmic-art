@@ -228,8 +228,8 @@ realParser = /*
           function(name, args) {
           		return new FunctionInvocation(name, args);
           	},
-          /^[a-z]/,
-          peg$classExpectation([["a", "z"]], false, false),
+          /^[a-zA-Z]/,
+          peg$classExpectation([["a", "z"], ["A", "Z"]], false, false),
           /^[a-zA-Z0-9]/,
           peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
           function() { return text(); },
@@ -686,7 +686,7 @@ realParser = /*
     			if (this.isConstant) {
     				this.cachedValue = result;
     			}
-    			return result;			
+    			return result;
     		}
     	}
 

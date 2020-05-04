@@ -412,20 +412,23 @@
 		this.points = undefined;
 	}
 
-	Phyllotaxis.prototype.animatable = [
-		[
+	Phyllotaxis.prototype.animatable = {
+		continuous: [
 			'radius', 'aspectRatio', 'clipping', 'exponent', 'angle', 'spread', 'scale',
-			'start', 'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
+			'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 			'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
 			'spotOffset', 'strokeStyle'
 		],
-		[
-			'skip', 'stacking', 'petalShape', 'maxPetals', 'angleMode',
+		stepped: [
+			'skip', 'stacking', 'petalShape', 'angleMode',
 			'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
+		],
+		pairedStepped: [
+			['maxPetals', 'start']	// start moves towards maxPetals
 		]
-	];
+	};
 
 	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 
@@ -487,7 +490,7 @@
 
 			this.points = []
 			let n = this.start;
-			let numPetals = 0;
+			let numPetals = n;
 			let r = scale * n ** exponent;
 			let skip = this.skip;
 			if (skip === 1) {

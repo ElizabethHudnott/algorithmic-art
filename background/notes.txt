@@ -54,3 +54,4 @@ Parser Failures
 |t^3|
 ending in whitespace
 x(2) should only be interpreted as a function if it is a function
+(a+b)sin(x)

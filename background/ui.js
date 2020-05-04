@@ -131,20 +131,59 @@ function showBackgroundOptions() {
 		constructor(generator, rotation, backgroundElement) {
 			this.continuous = new Map();
 			this.stepped = new Map();
-			if (generator.animatable) {
-				for (let property of generator.animatable[0]) {
-					let value = generator[property];
-					if (Array.isArray(value)) {
-						value = deepCopy(value);
+			this.pairedContinuous = new Map();
+			this.pairedStepped = new Map();
+			const animatable = generator.animatable
+			if (animatable !== undefined) {
+				if ('continuous' in animatable) {
+					for (let property of animatable.continuous) {
+						let value = generator[property];
+						if (Array.isArray(value)) {
+							value = deepCopy(value);
+						}
+						this.continuous.set(property, value);
 					}
-					this.continuous.set(property, value);
 				}
-				for (let property of generator.animatable[1]) {
-					let value = generator[property];
-					if (Array.isArray(value)) {
-						value = deepCopy(value);
+				if ('stepped' in animatable) {
+					for (let property of animatable.stepped) {
+						let value = generator[property];
+						if (Array.isArray(value)) {
+							value = deepCopy(value);
+						}
+						this.stepped.set(property, value);
 					}
-					this.stepped.set(property, value);
+				}
+				if ('pairedContinuous' in animatable) {
+					for (let pair of animatable.pairedContinuous) {
+						const property1 = pair[0];
+						const property2 = pair[1];
+						let value1 = generator[property1];
+						let value2;
+						if (Array.isArray(value1)) {
+							value1 = deepCopy(value1);
+							value2 = deepCopy(generator[property2])
+						} else {
+							value2 = generator[property2];
+						}
+						this.pairedContinuous.set(property1, value1);
+						this.pairedContinuous.set(property2, value2);
+					}
+				}
+				if ('pairedStepped' in animatable) {
+					for (let pair of animatable.pairedStepped) {
+						const property1 = pair[0];
+						const property2 = pair[1];
+						let value1 = generator[property1];
+						let value2;
+						if (Array.isArray(value1)) {
+							value1 = deepCopy(value1);
+							value2 = deepCopy(generator[property2])
+						} else {
+							value2 = generator[property2];
+						}
+						this.pairedStepped.set(property1, value1);
+						this.pairedStepped.set(property2, value2);
+					}
 				}
 			}
 			this.rotation = rotation;
@@ -259,6 +298,26 @@ function showBackgroundOptions() {
 	}
 
 	function interpolateValue(startValue, endValue, tween, loop) {
+		if (Array.isArray(startValue)) {
+			const numStartComponents = startValue.length;
+			const numEndComponents = endValue.length;
+			const numComponents = Math.min(numStartComponents, numEndComponents);
+			const output = new Array(numComponents);
+			for (let i = 0; i < numComponents; i++) {
+				output[i] = interpolateValue(startValue[i], endValue[i], tween, loop);
+			}
+			if (numStartComponents > numEndComponents && tween < 0.5) {
+				for (let i = numEndComponents; i < numStartComponents; i++) {
+					output[i] = startValue[i];
+				}
+			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
+				for (let i = numStartComponents; i < numEndComponents; i++) {
+					output[i] = endValue[i];
+				}
+			}
+			return output;
+		}
+
 		if (loop) {
 			if (tween > 0.5) {
 				tween = 1 - (tween - 0.5) * 2;
@@ -283,24 +342,6 @@ function showBackgroundOptions() {
 			} else {
 				return hsla(...tweened);
 			}
-		} else if (Array.isArray(startValue)) {
-			const numStartComponents = startValue.length;
-			const numEndComponents = endValue.length;
-			const numComponents = Math.min(numStartComponents, numEndComponents);
-			const output = new Array(numComponents);
-			for (let i = 0; i < numComponents; i++) {
-				output[i] = interpolateValue(startValue[i], endValue[i], tween, loop);
-			}
-			if (numStartComponents > numEndComponents && tween < 0.5) {
-				for (let i = numEndComponents; i < numStartComponents; i++) {
-					output[i] = startValue[i];
-				}
-			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
-				for (let i = numStartComponents; i < numEndComponents; i++) {
-					output[i] = endValue[i];
-				}
-			}
-			return output;
 		}
 	}
 
@@ -347,6 +388,83 @@ function showBackgroundOptions() {
 		}
 	}
 
+	function interpolatePair(startValue1, endValue1, startValue2, endValue2, interpolate, tween) {
+		let value1, value2;
+		if (Array.isArray(startValue1)) {
+			value1 = []; value2 = [];
+			const numComponents1 = startValue1.length;
+			const numComponents2 = startValue2.length;
+			const numComponents = Math.min(numComponents1, numComponents2);
+			const output = new Array(numComponents);
+			for (let i = 0; i < numComponents; i++) {
+				const start1 = startValue1[i];
+				const end1 = endValue1[i];
+				const start2 = startValue2[i]
+				const end2 = endValue2[i];
+				if (i >= endValue1.length) {
+					value2[i] = interpolate(start2, end2, tween, true);
+				} else if (i >= endValue2.length) {
+					value1[i] = interpolate(start1, end1, tween, true);
+				} else {
+					[value1[i], value2[i]] = interpolatePair(start1, end1, start2, end2, interpolate, tween);
+				}
+			}
+			if (numComponents1 > numComponents2) {
+				for (let i = numComponents2; i < numComponents1; i++) {
+					if (i >= endValue1.length) {
+						value1[i] = startValue1[i];
+					} else {
+						value1[i] = interpolate(startValue1[i], endValue1[i], tween, true);
+					}
+				}
+			} else if (numComponents2 > numComponents1) {
+				for (let i = numComponents1; i < numComponents2; i++) {
+					if (i >= endValue2.length) {
+						value2[i] = startValue2[i];
+					} else {
+						value2[i] = interpolate(startValue2[i], endValue2[i], tween, true);
+					}
+				}
+			}
+		} else {
+			if (startValue1 === startValue2) {
+				value1 = endValue1;
+				value2 = interpolate(endValue2, endValue1, (tween - 0.5) * 2, false);
+			} else {
+				value1 = interpolate(startValue1, endValue1, tween, true);
+				value2 = interpolate(startValue2, endValue2, tween, true);
+			}
+		}
+		return [value1, value2];
+	}
+
+	function interpolatePairs(pairProperty, stepped, tween, loop) {
+		if (!(pairProperty in bgGenerator.animatable)) {
+			return;
+		}
+		const interpolate = stepped ? interpolateStep : interpolateValue;
+		if (!loop || tween <= 0.5) {
+			for (let [property1, property2] of bgGenerator.animatable[pairProperty]) {
+				const startValue1 = startFrame[pairProperty].get(property1);
+				const endValue1 = endFrame[pairProperty].get(property1);
+				bgGenerator[property1] = interpolate(startValue1, endValue1, tween, loop);
+				const startValue2 = startFrame[pairProperty].get(property2);
+				const endValue2 = endFrame[pairProperty].get(property2);
+				bgGenerator[property2] = interpolate(startValue2, endValue2, tween, loop);
+			}
+		} else {
+			for (let [property1, property2] of bgGenerator.animatable[pairProperty]) {
+				const startValue1 = startFrame[pairProperty].get(property1);
+				const endValue1 = endFrame[pairProperty].get(property1);
+				const startValue2 = startFrame[pairProperty].get(property2);
+				const endValue2 = endFrame[pairProperty].get(property2);
+				const [value1, value2] = interpolatePair(startValue1, endValue1, startValue2, endValue2, interpolate, tween);
+				bgGenerator[property1] = value1;
+				bgGenerator[property2] = value2;
+			}
+		}
+	}
+
 	function renderFrame(context, width, height, tween, loop, paintBackground, preview) {
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
@@ -356,6 +474,8 @@ function showBackgroundOptions() {
 			let endValue = endFrame.stepped.get(property);
 			bgGenerator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
+		interpolatePairs('pairedContinuous', false, tween, loop);
+		interpolatePairs('pairedStepped', true, tween, loop);
 		if ('tween' in bgGenerator) {
 			if (loop) {
 				if (tween > 0.5) {

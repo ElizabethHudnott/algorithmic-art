@@ -204,16 +204,16 @@
 		this.colors = colors;
 	}
 
-	SierpinskiCarpet.prototype.animatable = [
-		[
+	SierpinskiCarpet.prototype.animatable = {
+		continuous: [
 			'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
 			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities'
 		],
-		[
+		stepped: [
 			'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
 			'patternedCentre', 'centreEmphasis', 'bipartite'
 		]
-	];
+	};
 
 	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 

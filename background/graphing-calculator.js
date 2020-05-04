@@ -332,21 +332,24 @@
 		this.addSubpath(0, 0);
 		this.addParametricEquation(0, 0, 0);
 		const equation = this.equations[0][0][0];
-		equation.xFormula = realParser.parse('16 * sin(t)^3');
-		equation.yFormula = realParser.parse('13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)');
+		equation.xFormula = realParser.parse('16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)');
+		equation.yFormula = realParser.parse('(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)');
 		this.tween = 0;
 	}
 
-	GraphingCalculator.prototype.animatable = [
-		[
-			'min', 'max', 'step', 'rotation', 'translateX', 'translateY', 'scale',
+	GraphingCalculator.prototype.animatable = {
+		continuous: [
+			'step', 'rotation', 'translateX', 'translateY', 'scale',
 			'stretch', 'shearX', 'shearY', 'shearDirection', 'strokeColor', 'fillColor',
 			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
 		],
-		[
+		stepped: [
 			'repeat', 'closePath', 'lineWidth', 'dash', 'fillRule'
+		],
+		pairedContinuous: [
+			['max', 'min']	// min catches up to max.
 		]
-	];
+	};
 
 	GraphingCalculator.prototype.addShape = function (index) {
 		this.equations.splice(index, 0, []);

@@ -218,7 +218,9 @@ function showBackgroundOptions() {
 		}
 	}
 
-	modal.style.left = Math.max(Math.round(window.innerWidth - 508), 0) + 'px';
+	const modalWidth = 500
+	const modalMargin = 8;
+	modal.style.left = Math.max(Math.round(window.innerWidth - modalWidth - modalMargin), 0) + 'px';
 
 	function repositionModal() {
 		const grandchild = modal.children[0].children[0];
@@ -975,9 +977,24 @@ function showBackgroundOptions() {
 
 	// After resizing, generate a new background to fit the new window size.
 	let resizeTimer;
+	function resizeWindow() {
+		const rect = modal.getBoundingClientRect();
+		const child = modal.children[0];
+		const maxRight = window.innerWidth - modalMargin;
+		if (rect.right > maxRight) {
+			modal.style.left = Math.max(Math.round(maxRight - modalWidth), 0) + 'px';
+		}
+		const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
+		const childHeight = child.clientHeight;
+		if (rect.top +  childHeight> maxBottom) {
+			modal.style.top = Math.max(Math.round(maxBottom - childHeight), 0) + 'px';
+		}
+		generateBackground();
+	}
+
 	window.addEventListener('resize', function (event) {
 		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(generateBackground, 100);
+		resizeTimer = setTimeout(resizeWindow, 100);
 	});
 
 	let modalDrag;

@@ -301,6 +301,51 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			const minorRangeForm = optionsDoc.getElementById('calc-minor-range-form');
+			const minorMinInput = optionsDoc.getElementById('calc-minor-min');
+			const minorMaxInput = optionsDoc.getElementById('calc-minor-max');
+
+			function rescaleMinorAxis() {
+				let min = parseFloat(minorMinInput.value);
+				let max = parseFloat(minorMaxInput.value);
+				if (min === max) {
+					return;
+				} else if (min > max) {
+					const temp = min;
+					min = max;
+					max = temp;
+				}
+				me.minorAxisMin = min;
+				me.minorAxisMax = max;
+				progressiveBackgroundGen(me, 0);
+			}
+
+			minorRangeForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				rescaleMinorAxis();
+			});
+			minorRangeForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					rescaleMinorAxis();
+				}
+			});
+
+			optionsDoc.getElementById('calc-grid-minor-major').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.minorAxisMajorGridlines = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('calc-grid-major-major').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value > 0) {
+					me.majorAxisMajorGridlines = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
 			optionsDoc.getElementById('calc-major-grid-intensity').addEventListener('input', function (event) {
 				me.majorGridlineIntensity = parseFloat(this.value);
 				progressiveBackgroundGen(me, 0);
@@ -354,7 +399,7 @@
 		this.minorAxisMinorGridlines = 1;
 		this.majorGridlineIntensity = 0.64;
 		this.minorGridlineIntensity = 0.4;	// Relative to major grid lines
-		this.gridlineColor = '#000000';
+		this.gridlineColor = '#008000';
 
 		this.addShape(0);
 		this.addSubpath(0, 0);
@@ -369,7 +414,9 @@
 		continuous: [
 			'step', 'rotation', 'translateX', 'translateY', 'scale',
 			'stretch', 'shearX', 'shearY', 'shearDirection', 'strokeColor', 'fillColor',
-			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation'
+			'minorAxisMin', 'minorAxisMax', 'majorAxisTranslation',
+			'majorGridlineIntensity', 'gridlineColor', 'majorAxisMajorGridlines',
+			'minorAxisMajorGridlines'
 		],
 		stepped: [
 			'closePath', 'lineWidth', 'dash', 'fillRule'
@@ -527,7 +574,7 @@
 			context.restore();
 		}
 
-		let [r, g, b] = hexToRGB(this.gridlineColor);
+		let [r, g, b] = parseColor(this.gridlineColor)[1];
 		let gridIntensity = this.majorGridlineIntensity;
 		r = r * gridIntensity + 255 * (1 - gridIntensity);
 		g = g * gridIntensity + 255 * (1 - gridIntensity);
@@ -541,6 +588,7 @@
 		context.translate(xNudge, yNudge);
 		context.globalCompositeOperation = 'multiply';
 		if (canvasWidth >= canvasHeight) {
+			context.translate(0, -(minorAxisMin + minorAxisMax) / 2);
 			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
 			for (let x = minGridline; x < majorAxisMax; x += majorAxisMajorGL) {
 				context.beginPath();
@@ -558,6 +606,7 @@
 				context.stroke();
 			}
 		} else {
+			context.translate(-(minorAxisMin + minorAxisMax) / 2, 0);
 			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
 			for (let y = minGridline; y < majorAxisMax; y += majorAxisMajorGL) {
 				context.beginPath();

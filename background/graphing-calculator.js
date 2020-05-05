@@ -301,6 +301,16 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			optionsDoc.getElementById('calc-major-grid-intensity').addEventListener('input', function (event) {
+				me.majorGridlineIntensity = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('calc-grid-color').addEventListener('input', function (event) {
+				me.gridlineColor = this.value;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			const helpText = `
 <var>t</var> refers to the parameter in parametric equations and to the angle in polar equations.
 <var>x</var> and <var>y</var> refer to positions along the axes in other forms of equations.
@@ -338,6 +348,13 @@
 		this.minorAxisMin = -25;
 		this.minorAxisMax = 25;
 		this.majorAxisTranslation = 0;
+		this.majorAxisMajorGridlines = 5;
+		this.minorAxisMajorGridlines = 5;
+		this.majorAxisMinorGridlines = 1;
+		this.minorAxisMinorGridlines = 1;
+		this.majorGridlineIntensity = 0.64;
+		this.minorGridlineIntensity = 0.4;	// Relative to major grid lines
+		this.gridlineColor = '#000000';
 
 		this.addShape(0);
 		this.addSubpath(0, 0);
@@ -419,20 +436,26 @@
 	GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		let minDimension = Math.min(canvasWidth, canvasHeight);
 		context.translate(canvasWidth / 2, canvasHeight / 2);
-		const scale = minDimension / (this.minorAxisMax - this.minorAxisMin);
+		const minorAxisMin = this.minorAxisMin;
+		const minorAxisMax = this.minorAxisMax;
+		const scale = minDimension / (minorAxisMax - minorAxisMin);
 		const scaledWidth = canvasWidth / scale;
 		const scaledHeight = canvasHeight / scale;
 		context.scale(scale, -scale);
 		context.lineJoin = 'bevel';
-		let xTranslation, yTranslation;
+		let xTranslation, yTranslation, majorAxisMin, majorAxisMax;
 		if (canvasWidth >= canvasHeight) {
 			minDimension = canvasHeight;
 			xTranslation = this.majorAxisTranslation;
-			yTranslation = -(this.minorAxisMin + this.minorAxisMax) / 2;
+			yTranslation = -(minorAxisMin + minorAxisMax) / 2;
+			majorAxisMin = -scaledWidth / 2 + xTranslation;
+			majorAxisMax = scaledWidth / 2 - xTranslation;
 		} else {
 			minDimension = canvasWidth;
-			xTranslation = -(this.minorAxisMin + this.minorAxisMax) / 2;
+			xTranslation = -(minorAxisMin + minorAxisMax) / 2;
 			yTranslation = this.majorAxisTranslation;
+			majorAxisMin = -scaledHeight / 2 + yTranslation;
+			majorAxisMax = scaledHeight / 2 - yTranslation;
 		}
 		const variables = new Map();
 		variables.set('time', this.tween);
@@ -502,6 +525,55 @@
 			context.strokeStyle = strokeColor;
 			context.stroke();
 			context.restore();
+		}
+
+		let [r, g, b] = hexToRGB(this.gridlineColor);
+		let gridIntensity = this.majorGridlineIntensity;
+		r = r * gridIntensity + 255 * (1 - gridIntensity);
+		g = g * gridIntensity + 255 * (1 - gridIntensity);
+		b = b * gridIntensity + 255 * (1 - gridIntensity);
+		context.strokeStyle = rgba(r, g, b, 1);
+		context.lineWidth = 1 / scale;
+		const majorAxisMajorGL = this.majorAxisMajorGridlines;
+		const minorAxisMajorGL = this.minorAxisMajorGridlines;
+		const xNudge = 0.5 * (1 - context.canvas.width % 2) / scale;
+		const yNudge = 0.5 * (1 - context.canvas.height % 2) / scale;
+		context.translate(xNudge, yNudge);
+		context.globalCompositeOperation = 'multiply';
+		if (canvasWidth >= canvasHeight) {
+			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
+			for (let x = minGridline; x < majorAxisMax; x += majorAxisMajorGL) {
+				context.beginPath();
+				const xRounded = Math.round(x * scale) / scale;
+				context.moveTo(xRounded, minorAxisMin);
+				context.lineTo(xRounded, minorAxisMax);
+				context.stroke();
+			}
+			minGridline = minorAxisMin - (minorAxisMin % minorAxisMajorGL);
+			for (let y = minGridline; y < minorAxisMax; y += minorAxisMajorGL) {
+				context.beginPath();
+				const yRounded = Math.round(y * scale) / scale;
+				context.moveTo(majorAxisMin, yRounded);
+				context.lineTo(majorAxisMax, yRounded);
+				context.stroke();
+			}
+		} else {
+			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
+			for (let y = minGridline; y < majorAxisMax; y += majorAxisMajorGL) {
+				context.beginPath();
+				const yRounded = Math.round(y * scale) / scale;
+				context.moveTo(minorAxisMin, yRounded);
+				context.lineTo(minorAxisMax, yRounded);
+				context.stroke();
+			}
+			minGridline = minorAxisMin - (minorAxisMin % minorAxisMajorGL);
+			for (let x = minGridline; x < minorAxisMax; x += minorAxisMajorGL) {
+				context.beginPath();
+				const xRounded = Math.round(x * scale) / scale;
+				context.moveTo(xRounded, majorAxisMin);
+				context.lineTo(xRounded, majorAxisMax);
+				context.stroke();
+			}
 		}
 	};
 

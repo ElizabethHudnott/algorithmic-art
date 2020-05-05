@@ -4,6 +4,7 @@ Environment
 Link from home page
 Revise Patreon description
 Add credits
+User created sketches
 Thumbnail creation dialog
 Thumbnail based new dialog
 Responsiveness issues

@@ -132,13 +132,13 @@
 					Translate X
 				</label>
 				<div class="col-3">
-					<input type="number" value="0" class="form-control form-control-sm" id="calc-translate-x">
+					<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-x">
 				</div>
 				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-translate-y">
 					Translate Y
 				</label>
 				<div class="col-3">
-					<input type="number" value="0" class="form-control form-control-sm" id="calc-translate-y">
+					<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-y">
 				</div>
 			</div>
 			<div class="form-row form-group">
@@ -213,7 +213,7 @@
 				Line Opacity
 			</label>
 			<div class="col-3">
-				<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-1" id="calc-stroke-opacity">
+				<input type="range" min="0" max="1" step="0.05" value="1" class="form-control-range mt-1" id="calc-stroke-opacity">
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -227,7 +227,7 @@
 				Fill Opacity
 			</label>
 			<div class="col-3">
-				<input type="range" min="0" max="1" step="any" value="0.57" class="form-control-range mt-1" id="calc-fill-opacity">
+				<input type="range" min="0" max="1" step="0.05" value="0.55" class="form-control-range mt-1" id="calc-fill-opacity">
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -264,11 +264,17 @@
 					Major Lines
 				</label>
 				<div class="col-3">
-					<input type="range" min="0" max="1" value="0.64" step="0.04" class="form-control-range mt-1" id="calc-major-grid-intensity">
+					<input type="range" min="0" max="1" value="0.65" step="0.05" class="form-control-range mt-1" id="calc-major-grid-intensity">
 				</div>
 			</div>
 			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="calc-grid-color">
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-axis-intensity">
+					Axis Lines
+				</label>
+				<div class="col-3">
+					<input type="range" min="0" max="1" value="0.1" step="0.05" class="form-control-range mt-1" id="calc-axis-intensity">
+				</div>
+				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-grid-color">
 					Colour
 				</label>
 				<div class="col-3">
@@ -284,11 +290,11 @@
 				</label>
 				<div class="col-9">
 					<div class="input-group input-group-sm">
-						<input type="number" value="-25" class="form-control" id="calc-minor-min">
+						<input type="number" step="any" value="-25" class="form-control" id="calc-minor-min">
 						<div class="input-group-append input-group-prepend">
 							<span class="input-group-text">to</span>
 						</div>
-						<input type="number" value="25" class="form-control" id="calc-minor-max">
+						<input type="number" step="any" value="25" class="form-control" id="calc-minor-max">
 						<div class="input-group-append">
 							<button type="submit" class="btn btn-secondary">
 								Set
@@ -302,18 +308,26 @@
 					Major Lines
 				</label>
 				<div class="col-3">
-					<input type="number" min="0" value="5" class="form-control form-control-sm" id="calc-grid-minor-major">
+					<input type="number" min="0" step="any" value="5" class="form-control form-control-sm" id="calc-grid-minor-major">
 				</div>
 			</div>
 		</fieldset>
 		<fieldset>
 			<legend>Major Axis</legend>
 			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-major-axis-center">
+					Centre
+				</label>
+				<div class="col-3">
+					<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-major-axis-center">
+				</div>
+			</div>
+			<div class="form-row form-group">
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-grid-major-major">
 					Major Lines
 				</label>
 				<div class="col-3">
-					<input type="number" min="0" value="5" class="form-control form-control-sm" id="calc-grid-major-major">
+					<input type="number" min="0" step="any" value="5" class="form-control form-control-sm" id="calc-grid-major-major">
 				</div>
 			</div>
 		</fieldset>

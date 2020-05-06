@@ -32,6 +32,37 @@
 			} while (t < max);
 		}
 
+		getBoundingBox(variables, min, max, step) {
+			const xFormula = this.xFormula, yFormula = this.yFormula;
+			variables.set('t', min);
+			let minX = xFormula.eval(variables);
+			let minY = yFormula.eval(variables);
+			let maxX = minX, maxY = minY;
+			let i = 1;
+			let t;
+			do {
+				t = min + i * step;
+				if (t > max) {
+					t = max;
+				}
+				variables.set('t', t);
+				const x = xFormula.eval(variables);
+				const y = yFormula.eval(variables);
+				if (x < minX) {
+					minX = x;
+				} else if (x > maxX) {
+					maxX = x;
+				}
+				if (y < minY) {
+					minY = y;
+				} else if (y > maxY) {
+					maxY = y;
+				}
+				i++;
+			} while (t < max);
+			return new BoundingBox(minX, maxX, minY, maxY);
+		}
+
 	}
 
 	function GraphingCalculator() {
@@ -301,6 +332,21 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			optionsDoc.getElementById('calc-major-grid-intensity').addEventListener('input', function (event) {
+				me.majorGridlineIntensity = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('calc-axis-intensity').addEventListener('input', function (event) {
+				me.axisIntensity = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('calc-grid-color').addEventListener('input', function (event) {
+				me.gridlineColor = this.value;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			const minorRangeForm = optionsDoc.getElementById('calc-minor-range-form');
 			const minorMinInput = optionsDoc.getElementById('calc-minor-min');
 			const minorMaxInput = optionsDoc.getElementById('calc-minor-max');
@@ -337,6 +383,13 @@
 					progressiveBackgroundGen(me, 0);
 				}
 			});
+			optionsDoc.getElementById('calc-major-axis-center').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value)) {
+					me.majorAxisTranslation = -value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
 
 			optionsDoc.getElementById('calc-grid-major-major').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
@@ -344,16 +397,6 @@
 					me.majorAxisMajorGridlines = value;
 					progressiveBackgroundGen(me, 0);
 				}
-			});
-
-			optionsDoc.getElementById('calc-major-grid-intensity').addEventListener('input', function (event) {
-				me.majorGridlineIntensity = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
-			});
-
-			optionsDoc.getElementById('calc-grid-color').addEventListener('input', function (event) {
-				me.gridlineColor = this.value;
-				progressiveBackgroundGen(me, 0);
 			});
 
 			const helpText = `
@@ -397,7 +440,8 @@
 		this.minorAxisMajorGridlines = 5;
 		this.majorAxisMinorGridlines = 1;
 		this.minorAxisMinorGridlines = 1;
-		this.majorGridlineIntensity = 0.64;
+		this.axisIntensity = 0.1;
+		this.majorGridlineIntensity = 0.65;
 		this.minorGridlineIntensity = 0.4;	// Relative to major grid lines
 		this.gridlineColor = '#008000';
 
@@ -448,7 +492,7 @@
 		this.lineWidth.splice(index, 0, 3);
 		this.dash.splice(index, 0, [1, 0]);
 		this.strokeColor.splice(index, 0, '#000000ff');
-		this.fillColor.splice(index, 0, '#ff008092');
+		this.fillColor.splice(index, 0, '#ff00808c');
 		this.fillRule.splice(index, 0, 'nonzero');
 	};
 
@@ -495,13 +539,13 @@
 			minDimension = canvasHeight;
 			xTranslation = this.majorAxisTranslation;
 			yTranslation = -(minorAxisMin + minorAxisMax) / 2;
-			majorAxisMin = -scaledWidth / 2 + xTranslation;
+			majorAxisMin = -scaledWidth / 2 - xTranslation;
 			majorAxisMax = scaledWidth / 2 - xTranslation;
 		} else {
 			minDimension = canvasWidth;
 			xTranslation = -(minorAxisMin + minorAxisMax) / 2;
 			yTranslation = this.majorAxisTranslation;
-			majorAxisMin = -scaledHeight / 2 + yTranslation;
+			majorAxisMin = -scaledHeight / 2 - yTranslation;
 			majorAxisMax = scaledHeight / 2 - yTranslation;
 		}
 		const variables = new Map();
@@ -560,45 +604,59 @@
 			context.fillStyle = fillColor;
 			context.fill(this.fillRule[shapeNum]);
 			const lineWidth = this.lineWidth[shapeNum];
-			context.lineWidth = lineWidth / (scale * shapeScale);
-			const dash = this.dash[shapeNum];
-			const numDashLengths = dash.length;
-			const scaledDash = new Array(numDashLengths);
-			for (let i = 0; i < numDashLengths; i++) {
-				scaledDash[i] = dash[i] / scale;
+			if (lineWidth > 0) {
+				context.lineWidth = lineWidth / (scale * shapeScale);
+				const dash = this.dash[shapeNum];
+				const numDashLengths = dash.length;
+				const scaledDash = new Array(numDashLengths);
+				for (let i = 0; i < numDashLengths; i++) {
+					scaledDash[i] = dash[i] / scale;
+				}
+				context.setLineDash(scaledDash);
+				const strokeColor = this.strokeColor[shapeNum];
+				context.strokeStyle = strokeColor;
+				context.stroke();
 			}
-			context.setLineDash(scaledDash);
-			const strokeColor = this.strokeColor[shapeNum];
-			context.strokeStyle = strokeColor;
-			context.stroke();
 			context.restore();
 		}
 
 		let [r, g, b] = parseColor(this.gridlineColor)[1];
 		let gridIntensity = this.majorGridlineIntensity;
-		r = r * gridIntensity + 255 * (1 - gridIntensity);
-		g = g * gridIntensity + 255 * (1 - gridIntensity);
-		b = b * gridIntensity + 255 * (1 - gridIntensity);
-		context.strokeStyle = rgba(r, g, b, 1);
+		let rPrime = r * gridIntensity + 255 * (1 - gridIntensity);
+		let gPrime = g * gridIntensity + 255 * (1 - gridIntensity);
+		let bPrime = b * gridIntensity + 255 * (1 - gridIntensity);
+		context.strokeStyle = rgba(rPrime, gPrime, bPrime, 1);
 		context.lineWidth = 1 / scale;
 		const majorAxisMajorGL = this.majorAxisMajorGridlines;
 		const minorAxisMajorGL = this.minorAxisMajorGridlines;
 		const xNudge = 0.5 * (1 - context.canvas.width % 2) / scale;
 		const yNudge = 0.5 * (1 - context.canvas.height % 2) / scale;
-		context.translate(xNudge, yNudge);
+		context.translate(xTranslation + xNudge, yTranslation + yNudge);
 		context.globalCompositeOperation = 'multiply';
+		let minMajorGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
+		if (minMajorGridline === majorAxisMin) {
+			minMajorGridline += majorAxisMajorGL;
+		}
+		let minMinorGridline = minorAxisMin - (minorAxisMin % minorAxisMajorGL);
+		if (minMinorGridline === minorAxisMin) {
+			minMinorGridline += minorAxisMajorGL;
+		}
 		if (canvasWidth >= canvasHeight) {
 			context.translate(0, -(minorAxisMin + minorAxisMax) / 2);
-			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
-			for (let x = minGridline; x < majorAxisMax; x += majorAxisMajorGL) {
+			for (let x = minMajorGridline; x < majorAxisMax; x += majorAxisMajorGL) {
+				if (x === 0) {
+					continue;
+				}
 				context.beginPath();
 				const xRounded = Math.round(x * scale) / scale;
 				context.moveTo(xRounded, minorAxisMin);
 				context.lineTo(xRounded, minorAxisMax);
 				context.stroke();
 			}
-			minGridline = minorAxisMin - (minorAxisMin % minorAxisMajorGL);
-			for (let y = minGridline; y < minorAxisMax; y += minorAxisMajorGL) {
+			for (let y = minMinorGridline; y < minorAxisMax; y += minorAxisMajorGL) {
+				if (y === 0) {
+					continue;
+				}
 				context.beginPath();
 				const yRounded = Math.round(y * scale) / scale;
 				context.moveTo(majorAxisMin, yRounded);
@@ -607,16 +665,20 @@
 			}
 		} else {
 			context.translate(-(minorAxisMin + minorAxisMax) / 2, 0);
-			let minGridline = majorAxisMin - (majorAxisMin % majorAxisMajorGL);
-			for (let y = minGridline; y < majorAxisMax; y += majorAxisMajorGL) {
+			for (let y = minMajorGridline; y < majorAxisMax; y += majorAxisMajorGL) {
+				if (y === 0) {
+					continue;
+				}
 				context.beginPath();
 				const yRounded = Math.round(y * scale) / scale;
 				context.moveTo(minorAxisMin, yRounded);
 				context.lineTo(minorAxisMax, yRounded);
 				context.stroke();
 			}
-			minGridline = minorAxisMin - (minorAxisMin % minorAxisMajorGL);
-			for (let x = minGridline; x < minorAxisMax; x += minorAxisMajorGL) {
+			for (let x = minMinorGridline; x < minorAxisMax; x += minorAxisMajorGL) {
+				if (x === 0) {
+					continue;
+				}
 				context.beginPath();
 				const xRounded = Math.round(x * scale) / scale;
 				context.moveTo(xRounded, majorAxisMin);
@@ -624,6 +686,36 @@
 				context.stroke();
 			}
 		}
+		const axisIntensity = gridIntensity + this.axisIntensity * (1 - gridIntensity);
+		rPrime = r * axisIntensity + 255 * (1 - axisIntensity);
+		gPrime = g * axisIntensity + 255 * (1 - axisIntensity);
+		bPrime = b * axisIntensity + 255 * (1 - axisIntensity);
+		context.strokeStyle = rgba(rPrime, gPrime, bPrime, 1);
+		let unnudge = this.axisIntensity >= 0.05 ? 1 : 0;
+		if (unnudge) {
+			context.lineWidth = 2 / scale;
+		}
+		context.beginPath();
+
+		if (majorAxisMin < 0 && majorAxisMax > 0) {
+			if (canvasWidth > canvasHeight) {
+				context.moveTo(-xNudge * unnudge, minorAxisMin);
+				context.lineTo(-xNudge * unnudge, minorAxisMax);
+			} else {
+				context.moveTo(minorAxisMin, -yNudge * unnudge);
+				context.lineTo(minorAxisMax, -yNudge * unnudge);
+			}
+		}
+		if (minorAxisMin < 0 && minorAxisMax > 0) {
+			if (canvasWidth > canvasHeight) {
+				context.moveTo(majorAxisMin, -yNudge * unnudge);
+				context.lineTo(majorAxisMax, -yNudge * unnudge);
+			} else {
+				context.moveTo(-xNudge * unnudge, majorAxisMin);
+				context.lineTo(-xNudge * unnudge, majorAxisMax);
+			}
+		}
+		context.stroke();
 	};
 
 	backgroundGenerators.set('graphing-calculator', new GraphingCalculator());

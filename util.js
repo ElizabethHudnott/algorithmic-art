@@ -216,3 +216,13 @@ function parseLineDash(str) {
 
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;
+
+class BoundingBox {
+	constructor(minX, maxX, minY, maxY) {
+		this.minX = minX;
+		this.maxX = maxX;
+		this.minY = minY;
+		this.maxY = maxY;
+	}
+
+}

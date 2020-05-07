@@ -29,6 +29,7 @@ Background: color, picture, video or fix current image
 Existing Sketches
 -----------------
 Phyllotaxis
+	Radial blur
 	Add note to spread
 	Centre piece?
 	Primes
@@ -36,8 +37,7 @@ Phyllotaxis
 	Ways to choose an angle: Continued fractions?
 	Mirrored radial colour transitions
 	Fade hue through black or white
-	Hue rotation of images
-	Improve performance with images
+	Improve performance with images (prerender filters, pre-resize if no growth)
 	Alternative petal shapes:
 		Curves
 		Polygon: join adjacent points

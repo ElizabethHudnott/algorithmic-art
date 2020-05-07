@@ -342,17 +342,19 @@
 
 			const shadowColorInput = optionsDoc.getElementById('phyllotaxis-shadow-color');
 			shadowColorInput.addEventListener('input', function (event) {
-				const shade = parseInt(this.max) - parseInt(this.value);
-				me.shadowColor = rgba(shade, shade, shade, 1);
+				me.shadowColor = rgba(0, 0, 0, parseFloat(this.value));
 				progressiveBackgroundGen(me, 3);
 			});
 			shadowColorInput.addEventListener('pointerup', fullRecolor);
 			shadowColorInput.addEventListener('keyup', fullRecolor);
 
-			optionsDoc.getElementById('phyllotaxis-outline').addEventListener('input', function (event) {
+			const outlineInput = optionsDoc.getElementById('phyllotaxis-outline');
+			outlineInput.addEventListener('input', function (event) {
 				me.strokeStyle = 'rgba(0, 0, 0, ' + this.value + ')';
-				progressiveBackgroundGen(me, 2);
+				progressiveBackgroundGen(me, 3);
 			});
+			outlineInput.addEventListener('pointerup', fullRecolor);
+			outlineInput.addEventListener('keyup', fullRecolor);
 
 			return optionsDoc;
 		});
@@ -573,10 +575,10 @@
 			saturationVaries = variesRegExp.test(this.saturationMode);
 			lightnessVaries = variesRegExp.test(this.lightnessMode);
 			if (hueVaries) {
-				this.spriteSheet.width = bgGeneratorImage.naturalWidth;
-				this.spriteSheet.height = bgGeneratorImage.naturalHeight;
+				this.spriteSheet.width = imageWidth;
+				this.spriteSheet.height = imageHeight;
 				const spriteContext = this.spriteSheet.getContext('2d');
-				spriteContext.filter = 'url("filters.svg#red")';
+				spriteContext.filter = 'url("filters.svg#green")';
 				spriteContext.drawImage(bgGeneratorImage, 0, 0);
 				image = this.spriteSheet;
 			} else {
@@ -590,6 +592,18 @@
 		context.beginPath();
 		context.ellipse(0, 0, maxRX, maxRY, 0, 0, TWO_PI);
 		context.clip();
+
+/*
+		context.beginPath();
+		context.ellipse(0, 0, 400, 400, 0, 0, TWO_PI);
+		const centreGradient = context.createRadialGradient(0, 0, 0, 0, 0, 400);
+		centreGradient.addColorStop(0, '#330000ff');
+		centreGradient.addColorStop(0.2, '#880000ff');
+		centreGradient.addColorStop(1, '#88000000');
+		context.fillStyle = centreGradient;
+		context.fill();
+*/
+
 		const stroke = petalShape !== 'i' && strokeStyle !== 'rgba(0, 0, 0, 0)';
 		context.strokeStyle = strokeStyle;
 		context.shadowColor = this.shadowColor;

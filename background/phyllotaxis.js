@@ -406,6 +406,8 @@
 		this.shadowBlur = 0;
 		this.shadowOffset = 0;
 		this.spotOffset = 0;
+
+		this.spriteSheet = document.createElement('CANVAS');
 	}
 
 	Phyllotaxis.prototype.purgeCache = function () {
@@ -562,11 +564,25 @@
 			sinShadowAngle = Math.sin(shadowAngle);
 		}
 		const spotOffset = this.spotOffset;
-		const applyFilters = preview === 0 || preview === 2;
-		const variesRegExp = /[ar]/;
-		const saturationVaries = variesRegExp.test(this.saturationMode);
-		const lightnessVaries = variesRegExp.test(this.lightnessMode);
-		const opacityVaries = variesRegExp.test(this.opacityMode);
+
+		let applyFilters, hueVaries, saturationVaries, lightnessVaries, image;
+		if (petalShape === 'i') {
+			applyFilters = preview === 0 || preview === 2;
+			const variesRegExp = /[ar]/;
+			hueVaries = variesRegExp.test(this.hueMode);
+			saturationVaries = variesRegExp.test(this.saturationMode);
+			lightnessVaries = variesRegExp.test(this.lightnessMode);
+			if (hueVaries) {
+				this.spriteSheet.width = bgGeneratorImage.naturalWidth;
+				this.spriteSheet.height = bgGeneratorImage.naturalHeight;
+				const spriteContext = this.spriteSheet.getContext('2d');
+				spriteContext.filter = 'url("filters.svg#red")';
+				spriteContext.drawImage(bgGeneratorImage, 0, 0);
+				image = this.spriteSheet;
+			} else {
+				image = bgGeneratorImage;
+			}
+		}
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
 		const maxRX = maxR * aspectRatio;
@@ -669,6 +685,9 @@
 				const imageResizedWidth = 2 * petalSize * imageAspect;
 				let filter = '';
 				if (applyFilters) {
+					if (hueVaries) {
+						filter += 'hue-rotate(' + (hue - 120) + 'deg) ';
+					}
 					if (saturationVaries) {
 						filter += 'saturate(' + saturation + ') ';
 					}
@@ -681,7 +700,7 @@
 					context.filter = filter;
 				}
 				context.globalAlpha = opacity;
-				context.drawImage(bgGeneratorImage, -imageResizedWidth / 2, -imageResizedHeight / 2, imageResizedWidth, imageResizedHeight);
+				context.drawImage(image, -imageResizedWidth / 2, -imageResizedHeight / 2, imageResizedWidth, imageResizedHeight);
 			}
 			if (stroke) {
 				context.shadowOffsetX = 0;

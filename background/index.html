@@ -198,15 +198,6 @@
 			<div class="modal-body">
 				<div class="form-row form-group">
 					<div class="col-1"></div>
-					<label class="col-3 col-form-label">
-						Full Rotations
-					</label>
-					<div class="col-3">
-						<input type="number" value="0" id="background-rotations" class="form-control">
-					</div>
-				</div>
-				<div class="form-row form-group">
-					<div class="col-1"></div>
 					<div class="col-3 col-form-label">
 						Looping
 					</div>
@@ -216,6 +207,47 @@
 							<label class="form-check-label" for="anim-loop">
 								Rollback some parameters to their start positions
 							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-1"></div>
+					<label class="col-3 col-form-label">
+						Full Rotations
+					</label>
+					<div class="col-3">
+						<input type="number" value="0" id="background-rotations" class="form-control">
+					</div>
+				</div>
+				<div class="form-row mb-2">
+					<div class="col-1"></div>
+					<div class="col-11 col-form-label">
+						Rotational Geometry
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-4 text-center" title="No size adjustment">
+						<div class="form-check text-center">
+							<label class="form-check-label mb-2" for="bg-rotation-size-screen">
+								<img src="../img/rotate-as-is.svg" class="w-100" alt="No adjustment">
+							</label>
+							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-screen" aria-label="Rotate without any size adjustment" checked>
+						</div>
+					</div>
+					<div class="col-4 text-center" title="Resize to fit everything on screen">
+						<div class="form-check text-center">
+							<label class="form-check-label mb-2" for="bg-rotation-size-square">
+								<img src="../img/rotate-square.svg" class="w-100" alt="Fit screen">
+							</label>
+							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-square" aria-label="Fit everything on screen when rotating">
+						</div>
+					</div>
+					<div class="col-4 text-center" title="Fill the screen">
+						<div class="form-check text-center">
+							<label class="form-check-label mb-2" for="bg-rotation-size-fill">
+								<img src="../img/rotate-hypotenuse.svg" class="w-100" alt="Fill screen">
+							</label>
+							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-fill" aria-label="Always fill the screen when rotating">
 						</div>
 					</div>
 				</div>

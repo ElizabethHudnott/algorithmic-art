@@ -356,8 +356,48 @@
 			outlineInput.addEventListener('pointerup', fullRecolor);
 			outlineInput.addEventListener('keyup', fullRecolor);
 
+			const centerInnerRadiusInput = optionsDoc.getElementById('phyllotaxis-center-inner-radius');
+			centerInnerRadiusInput.addEventListener('input', function (event) {
+				me.centerInnerRadius = parseFloat(this.value);
+				progressiveBackgroundGen(me, 3);
+			});
+			centerInnerRadiusInput.addEventListener('pointerup', fullRecolor);
+			centerInnerRadiusInput.addEventListener('keyup', fullRecolor);
+
+			const centerMidRadiusInput = optionsDoc.getElementById('phyllotaxis-center-mid-radius');
+			centerMidRadiusInput.addEventListener('input', function (event) {
+				me.centerMidRadius = parseFloat(this.value);
+				progressiveBackgroundGen(me, 3);
+			});
+			centerMidRadiusInput.addEventListener('pointerup', fullRecolor);
+			centerMidRadiusInput.addEventListener('keyup', fullRecolor);
+
+			const centerOuterRadiusInput = optionsDoc.getElementById('phyllotaxis-center-outer-radius');
+			centerOuterRadiusInput.addEventListener('input', function (event) {
+				me.centerOuterRadius = parseFloat(this.value);
+				progressiveBackgroundGen(me, 3);
+			});
+			centerOuterRadiusInput.addEventListener('pointerup', fullRecolor);
+			centerOuterRadiusInput.addEventListener('keyup', fullRecolor);
+
+			optionsDoc.getElementById('phyllotaxis-center-inner-color').addEventListener('input', function (event) {
+				me.centerInnerColor = this.value;
+				progressiveBackgroundGen(me, 2);
+			});
+
+			optionsDoc.getElementById('phyllotaxis-center-mid-color').addEventListener('input', function (event) {
+				me.centerMidColor = this.value;
+				progressiveBackgroundGen(me, 2);
+			});
+
 			return optionsDoc;
 		});
+
+		this.centerInnerRadius = 0.10;
+		this.centerMidRadius = 0.4;
+		this.centerOuterRadius = 0;
+		this.centerInnerColor = '#003300';
+		this.centerMidColor = '#008800';
 
 		this.points = undefined;
 		this.radiusPreset = 'max';
@@ -422,8 +462,9 @@
 			'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 			'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 			'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
-			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur', 'shadowOffset',
-			'spotOffset', 'strokeStyle'
+			'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur',
+			'shadowOffset', 'spotOffset', 'strokeStyle', 'centerInnerRadius',
+			'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
 		],
 		stepped: [
 			'skip', 'stacking', 'petalShape', 'angleMode',
@@ -480,6 +521,7 @@
 			this.radius = maxR / hypotenuse;
 		}
 
+		const petalShape = this.petalShape;
 		const petalStretch = this.petalStretch;
 		const petalDistortion = aspectRatio >= 1 ? petalStretch : 1 / petalStretch;
 
@@ -487,7 +529,7 @@
 			const angle = this.angle;
 			const exponent = this.exponent;
 			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
-			const petalSize = this.petalSize * (this.petalShape === 'i' ? 2 : 1);
+			const petalSize = this.petalSize * (petalShape === 'i' ? 2 : 1);
 			const petalEnlargement = this.petalEnlargement;
 			const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 			const clipping = this.clipping;
@@ -542,10 +584,6 @@
 			stacking = -1; // iterate from outermost to innermost
 		}
 
-		const petalShape = this.petalShape;
-		const imageWidth = bgGeneratorImage.width;
-		const imageHeight = bgGeneratorImage.height;
-		const imageAspect = imageWidth / imageHeight;
 		const strokeStyle = this.strokeStyle;
 		const fillRadius = petalShape === 'r' ? Math.SQRT2 : 1;
 
@@ -567,8 +605,11 @@
 		}
 		const spotOffset = this.spotOffset;
 
-		let applyFilters, hueVaries, saturationVaries, lightnessVaries, image;
+		let image, imageAspect, applyFilters, hueVaries, saturationVaries, lightnessVaries;
 		if (petalShape === 'i') {
+			const imageWidth = bgGeneratorImage.width;
+			const imageHeight = bgGeneratorImage.height;
+			imageAspect = imageWidth / imageHeight;
 			applyFilters = preview === 0 || preview === 2;
 			const variesRegExp = /[ar]/;
 			hueVaries = variesRegExp.test(this.hueMode);
@@ -587,22 +628,33 @@
 		}
 
 		context.translate(canvasWidth / 2, canvasHeight / 2);
+
+		const centerOuterRadius = this.centerOuterRadius * hypotenuse;
+		if (centerOuterRadius > 0) {
+			context.save();
+			context.scale(aspectRatio, 1);
+			context.beginPath();
+			context.arc(0, 0, centerOuterRadius, 0, TWO_PI);
+			const gradient = context.createRadialGradient(0, 0, 0, 0, 0, centerOuterRadius);
+			const innnerColor = this.centerInnerColor;
+			gradient.addColorStop(0, innnerColor);
+			const midRadius = this.centerMidRadius;
+			const innerRadius = this.centerInnerRadius * midRadius;
+			gradient.addColorStop(innerRadius, innnerColor);
+			const midColor = this.centerMidColor;
+			gradient.addColorStop(midRadius, midColor);
+			const [r, g, b] = parseColor(midColor)[1];
+			gradient.addColorStop(1, rgba(r, g, b, 0));
+			context.fillStyle = gradient;
+			context.fill();
+			context.restore();
+		}
+
 		const maxRX = maxR * aspectRatio;
 		const maxRY = maxR;
 		context.beginPath();
 		context.ellipse(0, 0, maxRX, maxRY, 0, 0, TWO_PI);
 		context.clip();
-
-/*
-		context.beginPath();
-		context.ellipse(0, 0, 400, 400, 0, 0, TWO_PI);
-		const centreGradient = context.createRadialGradient(0, 0, 0, 0, 0, 400);
-		centreGradient.addColorStop(0, '#330000ff');
-		centreGradient.addColorStop(0.2, '#880000ff');
-		centreGradient.addColorStop(1, '#88000000');
-		context.fillStyle = centreGradient;
-		context.fill();
-*/
 
 		const stroke = petalShape !== 'i' && strokeStyle !== 'rgba(0, 0, 0, 0)';
 		context.strokeStyle = strokeStyle;

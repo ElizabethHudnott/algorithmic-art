@@ -5,14 +5,12 @@ Link from home page
 Revise Patreon description
 Add credits
 User created sketches
-Thumbnail creation dialog
 Thumbnail based new dialog
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider
 Hide rotation for circular sketches
-Look into using ImageBitmap objects
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
@@ -23,15 +21,15 @@ Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
 Ability to incorporate video data
 	as component image and as background
-Background: color, picture, video or fix current image
+Radial blur
+Background: color, picture, video or layered sketches
+Animation easing
 
 
 Existing Sketches
 -----------------
 Phyllotaxis
-	Radial blur
 	Add note to spread
-	Centre piece?
 	Primes
 	Fill background with spokes?
 	Ways to choose an angle: Continued fractions?
@@ -43,6 +41,9 @@ Phyllotaxis
 		Polygon: join adjacent points
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
+
+Sierpinski Carpet
+	Lopsidedness
 
 
 New Sketches

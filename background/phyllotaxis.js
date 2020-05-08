@@ -4,6 +4,7 @@
 	function Phyllotaxis() {
 		const me = this;
 		this.title = 'Phyllotaxis';
+		this.credits = 'Inspired by Daniel Sheefmahhnnn\'s <a href="https://thecodingtrain.com/CodingChallenges/030-phyllotaxis.html" target="_blank">Coding Challenge #30</a>, which he developed from the book <a href="http://algorithmicbotany.org/papers/#abop" target="_blank">The Algorithmic Beauty of Plants</a> by Prusinkiewicz &amp; Lindenmayer';
 		this.hasRandomness = false;
 
 		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {

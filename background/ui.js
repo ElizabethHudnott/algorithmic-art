@@ -259,7 +259,11 @@ function showBackgroundOptions() {
 				if (imageCtrlLocation !== null) {
 					imageCtrlLocation.appendChild(imageUpload);
 				}
-				repositionModal();
+				if (modal.classList.contains('show')) {
+					repositionModal();
+				} else {
+					modal.children[0].classList.add('modal-dialog-centered');
+				}
 			}
 
 			// Switch out previous DOM

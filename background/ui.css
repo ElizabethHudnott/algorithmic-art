@@ -15,6 +15,10 @@ legend {
 	font-size: 1.25rem;
 }
 
+.modal-header {
+	padding: 0.7rem;
+}
+
 .progress-bar {
 	overflow: visible;
 }

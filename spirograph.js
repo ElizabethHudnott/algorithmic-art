@@ -1220,9 +1220,9 @@ function setPenColor() {
 	this.classList.add('active');
 }
 
-penSwatches.forEach(function (item) {
-	item.parentElement.addEventListener('click', setPenColor);
-});
+for (let swatch of penSwatches) {
+	swatch.parentElement.addEventListener('click', setPenColor);
+};
 
 customPenInput.addEventListener('click', function (event) {
 	spiroContext.strokeStyle = this.value;
@@ -1254,9 +1254,9 @@ function setCompositionOp() {
 	spiroContext.globalCompositeOperation = compositionOp;
 }
 
-document.getElementsByName('composition').forEach(function (item) {
+for (let item of document.getElementsByName('composition')) {
 	item.addEventListener('input', setCompositionOp);
-});
+};
 
 
 function setPaperColor() {
@@ -1269,9 +1269,9 @@ function setPaperColor() {
 	this.classList.add('active');
 }
 
-paperSwatches.forEach(function (item) {
-	item.parentElement.addEventListener('click', setPaperColor);
-});
+for (let swatch of paperSwatches) {
+	swatch.parentElement.addEventListener('click', setPaperColor);
+};
 
 customPaperInput.addEventListener('click', function (event) {
 	spiroCanvas.style.backgroundColor = this.value;

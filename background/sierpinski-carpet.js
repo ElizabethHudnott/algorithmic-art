@@ -7,7 +7,7 @@
 		this.title = 'Sierpinski Carpet';
 		this.hasRandomness = false;
 
-		this.optionsDocument = downloadDocument('sierpinski-carpet.html').then(function (optionsDoc) {
+		this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
 			function fullRedraw() {
 				progressiveBackgroundGen(me, 0);
@@ -49,17 +49,17 @@
 				}
 			}
 
-			optionsDoc.querySelectorAll('input[name=carpet-filling]').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=carpet-filling]')) {
 				item.addEventListener('input', setFilling);
-			});
+			};
 
-			optionsDoc.querySelectorAll('input[name=carpet-pattern-location]').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=carpet-pattern-location]')) {
 				item.addEventListener('input', function (event) {
 					const locations = parseInt(this.value);
 					me.patternLocations = locations;
 					progressiveBackgroundGen(me, 0);
-				})
-			});
+				});
+			};
 
 			optionsDoc.getElementById('carpet-patterned-centre').addEventListener('input', function (event) {
 				me.patternedCentre = this.checked;
@@ -214,8 +214,6 @@
 			'patternedCentre', 'centreEmphasis', 'bipartite'
 		]
 	};
-
-	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 
 	function Tile(x, y, relationship) {
 		this.x = x;
@@ -389,4 +387,5 @@
 		context.fill();
 	};
 
+	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
 }

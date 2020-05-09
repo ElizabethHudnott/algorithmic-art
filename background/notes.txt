@@ -5,7 +5,6 @@ Link from home page
 Revise Patreon description
 Add credits
 User created sketches
-Thumbnail based new dialog
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches

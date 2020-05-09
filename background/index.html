@@ -53,30 +53,9 @@
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
 
-	<div class="dropdown">
-		<button type="button" class="btn btn-light dropdown-toggle" id="btn-generator" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose another sketch">
-			<img src="../img/module.png" alt="Sketch">
-		</button>
-		<div class="dropdown-menu p-0 emphasize-active w-fit" aria-labelledby="btn-generator">
-			<div id="generators" class="btn-group-toggle p-0 bg-white opaque" data-toggle="buttons">
-				<label class="btn d-block text-left pl-3">
-					<input type="radio" name="generator" value="ten-print">10 PRINT
-				</label>
-				<label class="btn d-block text-left pl-3">
-					<input type="radio" name="generator" value="circle-packing">Circle Packing
-				</label>
-				<label class="btn d-block text-left pl-3">
-					<input type="radio" name="generator" value="graphing-calculator">Graphing Calculator
-				</label>
-				<label class="btn d-block text-left pl-3">
-					<input type="radio" name="generator" value="phyllotaxis">Phyllotaxis
-				</label>
-				<label class="btn d-block text-left pl-3">
-					<input type="radio" name="generator" value="sierpinski-carpet">Sierpinski Carpet
-				</label>
-			</div>
-		</div>
-	</div>
+	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch">
+		<img src="../img/module.png" alt="Sketch">
+	</button>
 	<button type="button" class="btn btn-light" id="btn-background-gen-options" title="Change parameters">
 		<img src="../img/gear_in.png" alt="Parameters">
 	</button>
@@ -122,10 +101,10 @@
  			</form>
  		</div>
   	</div>
-	<button type="button" class="btn btn-light" title="Create video" data-toggle="modal" data-target="#video-modal">
+	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#video-modal" title="Create video">
 		<img src="../img/film.png" alt="Video">
 	</button>
-	<button type="button" class="btn btn-light" title="Download picture" data-toggle="modal" data-target="#save-pic-modal">
+	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
 		<img src="../img/picture_save.png" alt="Download">
 	</button>
 	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#help-modal" title="Help">
@@ -133,8 +112,29 @@
 	</button>
 </div>
 
-<div class="modal fade" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false" style="z-index: 0">
-	<div class="modal-dialog modal-dialog-centered mx-0" role="document">
+<div class="modal fade" id="sketches-modal" tabindex="-1" role="dialog" aria-labelledby="sketches-modal-title" aria-hidden="true">
+	<div class="modal-dialog modal-wide" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="sketches-modal-title">Choose A Sketch</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="card-deck btn-group-toggle thumbnails px-2" data-toggle="buttons" id="sketch-list">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			  	<button class="btn btn-primary" id="btn-open-sketch">Select</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade p-0" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false" style="z-index: 0">
+	<div class="modal-dialog mx-0" role="document">
 		<form id="background-gen-form" class="modal-content">
 			<div class="modal-header" id="background-gen-modal-header" title="Double click to collapse">
 				<h5 class="modal-title" id="background-gen-modal-label"></h5>
@@ -433,7 +433,7 @@
 </div>
 
 <div class="modal fade show" id="help-modal" tabindex="-1" role="dialog" aria-labelledby="help-modal-title" aria-hidden="true">
-	<div class="modal-dialog" role="document" style="max-width: 90%">
+	<div class="modal-dialog modal-wide" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="help-modal-title">Welcome to Creative Coding With Elizabeth!</h5>

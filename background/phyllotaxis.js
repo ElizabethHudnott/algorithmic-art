@@ -7,7 +7,7 @@
 		this.credits = 'Inspired by Daniel Sheefmahhnnn\'s <a href="https://thecodingtrain.com/CodingChallenges/030-phyllotaxis.html" target="_blank">Coding Challenge #30</a>, which he developed from the book <a href="http://algorithmicbotany.org/papers/#abop" target="_blank">The Algorithmic Beauty of Plants</a> by Prusinkiewicz &amp; Lindenmayer';
 		this.hasRandomness = false;
 
-		this.optionsDocument = downloadDocument('phyllotaxis.html').then(function (optionsDoc) {
+		this.optionsDocument = downloadFile('phyllotaxis.html', 'document').then(function (optionsDoc) {
 			const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
 			const angleModeSelect = optionsDoc.getElementById('phyllotaxis-angle-mode');
 			const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
@@ -109,14 +109,14 @@
 				}
 			});
 
-			const polygonOpts = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
+			const polygonOptions = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
 			function setShape(event) {
 				const shape = this.value;
 				me.petalShape = shape;
 				const shapeIsImage = shape === 'i';
-				polygonOpts.forEach(function (item) {
-					item.hidden = shapeIsImage;
-				});
+				for (let element of polygonOptions) {
+					element.hidden = shapeIsImage;
+				};
 				if (shapeIsImage && bgGeneratorImage.src === '') {
 					document.getElementById('background-gen-image-upload').click();
 				} else {
@@ -124,9 +124,9 @@
 				}
 			}
 
-			optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]')) {
 				item.addEventListener('input', setShape);
-			});
+			};
 
 			optionsDoc.getElementById('phyllotaxis-petal-size').addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
@@ -162,9 +162,9 @@
 				progressiveBackgroundGen(me, 0);
 			}
 
-			optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]')) {
 				item.addEventListener('input', setStacking);
-			});
+			};
 
 			angleModeSelect.addEventListener('input', function (event) {
 				const value = this.value;
@@ -476,8 +476,6 @@
 		]
 	};
 
-	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
-
 	class Petal {
 		constructor(r, theta, petalSize) {
 			this.r = r;
@@ -778,4 +776,5 @@
 		}
 	};
 
+	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
 }

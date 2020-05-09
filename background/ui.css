@@ -45,6 +45,23 @@ legend {
 	position: absolute;
 }
 
+.modal-content {
+	max-height: calc(100vh - 1rem - 2px);
+}
+
+.modal-body {
+	overflow-y: auto;
+}
+
+.modal-wide {
+	width: fit-content;
+	max-width: 90%;
+}
+
+.modal-wide .modal-content {
+	width: fit-content;
+}
+
 .opaque {
 	opacity: 1;
 }
@@ -57,20 +74,17 @@ legend {
 	width: 60% !important;
 }
 
-.w-fit {
-	width: max-content;
-}
-
 .max-w-fit {
 	max-width: fit-content;
 }
 
-.emphasize-active .active {
-	font-weight: bold;
+.thumbnails>.active {
+	background-color: var(--light);
+	box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);
 }
 
-#background-gen-modal {
-	top: 1.75rem;
+.thumbnails .card {
+	width: 168px;
 }
 
 #background-gen-modal-header {

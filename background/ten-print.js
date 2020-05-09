@@ -11,7 +11,7 @@
 		this.hasRandomness = true;
 		this.credits = 'Inspired by Daniel Sheefmahhnnn\'s <a href="https://thecodingtrain.com/CodingChallenges/076-10print.html" target="_blank">Coding Challenge #76</a>, which he developed from the book <a href="https://10print.org" target="_blank">10 PRINT</a> by Montfort et al.';
 
-		this.optionsDocument = downloadDocument('ten-print.html').then(function (optionsDoc) {
+		this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {
 			optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
 				me.zoomOut = parseFloat(this.value);
 				progressiveBackgroundGen(me, 1);
@@ -61,8 +61,6 @@
 		// Stroke width as a proportion of the cell's area.
 		this.strokeRatio = 0.12;
 	}
-
-	backgroundGenerators.set('ten-print', new TenPrint());
 
 	TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		let beginTime = performance.now();
@@ -175,4 +173,5 @@
 		}
 	}
 
+	backgroundGenerators.set('ten-print', new TenPrint());
 }

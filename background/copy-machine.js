@@ -60,8 +60,6 @@
 
 	}
 
-	backgroundGenerators.set('copy-machine', new CopyMachine());
-
 	CopyMachine.prototype.draw = function (context, shapeNum, depth) {
 		this.renderings[shapeNum].draw(context, 0, 0, this.sizes[shapeNum]);
 		if (depth < this.depth) {
@@ -89,4 +87,5 @@
 		this.draw(context, 0, 0);
 	}
 
+	backgroundGenerators.set('copy-machine', new CopyMachine());
 }

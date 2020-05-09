@@ -64,7 +64,7 @@
 		this.title = 'Circle Packing';
 		this.hasRandomness = true;
 
-		this.optionsDocument = downloadDocument('circle-packing.html').then(function (optionsDoc) {
+		this.optionsDocument = downloadFile('circle-packing.html', 'document').then(function (optionsDoc) {
 
 			const maxGrowthInput = optionsDoc.getElementById('circle-pack-max-growth');
 
@@ -73,9 +73,9 @@
 				progressiveBackgroundGen(me, 0);
 			}
 
-			optionsDoc.querySelectorAll('input[name=circle-pack-shape]').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=circle-pack-shape]')) {
 				item.addEventListener('input', setShape);
-			});
+			};
 
 			optionsDoc.getElementById('circle-pack-num-seeds').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
@@ -200,8 +200,6 @@
 	CirclePacking.prototype.purgeCache = function () {
 		this.shapes = undefined;
 	}
-
-	backgroundGenerators.set('circle-packing', new CirclePacking);
 
 	CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const shapes = this.seedShapes.slice();
@@ -438,4 +436,5 @@
 		return fullSize;
 	}
 
+	backgroundGenerators.set('circle-packing', new CirclePacking());
 }

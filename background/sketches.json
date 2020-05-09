@@ -1,0 +1,39 @@
+{
+	"sketches": [
+		{
+			"title": "10 PRINT",
+			"url": "ten-print.js",
+			"thumbnail": "thumbnail/ten-print.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["BASIC", "lines"]
+		},
+		{
+			"title": "Circle Packing",
+			"url": "circle-packing.js",
+			"thumbnail": "thumbnail/circle-packing.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["circles"]
+		},
+		{
+			"title": "Graphing Calculator",
+			"url": "graphing-calculator.js",
+			"thumbnail": "thumbnail/graphing-calculator.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["mathematics"]
+		},
+		{
+			"title": "Phyllotaxis",
+			"url": "phyllotaxis.js",
+			"thumbnail": "thumbnail/phyllotaxis.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["plants", "golden ratio", "spirals"]
+		},
+		{
+			"title": "Sierpinski Carpet",
+			"url": "sierpinski-carpet.js",
+			"thumbnail": "thumbnail/sierpinski-carpet.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["fractals", "recursion", "squares"]
+		}
+	]
+}

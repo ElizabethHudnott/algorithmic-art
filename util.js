@@ -54,14 +54,17 @@ function injectScript(src) {
 	});
 }
 
-function downloadDocument(url) {
+function downloadFile(url, type) {
 	return new Promise(function (resolve, reject) {
 		const request = new XMLHttpRequest();
-		request.onload = function() {
-			resolve(this.responseXML);
-		}
 		request.open("GET", url);
-		request.responseType = "document";
+		request.responseType = type;
+		request.timeout = 60000;
+		request.addEventListener('load', function() {
+			resolve(this.response);
+		});
+		request.addEventListener('error', reject);
+		request.addEventListener('timeout', reject);
 		request.send();
 	});
 }

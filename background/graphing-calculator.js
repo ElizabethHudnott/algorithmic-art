@@ -69,7 +69,7 @@
 		const me = this;
 		this.title = 'Graphing Calculator';
 		this.hasRandomness = false;
-		this.optionsDocument = downloadDocument('graphing-calculator.html').then(function (optionsDoc) {
+		this.optionsDocument = downloadFile('graphing-calculator.html', 'document').then(function (optionsDoc) {
 			const shapeSelection = optionsDoc.getElementById('calc-shape-selection');
 			const subpathSelection = optionsDoc.getElementById('calc-subpath-selection');
 			const pieceSelection = optionsDoc.getElementById('calc-piece-selection');
@@ -196,9 +196,9 @@
 						break;
 					}
 				}
-				unitDisplays.forEach(function (element) {
+				for (let element of unitDisplays) {
 					element.innerHTML = units;
-				});
+				};
 			});
 			optionsDoc.getElementById('calc-step').addEventListener('input', function (event) {
 				let value = Math.abs(parseFraction(this.value));
@@ -272,9 +272,9 @@
 				progressiveBackgroundGen(me, 0);
 			}
 
-			optionsDoc.querySelectorAll('input[name=calc-shear-direction').forEach(function (item) {
+			for (let item of optionsDoc.querySelectorAll('input[name=calc-shear-direction')) {
 				item.addEventListener('input', setShearDirection);
-			});
+			};
 
 			optionsDoc.getElementById('calc-close-path').addEventListener('input', function (event) {
 				me.closePath[shapeNum][pathNum] = this.checked;
@@ -719,5 +719,4 @@
 	};
 
 	backgroundGenerators.set('graphing-calculator', new GraphingCalculator());
-
 }

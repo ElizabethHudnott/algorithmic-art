@@ -32,36 +32,7 @@ const bgGeneratorImage = new Image();
 bgGeneratorImage.onload = generateBackground;
 
 const signatureFont = 'italic 20px "Pacifico", cursive';
-let signatureWidth, signatureHeight;
-let author = '';
-
-function drawSignature(context, backgroundColor) {
-	context.restore();
-	context.save();
-	context.shadowColor = 'transparent';
-	context.font = signatureFont;
-	context.textAlign = 'left';
-	context.textBaseline = 'bottom';
-	const text = 'Elizabeth Hudnott' + (author === '' ? '' : ' & ' + author);
-	const metrics = context.measureText(text);
-	const scale = context.savedScale || 1;
-	const paddingX = Math.ceil(3 / scale);
-	const paddingY = Math.ceil(4 / scale);
-	signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
-	signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
-	const canvasHeight = context.canvas.height / scale;
-	if (backgroundColor === undefined) {
-		context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
-		backgroundColor = backgroundElement.style.backgroundColor;
-	} else {
-		context.fillStyle = backgroundColor;
-		context.fillRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
-	}
-	const [colorSystem, colorComponents] = parseColor(backgroundColor);
-	const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
-	context.fillStyle = luma >= 0.5 ? 'black' : 'white';
-	context.fillText(text, paddingX, canvasHeight);
-}
+let drawSignature;
 
 function progressiveBackgroundDraw(generator, context, width, height, preview) {
 	const redraw = generator.generate(context, width, height, preview);
@@ -105,8 +76,9 @@ function showBackgroundOptions() {
 
 {
 	const urlParameters = new URLSearchParams(document.location.search);
+	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
-	let bgGeneratorName, startFrame, endFrame, animController;
+	let generatorName, startFrame, endFrame, animController;
 	let fullRotations = 0, loopAnim = false;
 
 	const errorAlert = $('#error-alert');
@@ -116,6 +88,7 @@ function showBackgroundOptions() {
 	const authorForm = document.getElementById('author-form');
 	const authorInput = document.getElementById('author');
 
+	const sketchCards = document.getElementById('sketch-list');
 	const modal = document.getElementById('background-gen-modal');
 	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
@@ -205,38 +178,138 @@ function showBackgroundOptions() {
 		elem.timeout = setTimeout(hideAlert, 6000, jquery);
 	}
 
-	function backgroundGeneratorFactory(name) {
+	let signatureWidth, signatureHeight;
+	let userDisplayName = undefined;
+
+	drawSignature = function (context, backgroundColor) {
+		context.restore();
+		context.save();
+		context.shadowColor = 'transparent';
+		context.font = signatureFont;
+		context.textAlign = 'left';
+		context.textBaseline = 'bottom';
+		let text = '';
+		let sketchAuthor;
+		if (currentSketch) {
+			sketchAuthor = currentSketch.author;
+		}
+		if (sketchAuthor) {
+			text = sketchAuthor;
+			if (userDisplayName) {
+				text += ' & ';
+			}
+		}
+		if (userDisplayName) {
+			text += userDisplayName;
+		}
+		if (text == '') {
+			// For mouse zoning
+			signatureWidth = 100;
+			signatureHeight = 30;
+		} else {
+			const metrics = context.measureText(text);
+			const scale = context.savedScale || 1;
+			const paddingX = Math.ceil(3 / scale);
+			const paddingY = Math.ceil(4 / scale);
+			signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
+			signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
+			const canvasHeight = context.canvas.height / scale;
+			if (backgroundColor === undefined) {
+				context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
+				backgroundColor = backgroundElement.style.backgroundColor;
+			} else {
+				context.fillStyle = backgroundColor;
+				context.fillRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
+			}
+			const [colorSystem, colorComponents] = parseColor(backgroundColor);
+			const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
+			context.fillStyle = luma >= 0.5 ? 'black' : 'white';
+			context.fillText(text, paddingX, canvasHeight);
+		}
+	}
+
+	function generatorFactory(name, url) {
 		let generator = backgroundGenerators.get(name);
 		if (generator === undefined) {
-			return injectScript(name + '.js').then(function () {
+			return injectScript(url).then(function () {
 				return  backgroundGenerators.get(name);
 			});
 		} else {
 			return new Promise(function (resolve, reject) {
 				return resolve(generator);
-			})
+			});
 		}
 	}
 
-	const modalWidth = 500
+	const modalWidth = 500;
 	const modalMargin = 8;
 	modal.style.left = Math.max(Math.round(window.innerWidth - modalWidth - modalMargin), 0) + 'px';
 
-	function repositionModal() {
-		const grandchild = modal.children[0].children[0];
-		const top = Math.max(Math.round((window.innerHeight - grandchild.clientHeight) / 2), 0);
-		modal.style.top = top + 'px';
+	function repositionModal(centre) {
+		if (modal.classList.contains('show')) {
+			const child = modal.children[0];
+			const rect = child.getBoundingClientRect();
+			const maxRight = window.innerWidth - modalMargin;
+			if (rect.right > maxRight) {
+				modal.style.left = Math.max(Math.round(maxRight - modalWidth), 0) + 'px';
+			}
+
+			if (centre) {
+				const grandchild = modal.children[0].children[0];
+				const top = Math.max(Math.round((window.innerHeight - grandchild.clientHeight) / 2), 0);
+				modal.style.top = top + 'px';
+			} else {
+				const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
+				const childHeight = child.clientHeight;
+				if (rect.top +  childHeight > maxBottom) {
+					modal.style.top = Math.max(Math.round(maxBottom - childHeight), 0) + 'px';
+				}
+			}
+		}
 	}
 
-	function switchBackgroundGenerator(name) {
-		backgroundGeneratorFactory(name).then(function (gen) {
+	function addSketch(sketch) {
+		const label = document.createElement('LABEL');
+		label.classList.add('btn' , 'p-1', 'm-1');
+		const input = document.createElement('INPUT');
+		input.type = 'radio';
+		input.name = 'sketch';
+		input._sketch = sketch;
+		label.appendChild(input);
+		const card = document.createElement('DIV');
+		card.classList.add('card', 'thumbnail', 'm-0', 'h-100');
+		label.appendChild(card);
+		const thumbnail = document.createElement('IMG');
+		thumbnail.src = sketch.thumbnail;
+		thumbnail.alt = sketch.title;
+		thumbnail.classList.add('card-img-top');
+		card.appendChild(thumbnail);
+		const body = document.createElement('DIV');
+		body.classList.add('card-body')
+		card.appendChild(body);
+		const title = document.createElement('H6');
+		title.innerHTML = sketch.title;
+		title.classList.add('card-title', 'text-center', 'text-dark');
+		body.appendChild(title);
+		sketchCards.appendChild(label);
+		label.addEventListener('dblclick', function (event) {
+			document.getElementById('btn-open-sketch').click();
+		});
+	}
+
+	function switchGenerator(url) {
+		if (currentSketch && currentSketch.url !== url) {
+			currentSketch = undefined;
+		}
+		const name = url.match(/(^|\/)([\w\-.]+)\.js$/)[2];
+		generatorFactory(name, url).then(function (gen) {
 			document.title = gen.title;
 			if (bgGenerator && bgGenerator.purgeCache) {
 				bgGenerator.purgeCache();
 			}
 			bgGenerator = gen;
-			const prevGenName = bgGeneratorName;
-			bgGeneratorName = name;
+			const prevGenName = generatorName;
+			generatorName = name;
 			startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 			endFrame = startFrame;
 			if ('tween' in gen) {
@@ -259,11 +332,7 @@ function showBackgroundOptions() {
 				if (imageCtrlLocation !== null) {
 					imageCtrlLocation.appendChild(imageUpload);
 				}
-				if (modal.classList.contains('show')) {
-					repositionModal();
-				} else {
-					modal.children[0].classList.add('modal-dialog-centered');
-				}
+				repositionModal(true);
 			}
 
 			// Switch out previous DOM
@@ -302,6 +371,40 @@ function showBackgroundOptions() {
 			history.replaceState(null, '', url.toString());
 		});
 	}
+
+	downloadFile('sketches.json', 'json').then(function (result) {
+		let firstGenURL = urlParameters.get('gen');
+		let nextStep;
+		if (firstGenURL === null) {
+			firstGenURL = 'ten-print.js';
+			nextStep = function () {
+				$('#sketches-modal').modal('show');
+			};
+		} else {
+			firstGenURL += '.js';
+			nextStep = function () {
+				$(modal).modal('show');
+			}
+		}
+		for (let sketch of result.sketches) {
+			addSketch(sketch);
+			if (sketch.url === firstGenURL) {
+				currentSketch = sketch;
+			}
+		}
+		switchGenerator(firstGenURL);
+
+		if (showWelcome) {
+			const helpModal = $('#help-modal');
+			helpModal.on('hidden.bs.modal', function (event) {
+				nextStep();
+			});
+			helpModal.modal('show');
+		} else {
+			document.getElementById('show-welcome').checked = false;
+			nextStep();
+		}
+	});
 
 	function interpolateValue(startValue, endValue, tween, loop) {
 		if (Array.isArray(startValue)) {
@@ -613,34 +716,8 @@ function showBackgroundOptions() {
 		const day = String(now.getDate()).padStart(2, '0');
 		const hour = String(now.getHours()).padStart(2, '0');
 		const minute = String(now.getMinutes()).padStart(2, '0');
-		return `${bgGeneratorName} ${year}-${month}-${day} ${hour}${minute}`;
+		return `${generatorName} ${year}-${month}-${day} ${hour}${minute}`;
 	}
-
-	// Select a background generator based on URL.
-	let firstGenName = urlParameters.get('gen');
-	let nextStep;
-	if (firstGenName === null) {
-		firstGenName = 'ten-print';
-		nextStep = function () {
-			document.getElementById('btn-generator').click();
-		};
-	} else {
-		nextStep = function () {
-			$(modal).modal('show');
-		}
-	}
-	const generatorButtonContainer = document.getElementById('generators');
-	try {
-		const generatorButton = checkInput(generatorButtonContainer, 'generator', firstGenName);
-		const currentSelection = generatorButtonContainer.querySelector('.active');
-		if (currentSelection !== null) {
-			currentSelection.classList.remove('active');
-		}
-		generatorButton.parentElement.classList.add('active');
-	} catch (e) {
-		console.log(`Loaded experimental background generator ${firstGenName}. There is no UI button for activating this generator.`)
-	}
-	switchBackgroundGenerator(firstGenName);
 
 	if (store !== undefined) {
 		document.getElementById('show-welcome').addEventListener('input', function (event) {
@@ -671,7 +748,7 @@ function showBackgroundOptions() {
 
 	authorForm.addEventListener('submit', function (event) {
 		event.preventDefault();
-		author = authorInput.value;
+		userDisplayName = authorInput.value;
 		this.hidden = true;
 		progressiveBackgroundGen(bgGenerator, 0);
 	});
@@ -679,18 +756,17 @@ function showBackgroundOptions() {
 	authorForm.addEventListener('focusout', function (event) {
 		if (!this.contains(event.relatedTarget)) {
 			authorForm.hidden = true;
-			authorInput.value = author;
+			authorInput.value = userDisplayName;
 		}
 	});
 
-	// Add events for switching between background generators.
-	function generatorSwitcher(event) {
-		switchBackgroundGenerator(this.value);
-	}
-
-	for (let button of generatorButtonContainer.querySelectorAll('input')) {
-		button.addEventListener('click', generatorSwitcher);
-	}
+	document.getElementById('btn-open-sketch').addEventListener('click', function (event) {
+		const sketchesModal = document.getElementById('sketches-modal');
+		$(sketchesModal).modal('hide');
+		$(modal).modal('show');
+		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
+		switchGenerator(currentSketch.url);
+	});
 
 	document.getElementById('btn-background-gen-options').addEventListener('click', function (event) {
 		$(modal).modal('show');
@@ -868,6 +944,7 @@ function showBackgroundOptions() {
 		$('#background-gen-modal').modal('hide');
 	}
 
+	$('#sketches-modal').on('show.bs.modal', hideConfig);
 	$('#anim-opts-modal').on('show.bs.modal', hideConfig);
 	$('#video-modal').on('show.bs.modal', hideConfig);
 
@@ -982,17 +1059,7 @@ function showBackgroundOptions() {
 	// After resizing, generate a new background to fit the new window size.
 	let resizeTimer;
 	function resizeWindow() {
-		const rect = modal.getBoundingClientRect();
-		const child = modal.children[0];
-		const maxRight = window.innerWidth - modalMargin;
-		if (rect.right > maxRight) {
-			modal.style.left = Math.max(Math.round(maxRight - modalWidth), 0) + 'px';
-		}
-		const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
-		const childHeight = child.clientHeight;
-		if (rect.top +  childHeight> maxBottom) {
-			modal.style.top = Math.max(Math.round(maxBottom - childHeight), 0) + 'px';
-		}
+		repositionModal(false);
 		generateBackground();
 	}
 
@@ -1016,7 +1083,6 @@ function showBackgroundOptions() {
 
 	window.addEventListener('pointermove', function (event) {
 		if (modalDrag !== undefined) {
-			modal.children[0].classList.remove('modal-dialog-centered');
 			modal.style.left = Math.round(event.clientX - modalDrag[0]) + 'px';
 			modal.style.top = Math.round(event.clientY - modalDrag[1]) + 'px';
 		}
@@ -1027,31 +1093,12 @@ function showBackgroundOptions() {
 	});
 
 	$(modal).on('shown.bs.modal', function (event) {
-		const classList = modal.children[0].classList;
-		if (classList.contains('modal-dialog-centered')) {
-			repositionModal();
-			classList.remove('modal-dialog-centered');
-		}
+		repositionModal(false);
 	});
 
 	modalHeader.addEventListener('dblclick', function (event) {
 		$('#background-gen-modal-content').collapse('toggle');
 	});
-
-	if (showWelcome) {
-		const helpModal = $('#help-modal');
-		helpModal.on('hidden.bs.modal', function (event) {
-			if (nextStep !== undefined) {
-				nextStep();
-				nextStep = undefined;
-			}
-		});
-		helpModal.modal('show');
-	} else {
-		document.getElementById('show-welcome').checked = false;
-		nextStep();
-		nextStep = undefined;
-	}
 
 	imageUpload.querySelector('#background-gen-image-upload').addEventListener('input', function (event) {
 		const file = this.files[0];

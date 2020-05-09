@@ -32,7 +32,7 @@ Phyllotaxis
 	Primes
 	Fill background with spokes?
 	Ways to choose an angle: Continued fractions?
-	Mirrored radial colour transitions
+	Mirrored angular colour transitions
 	Fade hue through black or white
 	Improve performance with images (prerender filters, pre-resize if no growth)
 	Alternative petal shapes:

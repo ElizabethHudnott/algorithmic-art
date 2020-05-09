@@ -17,9 +17,9 @@ const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
 
 function rotateCanvas(context, width, height, rotation) {
-		context.translate(width / 2, height / 2);
-		context.rotate(rotation);
-		context.translate(-width / 2, -height / 2);
+	context.translate(width / 2, height / 2);
+	context.rotate(rotation);
+	context.translate(-width / 2, -height / 2);
 }
 
 function generateBackground() {
@@ -241,9 +241,8 @@ function showBackgroundOptions() {
 		}
 	}
 
-	const modalWidth = 500;
 	const modalMargin = 8;
-	modal.style.left = Math.max(Math.round(window.innerWidth - modalWidth - modalMargin), 0) + 'px';
+	modal.style.left = Math.max(Math.round(window.innerWidth - 500 - modalMargin), 0) + 'px';
 
 	function repositionModal(centre) {
 		if (modal.classList.contains('show')) {
@@ -251,7 +250,7 @@ function showBackgroundOptions() {
 			const rect = child.getBoundingClientRect();
 			const maxRight = window.innerWidth - modalMargin;
 			if (rect.right > maxRight) {
-				modal.style.left = Math.max(Math.round(maxRight - modalWidth), 0) + 'px';
+				modal.style.left = Math.max(Math.round(maxRight - rect.width), 0) + 'px';
 			}
 
 			if (centre) {
@@ -1083,8 +1082,21 @@ function showBackgroundOptions() {
 
 	window.addEventListener('pointermove', function (event) {
 		if (modalDrag !== undefined) {
-			modal.style.left = Math.round(event.clientX - modalDrag[0]) + 'px';
-			modal.style.top = Math.round(event.clientY - modalDrag[1]) + 'px';
+			if (event.buttons !== 1) {
+				modalDrag = undefined;
+				return;
+			}
+
+			const child = modal.children[0];
+			let left = Math.round(event.clientX - modalDrag[0]);
+			const maxLeft = window.innerWidth - 32;
+			left = Math.min(left, maxLeft);
+
+			let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
+			const maxTop = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight - modalHeader.clientHeight;
+			top = Math.min(top, maxTop);
+			modal.style.left = left + 'px';
+			modal.style.top = top + 'px';
 		}
 	});
 

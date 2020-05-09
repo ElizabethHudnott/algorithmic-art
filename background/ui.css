@@ -88,11 +88,12 @@ legend {
 }
 
 #background-gen-modal-header {
+	touch-action: none;
 	user-select: none;
 }
 
-#background-gen-modal .modal-dialog {
-	margin-top: 0;
+#background-gen-modal-content {
+	overflow-y: auto;
 }
 
 #help-modal p {

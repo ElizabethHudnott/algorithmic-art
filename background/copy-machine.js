@@ -87,5 +87,5 @@
 		this.draw(context, 0, 0);
 	}
 
-	backgroundGenerators.set('copy-machine', new CopyMachine());
+	addBgGenerator(CopyMachine);
 }

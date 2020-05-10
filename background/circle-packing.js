@@ -436,5 +436,5 @@
 		return fullSize;
 	}
 
-	backgroundGenerators.set('circle-packing', new CirclePacking());
+	addBgGenerator(CirclePacking);
 }

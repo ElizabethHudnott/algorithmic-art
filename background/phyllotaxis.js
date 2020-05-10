@@ -120,7 +120,7 @@
 				if (shapeIsImage && bgGeneratorImage.src === '') {
 					document.getElementById('background-gen-image-upload').click();
 				} else {
-					progressiveBackgroundGen(me, 0);
+					progressiveBackgroundGen(me, 2);
 				}
 			}
 
@@ -520,7 +520,6 @@
 			this.radius = maxR / hypotenuse;
 		}
 
-		const petalShape = this.petalShape;
 		const petalStretch = this.petalStretch;
 		const petalDistortion = aspectRatio >= 1 ? petalStretch : 1 / petalStretch;
 
@@ -528,7 +527,7 @@
 			const angle = this.angle;
 			const exponent = this.exponent;
 			const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
-			const petalSize = this.petalSize * (petalShape === 'i' ? 2 : 1);
+			const petalSize = this.petalSize;
 			const petalEnlargement = this.petalEnlargement;
 			const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 			const clipping = this.clipping;
@@ -583,6 +582,7 @@
 			stacking = -1; // iterate from outermost to innermost
 		}
 
+		const petalShape = this.petalShape;
 		const strokeStyle = this.strokeStyle;
 		const fillRadius = petalShape === 'r' ? Math.SQRT2 : 1;
 
@@ -608,7 +608,7 @@
 		if (petalShape === 'i') {
 			const imageWidth = bgGeneratorImage.width;
 			const imageHeight = bgGeneratorImage.height;
-			imageAspect = imageWidth / imageHeight;
+			imageAspect = imageHeight / imageWidth;
 			applyFilters = preview === 0 || preview === 2;
 			const variesRegExp = /[ar]/;
 			hueVaries = variesRegExp.test(this.hueMode);
@@ -746,8 +746,8 @@
 				context.fill();
 				break;
 			case 'i':	// Image
-				const imageResizedHeight = 2 * petalSize * petalStretch;
-				const imageResizedWidth = 2 * petalSize * imageAspect;
+				const imageResizedWidth = 2 * petalSize;
+				const imageResizedHeight = 2 * petalSize * petalStretch * imageAspect;
 				let filter = '';
 				if (applyFilters) {
 					if (hueVaries) {
@@ -776,5 +776,5 @@
 		}
 	};
 
-	backgroundGenerators.set('phyllotaxis', new Phyllotaxis());
+	addBgGenerator(Phyllotaxis);
 }

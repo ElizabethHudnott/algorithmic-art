@@ -387,5 +387,5 @@
 		context.fill();
 	};
 
-	backgroundGenerators.set('sierpinski-carpet', new SierpinskiCarpet());
+	addBgGenerator(SierpinskiCarpet);
 }

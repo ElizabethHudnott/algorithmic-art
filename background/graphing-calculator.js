@@ -718,5 +718,5 @@
 		context.stroke();
 	};
 
-	backgroundGenerators.set('graphing-calculator', new GraphingCalculator());
+	addBgGenerator(GraphingCalculator);
 }

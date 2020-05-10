@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Custom Sketches</title>
+	<link rel="icon" href="../img/spirograph.png">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" href="../site.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+	<div class="container">
+		<header class="jumbotron bg-complement">
+			<h1 class="display-4">
+				Creating Your Own Sketches
+			</h1>
+		</header>
+		<main>
+			<h1>Writing The Code</h1>
+			<p>
+				This article discusses creating your own generative art sketches that take advantage of the hosting <a href="index.html">environment</a> I've created. The code template you will need to follow is shown below.
+			</p>
+			<p>
+				Each sketch has a title, which is used in GUI elements, and a <code>hasRandomness</code> property. If your sketch's output is deterministic and driven only by its input parameters then this should be set to false. On the other hand if you use pseudorandom numbers then set it to true and the environment will add the build icon <span class="btn btn-sm btn-light d-inline-block"><img src="../img/brick.png" alt="Build" width="16"></span> to the program's toolbar so users can generate a fresh image without adjusting the sketch's parameters. You can populate the <code>credits</code> property with acknowledgements (in <abbr>HTML</abbr>) recognizing any relevant sources of key inspiration or omit the property if no acknowledgements section is needed.
+			</p>
+			<p>
+				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during the early development phase but usually you will want to include it, unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>.
+			</p>
+			<p>
+				The remainder of the code has three significant sections.
+			</p>
+			<ol>
+				<li>
+					The event handlers inside the callback to <code>downloadFile()</code> that link the <abbr>HTML</abbr> code to the sketch's parameters.
+				</li>
+				<li>
+					The <code>animatable</code> property, which is a declarative description of how the sketch can be animated.
+				</li>
+				<li>
+					The code that draws the sketch onto the screen inside the <code>generate()</code> method.
+				</li>
+			</ol>
+			<div class="text-monospace border small overflow-auto my-3" id="code-template" style="white-space: pre-wrap; max-height: 500px; border-radius: 0.75rem; padding: 0.75rem">
+			</div>
+			<p>
+				There's a particularly challenging need to be able to redraw the sketch quickly in response to events like dragging a slider bar, while at the same time having the desire to create complex and intricate sketches that arouse artistic interest. There are two measures available to you which you should use to protect the application's performance.
+			</p>
+			<ul>
+				<li>
+					The <code>generate()</code> method is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators">generator function</a>, which means that you can use the <code>yield</code> statement periodically during time consuming drawing operations to temporarily suspend drawing and return control to the environment. The environment will then decide whether to continue with the present drawing operation, or alternatively, if a parameter's value is changing too quickly then it might decide to abandon the current drawing and start again.
+				</li>
+				<li>
+					The <code>generate()</code> has a parameter called <code>preview</code> that accepts a numeric argument. A value of 0 always means that a complete redraw with the maximum level of detail has been requested. However, you are free to use other values inside your <abbr>GUI</abbr>'s event handlers in any way that's useful to you.
+				</li>
+			</ul>
+			<p>
+				For instance, my <a href="index.html?gen=phyllotaxis">phyllotaxis</a> sketch uses four values for the <code>preview</code> parameter.
+			</p>
+			<ol start="0">
+				<li>
+					A complete redraw, including recalculation of the petals' positions and their colours. The positions are cached to speed up subsequent calls to <code>generate()</code> when possible.
+				</li>
+				<li>
+					Only a limited number of petals are drawn in order to give an impression of what the finished image would look like, but each petal does have all of its features calculated from scratch.
+				</li>
+				<li>
+					All of the petals are drawn but none of them have their positions recalculated. The positions are the petals are retrieved from the cache. This is used when a parameter is changed which affects the petals' shapes or colours but not their locations.
+				</li>
+				<li>
+					Only a limited number of petals are drawn and they don't have their positions recalculated. This is used when an effect is applied that is time consuming to render for a large number of petals even when much of numerical data is pre-calculated.
+				</li>
+			</ol>
+
+			<h1>Testing Your Sketch</h1>
+			<p>
+				Upload your files to a server and then use the following form to generate a <abbr>URL</abbr>.
+			</p>
+			<form id="url-generator-form">
+				<div class="form-group">
+					<label for="sketch-url">
+						Sketch <abbr>URL</abbr>
+					</label>
+					<div class="input-group">
+						<input type="text" class="form-control" id="sketch-url" aria-describedby="sketch-url-descriptor" pattern=".*\.js" title="The URL should end in .js">
+						<div class="input-group-append">
+							<button class="btn btn-primary" type="submit">
+								Generate <abbr>URL</abbr>
+							</button>
+						</div>
+					</div>
+					<small id="sketch-url-descriptor" class="form-text text-muted">
+						This should be the <abbr>URL</abbr> of your JavaScript file.
+					</small>
+				</div>
+				<div class="form-group">
+					<label for="preload-url">
+						Environment <abbr>URL</abbr>
+					</label>
+					<output class="form-control" id="preload-url"></output>
+				</div>
+			</form>
+		</main>
+	</div>
+	<script src="../util.js"></script>
+	<script>
+
+		downloadFile('template.js', 'text').then(function (code) {
+			document.getElementById('code-template').innerText = code;
+		});
+
+		document.getElementById('url-generator-form').addEventListener('submit', function (event) {
+			event.preventDefault();
+			const sketchURL = document.getElementById('sketch-url').value.slice(0, -3);
+			let path = window.location.pathname;
+			const slashIndex = path.lastIndexOf('/');
+			if (slashIndex > 0) {
+				path = path.slice(0, slashIndex);
+			}
+			const encodedURL = encodeURIComponent(sketchURL);
+			const preloadURL = window.location.origin + path + '/?gen=' + encodedURL;
+			document.getElementById('preload-url').value = preloadURL;
+		});
+	</script>
+</body>
+</html>

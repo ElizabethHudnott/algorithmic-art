@@ -173,5 +173,5 @@
 		}
 	}
 
-	backgroundGenerators.set('ten-print', new TenPrint());
+	addBgGenerator(TenPrint);
 }

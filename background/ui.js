@@ -16,6 +16,15 @@ let bgGeneratorRotation = 0;
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
 
+function urlToBgGeneratorName(url) {
+	return url.match(/(^|\/)([\w\-.]+)\.js$/)[2];
+}
+
+function addBgGenerator(func) {
+	const name = urlToBgGeneratorName(document.currentScript.src);
+	backgroundGenerators.set(name, new func());
+}
+
 function rotateCanvas(context, width, height, rotation) {
 	context.translate(width / 2, height / 2);
 	context.rotate(rotation);
@@ -296,11 +305,11 @@ function showBackgroundOptions() {
 		});
 	}
 
-	function switchGenerator(url) {
+	function switchGenerator(url, pushToHistory) {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
-		const name = url.match(/(^|\/)([\w\-.]+)\.js$/)[2];
+		const name = urlToBgGeneratorName(url);
 		generatorFactory(name, url).then(function (gen) {
 			document.title = gen.title;
 			if (bgGenerator && bgGenerator.purgeCache) {
@@ -364,10 +373,12 @@ function showBackgroundOptions() {
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
 			document.getElementById('background-gen-credits').innerHTML = credits;
 
-			urlParameters.set('gen', name);
-			let url = document.location;
-			url = url.origin + url.pathname + '?' + urlParameters.toString();
-			history.replaceState(null, '', url.toString());
+			if (pushToHistory) {
+				urlParameters.set('gen', name);
+				let url = document.location;
+				url = url.origin + url.pathname + '?' + urlParameters.toString();
+				history.replaceState(null, '', url.toString());
+			}
 		});
 	}
 
@@ -391,13 +402,15 @@ function showBackgroundOptions() {
 				currentSketch = sketch;
 			}
 		}
-		switchGenerator(firstGenURL);
+		switchGenerator(firstGenURL, false);
 
 		if (showWelcome) {
 			const helpModal = $('#help-modal');
-			helpModal.on('hidden.bs.modal', function (event) {
+			function nextStepOnce(event) {
 				nextStep();
-			});
+				helpModal.off('hidden.bs.modal', nextStepOnce);
+			}
+			helpModal.on('hidden.bs.modal', nextStepOnce);
 			helpModal.modal('show');
 		} else {
 			document.getElementById('show-welcome').checked = false;
@@ -764,7 +777,7 @@ function showBackgroundOptions() {
 		$(sketchesModal).modal('hide');
 		$(modal).modal('show');
 		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
-		switchGenerator(currentSketch.url);
+		switchGenerator(currentSketch.url, true);
 	});
 
 	document.getElementById('btn-background-gen-options').addEventListener('click', function (event) {

@@ -15,14 +15,6 @@
 
 			const concentricOpts = optionsDoc.getElementById('carpet-concentric-opts');
 
-			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
-				const value = parseInt(this.value);
-				if (value >= 1) {
-					me.maxDepth = value - 1;
-					progressiveBackgroundGen(me, 0);
-				}
-			});
-
 			optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 0) {
@@ -157,6 +149,78 @@
 			lrCornerSlider.addEventListener('pointerup', fullRedraw);
 			lrCornerSlider.addEventListener('keyup', fullRedraw);
 
+			optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.maxDepth = value - 1;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			const lopsidedXInput = optionsDoc.getElementById('carpet-lopsided-x');
+			lopsidedXInput.addEventListener('input', function (event) {
+				me.lopsidednessX = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			lopsidedXInput.addEventListener('pointerup', fullRedraw);
+			lopsidedXInput.addEventListener('keyup', fullRedraw);
+
+			const lopsidedYInput = optionsDoc.getElementById('carpet-lopsided-y');
+			lopsidedYInput.addEventListener('input', function (event) {
+				me.lopsidednessY = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			lopsidedYInput.addEventListener('pointerup', fullRedraw);
+			lopsidedYInput.addEventListener('keyup', fullRedraw);
+
+			const middleWidthInput = optionsDoc.getElementById('carpet-middle-width');
+			middleWidthInput.addEventListener('input', function (event) {
+				me.middleWidth = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			middleWidthInput.addEventListener('pointerup', fullRedraw);
+			middleWidthInput.addEventListener('keyup', fullRedraw);
+
+			const sizeInput = optionsDoc.getElementById('carpet-size');
+			sizeInput.addEventListener('input', function (event) {
+				me.size = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			sizeInput.addEventListener('pointerup', fullRedraw);
+			sizeInput.addEventListener('keyup', fullRedraw);
+
+			const stretchInput = optionsDoc.getElementById('carpet-stretch');
+			stretchInput.addEventListener('input', function (event) {
+				me.stretch = parseFloat(this.value);
+				progressiveBackgroundGen(me, 1);
+			});
+			stretchInput.addEventListener('pointerup', fullRedraw);
+			stretchInput.addEventListener('keyup', fullRedraw);
+
+			optionsDoc.getElementById('carpet-left').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0 && value <= 1) {
+					me.left = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('carpet-top').addEventListener('input', function (event) {
+				const value = parseFloat(this.value);
+				if (value >= 0 && value <= 1) {
+					me.top = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			const rotationInput = optionsDoc.getElementById('carpet-rotation');
+			rotationInput.addEventListener('input', function (event) {
+				me.rotation = parseFloat(this.value) * TWO_PI;
+				progressiveBackgroundGen(me, 1);
+			});
+			rotationInput.addEventListener('pointerup', fullRedraw);
+			rotationInput.addEventListener('keyup', fullRedraw);
+
 			return optionsDoc;
 		});
 
@@ -214,8 +278,10 @@
 
 	SierpinskiCarpet.prototype.animatable = {
 		continuous: [
-			'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
-			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities', 'lopsidednessX'
+			'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'left',
+			'top', 'rotation', 'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner',
+			'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY', 'colors',
+			'patternOpacities'
 		],
 		stepped: [
 			'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
@@ -253,9 +319,11 @@
 			const idealHeight = drawHeight * (2 / 3 + 1 / middleWidth);
 			drawHeight = Math.min(Math.max(idealHeight, drawHeight), canvasHeight);
 		}
+		drawWidth = Math.round(drawWidth);
+		drawHeight = Math.round(drawHeight);
 
-		const left = this.left * (canvasWidth - drawWidth);
-		const top = this.top * (canvasHeight - drawHeight);
+		const left = Math.round(this.left * (canvasWidth - drawWidth));
+		const top = Math.round(this.top * (canvasHeight - drawHeight));
 		context.translate(left + drawWidth / 2, top + drawHeight / 2);
 		context.rotate(this.rotation);
 		context.translate(-drawWidth / 2, -drawHeight / 2);

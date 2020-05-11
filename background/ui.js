@@ -190,7 +190,7 @@ function showBackgroundOptions() {
 	let signatureWidth, signatureHeight;
 	let userDisplayName = undefined;
 
-	drawSignature = function (context, backgroundColor) {
+	drawSignature = function (context) {
 		context.restore();
 		context.save();
 		context.shadowColor = 'transparent';
@@ -223,13 +223,8 @@ function showBackgroundOptions() {
 			signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
 			signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
 			const canvasHeight = context.canvas.height / scale;
-			if (backgroundColor === undefined) {
-				context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
-				backgroundColor = backgroundElement.style.backgroundColor;
-			} else {
-				context.fillStyle = backgroundColor;
-				context.fillRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
-			}
+			context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
+			const backgroundColor = backgroundElement.style.backgroundColor;
 			const [colorSystem, colorComponents] = parseColor(backgroundColor);
 			const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
 			context.fillStyle = luma >= 0.5 ? 'black' : 'white';
@@ -586,6 +581,20 @@ function showBackgroundOptions() {
 		}
 	}
 
+	const tempCanvas = document.createElement('CANVAS');
+	const tempContext = tempCanvas.getContext('2d');
+
+	function fillBackground(context, backgroundColor, width, height) {
+		tempCanvas.width = width;
+		tempCanvas.height = height;
+		tempContext.drawImage(context.canvas, 0, 0);
+		context.restore();
+		context.save();
+		context.fillStyle = backgroundColor;
+		context.fillRect(0, 0, width, height);
+		context.drawImage(tempCanvas, 0, 0);
+	}
+
 	function renderFrame(context, width, height, tween, loop, paintBackground, preview) {
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
@@ -616,14 +625,8 @@ function showBackgroundOptions() {
 		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween, loop);
 
 		context.restore();
-		if (paintBackground) {
-			context.fillStyle = backgroundColor;
-			context.fillRect(0, 0, width, height);
-			context.fillStyle = 'black';
-		} else {
-			backgroundElement.style.backgroundColor = backgroundColor;
-			context.clearRect(0, 0, width, height);
-		}
+		backgroundElement.style.backgroundColor = backgroundColor;
+		context.clearRect(0, 0, width, height);
 		context.save();
 		rotateCanvas(context, width, height, rotation);
 		if (preview === 0) {
@@ -634,7 +637,10 @@ function showBackgroundOptions() {
 			do {
 				done = redraw.next().done;
 			} while (!done);
-			drawSignature(context, backgroundColor);
+			drawSignature(context);
+			if (paintBackground) {
+				fillBackground(context, backgroundColor, width, height);
+			}
 		} else {
 			progressiveBackgroundDraw(bgGenerator, context, width, height, preview);
 		}

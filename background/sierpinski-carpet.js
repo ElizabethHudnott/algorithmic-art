@@ -298,7 +298,7 @@
 	}
 
 	SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
-		const beginTime = performance.now();
+		let beginTime = performance.now();
 		const lopsidednessX = this.lopsidednessX + 1;
 		const lopsidednessY = this.lopsidednessY + 1;
 		const middleWidth = this.middleWidth / 3;
@@ -340,10 +340,9 @@
 		const spacingNumerator = Math.min(drawWidth * middleWidth, drawHeight / 3) / this.concentricDensity;
 
 		for (let depth = 0; depth <= maxDepth; depth++) {
-			const div = 3 ** depth;
 			const emphasize = depth <= this.centreEmphasis;
 			const drawPattern = filling !== 'b' && depth <= this.patternDepth;
-			const combinedSpacing = Math.round(spacingNumerator / div);
+			const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
 			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
 			if (fgSpacing === 0) {
 				fgSpacing = 1;
@@ -440,7 +439,7 @@
 				nextQueue.push(new Tile(x2, y2, width2, height2, 8));
 
 				numProcessed++;
-				if ((numProcessed & 500) === 499 && performance.now() >= beginTime + 20) {
+				if ((numProcessed % 500) === 499 && performance.now() >= beginTime + 20) {
 					yield;
 					beginTime = performance.now();
 				}

@@ -160,6 +160,14 @@
 			return optionsDoc;
 		});
 
+		this.size = 1;
+		this.stretch = 0;
+		this.lopsidednessX = 0;
+		this.lopsidednessY = 0;
+		this.middleWidth = 1;
+		this.left = 0;
+		this.top = 0;
+		this.rotation = 0;
 
 		this.maxDepth = 4;
 		this.patternDepth = 3;
@@ -207,7 +215,7 @@
 	SierpinskiCarpet.prototype.animatable = {
 		continuous: [
 			'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner', 'lowerRightCorner',
-			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities'
+			'topLeftCornerX', 'topLeftCornerY', 'colors', 'patternOpacities', 'lopsidednessX'
 		],
 		stepped: [
 			'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
@@ -215,20 +223,45 @@
 		]
 	};
 
-	function Tile(x, y, relationship) {
+	function Tile(x, y, width, height, relationship) {
 		this.x = x;
 		this.y = y;
+		this.width = width;
+		this.height = height;
 		this.relationship = relationship;
 	}
 
 	SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const beginTime = performance.now();
-		const outerSize = Math.min(canvasWidth, canvasHeight);
+		const lopsidednessX = this.lopsidednessX + 1;
+		const lopsidednessY = this.lopsidednessY + 1;
+		const middleWidth = this.middleWidth / 3;
 		const colors = this.colors;
 		const filling = this.filling;
-		let queue = [new Tile(0, 0, 12)];
+
+		const drawSize = this.size;
+		const stretch = this.stretch;
+		let drawWidth, drawHeight;
+		if (canvasWidth >= canvasHeight) {
+			drawWidth = drawSize * ((1 - stretch) * canvasHeight + stretch * canvasWidth);
+			drawHeight = drawSize * canvasHeight;
+			const idealWidth = drawWidth * (2 / 3 + middleWidth);
+			drawWidth = Math.min(Math.max(idealWidth, drawWidth), canvasWidth);
+		} else {
+			drawWidth = drawSize * canvasWidth;
+			drawHeight = drawSize * ((1 - stretch) * canvasWidth + stretch * canvasHeight);
+			const idealHeight = drawHeight * (2 / 3 + 1 / middleWidth);
+			drawHeight = Math.min(Math.max(idealHeight, drawHeight), canvasHeight);
+		}
+
+		const left = this.left * (canvasWidth - drawWidth);
+		const top = this.top * (canvasHeight - drawHeight);
+		context.translate(left + drawWidth / 2, top + drawHeight / 2);
+		context.rotate(this.rotation);
+		context.translate(-drawWidth / 2, -drawHeight / 2);
+
+		let queue = [new Tile(0, 0, drawWidth, drawHeight, 12)];
 		let nextQueue = [];
-		let prevSideLength = outerSize;
 		let numProcessed = 0;
 
 		let maxDepth = this.maxDepth;
@@ -236,16 +269,12 @@
 			maxDepth = 3;
 		}
 
-		const spacingNumerator = (outerSize / 3) / this.concentricDensity;
+		const spacingNumerator = Math.min(drawWidth * middleWidth, drawHeight / 3) / this.concentricDensity;
 
 		for (let depth = 0; depth <= maxDepth; depth++) {
-			let sideLength = outerSize / 3 ** (depth + 1);
-			if (sideLength < 1) {
-				break;
-			}
 			const div = 3 ** depth;
 			const emphasize = depth <= this.centreEmphasis;
-			const drawPattern = filling !== 'b' && depth <= this.patternDepth && prevSideLength >= 2;
+			const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 			const combinedSpacing = Math.round(spacingNumerator / div);
 			let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
 			if (fgSpacing === 0) {
@@ -257,6 +286,8 @@
 			const topLeftCornerX = Math.max(Math.round(this.topLeftCornerX * (combinedSpacing - 1)), 1);
 
 			for (let tile of queue) {
+				let width = tile.width;
+				let height = tile.height;
 				const x = tile.x;
 				const y = tile.y;
 				const relationship = tile.relationship;
@@ -275,53 +306,70 @@
 					patternLocation = patternedCentre;
 				}
 
-				context.fillStyle = colors[relationship];
 				const roundedX = Math.round(x);
 				const roundedY = Math.round(y);
-				let roundedWidth = Math.round(prevSideLength + x - roundedX);
-				let roundedHeight = Math.round(prevSideLength + y - roundedY);
+				let roundedWidth = Math.round(width + x - roundedX);
+				let roundedHeight = Math.round(height + y - roundedY);
+				context.fillStyle = colors[relationship];
 				context.globalCompositeOperation = this.compositionOp;
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 
-				const centreX = x + sideLength;
-				const centreY = y + sideLength;
-				const roundedCentreX = Math.round(centreX);
-				const roundedCentreY = Math.round(centreY);
-				roundedWidth = Math.round(sideLength + centreX - roundedCentreX);
-				roundedHeight = Math.round(sideLength + centreY - roundedCentreY);
-				if (roundedWidth <= 1 || roundedHeight <=1) {
-					roundedWidth = 1;
-					roundedHeight = 1;
-				}
-				if (emphasize) {
-					context.globalCompositeOperation = 'source-over';
-					context.fillStyle = colors[10 + bipartiteColoring];
-				} else {
-					context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
-				}
-				if (drawPattern && patternLocation) {
-					if (filling === 'c') {
-						this.concentricSquares(context, roundedCentreX, roundedCentreY, roundedWidth,
-							fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX);
-					} else {
-						if (!emphasize) {
-							context.globalAlpha = this.patternOpacities[bipartiteColoring];
-						}
-						context.drawImage(bgGeneratorImage, roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
-						context.globalAlpha = 1;
+				const remainingWidth = width * (1 - middleWidth);
+				width = width * middleWidth;
+				const width1 = width;
+				height = height / 3;
+				const height1 = height;
+				const width0 = remainingWidth / 2 * lopsidednessX;
+				const height0 = height * lopsidednessY;
+				const x1 = x + width0;
+				const y1 = y + height0;
+
+				if (width >= 1 || height >= 1) {
+					if (width < 1) {
+						width = 1;
+					} else if (height < 1) {
+						height = 1;
 					}
-				} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
-					context.fillRect(roundedCentreX, roundedCentreY, roundedWidth, roundedHeight);
+					const roundedX1 = Math.round(x1);
+					const roundedY1 = Math.round(y1);
+					roundedWidth = Math.max(Math.round(width + x1 - roundedX1), 1);
+					roundedHeight = Math.max(Math.round(height + y1 - roundedY1), 1);
+					if (emphasize) {
+						context.globalCompositeOperation = 'source-over';
+						context.fillStyle = colors[10 + bipartiteColoring];
+					} else {
+						context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
+					}
+					if (drawPattern && patternLocation) {
+						if (filling === 'c') {
+							this.concentricSquares(context, roundedX1, roundedY1,
+								roundedWidth, roundedHeight, fgSpacing, bgSpacing,
+								lowerLeftCorner, lowerRightCorner, topLeftCornerX
+							);
+						} else {
+							if (!emphasize) {
+								context.globalAlpha = this.patternOpacities[bipartiteColoring];
+							}
+							context.drawImage(bgGeneratorImage, roundedX1, roundedY1, roundedWidth, roundedHeight);
+							context.globalAlpha = 1;
+						}
+					} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
+						context.fillRect(roundedX1, roundedY1, roundedWidth, roundedHeight);
+					}
 				}
 
-				nextQueue.push(new Tile(x, y, 0));
-				nextQueue.push(new Tile(x + sideLength, y, 1));
-				nextQueue.push(new Tile(x + 2 * sideLength, y, 2));
-				nextQueue.push(new Tile(x, y + sideLength, 3));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + sideLength, 5));
-				nextQueue.push(new Tile(x, y + 2 * sideLength, 6));
-				nextQueue.push(new Tile(x + sideLength, y + 2 * sideLength, 7));
-				nextQueue.push(new Tile(x + 2 * sideLength, y + 2 * sideLength, 8));
+				const x2 = x1 + width;
+				const y2 = y1 + height;
+				const width2 = remainingWidth - width0;
+				const height2 = 2 * height - height0;
+				nextQueue.push(new Tile(x, y, width0, height0, 0));
+				nextQueue.push(new Tile(x1, y, width, height0, 1));
+				nextQueue.push(new Tile(x2, y, width2, height0, 2));
+				nextQueue.push(new Tile(x, y1, width0, height, 3));
+				nextQueue.push(new Tile(x2, y1, width2, height, 5));
+				nextQueue.push(new Tile(x, y2, width0, height2, 6));
+				nextQueue.push(new Tile(x1, y2, width, height2, 7));
+				nextQueue.push(new Tile(x2, y2, width2, height2, 8));
 
 				numProcessed++;
 				if ((numProcessed & 500) === 499 && performance.now() >= beginTime + 20) {
@@ -332,24 +380,22 @@
 			}
 			queue = nextQueue;
 			nextQueue = [];
-			prevSideLength = sideLength;
 		}
 	};
 
-	SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, size, fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX) {
+	SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, width, height, fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX) {
 		let combinedSpacing;
-		let currentSize = size;
 		let leftX = x;
-		let bottomY = y + size;
+		let bottomY = y + height;
 		const originalLLCorner = lowerLeftCorner, originalLRCorner = lowerRightCorner;
 		const originalTLCornerX = topLeftCornerX;
 		let decrements = 0;
 		let rightX, topY, prevSpacing, corner1X, corner1Y, corner2;
 		context.beginPath();
-		while (currentSize >= 2 * fgSpacing) {
+		while (Math.min(width, height) >= 2 * fgSpacing) {
 			combinedSpacing = fgSpacing + bgSpacing;
-			rightX = leftX + currentSize;
-			topY = bottomY - currentSize;
+			rightX = leftX + width;
+			topY = bottomY - height;
 			context.moveTo(leftX, bottomY);
 			context.lineTo(rightX, bottomY);
 			context.lineTo(rightX, topY);
@@ -363,7 +409,8 @@
 			corner2 = bottomY - lowerRightCorner;
 			context.lineTo(rightX - fgSpacing, corner2);
 			context.lineTo(leftX, bottomY - lowerLeftCorner);
-			currentSize -= 2 * combinedSpacing;
+			width -= 2 * combinedSpacing;
+			height -= 2 * combinedSpacing;
 
 			prevSpacing = fgSpacing;
 			if (fgSpacing > 1) {

@@ -1,10 +1,12 @@
-
 Environment
 -----------
 Link from home page
 Revise Patreon description
 Add credits
+Add URL to image
 User created sketches
+	documentation: template download link, GitHub, util functions
+	online editor
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
@@ -23,7 +25,7 @@ Ability to incorporate video data
 Radial blur
 Background: color, picture, video or layered sketches
 Animation easing
-
+WebGL shader sketches
 
 Existing Sketches
 -----------------
@@ -48,6 +50,7 @@ Sierpinski Carpet
 New Sketches
 ------------
 Copy machine
+	Change to stack based implementation
 
 Parser Failures
 ---------------

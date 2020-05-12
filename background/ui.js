@@ -423,12 +423,13 @@ function showBackgroundOptions() {
 			for (let i = 0; i < numComponents; i++) {
 				output[i] = interpolateValue(startValue[i], endValue[i], tween, loop);
 			}
-			if (numStartComponents > numEndComponents && tween < 0.5) {
-				for (let i = numEndComponents; i < numStartComponents; i++) {
+			const maxIndex = interpolateStep(numStartComponents, numEndComponents, tween, loop);
+			if (numStartComponents > numEndComponents) {
+				for (let i = numEndComponents; i < maxIndex; i++) {
 					output[i] = startValue[i];
 				}
-			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
-				for (let i = numStartComponents; i < numEndComponents; i++) {
+			} else if (numEndComponents > numStartComponents) {
+				for (let i = numStartComponents; i < maxIndex ; i++) {
 					output[i] = endValue[i];
 				}
 			}
@@ -473,12 +474,13 @@ function showBackgroundOptions() {
 			for (let i = 0; i < numComponents; i++) {
 				output[i] = interpolateStep(startValue[i], endValue[i], tween, loop);
 			}
-			if (numStartComponents > numEndComponents && tween < 0.5) {
-				for (let i = numEndComponents; i < numStartComponents; i++) {
+			const maxIndex = interpolateStep(numStartComponents, numEndComponents, tween, loop);
+			if (numStartComponents > numEndComponents) {
+				for (let i = numEndComponents; i < maxIndex; i++) {
 					output[i] = startValue[i];
 				}
-			} else if (numEndComponents > numStartComponents && tween >= 0.5) {
-				for (let i = numStartComponents; i < numEndComponents; i++) {
+			} else if (numEndComponents > numStartComponents) {
+				for (let i = numStartComponents; i < maxIndex; i++) {
 					output[i] = endValue[i];
 				}
 			}
@@ -798,7 +800,7 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('background-rotation-reset').addEventListener('click', function (event) {
-		rotationSlider.value = '0';
+		rotationSlider.value = 0;
 		bgGeneratorRotation = 0;
 		progressiveBackgroundGen(bgGenerator, 0);
 	});

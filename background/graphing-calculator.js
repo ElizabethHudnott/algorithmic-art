@@ -327,8 +327,15 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
-			optionsDoc.getElementById('calc-rotation').addEventListener('input', function (event) {
+			const rotationSlider = optionsDoc.getElementById('calc-rotation');
+			rotationSlider.addEventListener('input', function (event) {
 				me.rotation[shapeNum] = parseFloat(this.value) * TWO_PI;
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('calc-rotation-reset').addEventListener('click', function (event) {
+				rotationSlider.value = '0';
+				me.rotation[shapeNum] = 0;
 				progressiveBackgroundGen(me, 0);
 			});
 

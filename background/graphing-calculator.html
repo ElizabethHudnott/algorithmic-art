@@ -247,11 +247,16 @@
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="calc-rotation">
+			<label class="col-3 mt-1 col-form-label col-form-label-sm" for="calc-rotation">
 				Rotation
 			</label>
-			<div class="col-3">
-				<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-1" id="calc-rotation">
+			<div class="col-8">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="calc-rotation">
+			</div>
+			<div class="col-1">
+				<button type="button" class="btn btn-light" id="calc-rotation-reset" title="Reset rotation">
+					<img src="../img/cross.png" alt="Remove">
+				</button>
 			</div>
 		</div>
 	</div>

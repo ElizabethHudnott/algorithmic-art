@@ -101,6 +101,7 @@ function showBackgroundOptions() {
 	const modal = document.getElementById('background-gen-modal');
 	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
+	const rotationSlider = document.getElementById('background-rotation');
 	const progressBar = document.getElementById('video-progress');
 	const imageUpload = document.getElementById('background-gen-image');
 	imageUpload.remove();
@@ -619,9 +620,10 @@ function showBackgroundOptions() {
 		}
 
 		const startRotation = startFrame.rotation;
-		const endRotation = endFrame.rotation;
-		const loopedRotation = loop && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
-		const rotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
+		let endRotation = endFrame.rotation;
+		const loopedRotation = loop && (startRotation + TWO_PI) % TWO_PI !== (endRotation + TWO_PI) % TWO_PI;
+		endRotation += Math.sign(endRotation) * TWO_PI * fullRotations;
+		const rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
 		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween, loop);
 
 		context.restore();
@@ -790,10 +792,16 @@ function showBackgroundOptions() {
 		$(modal).modal('show');
 	});
 
-	document.getElementById('background-rotation').addEventListener('input', function (event) {
+	rotationSlider.addEventListener('input', function (event) {
 		bgGeneratorRotation = TWO_PI * parseFloat(this.value);
 		progressiveBackgroundGen(bgGenerator, 0);
-	})
+	});
+
+	document.getElementById('background-rotation-reset').addEventListener('click', function (event) {
+		rotationSlider.value = '0';
+		bgGeneratorRotation = 0;
+		progressiveBackgroundGen(bgGenerator, 0);
+	});
 
 	// Changing background colour.
 	document.getElementById('paper-color').addEventListener('input', function (event) {
@@ -914,7 +922,7 @@ function showBackgroundOptions() {
 		const endRotation = endFrame.rotation;
 		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
 		bgGeneratorRotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
-		document.getElementById('background-rotation').value = bgGeneratorRotation / TWO_PI;
+		rotationSlider.value = bgGeneratorRotation / TWO_PI;
 	}
 
 	function syncAndDraw() {

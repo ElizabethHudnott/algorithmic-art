@@ -3,20 +3,19 @@ Environment
 Link from home page
 Revise Patreon description
 Add credits
-Add URL to image
+Add URL to signature
 User created sketches
 	documentation: template download link, GitHub, util functions
 	online editor
+Generalize left and top parameters
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider
-Hide rotation for circular sketches
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
 Download picture sizing
-Add directionality to rotation
 Ability to animate sketches that use random numbers
 Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
@@ -42,10 +41,6 @@ Phyllotaxis
 		Polygon: join adjacent points
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
-
-Sierpinski Carpet
-	Lopsidedness
-
 
 New Sketches
 ------------

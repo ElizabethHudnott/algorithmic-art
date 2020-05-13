@@ -87,6 +87,10 @@ legend {
 	width: 168px;
 }
 
+.no-thumbnail {
+	height: 168px;
+}
+
 #background-gen-modal-header {
 	touch-action: none;
 	user-select: none;

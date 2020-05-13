@@ -1,0 +1,71 @@
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-preset-type">
+		Preset
+	</label>
+	<div class="col-6">
+		<div class="input-group input-group-sm">
+			<select id="ca-preset-type" class="form-control">
+				<option value="e" selected>Elementary</option>
+				<option value="t">Totalistic</option>
+			</select>
+			<input type="number" min="0" value="18" class="form-control" id="ca-preset">
+		</div>
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-seed">
+		Seed
+	</label>
+	<div class="col-3">
+		<input type="number" min="0" value="1" class="form-control form-control-sm" id="ca-seed">
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-seed-length">
+		Seed Length
+	</label>
+	<div class="col-3">
+		<input type="number" min="1" value="10" class="form-control form-control-sm" id="ca-seed-length" disabled>
+	</div>
+</div>
+<div class="form-row form-group" id="ca-seed-type">
+	<div class="col-3 col-form-label col-form-label-sm">
+		Seed Type
+	</div>
+	<div class="col-3 text-right">
+		<div class="form-check mt-1">
+			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
+			<label class="form-check-label small" for="ca-seed-type-tri">
+				Triangular
+			</label>
+		</div>
+	</div>
+	<div class="col-3 pl-4">
+		<div class="form-check mt-1">
+			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-repeat" value="repeat">
+			<label class="form-check-label small" for="ca-seed-type-repeat">
+				Repeated
+			</label>
+		</div>
+	</div>
+	<div class="col-3">
+		<div class="form-check mt-1">
+			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-random" value="random">
+			<label class="form-check-label small" for="ca-seed-type-random">
+				Random
+			</label>
+		</div>
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-cell-width">
+		Cell Width
+	</label>
+	<div class="col-3">
+		<input type="number" min="1" value="12" class="form-control form-control-sm" id="ca-cell-width">
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-cell-height">
+		Cell Height
+	</label>
+	<div class="col-3">
+		<input type="number" min="1" value="12" class="form-control form-control-sm" id="ca-cell-height">
+	</div>
+</div>

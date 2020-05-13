@@ -7,12 +7,79 @@
 		this.title = 'Cellular Automata';
 		this.hasRandomness = true;
 
-		/*
 		this.optionsDocument = downloadFile('cellular-automata.html', 'document').then(function (optionsDoc) {
+
+			const presetInput = optionsDoc.getElementById('ca-preset');
+			const seedInput = optionsDoc.getElementById('ca-seed');
+			const seedLengthInput = optionsDoc.getElementById('ca-seed-length');
+			const seedTypeRow = optionsDoc.getElementById('ca-seed-type');
+
+			function setPreset() {
+				const number = parseInt(presetInput.value);
+				if (number >= 0 && number <= 255) {
+					me.setElementaryRule(number);
+					progressiveBackgroundGen(me, 0);
+				}
+			}
+			presetInput.addEventListener('input', setPreset);
+
+			function setSeed() {
+				let seed = parseInt(seedInput.value);
+				if (!(seed >= 0)) {
+					seed = me.seed;
+				}
+				const seedType = queryChecked(seedTypeRow, 'ca-seed-type').value;
+				let length;
+				if (seedType === 'tri') {
+					length = 1;
+				} else {
+					length = parseInt(seedLengthInput.value);
+					if (!(length >= 1)) {
+						length = 1;
+					}
+				}
+				me.setSeed(seed, length);
+				progressiveBackgroundGen(me, 0);
+			};
+
+			seedInput.addEventListener('input', setSeed);
+			seedLengthInput.addEventListener('input', setSeed);
+
+			function setSeedType(event) {
+				const type = this.value;
+				me.repeatSeed = type === 'repeat';
+				if (type === 'random') {
+					me.seed = undefined;
+					progressiveBackgroundGen(me, 0);
+				} else {
+					setSeed();
+				}
+				seedInput.disabled = type === 'random';
+				seedLengthInput.disabled = type !== 'repeat';
+			}
+
+			for (let element of seedTypeRow.querySelectorAll('[name=ca-seed-type]')) {
+				element.addEventListener('input', setSeedType);
+			}
+
+			optionsDoc.getElementById('ca-cell-width').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.cellWidth = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
+
+			optionsDoc.getElementById('ca-cell-height').addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 1) {
+					me.cellHeight = value;
+					progressiveBackgroundGen(me, 0);
+				}
+			});
 
 			return optionsDoc;
 		});
-		*/
 
 		const transitions = new Array(16);
 		transitions.fill(0);
@@ -23,9 +90,8 @@
 		this.transitions = transitions;
 		this.numStates = 2;
 
-		this.colors = [
-			'#ff0000'
-		];
+		this.hues = [0];
+		this.lightnesses = [0.5];
 
 		this.seed = [1];
 		this.repeatSeed = false;
@@ -35,7 +101,7 @@
 		this.history = undefined;
 		this.cachedWidth = undefined;
 		this.cachedHeight = undefined;
-		this.tween = 1;
+		//this.tween = 1;
 	}
 
 	CellAutomaton.prototype.animatable = {
@@ -44,11 +110,11 @@
 	CellAutomaton.prototype.setSeed = function (n, padLength) {
 		const numStates = this.numStates;
 		const seed = [];
-		while (n > 0) {
+		do {
 			const value = n % numStates;
 			seed.push(value);
 			n = (n - value) / numStates;
-		}
+		} while (n > 0);
 		seed.reverse();
 		for (let i = seed.length; i < padLength; i++) {
 			seed[i] = 0;
@@ -110,6 +176,36 @@
 		}
 	}
 
+	CellAutomaton.prototype.getCellValue = function (i, j) {
+		if (j === -1) {
+			if (this.repeatSeed) {
+				j = 0;
+			} else {
+				return 0;
+			}
+		} else if (j === this.history.length) {
+			j = 0;
+		}
+
+		const row = this.history[j];
+		const width = row.length;
+		if (i === -1) {
+			if (this.repeatSeed && j === 0) {
+				return this.seed[this.seed.length - 1];	// wrap seed
+			} else {
+				return row[width - 1];	// wrap row data
+			}
+		} else if (i === width) {
+			if (this.repeatSeed && j === 0) {
+				return this.seed[(i + 1) % this.seed.length];	// wrap seed
+			} else {
+				return row[0];	// wrap row data
+			}
+		} else {
+			return row[i];
+		}
+	}
+
 	CellAutomaton.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const cellWidth = this.cellWidth;
 		const cellHeight = this.cellHeight;
@@ -117,7 +213,7 @@
 		const emptyTopRow = !this.repeatSeed && this.seed !== undefined;
 		const gridHeight = Math.ceil(canvasHeight / cellHeight) - emptyTopRow;
 		context.translate(
-			(canvasWidth - gridWidth * cellWidth) / 2 + 0.5,
+			Math.trunc((canvasWidth - gridWidth * cellWidth) / 2) + 0.5,
 			(emptyTopRow ? cellHeight : 0) + 0.5
 		);
 
@@ -133,41 +229,16 @@
 
 		const history = this.history;
 		const numStates = this.numStates;
-		const maxRow = Math.ceil(this.tween * gridHeight);
+		const tween = 1;
+		const maxRow = Math.ceil(tween * gridHeight);
 
 		for (let j = history.length; j < maxRow; j++) {
-			const lastRow = history[j - 1];
 			const row = new Array(gridWidth);
 			for (let i = 0; i < gridWidth; i++) {
-				let left, centre, right, past;
-				if (i === 0) {
-					if (this.repeatSeed && j === 1) {
-						left = this.seed[this.seed.length - 1];
-					} else {
-						left = lastRow[gridWidth - 1];
-					}
-				} else {
-					left = lastRow[i - 1];
-				}
-				centre = lastRow[i];
-				if (i === gridWidth - 1) {
-					if (this.repeatSeed && j === 1) {
-						right = this.seed[(i + 1) % this.seed.length];
-					} else {
-						right = lastRow[0];
-					}
-				} else {
-					right = lastRow[i + 1];
-				}
-				if (j === 1) {
-					if (this.repeatSeed) {
-						past = centre;
-					} else {
-						past = 0;
-					}
-				} else {
-					past = history[j - 2][i];
-				}
+				const left = this.getCellValue(i - 1, j - 1);
+				const centre = this.history[j - 1][i];
+				const right = this.getCellValue(i + 1, j - 1);
+				const past = this.getCellValue(i, j - 2);
 				const index =
 					left +
 					centre * numStates +
@@ -183,8 +254,22 @@
 			for (let i = 0; i < gridWidth; i++) {
 				const value = history[j][i];
 				if (value !== 0) {
+					let neighbourCount = 0;
+					neighbourCount += this.getCellValue(i - 1, j - 1) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i, j - 1) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i + 1, j - 1) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i - 1, j) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i + 1, j) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i - 1, j + 1) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
+					neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
+
+					const hue = this.hues[value - 1];
+					const saturation = 1 - neighbourCount / 8;
+					const lightness = this.lightnesses[value - 1];
+					const alpha = 1;
+					context.fillStyle = hsla(hue, saturation, lightness, alpha);
 					const x = i * cellWidth;
-					context.fillStyle = this.colors[value - 1];
 					context.fillRect(x, y, cellWidth, cellHeight);
 					context.strokeRect(x, y, cellWidth, cellHeight);
 				}

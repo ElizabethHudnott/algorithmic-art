@@ -272,6 +272,14 @@ function showBackgroundOptions() {
 		}
 	}
 
+	function openSketch() {
+		document.getElementById('btn-open-sketch').click();
+	}
+
+	function enableOpenButton() {
+		document.getElementById('btn-open-sketch').disabled = false;
+	}
+
 	function addSketch(sketch) {
 		const label = document.createElement('LABEL');
 		label.classList.add('btn' , 'p-1', 'm-1');
@@ -281,11 +289,17 @@ function showBackgroundOptions() {
 		input._sketch = sketch;
 		label.appendChild(input);
 		const card = document.createElement('DIV');
-		card.classList.add('card', 'thumbnail', 'm-0', 'h-100');
+		card.classList.add('card', 'm-0', 'h-100');
 		label.appendChild(card);
-		const thumbnail = document.createElement('IMG');
-		thumbnail.src = sketch.thumbnail;
-		thumbnail.alt = sketch.title;
+		let thumbnail;
+		if (sketch.thumbnail) {
+			thumbnail = document.createElement('IMG');
+			thumbnail.src = sketch.thumbnail;
+			thumbnail.alt = sketch.title;
+		} else {
+			thumbnail = document.createElement('DIV');
+			thumbnail.classList.add('bg-dark', 'no-thumbnail');
+		}
 		thumbnail.classList.add('card-img-top');
 		card.appendChild(thumbnail);
 		const body = document.createElement('DIV');
@@ -296,9 +310,8 @@ function showBackgroundOptions() {
 		title.classList.add('card-title', 'text-center', 'text-dark');
 		body.appendChild(title);
 		sketchCards.appendChild(label);
-		label.addEventListener('dblclick', function (event) {
-			document.getElementById('btn-open-sketch').click();
-		});
+		label.addEventListener('click', enableOpenButton);
+		label.addEventListener('dblclick', openSketch);
 	}
 
 	function switchGenerator(url, pushToHistory) {

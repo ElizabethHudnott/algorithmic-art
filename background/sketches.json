@@ -8,6 +8,12 @@
 			"keywords": ["BASIC", "lines"]
 		},
 		{
+			"title": "Cellular Automata",
+			"url": "cellular-automata.js",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["automata", "cells"]
+		},
+		{
 			"title": "Circle Packing",
 			"url": "circle-packing.js",
 			"thumbnail": "thumbnail/circle-packing.png",

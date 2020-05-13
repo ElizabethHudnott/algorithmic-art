@@ -298,7 +298,11 @@ function showBackgroundOptions() {
 			thumbnail.alt = sketch.title;
 		} else {
 			thumbnail = document.createElement('DIV');
-			thumbnail.classList.add('bg-dark', 'no-thumbnail');
+			thumbnail.classList.add('bg-dark', 'text-white', 'no-thumbnail');
+			const thumbContent = document.createElement('DIV');
+			thumbContent.classList.add('vertical-center', 'w-100', 'text-center');
+			thumbnail.appendChild(thumbContent);
+			thumbContent.innerHTML = 'No Preview Available';
 		}
 		thumbnail.classList.add('card-img-top');
 		card.appendChild(thumbnail);

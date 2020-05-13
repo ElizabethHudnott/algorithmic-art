@@ -1,15 +1,18 @@
 <div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-preset-type">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-rule-type">
+		Rule Type
+	</label>
+	<div class="col-3">
+		<select id="ca-preset-type" class="form-control form-control-sm">
+			<option value="g" selected>General</option>
+			<option value="t">Totalistic</option>
+		</select>
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-preset">
 		Preset
 	</label>
-	<div class="col-6">
-		<div class="input-group input-group-sm">
-			<select id="ca-preset-type" class="form-control">
-				<option value="e" selected>Elementary</option>
-				<option value="t">Totalistic</option>
-			</select>
-			<input type="number" min="0" value="18" class="form-control" id="ca-preset">
-		</div>
+	<div class="col-3">
+		<input type="number" min="0" value="18" class="form-control form-control-sm" id="ca-preset">
 	</div>
 </div>
 <div class="form-row form-group">
@@ -60,12 +63,31 @@
 		Cell Width
 	</label>
 	<div class="col-3">
-		<input type="number" min="1" value="12" class="form-control form-control-sm" id="ca-cell-width">
+		<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-width">
 	</div>
 	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-cell-height">
 		Cell Height
 	</label>
 	<div class="col-3">
-		<input type="number" min="1" value="12" class="form-control form-control-sm" id="ca-cell-height">
+		<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-height">
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-hue-min">
+		Hue
+	</label>
+	<div class="col-3">
+		<input type="range" min="0" max="360" value="0" class="form-control-range mt-1" id="ca-hue-min">
+	</div>
+	<div class="col-3">
+		<input type="range" min="0" max="360" value="45" class="form-control-range mt-1" id="ca-hue-max" aria-label="Maximum hue angle">
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-stroke">
+		Outline Intensity
+	</label>
+	<div class="col-3">
+		<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1" id="ca-stroke">
 	</div>
 </div>

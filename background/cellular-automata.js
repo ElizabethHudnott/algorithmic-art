@@ -24,21 +24,21 @@
 			presetInput.addEventListener('input', setPreset);
 
 			function setSeed() {
-				let seed = parseInt(seedInput.value);
-				if (!(seed >= 0)) {
-					seed = me.seed;
-				}
-				const seedType = queryChecked(seedTypeRow, 'ca-seed-type').value;
-				let length;
-				if (seedType === 'tri') {
-					length = 1;
-				} else {
-					length = parseInt(seedLengthInput.value);
-					if (!(length >= 1)) {
+				const seed = parseInt(seedInput.value);
+
+				if (seed >= 0) {
+					const seedType = queryChecked(seedTypeRow, 'ca-seed-type').value;
+					let length;
+					if (seedType === 'tri') {
 						length = 1;
+					} else {
+						length = parseInt(seedLengthInput.value);
+						if (!(length >= 1)) {
+							length = 1;
+						}
 					}
+					me.setSeed(seed, length);
 				}
-				me.setSeed(seed, length);
 				progressiveBackgroundGen(me, 0);
 			};
 
@@ -78,6 +78,21 @@
 				}
 			});
 
+			optionsDoc.getElementById('ca-hue-min').addEventListener('input', function (event) {
+				me.hueMin = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('ca-hue-max').addEventListener('input', function (event) {
+				me.hueMax = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('ca-stroke').addEventListener('input', function (event) {
+				me.strokeIntensity = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
 			return optionsDoc;
 		});
 
@@ -91,12 +106,15 @@
 		this.numStates = 2;
 
 		this.hues = [0];
+		this.hueMin = 0;
+		this.hueMax = 45;
 		this.lightnesses = [0.5];
+		this.strokeIntensity = 1;
 
 		this.seed = [1];
 		this.repeatSeed = false;
-		this.cellWidth = 12;
-		this.cellHeight = 12;
+		this.cellWidth = 11;
+		this.cellHeight = 11;
 
 		this.history = undefined;
 		this.cachedWidth = undefined;
@@ -212,11 +230,6 @@
 		const gridWidth = Math.trunc(canvasWidth / cellWidth);
 		const emptyTopRow = !this.repeatSeed && this.seed !== undefined;
 		const gridHeight = Math.ceil(canvasHeight / cellHeight) - emptyTopRow;
-		context.translate(
-			Math.trunc((canvasWidth - gridWidth * cellWidth) / 2) + 0.5,
-			(emptyTopRow ? cellHeight : 0) + 0.5
-		);
-
 
 		if (
 			this.history === undefined ||
@@ -249,6 +262,24 @@
 			history.push(row);
 		}
 
+		const hueMin = this.hueMin;
+		const hueRange = this.hueMax - hueMin;
+
+		const strokeIntensity = this.strokeIntensity;
+		let xNudge, yNudge;
+		if (strokeIntensity > 0) {
+			xNudge = 0.5 * (1 - context.canvas.width % 2);
+			yNudge = 0.5 * (1 - context.canvas.height % 2);
+		} else {
+			xNudge = 0;
+			yNudge = 0
+		}
+		context.translate(
+			Math.trunc((canvasWidth - gridWidth * cellWidth) / 2) + xNudge,
+			(emptyTopRow ? cellHeight : 0) + yNudge
+		);
+		context.strokeStyle = rgba(0, 0, 0, strokeIntensity);
+
 		for (let j = 0; j < maxRow - 1; j++) {
 			const y = j * cellHeight;
 			for (let i = 0; i < gridWidth; i++) {
@@ -264,7 +295,12 @@
 					neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
 					neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
 
-					const hue = this.hues[value - 1];
+					let hue;
+					if (this.numStates === 2) {
+						hue = hueMin + j / (gridHeight - 1) * hueRange;
+					} else {
+						hue = this.hues[value - 1];
+					}
 					const saturation = 1 - neighbourCount / 8;
 					const lightness = this.lightnesses[value - 1];
 					const alpha = 1;

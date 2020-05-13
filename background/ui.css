@@ -74,6 +74,12 @@ legend {
 	width: 60% !important;
 }
 
+.vertical-center {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
 .max-w-fit {
 	max-width: fit-content;
 }
@@ -89,6 +95,7 @@ legend {
 
 .no-thumbnail {
 	height: 168px;
+	position: relative;
 }
 
 #background-gen-modal-header {

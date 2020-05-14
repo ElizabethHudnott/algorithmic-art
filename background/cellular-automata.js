@@ -62,6 +62,11 @@
 				element.addEventListener('input', setSeedType);
 			}
 
+			optionsDoc.getElementById('ca-border-row').addEventListener('input', function (event) {
+				me.borderRow = this.checked;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			optionsDoc.getElementById('ca-cell-width').addEventListener('input', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 1) {
@@ -78,6 +83,16 @@
 				}
 			});
 
+			optionsDoc.getElementById('ca-gap-x').addEventListener('input', function (event) {
+				me.gapX = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('ca-gap-y').addEventListener('input', function (event) {
+				me.gapY = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
 			optionsDoc.getElementById('ca-hue-min').addEventListener('input', function (event) {
 				me.hueMin = parseFloat(this.value);
 				progressiveBackgroundGen(me, 0);
@@ -90,6 +105,16 @@
 
 			optionsDoc.getElementById('ca-stroke').addEventListener('input', function (event) {
 				me.strokeIntensity = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('ca-start-row').addEventListener('input', function (event) {
+				me.startHeight = parseFloat(this.value);
+				progressiveBackgroundGen(me, 0);
+			});
+
+			optionsDoc.getElementById('ca-end-row').addEventListener('input', function (event) {
+				me.endHeight = parseFloat(this.value);
 				progressiveBackgroundGen(me, 0);
 			});
 
@@ -108,18 +133,22 @@
 		this.hues = [0];
 		this.hueMin = 0;
 		this.hueMax = 45;
-		this.lightnesses = [0.5];
+		this.lightnesses = [0.55];
 		this.strokeIntensity = 1;
 
 		this.seed = [1];
 		this.repeatSeed = false;
 		this.cellWidth = 11;
 		this.cellHeight = 11;
+		this.borderRow = true;
+		this.gapX = 0;
+		this.gapY = 0;
+		this.startHeight = 0;
+		this.endHeight = 1;
 
 		this.history = undefined;
 		this.cachedWidth = undefined;
 		this.cachedHeight = undefined;
-		//this.tween = 1;
 	}
 
 	CellAutomaton.prototype.animatable = {
@@ -151,6 +180,14 @@
 		}
 		this.transitions = transitions;
 		this.numStates = 2;
+		this.history = undefined;
+	};
+
+	CellAutomaton.prototype.setTotalisticRule = function (n, numStates) {
+		const transitions = new Array(numStates ** 4);
+
+		this.transitions = transitions;
+		this.numStates = numStates;
 		this.history = undefined;
 	};
 
@@ -227,9 +264,11 @@
 	CellAutomaton.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 		const cellWidth = this.cellWidth;
 		const cellHeight = this.cellHeight;
-		const gridWidth = Math.trunc(canvasWidth / cellWidth);
-		const emptyTopRow = !this.repeatSeed && this.seed !== undefined;
-		const gridHeight = Math.ceil(canvasHeight / cellHeight) - emptyTopRow;
+		const totalWidth = Math.round(cellWidth * (1 + this.gapX));
+		const totalHeight = Math.round(cellHeight * (1 + this.gapY));
+		const gridWidth = Math.trunc(canvasWidth / totalWidth);
+		const emptyTopRow = this.borderRow;
+		const gridHeight = Math.ceil(canvasHeight / totalHeight) - emptyTopRow;
 
 		if (
 			this.history === undefined ||
@@ -242,10 +281,12 @@
 
 		const history = this.history;
 		const numStates = this.numStates;
-		const tween = 1;
-		const maxRow = Math.ceil(tween * gridHeight);
+		const startHeight = this.startHeight;
+		const minRow = startHeight === 1 ? gridHeight - 1 : Math.trunc(startHeight * gridHeight);
+		const endHeight = this.endHeight;
+		const maxRow = endHeight === 1 ? gridHeight - 1 : Math.trunc(endHeight * gridHeight);
 
-		for (let j = history.length; j < maxRow; j++) {
+		for (let j = history.length; j <= maxRow; j++) {
 			const row = new Array(gridWidth);
 			for (let i = 0; i < gridWidth; i++) {
 				const left = this.getCellValue(i - 1, j - 1);
@@ -266,22 +307,14 @@
 		const hueRange = this.hueMax - hueMin;
 
 		const strokeIntensity = this.strokeIntensity;
-		let xNudge, yNudge;
-		if (strokeIntensity > 0) {
-			xNudge = 0.5 * (1 - context.canvas.width % 2);
-			yNudge = 0.5 * (1 - context.canvas.height % 2);
-		} else {
-			xNudge = 0;
-			yNudge = 0
-		}
 		context.translate(
-			Math.trunc((canvasWidth - gridWidth * cellWidth) / 2) + xNudge,
-			(emptyTopRow ? cellHeight : 0) + yNudge
+			Math.trunc((canvasWidth - gridWidth * totalWidth) / 2),
+			(emptyTopRow ? cellHeight : 0)
 		);
 		context.strokeStyle = rgba(0, 0, 0, strokeIntensity);
 
-		for (let j = 0; j < maxRow - 1; j++) {
-			const y = j * cellHeight;
+		for (let j = minRow; j <= maxRow; j++) {
+			const y = j * totalHeight;
 			for (let i = 0; i < gridWidth; i++) {
 				const value = history[j][i];
 				if (value !== 0) {
@@ -305,9 +338,11 @@
 					const lightness = this.lightnesses[value - 1];
 					const alpha = 1;
 					context.fillStyle = hsla(hue, saturation, lightness, alpha);
-					const x = i * cellWidth;
+					const x = i * totalWidth;
 					context.fillRect(x, y, cellWidth, cellHeight);
+					context.translate(0.5, 0.5);
 					context.strokeRect(x, y, cellWidth, cellHeight);
+					context.translate(-0.5, -0.5);
 				}
 			}
 		}

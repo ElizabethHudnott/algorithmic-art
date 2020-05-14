@@ -10,6 +10,7 @@
 		{
 			"title": "Cellular Automata",
 			"url": "cellular-automata.js",
+			"thumbnail": "thumbnail/cellular-automata.png",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["automata", "cells"]
 		},

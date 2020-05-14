@@ -29,11 +29,11 @@
 		<input type="number" min="1" value="10" class="form-control form-control-sm" id="ca-seed-length" disabled>
 	</div>
 </div>
-<div class="form-row form-group" id="ca-seed-type">
+<div class="form-row" id="ca-seed-type">
 	<div class="col-3 col-form-label col-form-label-sm">
 		Seed Type
 	</div>
-	<div class="col-3 text-right">
+	<div class="col-3">
 		<div class="form-check mt-1">
 			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
 			<label class="form-check-label small" for="ca-seed-type-tri">
@@ -59,6 +59,17 @@
 	</div>
 </div>
 <div class="form-row form-group">
+	<div class="col-3"></div>
+	<div class="col-3">
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" checked id="ca-border-row">
+			<label class="form-check-label small" for="ca-border-row">
+				Border row
+			</label>
+		</div>
+	</div>
+</div>
+<div class="form-row form-group">
 	<label class="col-3 col-form-label col-form-label-sm" for="ca-cell-width">
 		Cell Width
 	</label>
@@ -70,6 +81,20 @@
 	</label>
 	<div class="col-3">
 		<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-height">
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-gap-x">
+		Gap X
+	</label>
+	<div class="col-3">
+		<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-x">
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-gap-y">
+		Gap Y
+	</label>
+	<div class="col-3">
+		<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-y">
 	</div>
 </div>
 <div class="form-row form-group">
@@ -89,5 +114,19 @@
 	</label>
 	<div class="col-3">
 		<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1" id="ca-stroke">
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-start-row">
+		Start Row
+	</label>
+	<div class="col-3">
+		<input type="range" min="0" max="1" step="0.001" value="0" class="form-control-range mt-1" id="ca-start-row">
+	</div>
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-end-row">
+		End Row
+	</label>
+	<div class="col-3">
+		<input type="range" min="0" max="1" step="0.001" value="1" class="form-control-range mt-1" id="ca-end-row">
 	</div>
 </div>

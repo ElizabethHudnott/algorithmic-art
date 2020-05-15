@@ -160,10 +160,11 @@
 		this.transitions = transitions;
 		this.numStates = 2;
 
-		this.hues = [0, 60, 240];
+		this.hues = [0, 60];
+		this.saturations = [1, 1];
+		this.lightnesses = [0.55, 0.55];
 		this.hueMin = 0;
 		this.hueMax = 45;
-		this.lightnesses = [0.55, 0.55, 0.55];
 		this.strokeIntensity = 1;
 
 		this.seed = [1];
@@ -408,29 +409,92 @@
 			for (let i = 0; i < gridWidth; i++) {
 				const value = history[j][i];
 				if (value !== 0) {
-					let neighbourCount = 0;
-					neighbourCount += this.getCellValue(i - 1, j - 1) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i, j - 1) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i + 1, j - 1) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i - 1, j) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i + 1, j) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i - 1, j + 1) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
-					neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
+					const x = i * totalWidth;
+					let hue, saturation, lightness;
 
-					let hue, saturation;
 					if (this.numStates === 2) {
+						let neighbourCount = 0;
+						neighbourCount += this.getCellValue(i - 1, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i + 1, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i - 1, j) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i + 1, j) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i - 1, j + 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
+
 						hue = hueMin + j / (gridHeight - 1) * hueRange;
 						saturation = 1 - neighbourCount / 8;
+						lightness = this.lightnesses[value - 1];
+
+						context.fillStyle = hsla(hue, saturation, lightness, 1);
+						context.fillRect(x, y, cellWidth, cellHeight);
+
 					} else {
 						hue = this.hues[value - 1];
-						saturation = 1;
+						saturation = this.saturations[value - 1];
+						lightness = this.lightnesses[value - 1];
+						const thisColor = hsla(hue, saturation, lightness, 1);
+						const centreX = x + cellWidth / 2;
+						const centreY = y + cellHeight / 2;
+						const r = cellHeight / 2 * Math.SQRT2;
+
+						let top = this.getCellValue(i, j - 1);
+						if (top === 0) {
+							top = value;
+						}
+						if (top === value) {
+							context.fillStyle = thisColor;
+						} else {
+							const g = context.createRadialGradient(centreX, centreY, 0, centreX, centreY, r);
+							hue = this.hues[top - 1];
+							saturation = this.saturations[top - 1];
+							lightness = this.lightnesses[top - 1];
+							const topColor = hsla(hue, saturation, lightness, 1);
+							g.addColorStop(0, thisColor);
+							g.addColorStop(1, topColor);
+							context.fillStyle = g;
+						}
+						context.beginPath();
+						context.moveTo(x + cellWidth, y);
+						context.lineTo(x, y);
+
+						let left = this.getCellValue(i - 1, j);
+						if (left === 0) {
+							left = value;
+						}
+						if (left !== top) {
+							context.lineTo(centreX, centreY + 1);
+							context.fill();
+							context.beginPath();
+							context.moveTo(centreX + 1, centreY);
+							context.lineTo(x, y);
+							if (left === value) {
+								context.fillStyle = thisColor;
+							} else {
+								const g = context.createRadialGradient(centreX, centreY, 0, centreX, centreY, r);
+								hue = this.hues[left - 1];
+								saturation = this.saturations[left - 1];
+								lightness = this.lightnesses[left - 1];
+								const leftColor = hsla(hue, saturation, lightness, 1);
+								g.addColorStop(0, thisColor);
+								g.addColorStop(1, leftColor);
+								context.fillStyle = g;
+							}
+						}
+						context.lineTo(x, y + cellHeight);
+
+						if (left !== value) {
+							context.fill();
+							context.beginPath();
+							context.fillStyle = thisColor;
+							context.moveTo(x, y + cellHeight);
+						}
+						context.lineTo(x + cellWidth, y + cellHeight);
+						context.lineTo(x + cellWidth, y);
+						context.fill();
 					}
-					const lightness = this.lightnesses[value - 1];
-					const alpha = 1;
-					context.fillStyle = hsla(hue, saturation, lightness, alpha);
-					const x = i * totalWidth;
-					context.fillRect(x, y, cellWidth, cellHeight);
+
 					context.translate(0.5, 0.5);
 					context.strokeRect(x, y, cellWidth, cellHeight);
 					context.translate(-0.5, -0.5);

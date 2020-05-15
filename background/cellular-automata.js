@@ -325,25 +325,23 @@
 
 	CellAutomaton.prototype.getCellValue = function (i, j) {
 		if (j === -1) {
-			if (this.repeatSeed) {
-				j = 0;
-			} else {
-				return 0;
-			}
-		} else if (j === this.history.length) {
-			j = 0;
+			return 0
 		}
 
 		const row = this.history[j];
 		const width = row.length;
 		if (i === -1) {
-			if (this.repeatSeed && j === 0) {
+			if (this.seed === undefined) {
+				return Math.trunc(Math.random() * this.numStates);
+			} else if (j === 0 && this.repeatSeed) {
 				return this.seed[this.seed.length - 1];	// wrap seed
 			} else {
 				return row[width - 1];	// wrap row data
 			}
 		} else if (i === width) {
-			if (this.repeatSeed && j === 0) {
+			if (this.seed === undefined) {
+				return Math.trunc(Math.random() * this.numStates);
+			} if (j === 0 && this.repeatSeed) {
 				return this.seed[(i + 1) % this.seed.length];	// wrap seed
 			} else {
 				return row[0];	// wrap row data
@@ -378,7 +376,7 @@
 		const endHeight = this.endHeight;
 		const maxRow = endHeight === 1 ? gridHeight : Math.trunc(endHeight * (gridHeight + 1));
 
-		for (let j = history.length; j <= maxRow; j++) {
+		for (let j = history.length; j <= maxRow + 1; j++) {
 			const row = new Array(gridWidth);
 			for (let i = 0; i < gridWidth; i++) {
 				const left = this.getCellValue(i - 1, j - 1);

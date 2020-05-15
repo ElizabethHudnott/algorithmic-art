@@ -29,7 +29,7 @@
 					} else if (blank) {
 						presetInput.value = '';
 					}
-				} else {
+				} else if (type === 't') {
 					const numDigits = 3 * numStates - 2;
 					const maxValue = numStates ** numDigits - 1;
 					if (number >= 0 && number <= maxValue) {
@@ -38,7 +38,11 @@
 					} else if (blank) {
 						presetInput.value = '';
 					}
+				} else {
+					me.setCyclicRule();
+					progressiveBackgroundGen(me, 0);
 				}
+				presetInput.disabled = type == 'c';
 			}
 
 			ruleTypeInput.addEventListener('input', setPreset);
@@ -178,6 +182,15 @@
 	}
 
 	CellAutomaton.prototype.animatable = {
+		continuous: [
+			'hueMin', 'hueMax', 'strokeIntensity', 'gapX', 'gapY'
+		],
+		stepped: [
+			'repeatSeed', 'cellWidth', 'cellHeight', 'borderRow'
+		],
+		pairedContinuous: [
+			['endHeight', 'startHeight']
+		]
 	};
 
 	CellAutomaton.prototype.setSeed = function (n, padLength) {
@@ -234,6 +247,34 @@
 				value = (value - units) / numStates;
 			}
 			transitions[i] = outputs[total];
+		}
+		for (let i = cubed; i < pow4; i++) {
+			transitions[i] = transitions[i % cubed];
+		}
+		this.transitions = transitions;
+		this.history = undefined;
+	};
+
+	CellAutomaton.prototype.setCyclicRule = function () {
+		const numStates = this.numStates;
+		const cubed = numStates ** 3;
+		const pow4 = cubed * numStates;
+		const transitions = new Array(pow4);
+		for (let i = 0; i < cubed; i++) {
+			let value = i;
+			const left = value % numStates;
+			value = (value - left) / numStates;
+			const centre = value % numStates;
+			value = (value - centre) / numStates;
+			const right = value;
+			const nextState = (centre + 1) % numStates;
+			const leftMatch = left === nextState;
+			const rightMatch = right === nextState;
+			if (leftMatch ^ rightMatch) {
+				transitions[i] = nextState;
+			} else {
+				transitions[i] = centre;
+			}
 		}
 		for (let i = cubed; i < pow4; i++) {
 			transitions[i] = transitions[i % cubed];
@@ -335,7 +376,7 @@
 		const startHeight = this.startHeight;
 		const minRow = startHeight === 1 ? gridHeight - 1 : Math.trunc(startHeight * gridHeight);
 		const endHeight = this.endHeight;
-		const maxRow = endHeight === 1 ? gridHeight - 1 : Math.trunc(endHeight * gridHeight);
+		const maxRow = endHeight === 1 ? gridHeight : Math.trunc(endHeight * (gridHeight + 1));
 
 		for (let j = history.length; j <= maxRow; j++) {
 			const row = new Array(gridWidth);
@@ -364,7 +405,7 @@
 		);
 		context.strokeStyle = rgba(0, 0, 0, strokeIntensity);
 
-		for (let j = minRow; j <= maxRow; j++) {
+		for (let j = minRow; j < maxRow; j++) {
 			const y = j * totalHeight;
 			for (let i = 0; i < gridWidth; i++) {
 				const value = history[j][i];

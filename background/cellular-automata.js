@@ -8,20 +8,46 @@
 		this.hasRandomness = true;
 
 		this.optionsDocument = downloadFile('cellular-automata.html', 'document').then(function (optionsDoc) {
-
+			const ruleTypeInput = optionsDoc.getElementById('ca-type');
+			const numStatesInput = optionsDoc.getElementById('ca-num-states');
 			const presetInput = optionsDoc.getElementById('ca-preset');
 			const seedInput = optionsDoc.getElementById('ca-seed');
 			const seedLengthInput = optionsDoc.getElementById('ca-seed-length');
 			const seedTypeRow = optionsDoc.getElementById('ca-seed-type');
 
 			function setPreset() {
+				const type = ruleTypeInput.value;
+				const numStates = me.numStates;
 				const number = parseInt(presetInput.value);
-				if (number >= 0 && number <= 255) {
-					me.setElementaryRule(number);
-					progressiveBackgroundGen(me, 0);
+				const blank = this !== presetInput;
+
+				if (type === 'g') {
+					const maxValue = numStates ** (numStates ** 3) - 1;
+					if (number >= 0 && number <= maxValue) {
+						me.setGeneralRule(number);
+						progressiveBackgroundGen(me, 0);
+					} else if (blank) {
+						presetInput.value = '';
+					}
+				} else {
+					const numDigits = 3 * numStates - 2;
+					const maxValue = numStates ** numDigits - 1;
+					if (number >= 0 && number <= maxValue) {
+						me.setTotalisticRule(number);
+						progressiveBackgroundGen(me, 0);
+					} else if (blank) {
+						presetInput.value = '';
+					}
 				}
 			}
+
+			ruleTypeInput.addEventListener('input', setPreset);
 			presetInput.addEventListener('input', setPreset);
+
+			numStatesInput.addEventListener('input', function (event) {
+				me.numStates = parseInt(this.value);
+				setPreset();
+			});
 
 			function setSeed() {
 				const seed = parseInt(seedInput.value);
@@ -130,10 +156,10 @@
 		this.transitions = transitions;
 		this.numStates = 2;
 
-		this.hues = [0];
+		this.hues = [0, 60, 240];
 		this.hueMin = 0;
 		this.hueMax = 45;
-		this.lightnesses = [0.55];
+		this.lightnesses = [0.55, 0.55, 0.55];
 		this.strokeIntensity = 1;
 
 		this.seed = [1];
@@ -170,24 +196,49 @@
 		this.history = undefined;
 	}
 
-	CellAutomaton.prototype.setElementaryRule = function (n) {
-		const transitions = new Array(16);
-		for (let i = 0; i < 8; i++) {
-			const value = n & 1;
+	CellAutomaton.prototype.setGeneralRule = function (n) {
+		const numStates = this.numStates;
+		const cubed = numStates ** 3;
+		const pow4 = cubed * numStates;
+		const transitions = new Array(pow4);
+		for (let i = 0; i < cubed; i++) {
+			const value = n % numStates;
 			transitions[i] = value;
-			transitions[8 + i] = value;
-			n = n >>> 1;
+			transitions[cubed + i] = value;
+			n = (n - value) / numStates;
 		}
 		this.transitions = transitions;
-		this.numStates = 2;
 		this.history = undefined;
 	};
 
-	CellAutomaton.prototype.setTotalisticRule = function (n, numStates) {
-		const transitions = new Array(numStates ** 4);
-
+	CellAutomaton.prototype.setTotalisticRule = function (n) {
+		const numStates = this.numStates;
+		const outputs = new Array(3 * numStates - 2);
+		outputs.fill(0);
+		let i = 0;
+		while (n > 0) {
+			const value = n % numStates;
+			outputs[i] = value;
+			n = (n - value) / numStates;
+			i++;
+		}
+		const cubed = numStates ** 3;
+		const pow4 = cubed * numStates;
+		const transitions = new Array(pow4);
+		for (let i = 0; i < cubed; i++) {
+			let value = i;
+			let total = 0;
+			for (let j = 0; j < 3; j++) {
+				let units = value % numStates;
+				total += units;
+				value = (value - units) / numStates;
+			}
+			transitions[i] = outputs[total];
+		}
+		for (let i = cubed; i < pow4; i++) {
+			transitions[i] = transitions[i % cubed];
+		}
 		this.transitions = transitions;
-		this.numStates = numStates;
 		this.history = undefined;
 	};
 
@@ -328,13 +379,14 @@
 					neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
 					neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
 
-					let hue;
+					let hue, saturation;
 					if (this.numStates === 2) {
 						hue = hueMin + j / (gridHeight - 1) * hueRange;
+						saturation = 1 - neighbourCount / 8;
 					} else {
 						hue = this.hues[value - 1];
+						saturation = 1;
 					}
-					const saturation = 1 - neighbourCount / 8;
 					const lightness = this.lightnesses[value - 1];
 					const alpha = 1;
 					context.fillStyle = hsla(hue, saturation, lightness, alpha);

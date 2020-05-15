@@ -1,14 +1,25 @@
 <div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-rule-type">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-type">
 		Rule Type
 	</label>
 	<div class="col-3">
-		<select id="ca-preset-type" class="form-control form-control-sm">
+		<select id="ca-type" class="form-control form-control-sm">
 			<option value="g" selected>General</option>
 			<option value="t">Totalistic</option>
 		</select>
 	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-preset">
+	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-num-states">
+		States
+	</label>
+	<div class="col-3">
+		<select class="form-control form-control-sm" id="ca-num-states">
+			<option selected>2</option>
+			<option>3</option>
+		</select>
+	</div>
+</div>
+<div class="form-row form-group">
+	<label class="col-3 col-form-label col-form-label-sm" for="ca-preset">
 		Preset
 	</label>
 	<div class="col-3">

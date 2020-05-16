@@ -42,9 +42,6 @@ Phyllotaxis
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
-Automata
-	Random (but consistent) Row -1 for a random seed
-
 New Sketches
 ------------
 Copy machine

@@ -15,6 +15,10 @@
 			const seedLengthInput = optionsDoc.getElementById('ca-seed-length');
 			const seedTypeRow = optionsDoc.getElementById('ca-seed-type');
 
+			function fullRedraw() {
+				progressiveBackgroundGen(me, 0);
+			}
+
 			function setPreset() {
 				const type = ruleTypeInput.value;
 				const numStates = me.numStates;
@@ -97,7 +101,7 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
-			optionsDoc.getElementById('ca-cell-width').addEventListener('input', function (event) {
+			optionsDoc.getElementById('ca-cell-width').addEventListener('change', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 1) {
 					me.cellWidth = value;
@@ -105,7 +109,7 @@
 				}
 			});
 
-			optionsDoc.getElementById('ca-cell-height').addEventListener('input', function (event) {
+			optionsDoc.getElementById('ca-cell-height').addEventListener('change', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 1) {
 					me.cellHeight = value;
@@ -113,15 +117,21 @@
 				}
 			});
 
-			optionsDoc.getElementById('ca-gap-x').addEventListener('input', function (event) {
+			const gapXSlider = optionsDoc.getElementById('ca-gap-x');
+			gapXSlider.addEventListener('input', function (event) {
 				me.gapX = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 1);
 			});
+			gapXSlider.addEventListener('pointerup', fullRedraw);
+			gapXSlider.addEventListener('keyup', fullRedraw);
 
-			optionsDoc.getElementById('ca-gap-y').addEventListener('input', function (event) {
+			const gapYSlider = optionsDoc.getElementById('ca-gap-y');
+			gapYSlider.addEventListener('input', function (event) {
 				me.gapY = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 1);
 			});
+			gapYSlider.addEventListener('pointerup', fullRedraw);
+			gapYSlider.addEventListener('keyup', fullRedraw);
 
 			optionsDoc.getElementById('ca-hue-min').addEventListener('input', function (event) {
 				me.hueMin = parseFloat(this.value);
@@ -133,20 +143,29 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
-			optionsDoc.getElementById('ca-stroke').addEventListener('input', function (event) {
+			const strokeSlider = optionsDoc.getElementById('ca-stroke');
+			strokeSlider.addEventListener('input', function (event) {
 				me.strokeIntensity = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 1);
 			});
+			strokeSlider.addEventListener('pointerup', fullRedraw);
+			strokeSlider.addEventListener('keyup', fullRedraw);
 
-			optionsDoc.getElementById('ca-start-row').addEventListener('input', function (event) {
+			const startSlider = optionsDoc.getElementById('ca-start-row');
+			startSlider.addEventListener('input', function (event) {
 				me.startHeight = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 1);
 			});
+			startSlider.addEventListener('pointerup', fullRedraw);
+			startSlider.addEventListener('keyup', fullRedraw);
 
-			optionsDoc.getElementById('ca-end-row').addEventListener('input', function (event) {
+			const endSlider = optionsDoc.getElementById('ca-end-row');
+			endSlider.addEventListener('input', function (event) {
 				me.endHeight = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				progressiveBackgroundGen(me, 1);
 			});
+			endSlider.addEventListener('pointerup', fullRedraw);
+			endSlider.addEventListener('keyup', fullRedraw);
 
 			return optionsDoc;
 		});
@@ -160,9 +179,9 @@
 		this.transitions = transitions;
 		this.numStates = 2;
 
-		this.hues = [0, 60];
+		this.hues = [0, 0];
 		this.saturations = [1, 1];
-		this.lightnesses = [0.55, 0.55];
+		this.lightnesses = [0.55, 0];
 		this.hueMin = 0;
 		this.hueMax = 45;
 		this.strokeIntensity = 1;
@@ -210,11 +229,19 @@
 		this.history = undefined;
 	}
 
+	CellAutomaton.prototype.setPresentOnly = function () {
+		const transitions = this.transitions;
+		const numTransitions = transitions.length;
+		const numBaseTransitions = numTransitions / this.numStates;
+		for (let i = numBaseTransitions; i < numTransitions; i++) {
+			transitions[i] = transitions[i % numBaseTransitions];
+		}
+	};
+
 	CellAutomaton.prototype.setGeneralRule = function (n) {
 		const numStates = this.numStates;
 		const cubed = numStates ** 3;
-		const pow4 = cubed * numStates;
-		const transitions = new Array(pow4);
+		const transitions = new Array(cubed * numStates);
 		for (let i = 0; i < cubed; i++) {
 			const value = n % numStates;
 			transitions[i] = value;
@@ -222,6 +249,7 @@
 			n = (n - value) / numStates;
 		}
 		this.transitions = transitions;
+		this.setPresentOnly();
 		this.history = undefined;
 	};
 
@@ -237,8 +265,7 @@
 			i++;
 		}
 		const cubed = numStates ** 3;
-		const pow4 = cubed * numStates;
-		const transitions = new Array(pow4);
+		const transitions = new Array(cubed * numStates);
 		for (let i = 0; i < cubed; i++) {
 			let value = i;
 			let total = 0;
@@ -249,18 +276,15 @@
 			}
 			transitions[i] = outputs[total];
 		}
-		for (let i = cubed; i < pow4; i++) {
-			transitions[i] = transitions[i % cubed];
-		}
 		this.transitions = transitions;
+		this.setPresentOnly();
 		this.history = undefined;
 	};
 
 	CellAutomaton.prototype.setCyclicRule = function () {
 		const numStates = this.numStates;
 		const cubed = numStates ** 3;
-		const pow4 = cubed * numStates;
-		const transitions = new Array(pow4);
+		const transitions = new Array(cubed * numStates);
 		for (let i = 0; i < cubed; i++) {
 			let value = i;
 			const left = value % numStates;
@@ -277,10 +301,8 @@
 				transitions[i] = centre;
 			}
 		}
-		for (let i = cubed; i < pow4; i++) {
-			transitions[i] = transitions[i % cubed];
-		}
 		this.transitions = transitions;
+		this.setPresentOnly();
 		this.history = undefined;
 	};
 
@@ -435,64 +457,78 @@
 						saturation = this.saturations[value - 1];
 						lightness = this.lightnesses[value - 1];
 						const thisColor = hsla(hue, saturation, lightness, 1);
-						const centreX = x + cellWidth / 2;
-						const centreY = y + cellHeight / 2;
-						const r = cellHeight / 2 * Math.SQRT2;
 
-						let top = this.getCellValue(i, j - 1);
-						if (top === 0) {
-							top = value;
-						}
-						if (top === value) {
+						if (preview > 0) {
+
 							context.fillStyle = thisColor;
-						} else {
-							const g = context.createRadialGradient(centreX, centreY, 0, centreX, centreY, r);
-							hue = this.hues[top - 1];
-							saturation = this.saturations[top - 1];
-							lightness = this.lightnesses[top - 1];
-							const topColor = hsla(hue, saturation, lightness, 1);
-							g.addColorStop(0, thisColor);
-							g.addColorStop(1, topColor);
-							context.fillStyle = g;
-						}
-						context.beginPath();
-						context.moveTo(x + cellWidth, y);
-						context.lineTo(x, y);
+							context.fillRect(x, y, cellWidth, cellHeight);
 
-						let left = this.getCellValue(i - 1, j);
-						if (left === 0) {
-							left = value;
-						}
-						if (left !== top) {
-							context.lineTo(centreX, centreY + 1);
-							context.fill();
-							context.beginPath();
-							context.moveTo(centreX + 1, centreY);
-							context.lineTo(x, y);
-							if (left === value) {
+						} else {
+
+							context.save();
+							const scale = cellWidth / cellHeight;
+							context.scale(scale, 1);
+							const scaledX = x / scale;
+							const centreX = scaledX + cellHeight / 2;
+							const centreY = y + cellHeight / 2;
+							const r = cellHeight / 2 * Math.SQRT2;
+
+							let top = this.getCellValue(i, j - 1);
+							if (top === 0) {
+								top = value;
+							}
+							if (top === value) {
 								context.fillStyle = thisColor;
 							} else {
 								const g = context.createRadialGradient(centreX, centreY, 0, centreX, centreY, r);
-								hue = this.hues[left - 1];
-								saturation = this.saturations[left - 1];
-								lightness = this.lightnesses[left - 1];
-								const leftColor = hsla(hue, saturation, lightness, 1);
+								hue = this.hues[top - 1];
+								saturation = this.saturations[top - 1];
+								lightness = this.lightnesses[top - 1];
+								const topColor = hsla(hue, saturation, lightness, 1);
 								g.addColorStop(0, thisColor);
-								g.addColorStop(1, leftColor);
+								g.addColorStop(1, topColor);
 								context.fillStyle = g;
 							}
-						}
-						context.lineTo(x, y + cellHeight);
-
-						if (left !== value) {
-							context.fill();
 							context.beginPath();
-							context.fillStyle = thisColor;
-							context.moveTo(x, y + cellHeight);
+							context.moveTo(scaledX + cellHeight, y);
+							context.lineTo(scaledX, y);
+
+							let left = this.getCellValue(i - 1, j);
+							if (left === 0) {
+								left = value;
+							}
+							if (left !== top) {
+								context.lineTo(centreX, centreY + 1);
+								context.fill();
+								context.beginPath();
+								context.moveTo(centreX + 1, centreY);
+								context.lineTo(scaledX, y);
+								if (left === value) {
+									context.fillStyle = thisColor;
+								} else {
+									const g = context.createRadialGradient(centreX, centreY, 0, centreX, centreY, r);
+									hue = this.hues[left - 1];
+									saturation = this.saturations[left - 1];
+									lightness = this.lightnesses[left - 1];
+									const leftColor = hsla(hue, saturation, lightness, 1);
+									g.addColorStop(0, thisColor);
+									g.addColorStop(1, leftColor);
+									context.fillStyle = g;
+								}
+							}
+							context.lineTo(scaledX, y + cellHeight);
+
+							if (left !== value) {
+								context.fill();
+								context.beginPath();
+								context.fillStyle = thisColor;
+								context.moveTo(scaledX, y + cellHeight);
+							}
+							context.lineTo(scaledX + cellHeight, y + cellHeight);
+							context.lineTo(scaledX + cellHeight, y);
+							context.fill();
+							context.restore();
 						}
-						context.lineTo(x + cellWidth, y + cellHeight);
-						context.lineTo(x + cellWidth, y);
-						context.fill();
 					}
 
 					context.translate(0.5, 0.5);

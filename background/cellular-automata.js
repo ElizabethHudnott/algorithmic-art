@@ -33,11 +33,12 @@
 					} else if (blank) {
 						presetInput.value = '';
 					}
-				} else if (type === 't') {
-					const numDigits = 3 * numStates - 2;
+				} else if (type[1] === 't') {
+					const outer = type[0] === 'o';
+					const numDigits = (outer ? 2 : 3) * (numStates - 1) + 1;
 					const maxValue = numStates ** numDigits - 1;
 					if (number >= 0 && number <= maxValue) {
-						me.setTotalisticRule(number);
+						me.setTotalisticRule(number, outer);
 						progressiveBackgroundGen(me, 0);
 					} else if (blank) {
 						presetInput.value = '';
@@ -253,7 +254,7 @@
 		this.history = undefined;
 	};
 
-	CellAutomaton.prototype.setTotalisticRule = function (n) {
+	CellAutomaton.prototype.setTotalisticRule = function (n, outer) {
 		const numStates = this.numStates;
 		const outputs = new Array(3 * numStates - 2);
 		outputs.fill(0);
@@ -271,7 +272,9 @@
 			let total = 0;
 			for (let j = 0; j < 3; j++) {
 				let units = value % numStates;
-				total += units;
+				if (!outer || j !== 1) {
+					total += units;
+				}
 				value = (value - units) / numStates;
 			}
 			transitions[i] = outputs[total];

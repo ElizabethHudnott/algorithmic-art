@@ -43,12 +43,14 @@ Phyllotaxis
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 Cellular Automata
-	Number base selection 10 or numStates
-	Born, survive, decay specification
+	Number base selection for preset: 10 or numStates
+	Seed to be expressed in base numStates
+	Option to treat memory cell like an ordinary neighbour
 	Neighbourhood selection
-	Reflection checkbox
+	Born, survive, decay specification
+	Rule table compression: reflection, ignore centre cell, maps permutations of colors to the same/different values
 	Brick wall neighbourhoods (odd left, even right)
-	Alternating neighbourhoods
+	Alternate neighbourhoods
 
 New Sketches
 ------------

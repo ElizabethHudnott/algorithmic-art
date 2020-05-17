@@ -34,6 +34,38 @@
 		<input type="number" min="0" value="18" class="form-control form-control-sm" id="ca-preset">
 	</div>
 </div>
+<div class="form-row form-group" id="ca-memory">
+	<div class="col-3 col-form-label col-form-label-sm">
+		Memory Cell
+	</div>
+	<div class="col-3">
+		<div class="form-check mt-1">
+			<input type="radio" checked name="ca-memory" value="i" id="ca-memory-ignore" class="form-check-input">
+			<label class="form-check-label small" for="ca-memory-ignore">
+				Ignore
+			</label>
+		</div>
+	</div>
+	<div class="col-3 pl-4">
+		<div class="form-check mt-1">
+			<input type="radio" name="ca-memory" value="+" id="ca-memory-add" class="form-check-input">
+			<label class="form-check-label small" for="ca-memory-add">
+				Add
+			</label>
+		</div>
+	</div>
+	<div class="col-3 small">
+		<div class="form-check mt-1">
+			<input type="radio" name="ca-memory" value="c" id="ca-memory-centre" class="form-check-input">
+			<label class="form-check-label" for="ca-memory-centre">
+				Replace centre
+			</label>
+		</div>
+		<div class="pl-4">
+			(<a href="https://www.wolframscience.com/conference/2006/presentations/materials/letourneau.pdf" target="_blank">paper</a>)
+		</div>
+	</div>
+</div>
 <div class="form-row form-group">
 	<label class="col-3 col-form-label col-form-label-sm" for="ca-seed">
 		Seed
@@ -48,7 +80,7 @@
 		<input type="number" min="1" value="30" class="form-control form-control-sm" id="ca-seed-length" disabled>
 	</div>
 </div>
-<div class="form-row form-group" id="ca-seed-type">
+<div class="form-row" id="ca-seed-type">
 	<div class="col-3 col-form-label col-form-label-sm">
 		Seed Type
 	</div>
@@ -78,14 +110,12 @@
 	</div>
 </div>
 <div class="form-row form-group">
-	<div class="col-3 col-form-label col-form-label-sm">
-		Display
-	</div>
+	<div class="col-3"></div>
 	<div class="col-3">
 		<div class="form-check">
 			<input class="form-check-input" type="checkbox" checked id="ca-border-row">
 			<label class="form-check-label small" for="ca-border-row">
-				Show border
+				Border row
 			</label>
 		</div>
 	</div>

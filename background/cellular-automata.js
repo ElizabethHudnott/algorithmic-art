@@ -8,7 +8,15 @@
 		this.hasRandomness = true;
 
 		this.optionsDocument = downloadFile('cellular-automata.html', 'document').then(function (optionsDoc) {
+			const helpLinks = new Map();
+			helpLinks.set('g', 'https://mathworld.wolfram.com/CellularAutomaton.html');
+			helpLinks.set('a', 'https://mathworld.wolfram.com/AdditiveCellularAutomaton.html');
+			helpLinks.set('c', 'https://en.wikipedia.org/wiki/Cyclic_cellular_automaton');
+			helpLinks.set('ot', 'https://mathworld.wolfram.com/Outer-TotalisticCellularAutomaton.html');
+			helpLinks.set('at', 'https://mathworld.wolfram.com/TotalisticCellularAutomaton.html');
+
 			const ruleTypeInput = optionsDoc.getElementById('ca-type');
+			const helpAnchor = optionsDoc.getElementById('ca-help');
 			const numStatesInput = optionsDoc.getElementById('ca-num-states');
 			const presetInput = optionsDoc.getElementById('ca-preset');
 			const seedInput = optionsDoc.getElementById('ca-seed');
@@ -33,6 +41,9 @@
 					} else if (blank) {
 						presetInput.value = '';
 					}
+				} else if (type === 'a') {
+					me.setAdditiveRule();
+					progressiveBackgroundGen(me, 0);
 				} else if (type[1] === 't') {
 					const outer = type[0] === 'o';
 					const numDigits = (outer ? 2 : 3) * (numStates - 1) + 1;
@@ -47,10 +58,19 @@
 					me.setCyclicRule();
 					progressiveBackgroundGen(me, 0);
 				}
-				presetInput.disabled = type == 'c';
+				presetInput.disabled = type === 'a' || type === 'c';
 			}
 
-			ruleTypeInput.addEventListener('input', setPreset);
+			ruleTypeInput.addEventListener('input', function (event) {
+				const value = this.value;
+				helpAnchor.href = helpLinks.get(value);
+				for (let option of this.children) {
+					if (option.value === value) {
+						helpAnchor.innerHTML = 'About ' + option.innerText.toLowerCase() + ' CAs';
+					}
+				}
+				setPreset();
+			});
 			presetInput.addEventListener('input', setPreset);
 
 			numStatesInput.addEventListener('input', function (event) {
@@ -179,6 +199,7 @@
 		transitions[12] = 1;
 		this.transitions = transitions;
 		this.numStates = 2;
+		this.neighbourhood = 7;	// left, centre and right
 
 		this.hues = [0, 0];
 		this.saturations = [1, 1];
@@ -230,12 +251,29 @@
 		this.history = undefined;
 	}
 
-	CellAutomaton.prototype.setPresentOnly = function () {
+	CellAutomaton.prototype.restrictNeighbourhood = function () {
 		const transitions = this.transitions;
 		const numTransitions = transitions.length;
-		const numBaseTransitions = numTransitions / this.numStates;
-		for (let i = numBaseTransitions; i < numTransitions; i++) {
-			transitions[i] = transitions[i % numBaseTransitions];
+		const numStates = this.numStates;
+		const neighbourhood = this.neighbourhood;
+		const squared = numStates * numStates;
+		const cubed = squared * numStates;
+		for (let i = 0; i < numTransitions; i++) {
+			if (transitions[i] === undefined) {
+				let value = i;
+				const left = value % numStates;
+				value = (value - left) / numStates;
+				const centre = value % numStates;
+				value = (value - centre) / numStates;
+				const right = value % numStates;
+				const past = (value - right) / numStates;
+				const index =
+					(neighbourhood & 1 ? left : 0) +
+					(neighbourhood & 2 ? centre * numStates : 0) +
+					(neighbourhood & 4 ? right * squared : 0) +
+					(neighbourhood & 8 ? past * cubed : 0);
+				transitions[i] = transitions[index];
+			}
 		}
 	};
 
@@ -250,7 +288,59 @@
 			n = (n - value) / numStates;
 		}
 		this.transitions = transitions;
-		this.setPresentOnly();
+		this.neighbourhood = 7;
+		this.restrictNeighbourhood();
+		this.history = undefined;
+	};
+
+	CellAutomaton.prototype.setAdditiveRule = function () {
+		const numStates = this.numStates;
+		const pow4 = numStates ** 4;
+		const neighbourhood = this.neighbourhood;
+		const transitions = new Array(pow4);
+		for (let i = 0; i < pow4; i++) {
+			let value = i;
+			const left = value % numStates;
+			value = (value - left) / numStates;
+			const centre = value % numStates;
+			value = (value - centre) / numStates;
+			const right = value % numStates;
+			const past = (value - right) / numStates;
+			let total =
+				(neighbourhood & 1 ? left : 0) +
+				(neighbourhood & 2 ? centre : 0) +
+				(neighbourhood & 4 ? right : 0) +
+				(neighbourhood & 8 ? past : 0);
+			transitions[i] = total % numStates;
+		}
+		this.transitions = transitions;
+		this.history = undefined;
+	}
+
+
+	CellAutomaton.prototype.setCyclicRule = function () {
+		const numStates = this.numStates;
+		const cubed = numStates ** 3;
+		const transitions = new Array(cubed * numStates);
+		for (let i = 0; i < cubed; i++) {
+			let value = i;
+			const left = value % numStates;
+			value = (value - left) / numStates;
+			const centre = value % numStates;
+			value = (value - centre) / numStates;
+			const right = value;
+			const nextState = (centre + 1) % numStates;
+			const leftMatch = left === nextState;
+			const rightMatch = right === nextState;
+			if (leftMatch ^ rightMatch) {
+				transitions[i] = nextState;
+			} else {
+				transitions[i] = centre;
+			}
+		}
+		this.transitions = transitions;
+		this.neighbourhood = 7;
+		this.restrictNeighbourhood();
 		this.history = undefined;
 	};
 
@@ -280,32 +370,8 @@
 			transitions[i] = outputs[total];
 		}
 		this.transitions = transitions;
-		this.setPresentOnly();
-		this.history = undefined;
-	};
-
-	CellAutomaton.prototype.setCyclicRule = function () {
-		const numStates = this.numStates;
-		const cubed = numStates ** 3;
-		const transitions = new Array(cubed * numStates);
-		for (let i = 0; i < cubed; i++) {
-			let value = i;
-			const left = value % numStates;
-			value = (value - left) / numStates;
-			const centre = value % numStates;
-			value = (value - centre) / numStates;
-			const right = value;
-			const nextState = (centre + 1) % numStates;
-			const leftMatch = left === nextState;
-			const rightMatch = right === nextState;
-			if (leftMatch ^ rightMatch) {
-				transitions[i] = nextState;
-			} else {
-				transitions[i] = centre;
-			}
-		}
-		this.transitions = transitions;
-		this.setPresentOnly();
+		this.neighbourhood = outer ? 5 : 7;
+		this.restrictNeighbourhood();
 		this.history = undefined;
 	};
 
@@ -397,6 +463,8 @@
 
 		const history = this.history;
 		const numStates = this.numStates;
+		const squared = numStates * numStates;
+		const cubed = squared * numStates;
 		const startHeight = this.startHeight;
 		const minRow = startHeight === 1 ? gridHeight - 1 : Math.trunc(startHeight * gridHeight);
 		const endHeight = this.endHeight;
@@ -412,8 +480,8 @@
 				const index =
 					left +
 					centre * numStates +
-					right * numStates ** 2 +
-					past * numStates ** 3;
+					right * squared +
+					past * cubed;
 				row[i] = this.transitions[index];
 			}
 			history.push(row);

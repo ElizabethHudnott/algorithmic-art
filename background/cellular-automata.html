@@ -1,208 +1,226 @@
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-type">
-		Rule Type
-	</label>
-	<div class="col-3">
-		<select id="ca-type" class="form-control form-control-sm px-1">
-			<option value="g" selected>General</option>
-			<option value="a">Additive</option>
-			<option value="c">Cyclic</option>
-			<option value="t">Totalistic</option>
-		</select>
-	</div>
-	<div class="col-6 pl-4 text-center">
-		<a id="ca-help" href="https://mathworld.wolfram.com/CellularAutomaton.html" target="_blank">About cellular automata</a>
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-num-states">
-		States
-	</label>
-	<div class="col-3">
-		<select class="form-control form-control-sm" id="ca-num-states">
-			<option selected>2</option>
-			<option>3</option>
-		</select>
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-preset">
-		Preset
-	</label>
-	<div class="col-3">
-		<input type="number" min="0" value="18" class="form-control form-control-sm" id="ca-preset">
-	</div>
-</div>
-<div id="ca-memory">
-	<div class="form-row">
-		<div class="col-3 col-form-label col-form-label-sm">
-			Memory Cell
-		</div>
-		<div class="col-3">
-			<div class="form-check mt-1">
-				<input type="radio" checked name="ca-memory" value="i" id="ca-memory-ignore" class="form-check-input">
-				<label class="form-check-label small" for="ca-memory-ignore">
-					Ignore
-				</label>
+<ul class="nav nav-tabs mb-3" role="tablist">
+	<li class="nav-item">
+		<a class="nav-link active" id="ca-rule-tab" data-toggle="tab" href="#ca-rule" role="tab" aria-controls="ca-rule" aria-selected="true">
+			Rule
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" id="ca-render-tab" data-toggle="tab" href="#ca-render" role="tab" aria-controls="ca-render" aria-selected="false">
+			Rendering
+		</a>
+	</li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active" id="ca-rule" role="tabpanel" aria-labelledby="ca-rule-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-type">
+				Rule Type
+			</label>
+			<div class="col-3">
+				<select id="ca-type" class="form-control form-control-sm px-1">
+					<option value="g" selected>General</option>
+					<option value="a">Additive</option>
+					<option value="c">Cyclic</option>
+					<option value="t">Totalistic</option>
+				</select>
+			</div>
+			<div class="col-6 pl-4 text-center">
+				<a id="ca-help" href="https://mathworld.wolfram.com/CellularAutomaton.html" target="_blank">About cellular automata</a>
 			</div>
 		</div>
-		<div class="col-3 pl-4">
-			<div class="form-check mt-1">
-				<input type="radio" name="ca-memory" value="+" id="ca-memory-add" class="form-check-input">
-				<label class="form-check-label small" for="ca-memory-add">
-					Add
-				</label>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-num-states">
+				States
+			</label>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="ca-num-states">
+					<option selected>2</option>
+					<option>3</option>
+				</select>
 			</div>
 		</div>
-		<div class="col-3 small">
-			<div class="form-check mt-1">
-				<input type="radio" name="ca-memory" value="c" id="ca-memory-centre" class="form-check-input">
-				<label class="form-check-label" for="ca-memory-centre">
-					Replace centre
-				</label>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-preset">
+				Preset
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="18" class="form-control form-control-sm" id="ca-preset">
+			</div>
+		</div>
+		<div id="ca-memory">
+			<div class="form-row">
+				<div class="col-3 col-form-label col-form-label-sm">
+					Memory Cell
+				</div>
+				<div class="col-3">
+					<div class="form-check mt-1">
+						<input type="radio" checked name="ca-memory" value="i" id="ca-memory-ignore" class="form-check-input">
+						<label class="form-check-label small" for="ca-memory-ignore">
+							Ignore
+						</label>
+					</div>
+				</div>
+				<div class="col-3 pl-4">
+					<div class="form-check mt-1">
+						<input type="radio" name="ca-memory" value="+" id="ca-memory-add" class="form-check-input">
+						<label class="form-check-label small" for="ca-memory-add">
+							Add
+						</label>
+					</div>
+				</div>
+				<div class="col-3 small">
+					<div class="form-check mt-1">
+						<input type="radio" name="ca-memory" value="c" id="ca-memory-centre" class="form-check-input">
+						<label class="form-check-label" for="ca-memory-centre">
+							Replace centre
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<div class="col-3"></div>
+				<div class="col-6">
+					<div class="form-check mt-1">
+						<input type="radio" name="ca-memory" value="n" id="ca-memory-normal" class="form-check-input">
+						<label class="form-check-label small" for="ca-memory-normal">
+							Normal neighbour
+						</label>
+					</div>
+				</div>
+				<div class="col-3 pl-4 small">
+					(<a href="https://www.wolframscience.com/conference/2006/presentations/materials/letourneau.pdf" target="_blank">paper</a>)
+				</div>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3 col-form-label col-form-label-sm">
+				Centre
+			</div>
+			<div class="col-3 mt-1">
+				<div class="form-check">
+					<input type="checkbox" class="form-check-input" id="ca-exclude-centre">
+					<label class="form-check-label small" for="ca-exclude-centre">
+						Ignore centre
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-seed">
+				Seed
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="1" class="form-control form-control-sm" id="ca-seed">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-seed-length">
+				Seed Length
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" value="30" class="form-control form-control-sm" id="ca-seed-length" disabled>
+			</div>
+		</div>
+		<div class="form-row" id="ca-seed-type">
+			<div class="col-3 col-form-label col-form-label-sm">
+				Seed Type
+			</div>
+			<div class="col-3">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
+					<label class="form-check-label small" for="ca-seed-type-tri">
+						Triangular
+					</label>
+				</div>
+			</div>
+			<div class="col-3 pl-4">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-repeat" value="repeat">
+					<label class="form-check-label small" for="ca-seed-type-repeat">
+						Repeated
+					</label>
+				</div>
+			</div>
+			<div class="col-3">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-random" value="random">
+					<label class="form-check-label small" for="ca-seed-type-random">
+						Random
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3"></div>
+			<div class="col-3">
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" checked id="ca-border-row">
+					<label class="form-check-label small" for="ca-border-row">
+						Border row
+					</label>
+				</div>
 			</div>
 		</div>
 	</div>
-	<div class="form-row form-group">
-		<div class="col-3"></div>
-		<div class="col-6">
-			<div class="form-check mt-1">
-				<input type="radio" name="ca-memory" value="n" id="ca-memory-normal" class="form-check-input">
-				<label class="form-check-label small" for="ca-memory-normal">
-					Normal neighbour
-				</label>
+	<div class="tab-pane" id="ca-render" role="tabpanel" aria-labelledby="ca-render">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-cell-width">
+				Cell Width
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-width">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-cell-height">
+				Cell Height
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-height">
 			</div>
 		</div>
-		<div class="col-3 pl-4 small">
-			(<a href="https://www.wolframscience.com/conference/2006/presentations/materials/letourneau.pdf" target="_blank">paper</a>)
-		</div>
-	</div>
-</div>
-<div class="form-row form-group">
-	<div class="col-3 col-form-label col-form-label-sm">
-		Centre
-	</div>
-	<div class="col-3 mt-1">
-		<div class="form-check">
-			<input type="checkbox" class="form-check-input" id="ca-exclude-centre">
-			<label class="form-check-label small" for="ca-exclude-centre">
-				Ignore centre
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-gap-x">
+				Gap X
 			</label>
-		</div>
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-seed">
-		Seed
-	</label>
-	<div class="col-3">
-		<input type="number" min="0" value="1" class="form-control form-control-sm" id="ca-seed">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-seed-length">
-		Seed Length
-	</label>
-	<div class="col-3">
-		<input type="number" min="1" value="30" class="form-control form-control-sm" id="ca-seed-length" disabled>
-	</div>
-</div>
-<div class="form-row" id="ca-seed-type">
-	<div class="col-3 col-form-label col-form-label-sm">
-		Seed Type
-	</div>
-	<div class="col-3">
-		<div class="form-check mt-1">
-			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
-			<label class="form-check-label small" for="ca-seed-type-tri">
-				Triangular
+			<div class="col-3">
+				<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-x">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-gap-y">
+				Gap Y
 			</label>
+			<div class="col-3">
+				<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-y">
+			</div>
 		</div>
-	</div>
-	<div class="col-3 pl-4">
-		<div class="form-check mt-1">
-			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-repeat" value="repeat">
-			<label class="form-check-label small" for="ca-seed-type-repeat">
-				Repeated
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-hue-min">
+				Hues
 			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="360" value="0" class="form-control-range mt-1" id="ca-hue-min">
+			</div>
+			<div class="col-3">
+				<input type="range" min="0" max="360" value="45" class="form-control-range mt-1" id="ca-hue-max" aria-label="Maximum hue angle">
+			</div>
 		</div>
-	</div>
-	<div class="col-3">
-		<div class="form-check mt-1">
-			<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-random" value="random">
-			<label class="form-check-label small" for="ca-seed-type-random">
-				Random
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-stroke">
+				Outline Intensity
 			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1" id="ca-stroke">
+			</div>
 		</div>
-	</div>
-</div>
-<div class="form-row form-group">
-	<div class="col-3"></div>
-	<div class="col-3">
-		<div class="form-check">
-			<input class="form-check-input" type="checkbox" checked id="ca-border-row">
-			<label class="form-check-label small" for="ca-border-row">
-				Border row
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="ca-start-row">
+				Start Row
 			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.001" value="0" class="form-control-range mt-1" id="ca-start-row">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-end-row">
+				End Row
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.001" value="1" class="form-control-range mt-1" id="ca-end-row">
+			</div>
 		</div>
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-cell-width">
-		Cell Width
-	</label>
-	<div class="col-3">
-		<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-width">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-cell-height">
-		Cell Height
-	</label>
-	<div class="col-3">
-		<input type="number" min="1" value="11" class="form-control form-control-sm" id="ca-cell-height">
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-gap-x">
-		Gap X
-	</label>
-	<div class="col-3">
-		<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-x">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-gap-y">
-		Gap Y
-	</label>
-	<div class="col-3">
-		<input type="range" min="-0.5" max="0.5" step="0.04" value="0" class="form-control form-control-sm" id="ca-gap-y">
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-hue-min">
-		Hues
-	</label>
-	<div class="col-3">
-		<input type="range" min="0" max="360" value="0" class="form-control-range mt-1" id="ca-hue-min">
-	</div>
-	<div class="col-3">
-		<input type="range" min="0" max="360" value="45" class="form-control-range mt-1" id="ca-hue-max" aria-label="Maximum hue angle">
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-stroke">
-		Outline Intensity
-	</label>
-	<div class="col-3">
-		<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1" id="ca-stroke">
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="ca-start-row">
-		Start Row
-	</label>
-	<div class="col-3">
-		<input type="range" min="0" max="1" step="0.001" value="0" class="form-control-range mt-1" id="ca-start-row">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="ca-end-row">
-		End Row
-	</label>
-	<div class="col-3">
-		<input type="range" min="0" max="1" step="0.001" value="1" class="form-control-range mt-1" id="ca-end-row">
 	</div>
 </div>

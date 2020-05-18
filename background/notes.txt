@@ -45,10 +45,8 @@ Phyllotaxis
 Cellular Automata
 	Number base selection for preset: 10 or numStates
 	Seed to be expressed in base numStates
-	Option to treat memory cell like an ordinary neighbour
-	Neighbourhood selection
 	Born, survive, decay specification
-	Rule table compression: reflection, ignore centre cell, maps permutations of colors to the same/different values
+	Rule table compression: reflection, map permutations of colors to the same/different values
 	Brick wall neighbourhoods (odd left, even right)
 	Alternate neighbourhoods
 

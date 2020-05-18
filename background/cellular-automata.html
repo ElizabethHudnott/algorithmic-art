@@ -7,8 +7,7 @@
 			<option value="g" selected>General</option>
 			<option value="a">Additive</option>
 			<option value="c">Cyclic</option>
-			<option value="ot">Outer Totalistic</option>
-			<option value="at">Totalistic</option>
+			<option value="t">Totalistic</option>
 		</select>
 	</div>
 	<div class="col-6 pl-4 text-center">
@@ -34,35 +33,61 @@
 		<input type="number" min="0" value="18" class="form-control form-control-sm" id="ca-preset">
 	</div>
 </div>
-<div class="form-row form-group" id="ca-memory">
-	<div class="col-3 col-form-label col-form-label-sm">
-		Memory Cell
-	</div>
-	<div class="col-3">
-		<div class="form-check mt-1">
-			<input type="radio" checked name="ca-memory" value="i" id="ca-memory-ignore" class="form-check-input">
-			<label class="form-check-label small" for="ca-memory-ignore">
-				Ignore
-			</label>
+<div id="ca-memory">
+	<div class="form-row">
+		<div class="col-3 col-form-label col-form-label-sm">
+			Memory Cell
+		</div>
+		<div class="col-3">
+			<div class="form-check mt-1">
+				<input type="radio" checked name="ca-memory" value="i" id="ca-memory-ignore" class="form-check-input">
+				<label class="form-check-label small" for="ca-memory-ignore">
+					Ignore
+				</label>
+			</div>
+		</div>
+		<div class="col-3 pl-4">
+			<div class="form-check mt-1">
+				<input type="radio" name="ca-memory" value="+" id="ca-memory-add" class="form-check-input">
+				<label class="form-check-label small" for="ca-memory-add">
+					Add
+				</label>
+			</div>
+		</div>
+		<div class="col-3 small">
+			<div class="form-check mt-1">
+				<input type="radio" name="ca-memory" value="c" id="ca-memory-centre" class="form-check-input">
+				<label class="form-check-label" for="ca-memory-centre">
+					Replace centre
+				</label>
+			</div>
 		</div>
 	</div>
-	<div class="col-3 pl-4">
-		<div class="form-check mt-1">
-			<input type="radio" name="ca-memory" value="+" id="ca-memory-add" class="form-check-input">
-			<label class="form-check-label small" for="ca-memory-add">
-				Add
-			</label>
+	<div class="form-row form-group">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<div class="form-check mt-1">
+				<input type="radio" name="ca-memory" value="n" id="ca-memory-normal" class="form-check-input">
+				<label class="form-check-label small" for="ca-memory-normal">
+					Normal neighbour
+				</label>
+			</div>
 		</div>
-	</div>
-	<div class="col-3 small">
-		<div class="form-check mt-1">
-			<input type="radio" name="ca-memory" value="c" id="ca-memory-centre" class="form-check-input">
-			<label class="form-check-label" for="ca-memory-centre">
-				Replace centre
-			</label>
-		</div>
-		<div class="pl-4">
+		<div class="col-3 pl-4 small">
 			(<a href="https://www.wolframscience.com/conference/2006/presentations/materials/letourneau.pdf" target="_blank">paper</a>)
+		</div>
+	</div>
+</div>
+<div class="form-row form-group">
+	<div class="col-3 col-form-label col-form-label-sm">
+		Centre
+	</div>
+	<div class="col-3 mt-1">
+		<div class="form-check">
+			<input type="checkbox" class="form-check-input" id="ca-exclude-centre">
+			<label class="form-check-label small" for="ca-exclude-centre">
+				Ignore centre
+			</label>
 		</div>
 	</div>
 </div>

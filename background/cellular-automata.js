@@ -12,14 +12,14 @@
 			helpLinks.set('g', 'https://mathworld.wolfram.com/CellularAutomaton.html');
 			helpLinks.set('a', 'https://mathworld.wolfram.com/AdditiveCellularAutomaton.html');
 			helpLinks.set('c', 'https://en.wikipedia.org/wiki/Cyclic_cellular_automaton');
-			helpLinks.set('ot', 'https://mathworld.wolfram.com/Outer-TotalisticCellularAutomaton.html');
-			helpLinks.set('at', 'https://mathworld.wolfram.com/TotalisticCellularAutomaton.html');
+			helpLinks.set('t', 'https://mathworld.wolfram.com/TotalisticCellularAutomaton.html');
 
 			const ruleTypeInput = optionsDoc.getElementById('ca-type');
 			const helpAnchor = optionsDoc.getElementById('ca-help');
 			const numStatesInput = optionsDoc.getElementById('ca-num-states');
 			const presetInput = optionsDoc.getElementById('ca-preset');
 			const memoryOptions = optionsDoc.getElementById('ca-memory');
+			const excludeCentreCheck = optionsDoc.getElementById('ca-exclude-centre');
 			const seedInput = optionsDoc.getElementById('ca-seed');
 			const seedLengthInput = optionsDoc.getElementById('ca-seed-length');
 			const seedTypeRow = optionsDoc.getElementById('ca-seed-type');
@@ -31,36 +31,61 @@
 			function setPreset() {
 				const type = ruleTypeInput.value;
 				const numStates = me.numStates;
-				const number = parseInt(presetInput.value);
-				const blank = this !== presetInput;
+				let number = parseInt(presetInput.value);
 				const memoryFunction = queryChecked(memoryOptions, 'ca-memory').value;
+				const includeCentre = !excludeCentreCheck.checked || memoryFunction === 'c';
+				const numNeighbours = 2 + includeCentre + (memoryFunction === 'n');
+				const neighbourhood =
+					5 +
+					(includeCentre ? 2 : 0) +
+					(memoryFunction === 'n' ? 8 : 0);
+				me.neighbourhood = neighbourhood;
+				let maxValue;
 
-				if (type === 'g') {
-					const maxValue = numStates ** (numStates ** 3) - 1;
+				switch (type) {
+				case 'g': 	// General
+					maxValue = numStates ** (numStates ** 3) - 1;
 					if (number >= 0 && number <= maxValue) {
 						me.setGeneralRule(number, memoryFunction);
-						progressiveBackgroundGen(me, 0);
-					} else if (blank) {
-						presetInput.value = '';
 					}
-				} else if (type === 'a') {
+					break;
+
+				case 'a': 	// Additive
 					me.setAdditiveRule(memoryFunction);
-					progressiveBackgroundGen(me, 0);
-				} else if (type[1] === 't') {
-					const outer = type[0] === 'o';
-					const numDigits = (outer ? 2 : 3) * (numStates - 1) + 1;
-					const maxValue = numStates ** numDigits - 1;
+					break;
+
+				case 'c': 	// Cyclic
+					if (!(number < numNeighbours)) {
+						number = 1;
+						if (this !== presetInput) {
+							presetInput.value = '1';
+						}
+					}
+					me.setCyclicRule(number, memoryFunction);
+					break;
+
+				case 't': 	// Totalistic
+					const numDigits = numNeighbours * (numStates - 1) + 1;
+					maxValue = numStates ** numDigits - 1;
 					if (number >= 0 && number <= maxValue) {
-						me.setTotalisticRule(number, outer, memoryFunction);
-						progressiveBackgroundGen(me, 0);
-					} else if (blank) {
+						me.setTotalisticRule(number, memoryFunction);
+					}
+					break;
+
+				default:
+					throw new Error('Missing case statement');
+				}
+
+				presetInput.disabled = type === 'a';
+
+				if (number > maxValue) {
+					if (this !== presetInput) {
 						presetInput.value = '';
 					}
 				} else {
-					me.setCyclicRule(memoryFunction);
 					progressiveBackgroundGen(me, 0);
 				}
-				presetInput.disabled = type === 'a' || type === 'c';
+
 			}
 
 			ruleTypeInput.addEventListener('input', function (event) {
@@ -84,6 +109,8 @@
 			for (let element of optionsDoc.querySelectorAll('[name=ca-memory]')) {
 				element.addEventListener('input', setPreset);
 			}
+
+			excludeCentreCheck.addEventListener('input', setPreset);
 
 			function setSeed() {
 				const seed = parseInt(seedInput.value);
@@ -259,6 +286,17 @@
 		this.history = undefined;
 	}
 
+	CellAutomaton.prototype.transitionNumToCellValues = function (transitionNum) {
+		const numStates = this.numStates;
+		const left = transitionNum % numStates;
+		transitionNum = (transitionNum - left) / numStates;
+		const centre = transitionNum % numStates;
+		transitionNum = (transitionNum - centre) / numStates;
+		const right = transitionNum % numStates;
+		const past = (transitionNum - right) / numStates;
+		return [left, centre, right, past];
+	}
+
 	CellAutomaton.prototype.restrictNeighbourhood = function () {
 		const transitions = this.transitions;
 		const numTransitions = transitions.length;
@@ -268,13 +306,7 @@
 		const cubed = squared * numStates;
 		for (let i = 0; i < numTransitions; i++) {
 			if (transitions[i] === undefined) {
-				let value = i;
-				const left = value % numStates;
-				value = (value - left) / numStates;
-				const centre = value % numStates;
-				value = (value - centre) / numStates;
-				const right = value % numStates;
-				const past = (value - right) / numStates;
+				const [left, centre, right, past] = this.transitionNumToCellValues(i);
 				const index =
 					(neighbourhood & 1 ? left : 0) +
 					(neighbourhood & 2 ? centre * numStates : 0) +
@@ -293,26 +325,8 @@
 		const numTransitions = cubed * numStates;
 
 		switch (option) {
-		case 'i': 	// Ignore the memory cell
-			this.neighbourhood = this.neighbourhood & 7;
-			this.restrictNeighbourhood();
-			break;
-
-		case 'c': 	// Substitute the memory cell for the centre cell.
-			const newTransitions = new Array(numTransitions);
-			for (let i = 0; i < cubed; i++) {
-				let value = i;
-				const left = value % numStates;
-				value = (value - left) / numStates;
-				const centre = value % numStates;
-				value = (value - centre) / numStates;
-				const right = value % numStates;
-				const index = left + right * squared + centre * cubed;
-				newTransitions[index] = currentTransitions[i];
-			}
-			this.transitions = newTransitions;
-			this.neighbourhood = (this.neighbourhood & 5) | 8;
-			this.restrictNeighbourhood();
+		case 'i': 	// Ignore the memory cell, no further action needed
+		case 'n': 	// Treat like a normal neighbour cell, no further action needed
 			break;
 
 		case '+': 	// Add the value of the memory cell to the original output.
@@ -323,6 +337,18 @@
 			this.neighbourhood = this.neighbourhood | 8;
 			break;
 
+		case 'c': 	// Substitute the memory cell for the centre cell.
+			const newTransitions = new Array(numTransitions);
+			for (let i = 0; i < cubed; i++) {
+				const [left, centre, right] = this.transitionNumToCellValues(i);
+				const index = left + right * squared + centre * cubed;
+				newTransitions[index] = currentTransitions[i];
+			}
+			this.transitions = newTransitions;
+			this.neighbourhood = (this.neighbourhood & 5) | 8;
+			this.restrictNeighbourhood();
+			break;
+
 		default:
 			throw new Error('Missing case statement.')
 		}
@@ -331,33 +357,40 @@
 
 	CellAutomaton.prototype.setGeneralRule = function (n, memoryFunction) {
 		const numStates = this.numStates;
-		const cubed = numStates ** 3;
-		const transitions = new Array(cubed * numStates);
-		for (let i = 0; i < cubed; i++) {
-			const value = n % numStates;
-			transitions[i] = value;
-			transitions[cubed + i] = value;
-			n = (n - value) / numStates;
+		const squared = numStates * numStates;
+		const cubed = squared * numStates;
+		const numTransitions = cubed * numStates;
+		const transitions = new Array(numTransitions);
+		const neighbourhood = this.neighbourhood;
+		for (let i = 0; i < numTransitions; i++) {
+			const [left, centre, right, past] = this.transitionNumToCellValues(i);
+			const index =
+				(neighbourhood & 1 ? left : 0) +
+				(neighbourhood & 2 ? centre * numStates : 0) +
+				(neighbourhood & 4 ? right * squared : 0) +
+				(neighbourhood & 8 ? past * cubed : 0);
+
+			if (index === i) {
+				const value = n % numStates;
+				transitions[i] = value;
+				n = (n - value) / numStates;
+			} else {
+				transitions[i] = transitions[index];
+			}
 		}
 		this.transitions = transitions;
-		this.neighbourhood = 7;
 		this.setMemoryFunction(memoryFunction);
 		this.history = undefined;
 	};
 
 	CellAutomaton.prototype.setAdditiveRule = function (memoryFunction) {
 		const numStates = this.numStates;
-		const pow4 = numStates ** 4;
+		const numTransitions = numStates ** 4;
+		const transitions = new Array(numTransitions);
 		const neighbourhood = this.neighbourhood;
-		const transitions = new Array(pow4);
-		for (let i = 0; i < pow4; i++) {
-			let value = i;
-			const left = value % numStates;
-			value = (value - left) / numStates;
-			const centre = value % numStates;
-			value = (value - centre) / numStates;
-			const right = value % numStates;
-			const past = (value - right) / numStates;
+
+		for (let i = 0; i < numTransitions; i++) {
+			const [left, centre, right, past] = this.transitionNumToCellValues(i);
 			let total =
 				(neighbourhood & 1 ? left : 0) +
 				(neighbourhood & 2 ? centre : 0) +
@@ -365,42 +398,39 @@
 				(neighbourhood & 8 ? past : 0);
 			transitions[i] = total % numStates;
 		}
+
 		this.transitions = transitions;
-		if ((neighbourhood & 8) === 0) {
-			this.setMemoryFunction(memoryFunction);
-		}
+		this.setMemoryFunction(memoryFunction);
 		this.history = undefined;
 	};
 
-	CellAutomaton.prototype.setCyclicRule = function (memoryFunction) {
+	CellAutomaton.prototype.setCyclicRule = function (threshold, memoryFunction) {
 		const numStates = this.numStates;
-		const cubed = numStates ** 3;
-		const transitions = new Array(cubed * numStates);
-		for (let i = 0; i < cubed; i++) {
-			let value = i;
-			const left = value % numStates;
-			value = (value - left) / numStates;
-			const centre = value % numStates;
-			value = (value - centre) / numStates;
-			const right = value;
+		const numTransitions = numStates ** 4;
+		const transitions = new Array(numTransitions);
+		const neighbourhood = this.neighbourhood;
+
+		for (let i = 0; i < numTransitions; i++) {
+			const [left, centre, right, past] = this.transitionNumToCellValues(i);
 			const nextState = (centre + 1) % numStates;
-			const leftMatch = left === nextState;
-			const rightMatch = right === nextState;
-			if (leftMatch ^ rightMatch) {
+			const leftMatch = left === nextState && (neighbourhood & 1);
+			const rightMatch = right === nextState && (neighbourhood & 4);
+			const pastMatch = past === nextState && (neighbourhood & 8);
+			if (leftMatch + rightMatch + pastMatch >= threshold) {
 				transitions[i] = nextState;
 			} else {
 				transitions[i] = centre;
 			}
 		}
 		this.transitions = transitions;
-		this.neighbourhood = 7;
+		this.neighbourhood = this.neighbourhood | 2;
 		this.setMemoryFunction(memoryFunction);
 		this.history = undefined;
 	};
 
-	CellAutomaton.prototype.setTotalisticRule = function (n, outer, memoryFunction) {
+	CellAutomaton.prototype.setTotalisticRule = function (n, memoryFunction) {
 		const numStates = this.numStates;
-		const outputs = new Array(3 * numStates - 2);
+		const outputs = new Array(4 * numStates - 3);
 		outputs.fill(0);
 		let i = 0;
 		while (n > 0) {
@@ -409,14 +439,16 @@
 			n = (n - value) / numStates;
 			i++;
 		}
-		const cubed = numStates ** 3;
-		const transitions = new Array(cubed * numStates);
-		for (let i = 0; i < cubed; i++) {
+
+		const numTransitions = numStates ** 4;
+		const transitions = new Array(numTransitions);
+		const neighbourhood = this.neighbourhood;
+		for (let i = 0; i < numTransitions; i++) {
 			let value = i;
 			let total = 0;
-			for (let j = 0; j < 3; j++) {
+			for (let j = 0; j < 4; j++) {
 				let units = value % numStates;
-				if (!outer || j !== 1) {
+				if ((neighbourhood & (1 << j)) !== 0) {
 					total += units;
 				}
 				value = (value - units) / numStates;
@@ -424,7 +456,6 @@
 			transitions[i] = outputs[total];
 		}
 		this.transitions = transitions;
-		this.neighbourhood = outer ? 5 : 7;
 		this.setMemoryFunction(memoryFunction);
 		this.history = undefined;
 	};

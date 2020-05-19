@@ -1,5 +1,10 @@
 'use strict';
 
+if (!window.debug) {
+	window.debug = {};
+}
+window.debug.video = false;
+
 let store, showWelcome;
 try {
 	store = window.localStorage;
@@ -605,14 +610,15 @@ function showBackgroundOptions() {
 	const tempContext = tempCanvas.getContext('2d');
 
 	function fillBackground(context, backgroundColor, width, height) {
-		tempCanvas.width = width;
-		tempCanvas.height = height;
+		tempCanvas.width = context.canvas.width;
+		tempCanvas.height = context.canvas.height;
 		tempContext.drawImage(context.canvas, 0, 0);
 		context.restore();
 		context.save();
 		context.fillStyle = backgroundColor;
 		context.fillRect(0, 0, width, height);
-		context.drawImage(tempCanvas, 0, 0);
+		context.fillStyle = 'black';
+		context.drawImage(tempCanvas, 0, 0, width, height);
 	}
 
 	function renderFrame(context, width, height, tween, loop, paintBackground, preview) {
@@ -651,7 +657,7 @@ function showBackgroundOptions() {
 		context.save();
 		rotateCanvas(context, width, height, rotation);
 		if (preview === 0) {
-			// Draw everything in one go when animating
+			// Draw everything in one go when capturing video
 			const redraw = bgGenerator.generate(context, width, height, 0);
 			backgroundRedraw = redraw;
 			let done;
@@ -734,6 +740,8 @@ function showBackgroundOptions() {
 			capturer.stop();
 			progressRow.hidden = true;
 			renderButton.disabled = false;
+			document.body.removeChild(context.canvas);
+			canvas.style.display = 'block';
 		}
 		animController.promise = animController.promise.then(
 			function () {
@@ -955,6 +963,7 @@ function showBackgroundOptions() {
 	document.getElementById('anim-length').addEventListener('input', function (event) {
 		const length = parseFloat(this.value);
 		if (length > 0) {
+			updateAnimPositionReadout(animPositionSlider.value);
 			videoErrorAlert.alert('close');
 		}
 	});
@@ -1046,6 +1055,10 @@ function showBackgroundOptions() {
 			const captureCanvas = document.createElement('canvas');
 			captureCanvas.width = videoWidth;
 			captureCanvas.height = videoHeight;
+			if (debug.video) {
+				canvas.style.display = 'none';
+				document.body.appendChild(captureCanvas);
+			}
 			const context = captureCanvas.getContext('2d');
 			const scale = videoHeight / screen.height;
 			context.scale(scale, scale);

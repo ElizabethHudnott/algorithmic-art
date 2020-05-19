@@ -39,7 +39,6 @@
 				let number = parseInt(presetInput.value);
 				const memoryFunction = queryChecked(memoryOptions, 'ca-memory').value;
 				const includeCentre = !excludeCentreCheck.checked || memoryFunction === 'c';
-				const numNeighbours = 2 + includeCentre + (memoryFunction === 'n');
 				const neighbourhood =
 					5 +
 					(includeCentre ? 2 : 0) +
@@ -55,6 +54,9 @@
 					if (Number.isNaN(weights[i])) {
 						weights[i] = 1;
 					}
+				}
+				if (memoryFunction === 'c') {
+					weights[1] = weights[3];
 				}
 				let maxValue;
 
@@ -72,6 +74,7 @@
 					break;
 
 				case 'c': 	// Cyclic
+					const numNeighbours = 2 + includeCentre + (memoryFunction === 'n');
 					if (!(number < numNeighbours)) {
 						number = 1;
 						if (this !== presetInput) {
@@ -110,6 +113,8 @@
 
 				presetInput.disabled = type === 'a';
 				weightsSection.collapse(type === 'a' || type === 't' ? 'show' : 'hide');
+				weightInputs[0].disabled = memoryFunction === 'i';
+				weightInputs[2].disabled = excludeCentreCheck.checked || memoryFunction === 'c';
 				progressiveBackgroundGen(me, 0);
 			}
 
@@ -588,9 +593,17 @@
 		const squared = numStates * numStates;
 		const cubed = squared * numStates;
 		const startHeight = this.startHeight;
-		const minRow = startHeight === 1 ? gridHeight - 1 : Math.trunc(startHeight * gridHeight);
+		let minRow = startHeight * gridHeight;
+		const minCol = Math.trunc((minRow - Math.trunc(minRow)) * gridWidth);
+		minRow = Math.trunc(minRow);
 		const endHeight = this.endHeight;
-		const maxRow = endHeight === 1 ? gridHeight : Math.trunc(endHeight * (gridHeight + 1));
+		let maxRow = endHeight === 1 ? gridHeight : endHeight * (gridHeight + 1);
+		let maxCol = (maxRow - Math.trunc(maxRow)) * gridWidth;
+		if (maxCol === 0) {
+			maxCol = gridWidth - 1;
+		}
+		maxCol = Math.trunc(maxCol);
+		maxRow = Math.trunc(maxRow);
 
 		for (let j = history.length; j <= maxRow + 1; j++) {
 			const row = new Array(gridWidth);
@@ -621,7 +634,9 @@
 
 		for (let j = minRow; j < maxRow; j++) {
 			const y = j * totalHeight;
-			for (let i = 0; i < gridWidth; i++) {
+			const firstCol = j === minRow ? minCol : 0;
+			const lastCol = j === maxRow - 1 ? maxCol : gridWidth - 1;
+			for (let i = firstCol; i <= lastCol; i++) {
 				const value = history[j][i];
 				if (value !== 0) {
 					const x = i * totalWidth;

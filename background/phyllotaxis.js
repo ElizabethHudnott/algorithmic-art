@@ -53,6 +53,11 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			optionsDoc.getElementById('phyllotaxis-bidirectional').addEventListener('input', function (event) {
+				me.bidirectional = this.checked;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			const angleSlider = optionsDoc.getElementById('phyllotaxis-angle-range');
 			angleSlider.addEventListener('input', function (event) {
 				me.angle = parseFloat(this.value) * TWO_PI;
@@ -405,6 +410,7 @@
 		this.radius = 1;
 		this.aspectRatio = 1;
 		this.clipping = -1;
+		this.bidirectional = false;
 
 		this.exponent = 0.5;
 		this.angle = TWO_PI * 0.382;
@@ -468,7 +474,7 @@
 			'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
 		],
 		stepped: [
-			'skip', 'stacking', 'petalShape', 'angleMode',
+			'bidirectional', 'skip', 'stacking', 'petalShape', 'angleMode',
 			'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 		],
 		pairedStepped: [
@@ -534,7 +540,7 @@
 
 			this.points = []
 			let n = this.start;
-			let numPetals = n;
+			let numPetals = n - 1;
 			let r = scale * n ** exponent;
 			let skip = this.skip;
 			if (skip === 1) {
@@ -553,6 +559,9 @@
 				const phi = n * angle;
 				if (numPetals % skip !== skip - 1) {
 					this.points.push(new Petal(r, phi, currentPetalSize));
+					if (this.bidirectional) {
+						this.points.push(new Petal(r, -phi, currentPetalSize));
+					}
 				}
 				numPetals++;
 				const inc = r === 0 ? 1 : 1 / ((r / TWO_PI) ** (1 - this.spread));
@@ -668,7 +677,7 @@
 			const y = zoom * r * Math.sin(theta);
 			const petalSize = zoom * point.radius;
 
-			const degrees = theta / Math.PI * 180;
+			const degrees = Math.abs(theta) / Math.PI * 180;
 			const radialValue = (r * r) / lastRSquared;
 
 			switch (this.hueMode) {

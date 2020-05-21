@@ -1,7 +1,6 @@
 'use strict';
 
 {
-
 	class ParametricEquation {
 		constructor(xText, yText) {
 			this.parseXFormula(xText);
@@ -128,6 +127,12 @@
 			});
 
 			$(optionsDoc.getElementById('calc-shapes-tab')).on('show.bs.tab', function (event) {
+				shapeSelection.hidden = false;
+				subpathSelection.hidden = true;
+				pieceSelection.hidden = true;
+			});
+
+			$(optionsDoc.getElementById('calc-render-tab')).on('show.bs.tab', function (event) {
 				shapeSelection.hidden = false;
 				subpathSelection.hidden = true;
 				pieceSelection.hidden = true;
@@ -531,6 +536,11 @@
 				progressiveBackgroundGen(me, 0);
 			});
 
+			optionsDoc.getElementById('calc-clip').addEventListener('input', function (event) {
+				me.clip[shapeNum] = this.checked;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			const rotationSlider = optionsDoc.getElementById('calc-rotation');
 			rotationSlider.addEventListener('input', function (event) {
 				me.rotation[shapeNum] = parseFloat(this.value) * TWO_PI;
@@ -644,6 +654,7 @@
 		this.strokeColor = [];	// Per shape
 		this.fillColor = [];	// Per shape
 		this.fillRule = [];		// Per shape
+		this.clip = [];			// Per shape
 
 		this.minorAxisMin = -25;
 		this.minorAxisMax = 25;
@@ -675,7 +686,7 @@
 			'minorAxisMajorGridlines'
 		],
 		stepped: [
-			'closePath', 'lineWidth', 'dash', 'fillRule'
+			'closePath', 'lineWidth', 'dash', 'fillRule', 'clip'
 		],
 		pairedContinuous: [
 			['max', 'min']	// min catches up to max.
@@ -707,6 +718,7 @@
 		this.strokeColor.splice(index, 0, '#000000ff');
 		this.fillColor.splice(index, 0, '#ff00808c');
 		this.fillRule.splice(index, 0, 'evenodd');
+		this.clip.splice(index, 0, false);
 	};
 
 	GraphingCalculator.prototype.addSubpath = function (shapeNum, index) {
@@ -813,6 +825,20 @@
 			const shapeShearDirection = this.shearDirection[shapeNum][0];
 			const shapeShearX = this.shearX[shapeNum][0] * Math.cos(shapeShearDirection);
 			const shapeShearY = this.shearY[shapeNum][0] * Math.sin(shapeShearDirection);
+			const clip = this.clip[shapeNum];
+
+			const lineWidth = this.lineWidth[shapeNum];
+			context.lineWidth = lineWidth / (scale * shapeScale);
+			const dash = this.dash[shapeNum];
+			const numDashLengths = dash.length;
+			const scaledDash = new Array(numDashLengths);
+			for (let i = 0; i < numDashLengths; i++) {
+				scaledDash[i] = dash[i] / scale;
+			}
+			context.setLineDash(scaledDash);
+			const strokeColor = this.strokeColor[shapeNum];
+			context.strokeStyle = strokeColor;
+			context.globalAlpha = 0.8;
 
 			for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
 				const pathMinRepeat = this.minPathRepeat[shapeNum][subpathNum];
@@ -827,6 +853,7 @@
 				context.translate(translateX, translateY);
 				context.rotate(rotation);
 				context.translate(xTranslation, yTranslation);
+				context.scale(shapeScale, shapeScale);
 				const subpathScale = shapeScale * this.scale[shapeNum][subpathNum + 1];
 				const stretch = shapeStretch * this.stretch[shapeNum][subpathNum + 1];
 				const shearDirection = this.shearDirection[shapeNum][subpathNum + 1];
@@ -849,26 +876,31 @@
 					}
 				}
 				context.restore();
+				if (clip) {
+					if (lineWidth > 0) {
+						context.stroke();
+					}
+					if (subpathNum === 0) {
+						context.clip();
+						context.globalAlpha = Math.SQRT1_2;
+						context.save();
+					}
+				}
 			}
-			context.scale(shapeScale, shapeScale);
 			const fillColor = this.fillColor[shapeNum];
 			context.fillStyle = fillColor;
+			context.globalAlpha = 1;
 			context.fill(this.fillRule[shapeNum]);
-			const lineWidth = this.lineWidth[shapeNum];
+			if (clip) {
+				context.globalAlpha = Math.SQRT1_2;
+			}
 			if (lineWidth > 0) {
-				context.lineWidth = lineWidth / (scale * shapeScale);
-				const dash = this.dash[shapeNum];
-				const numDashLengths = dash.length;
-				const scaledDash = new Array(numDashLengths);
-				for (let i = 0; i < numDashLengths; i++) {
-					scaledDash[i] = dash[i] / scale;
-				}
-				context.setLineDash(scaledDash);
-				const strokeColor = this.strokeColor[shapeNum];
-				context.strokeStyle = strokeColor;
 				context.stroke();
 			}
 			context.restore();
+			if (clip) {
+				context.restore();
+			}
 		}
 
 		let [r, g, b] = parseColor(this.gridlineColor)[1];

@@ -10,6 +10,11 @@
 		</a>
 	</li>
 	<li class="nav-item">
+		<a class="nav-link" id="calc-render-tab" data-toggle="tab" href="#calc-render" role="tab" aria-controls="calc-render" aria-selected="false">
+			Rendering
+		</a>
+	</li>
+	<li class="nav-item">
 		<a class="nav-link" id="calc-axes-tab" data-toggle="tab" href="#calc-axes" role="tab" aria-controls="calc-axes" aria-selected="false">
 			Axes
 		</a>
@@ -184,7 +189,7 @@
 					<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-stretch">
 				</div>
 			</div>
-			<div class="form-row" id="calc-shear-row">
+			<div class="form-row form-group" id="calc-shear-row">
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-shear">
 					Shear
 				</label>
@@ -204,8 +209,10 @@
 					</div>
 				</div>
 			</div>
-			<div class="form-row">
-				<div class="col-3"></div>
+			<div class="form-row form-group">
+				<div class="col-3 col-form-label col-form-label-sm">
+					Options
+				</div>
 				<div class="col-3">
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="checkbox" id="calc-close-path">
@@ -217,6 +224,22 @@
 	</div>
 
 	<div class="tab-pane" id="calc-shapes" role="tabpanel" aria-labelledby="calc-shapes-tab">
+		<div class="form-row form-group">
+			<label class="col-3 mt-1 col-form-label col-form-label-sm" for="calc-rotation">
+				Rotation
+			</label>
+			<div class="col-8">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="calc-rotation">
+			</div>
+			<div class="col-1">
+				<button type="button" class="btn btn-light" id="calc-rotation-reset" title="Reset rotation">
+					<img src="../img/cross.png" alt="Remove">
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="tab-pane" id="calc-render" role="tabpanel" aria-labelledby="calc-render-tab">
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="calc-line-width">
 				Line Width
@@ -275,17 +298,17 @@
 				</a>
 			</div>
 		</div>
-		<div class="form-row form-group">
-			<label class="col-3 mt-1 col-form-label col-form-label-sm" for="calc-rotation">
-				Rotation
-			</label>
-			<div class="col-8">
-				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="calc-rotation">
+		<div class="form-row">
+			<div class="col-3 col-form-label col-form-label-sm">
+				Options
 			</div>
-			<div class="col-1">
-				<button type="button" class="btn btn-light" id="calc-rotation-reset" title="Reset rotation">
-					<img src="../img/cross.png" alt="Remove">
-				</button>
+			<div class="col-5">
+				<div class="form-check mt-1">
+					<input type="checkbox" class="form-check-input" id="calc-clip">
+					<label class="form-check-label small" for="calc-clip">
+						Clip
+					</label>
+				</div>
 			</div>
 		</div>
 	</div>

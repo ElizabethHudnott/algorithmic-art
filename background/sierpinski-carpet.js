@@ -221,6 +221,12 @@
 			rotationInput.addEventListener('pointerup', fullRedraw);
 			rotationInput.addEventListener('keyup', fullRedraw);
 
+			optionsDoc.getElementById('carpet-rotation-reset').addEventListener('click', function (event) {
+				rotationInput.value = '0';
+				me.rotation = 0;
+				progressiveBackgroundGen(me, 0);
+			});
+
 			return optionsDoc;
 		});
 

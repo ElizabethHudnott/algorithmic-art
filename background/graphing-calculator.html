@@ -57,7 +57,10 @@
 					</button>
 					<div class="dropdown-menu py-0 m-0 w-fit" id="calc-equation-type">
 						<button type="button" class="btn btn-light w-100 text-left" value="Parametric">
-							<span class="col-form-label col-form-label-sm">Parametric</span>
+							Parametric
+						</button>
+						<button type="button" class="btn btn-light w-100 text-left" value="Polar">
+							Polar
 						</button>
 					</div>
 				</div>
@@ -99,6 +102,24 @@
 						<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
 					</div>
 					<input type="text" value="(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
+					<div class="input-group-append">
+						<button type="submit" class="btn btn-secondary" tabindex="-1">
+							Set
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+		<form class="form-row form-group" id="calc-equation-r-form" hidden>
+			<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-r">
+				Equation
+			</label>
+			<div class="col-9">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="calc-equation-r-lhs">r =</span>
+					</div>
+					<input type="text" value="1" class="form-control form-control-sm" id="calc-equation-r" aria-describedby="calc-equation-r-lhs" spellcheck="false" autocomplete="off">
 					<div class="input-group-append">
 						<button type="submit" class="btn btn-secondary" tabindex="-1">
 							Set

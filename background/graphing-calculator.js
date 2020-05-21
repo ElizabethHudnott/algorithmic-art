@@ -7,15 +7,19 @@
 			this.parseYFormula(yText);
 		}
 
-		parseXFormula(inputStr) {
+		parseXFormula(input) {
+			const inputStr = String(input);
 			this.xFormula = realParser.parse(inputStr);
 			this.xFormulaText = inputStr;
 		}
 
-		parseYFormula(inputStr) {
+		parseYFormula(input) {
+			const inputStr = String(input);
 			this.yFormula = realParser.parse(inputStr);
 			this.yFormulaText = inputStr;
 		}
+
+		variables = Object.freeze(['x', 'y']);
 
 		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
 			const xFormula = this.xFormula, yFormula = this.yFormula;
@@ -89,7 +93,96 @@
 			} while (amountLeft > 0);
 			return new BoundingBox(minX, maxX, minY, maxY);
 		}
+	}
 
+	class PolarEquation {
+		constructor(text) {
+			this.parseRFormula(text);
+		}
+
+		parseRFormula(input) {
+			const inputStr = String(input);
+			this.rFormula = realParser.parse(inputStr);
+			this.rFormulaText = inputStr;
+		}
+
+		variables = Object.freeze(['r']);
+
+		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
+			const formula = this.rFormula;
+			const xScale = yScale * stretch;
+			let i = 0;
+			let t, amountLeft;
+			do {
+				if (max >= min) {
+					t = min + i * step;
+					if (t > max) {
+						t = max;
+					}
+					amountLeft = max - t;
+				} else {
+					t = min - i * step;
+					if (t < max) {
+						t = max;
+					}
+					amountLeft = t - max;
+				}
+				variables.set('t', t);
+				const r = formula.eval(variables);
+				const initialX = xScale * r * Math.cos(t);
+				const initialY = yScale * r * Math.sin(t);
+				const x = initialX + stretch * shearX * initialY;
+				const y = initialY + shearY * initialX;
+				if (i === 0 && firstSegment) {
+					context.moveTo(x, y);
+				} else {
+					context.lineTo(x, y);
+				}
+				i++;
+			} while (amountLeft > 0);
+		}
+
+		getBoundingBox(variables, min, max, step) {
+			const formula = this.rFormula;
+			variables.set('t', min);
+			const initialR = formula.eval(variables);
+			let minX = initialR * Math.cos(min);
+			let minY = initialR * Math.sin(min);
+			let maxX = minX, maxY = minY;
+			let i = 1;
+			let t, amountLeft;
+			do {
+				if (max >= min) {
+					t = min + i * step;
+					if (t > max) {
+						t = max;
+					}
+					amountLeft = max - t;
+				} else {
+					t = min - i * step;
+					if (t < max) {
+						t = max;
+					}
+					amountLeft = t - max;
+				}
+				variables.set('t', t);
+				const r = formula.eval(variables);
+				const x = r * Math.cos(t);
+				const y = r * Math.sin(t);
+				if (x < minX) {
+					minX = x;
+				} else if (x > maxX) {
+					maxX = x;
+				}
+				if (y < minY) {
+					minY = y;
+				} else if (y > maxY) {
+					maxY = y;
+				}
+				i++;
+			} while (amountLeft > 0);
+			return new BoundingBox(minX, maxX, minY, maxY);
+		}
 	}
 
 	function GraphingCalculator() {
@@ -102,8 +195,22 @@
 			const pathInput = optionsDoc.getElementById('calc-subpath');
 			const pieceSelection = optionsDoc.getElementById('calc-piece-selection');
 			const pieceInput = optionsDoc.getElementById('calc-piece');
+
+			const equationXForm = optionsDoc.getElementById('calc-equation-x-form');
+			const equationYForm = optionsDoc.getElementById('calc-equation-y-form');
+			const equationRForm = optionsDoc.getElementById('calc-equation-r-form');
+			const equationForms = new Map();
+			equationForms.set('x', equationXForm);
+			equationForms.set('y', equationYForm);
+			equationForms.set('r', equationRForm);
 			const equationXInput = optionsDoc.getElementById('calc-equation-x');
 			const equationYInput = optionsDoc.getElementById('calc-equation-y');
+			const equationRInput = optionsDoc.getElementById('calc-equation-r');
+			const equationInputs = new Map();
+			equationInputs.set('x', equationXInput);
+			equationInputs.set('y', equationYInput);
+			equationInputs.set('r', equationRInput);
+
 			const minInput = optionsDoc.getElementById('calc-min');
 			const maxInput = optionsDoc.getElementById('calc-max');
 			const stepInput = optionsDoc.getElementById('calc-step');
@@ -161,6 +268,10 @@
 					option.innerHTML = i;
 					pieceInput.appendChild(option);
 				}
+				const variables = me.equations[shapeNum][pathNum][0].variables;
+				for (let varName of ['x', 'y', 'r']) {
+					equationForms.get(varName).hidden = !variables.includes(varName);
+				}
 				displayPiece();
 				pathRepeatInput.value = me.maxPathRepeat[shapeNum][pathNum];
 				pathTranslateXInput.value = me.translateX[shapeNum][pathNum + 1];
@@ -186,8 +297,12 @@
 				pieceInput.value = pieceNum;
 				pieceDelBtn.disabled = me.equations[shapeNum][pathNum].length === 1;
 				const equation = me.equations[shapeNum][pathNum][pieceNum];
-				equationXInput.value = equation.xFormulaText;
-				equationYInput.value = equation.yFormulaText;
+				const variables = equation.variables;
+				for (let varName of ['x', 'y', 'r']) {
+					if (variables.includes(varName)) {
+						equationInputs.get(varName).value = equation[varName + 'FormulaText'];
+					}
+				}
 				const unitsCode = me.rangeUnits[shapeNum][pathNum][pieceNum];
 				rangeUnitsInput.value = unitsCode;
 				updateUnitsDisplay();
@@ -228,7 +343,8 @@
 
 			optionsDoc.getElementById('calc-add-piece').addEventListener('click', function (event) {
 				pieceNum++;
-				me.addParametricEquation(shapeNum, pathNum, pieceNum);
+				const methodName = 'add' + me.equations[shapeNum][pathNum][0].constructor.name;
+				me[methodName](shapeNum, pathNum, pieceNum);
 				const option = document.createElement('OPTION');
 				option.innerHTML = me.equations[shapeNum][pathNum].length - 1;
 				pieceInput.appendChild(option);
@@ -302,47 +418,45 @@
 				errorBox.appendChild(div);
 			}
 
-			function compileEquationX() {
-				const formulaText = equationXInput.value;
+			function compileEquation(varName) {
+				const formulaText = equationInputs.get(varName).value;
 				try {
-					me.equations[shapeNum][pathNum][pieceNum].parseXFormula(formulaText);
+					const methodName = 'parse' + varName.toUpperCase() + 'Formula';
+					me.equations[shapeNum][pathNum][pieceNum][methodName](formulaText);
 					progressiveBackgroundGen(me, 0);
 					displayBoundingBox();
 				} catch (e) {
-					errorBox.innerText = 'Error in equation for x. ' + e.message;
+					errorBox.innerText = 'Error in equation for ' + varName + '. ' + e.message;
 				}
 			}
 
-			const equationXForm = optionsDoc.getElementById('calc-equation-x-form');
 			equationXForm.addEventListener('submit', function (event) {
 				event.preventDefault();
-				compileEquationX();
+				compileEquation('x');
 			});
 			equationXForm.addEventListener('focusout', function (event) {
 				if (!this.contains(event.relatedTarget)) {
-					compileEquationX();
+					compileEquation('x');
 				}
 			});
 
-			function compileEquationY() {
-				const formulaText = equationYInput.value;
-				try {
-					me.equations[shapeNum][pathNum][pieceNum].parseYFormula(formulaText);
-					progressiveBackgroundGen(me, 0);
-					displayBoundingBox();
-				} catch (e) {
-					errorBox.innerText = 'Error in equation for y. ' + e.message;
-				}
-			}
-
-			const equationYForm = optionsDoc.getElementById('calc-equation-y-form');
 			equationYForm.addEventListener('submit', function (event) {
 				event.preventDefault();
-				compileEquationY();
+				compileEquation('y');
 			});
 			equationYForm.addEventListener('focusout', function (event) {
 				if (!this.contains(event.relatedTarget)) {
-					compileEquationY();
+					compileEquation('y');
+				}
+			});
+
+			equationRForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				compileEquation('r');
+			});
+			equationRForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					compileEquation('r');
 				}
 			});
 
@@ -775,6 +889,15 @@
 		));
 		this.min[shapeNum][subpathNum].splice(index, 0, -Math.PI);
 		this.max[shapeNum][subpathNum].splice(index, 0, Math.PI);
+		this.step[shapeNum][subpathNum].splice(index, 0, Math.PI / 180);
+		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, 'PI');
+	};
+
+	GraphingCalculator.prototype.addPolarEquation = function (shapeNum, subpathNum, index) {
+		const r = this.getExampleRadius();
+		this.equations[shapeNum][subpathNum].splice(index, 0, new PolarEquation(r));
+		this.min[shapeNum][subpathNum].splice(index, 0, 0);
+		this.max[shapeNum][subpathNum].splice(index, 0, TWO_PI);
 		this.step[shapeNum][subpathNum].splice(index, 0, Math.PI / 180);
 		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, 'PI');
 	};

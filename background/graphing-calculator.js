@@ -706,7 +706,7 @@
 		this.dash.splice(index, 0, [1, 0]);
 		this.strokeColor.splice(index, 0, '#000000ff');
 		this.fillColor.splice(index, 0, '#ff00808c');
-		this.fillRule.splice(index, 0, 'nonzero');
+		this.fillRule.splice(index, 0, 'evenodd');
 	};
 
 	GraphingCalculator.prototype.addSubpath = function (shapeNum, index) {
@@ -893,7 +893,6 @@
 			minMinorGridline += minorAxisMajorGL;
 		}
 		if (canvasWidth >= canvasHeight) {
-			context.translate(0, -(minorAxisMin + minorAxisMax) / 2);
 			for (let x = minMajorGridline; x < majorAxisMax; x += majorAxisMajorGL) {
 				if (x === 0) {
 					continue;

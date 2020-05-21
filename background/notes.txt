@@ -42,6 +42,9 @@ Phyllotaxis
 		Recursive: cauliflower
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
+Calculator
+	Clipping option
+
 Cellular Automata
 	Number base selection for preset: 10 or numStates
 	Seed to be expressed in base numStates

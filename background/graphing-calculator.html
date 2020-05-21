@@ -49,7 +49,7 @@
 			<div class="col-3"></div>
 			<div class="col-3 text-right">
 				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-light" title="Delete subpath" id="calc-del-path" disabled>
+					<button type="button" class="btn btn-light" title="Delete subpath" id="calc-del-path">
 						<img src="../img/delete.png" alt="Delete">
 					</button>
 					<button type="button" class="btn btn-light dropdown-toggle" title="Add subpath" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -76,172 +76,174 @@
 				</div>
 			</div>
 		</div>
-		<form class="form-row form-group" id="calc-equation-x-form">
-			<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-x">
-				Equations
-			</label>
-			<div class="col-9">
-				<div class="input-group input-group-sm">
-					<div class="input-group-prepend">
-						<span class="input-group-text" id="calc-equation-x-lhs">x =</span>
-					</div>
-					<input type="text" value="16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
-					<div class="input-group-append">
-						<button type="submit" class="btn btn-secondary" tabindex="-1">
-							Set
-						</button>
-					</div>
-				</div>
-			</div>
-		</form>
-		<form class="form-row form-group" id="calc-equation-y-form">
-			<div class="col-3"></div>
-			<div class="col-9">
-				<div class="input-group input-group-sm">
-					<div class="input-group-prepend">
-						<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
-					</div>
-					<input type="text" value="(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
-					<div class="input-group-append">
-						<button type="submit" class="btn btn-secondary" tabindex="-1">
-							Set
-						</button>
+		<div id="calc-path-controls">
+			<form class="form-row form-group" id="calc-equation-x-form">
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-x">
+					Equations
+				</label>
+				<div class="col-9">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="calc-equation-x-lhs">x =</span>
+						</div>
+						<input type="text" value="16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-secondary" tabindex="-1">
+								Set
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</form>
-		<form class="form-row form-group" id="calc-equation-r-form" hidden>
-			<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-r">
-				Equation
-			</label>
-			<div class="col-9">
-				<div class="input-group input-group-sm">
-					<div class="input-group-prepend">
-						<span class="input-group-text" id="calc-equation-r-lhs">r =</span>
-					</div>
-					<input type="text" value="1" class="form-control form-control-sm" id="calc-equation-r" aria-describedby="calc-equation-r-lhs" spellcheck="false" autocomplete="off">
-					<div class="input-group-append">
-						<button type="submit" class="btn btn-secondary" tabindex="-1">
-							Set
-						</button>
+			</form>
+			<form class="form-row form-group" id="calc-equation-y-form">
+				<div class="col-3"></div>
+				<div class="col-9">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
+						</div>
+						<input type="text" value="(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-secondary" tabindex="-1">
+								Set
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</form>
-		<form class="form-row form-group" id="calc-range-form">
-			<label class="col-3 col-form-label col-form-label-sm" for="calc-min">
-				Range</span>
-			</label>
-			<div class="col-9">
-				<div class="input-group input-group-sm">
-					<input type="text" value="-1" class="form-control text-right" id="calc-min" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
-					<select class="form-control max-w-fit" id="calc-range-units">
-						<option value="1"></option>
-						<option value="PI" selected="">&pi;</option>
-					</select>
-					<div class="input-group-append input-group-prepend">
-						<span class="input-group-text">
-							&le;&nbsp;<span id="calc-variable">t</span>&nbsp;&le;
-						</span>
-					</div>
-					<input type="text" value="1" class="form-control text-right" id="calc-max" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
-					<div class="input-group-append">
-						<span class="input-group-text bg-white calc-units">
-							&pi;
-						</span>
-						<button type="submit" class="btn btn-secondary">
-							Set
-						</button>
+			</form>
+			<form class="form-row form-group" id="calc-equation-r-form" hidden>
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-r">
+					Equation
+				</label>
+				<div class="col-9">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="calc-equation-r-lhs">r =</span>
+						</div>
+						<input type="text" value="1" class="form-control form-control-sm" id="calc-equation-r" aria-describedby="calc-equation-r-lhs" spellcheck="false" autocomplete="off">
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-secondary" tabindex="-1">
+								Set
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</form>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="calc-step">
-				Step
-			</label>
-			<div class="col-3">
-				<div class="input-group input-group-sm">
-					<input type="text" value="1/180" class="form-control text-right" id="calc-step">
-					<div class="input-group-append">
-						<span class="input-group-text bg-white calc-units">
-							&pi;
-						</span>
+			</form>
+			<form class="form-row form-group" id="calc-range-form">
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-min">
+					Range</span>
+				</label>
+				<div class="col-9">
+					<div class="input-group input-group-sm">
+						<input type="text" value="-1" class="form-control text-right" id="calc-min" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
+						<select class="form-control max-w-fit" id="calc-range-units">
+							<option value="1"></option>
+							<option value="PI" selected="">&pi;</option>
+						</select>
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">
+								&le;&nbsp;<span id="calc-variable">t</span>&nbsp;&le;
+							</span>
+						</div>
+						<input type="text" value="1" class="form-control text-right" id="calc-max" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
+						<div class="input-group-append">
+							<span class="input-group-text bg-white calc-units">
+								&pi;
+							</span>
+							<button type="submit" class="btn btn-secondary">
+								Set
+							</button>
+						</div>
 					</div>
 				</div>
+			</form>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-step">
+					Step
+				</label>
+				<div class="col-3">
+					<div class="input-group input-group-sm">
+						<input type="text" value="1/180" class="form-control text-right" id="calc-step">
+						<div class="input-group-append">
+							<span class="input-group-text bg-white calc-units">
+								&pi;
+							</span>
+						</div>
+					</div>
+				</div>
+				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-path-repeat">
+					Repetitions
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="calc-path-repeat">
+				</div>
 			</div>
-			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-path-repeat">
-				Repetitions
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" value="1" class="form-control form-control-sm" id="calc-path-repeat">
+			<div class="form-group">
+				<output class="form-control form-control-sm" id="calc-error" style="height: unset"></output>
 			</div>
+			<fieldset>
+				<legend>Subpath Post-Processing</legend>
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="calc-translate-x">
+						Translate X
+					</label>
+					<div class="col-3">
+						<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-x">
+					</div>
+					<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-translate-y">
+						Translate Y
+					</label>
+					<div class="col-3">
+						<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-y">
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="calc-scale">
+						Scale
+					</label>
+					<div class="col-3">
+						<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-scale">
+					</div>
+					<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stretch">
+						Stretch
+					</label>
+					<div class="col-3">
+						<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-stretch">
+					</div>
+				</div>
+				<div class="form-row form-group" id="calc-shear-row">
+					<label class="col-3 col-form-label col-form-label-sm" for="calc-shear">
+						Shear
+					</label>
+					<div class="col-3">
+						<input type="number" value="0" step="0.1" class="form-control form-control-sm" id="calc-shear">
+					</div>
+					<div class="col-3 pl-4">
+						<div class="form-check mt-1">
+							<input class="form-check-input" type="radio" name="calc-shear-direction" value="0" id="calc-shear-direction-x" checked>
+							<label class="form-check-label small" for="calc-shear-direction-x">Horizontal</label>
+						</div>
+					</div>
+					<div class="col-3">
+						<div class="form-check mt-1">
+							<input class="form-check-input" type="radio" name="calc-shear-direction" value="0.5" id="calc-shear-direction-y">
+							<label class="form-check-label small" for="calc-shear-direction-y">Vertical</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="col-3 col-form-label col-form-label-sm">
+						Options
+					</div>
+					<div class="col-3">
+						<div class="form-check mt-1">
+							<input class="form-check-input" type="checkbox" id="calc-close-path">
+							<label class="form-check-label small" for="calc-close-path">Close path</label>
+						</div>
+					</div>
+				</div>
+			</fieldset>
 		</div>
-		<div class="form-group">
-			<output class="form-control form-control-sm" id="calc-error" style="height: unset"></output>
-		</div>
-		<fieldset>
-			<legend>Subpath Post-Processing</legend>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="calc-translate-x">
-					Translate X
-				</label>
-				<div class="col-3">
-					<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-x">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-translate-y">
-					Translate Y
-				</label>
-				<div class="col-3">
-					<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-y">
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="calc-scale">
-					Scale
-				</label>
-				<div class="col-3">
-					<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-scale">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stretch">
-					Stretch
-				</label>
-				<div class="col-3">
-					<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-stretch">
-				</div>
-			</div>
-			<div class="form-row form-group" id="calc-shear-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="calc-shear">
-					Shear
-				</label>
-				<div class="col-3">
-					<input type="number" value="0" step="0.1" class="form-control form-control-sm" id="calc-shear">
-				</div>
-				<div class="col-3 pl-4">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="calc-shear-direction" value="0" id="calc-shear-direction-x" checked>
-						<label class="form-check-label small" for="calc-shear-direction-x">Horizontal</label>
-					</div>
-				</div>
-				<div class="col-3">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="calc-shear-direction" value="0.5" id="calc-shear-direction-y">
-						<label class="form-check-label small" for="calc-shear-direction-y">Vertical</label>
-					</div>
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<div class="col-3 col-form-label col-form-label-sm">
-					Options
-				</div>
-				<div class="col-3">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="checkbox" id="calc-close-path">
-						<label class="form-check-label small" for="calc-close-path">Close path</label>
-					</div>
-				</div>
-			</div>
-		</fieldset>
 	</div>
 
 	<div class="tab-pane" id="calc-shapes" role="tabpanel" aria-labelledby="calc-shapes-tab">

@@ -195,6 +195,7 @@
 			const pathInput = optionsDoc.getElementById('calc-subpath');
 			const pieceSelection = optionsDoc.getElementById('calc-piece-selection');
 			const pieceInput = optionsDoc.getElementById('calc-piece');
+			const pathControls = optionsDoc.getElementById('calc-path-controls');
 
 			const equationXForm = optionsDoc.getElementById('calc-equation-x-form');
 			const equationYForm = optionsDoc.getElementById('calc-equation-y-form');
@@ -252,12 +253,12 @@
 			});
 
 			const pathDelBtn = optionsDoc.getElementById('calc-del-path');
+			const addPieceBtn = optionsDoc.getElementById('calc-add-piece');
 			const pieceDelBtn = optionsDoc.getElementById('calc-del-piece');
 
 			function displayPath() {
 				pieceNum = 0;
 				pathInput.value = pathNum;
-				pathDelBtn.disabled = me.equations[shapeNum].length === 1;
 				const numPieces = me.equations[shapeNum][pathNum].length;
 				const numOptions = pieceInput.children.length;
 				for (let i = numPieces; i < numOptions; i++) {
@@ -334,6 +335,9 @@
 				pathInput.appendChild(option);
 				pieceInput.innerHTML = '<option>0</option>';
 				displayPath();
+				pathControls.classList.remove('d-none');
+				pathDelBtn.disabled = false;
+				addPieceBtn.disabled = false;
 				progressiveBackgroundGen(me, 0);
 			}
 
@@ -341,7 +345,7 @@
 				element.addEventListener('click', addPath);
 			}
 
-			optionsDoc.getElementById('calc-add-piece').addEventListener('click', function (event) {
+			addPieceBtn.addEventListener('click', function (event) {
 				pieceNum++;
 				const methodName = 'add' + me.equations[shapeNum][pathNum][0].constructor.name;
 				me[methodName](shapeNum, pathNum, pieceNum);
@@ -363,7 +367,14 @@
 				if (pathNum === numPaths - 1) {
 					pathNum--;
 				}
-				displayPath();
+				if (pathNum >= 0) {
+					displayPath();
+				} else {
+					pathDelBtn.disabled = true;
+					pieceInput.innerHTML = '';
+					addPieceBtn.disabled = true;
+					pathControls.classList.add('d-none');
+				}
 				progressiveBackgroundGen(me, 0);
 			});
 

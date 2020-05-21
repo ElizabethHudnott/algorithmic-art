@@ -1,5 +1,7 @@
 Environment
 -----------
+Set both frames button
+Warn about unsaved frame before playback/skip
 Link from home page
 Revise Patreon description
 Add credits
@@ -43,7 +45,7 @@ Phyllotaxis
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 Calculator
-	Clipping option
+	User-defined variables
 
 Cellular Automata
 	Number base selection for preset: 10 or numStates

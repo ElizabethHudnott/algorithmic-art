@@ -3,20 +3,39 @@
 {
 
 	class ParametricEquation {
-		constructor(xFormula, yFormula) {
-			this.xFormula = xFormula;
-			this.yFormula = yFormula;
+		constructor(xText, yText) {
+			this.parseXFormula(xText);
+			this.parseYFormula(yText);
+		}
+
+		parseXFormula(inputStr) {
+			this.xFormula = realParser.parse(inputStr);
+			this.xFormulaText = inputStr;
+		}
+
+		parseYFormula(inputStr) {
+			this.yFormula = realParser.parse(inputStr);
+			this.yFormulaText = inputStr;
 		}
 
 		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
 			const xFormula = this.xFormula, yFormula = this.yFormula;
 			const xScale = yScale * stretch;
 			let i = 0;
-			let t;
+			let t, amountLeft;
 			do {
-				t = min + i * step;
-				if (t > max) {
-					t = max;
+				if (max >= min) {
+					t = min + i * step;
+					if (t > max) {
+						t = max;
+					}
+					amountLeft = max - t;
+				} else {
+					t = min - i * step;
+					if (t < max) {
+						t = max;
+					}
+					amountLeft = t - max;
 				}
 				variables.set('t', t);
 				const initialX = xScale * xFormula.eval(variables);
@@ -29,7 +48,7 @@
 					context.lineTo(x, y);
 				}
 				i++;
-			} while (t < max);
+			} while (amountLeft > 0);
 		}
 
 		getBoundingBox(variables, min, max, step) {
@@ -39,11 +58,20 @@
 			let minY = yFormula.eval(variables);
 			let maxX = minX, maxY = minY;
 			let i = 1;
-			let t;
+			let t, amountLeft;
 			do {
-				t = min + i * step;
-				if (t > max) {
-					t = max;
+				if (max >= min) {
+					t = min + i * step;
+					if (t > max) {
+						t = max;
+					}
+					amountLeft = max - t;
+				} else {
+					t = min - i * step;
+					if (t < max) {
+						t = max;
+					}
+					amountLeft = t - max;
 				}
 				variables.set('t', t);
 				const x = xFormula.eval(variables);
@@ -59,7 +87,7 @@
 					maxY = y;
 				}
 				i++;
-			} while (t < max);
+			} while (amountLeft > 0);
 			return new BoundingBox(minX, maxX, minY, maxY);
 		}
 
@@ -72,15 +100,25 @@
 		this.optionsDocument = downloadFile('graphing-calculator.html', 'document').then(function (optionsDoc) {
 			const shapeSelection = optionsDoc.getElementById('calc-shape-selection');
 			const subpathSelection = optionsDoc.getElementById('calc-subpath-selection');
+			const pathInput = optionsDoc.getElementById('calc-subpath');
 			const pieceSelection = optionsDoc.getElementById('calc-piece-selection');
 			const pieceInput = optionsDoc.getElementById('calc-piece');
 			const equationXInput = optionsDoc.getElementById('calc-equation-x');
 			const equationYInput = optionsDoc.getElementById('calc-equation-y');
 			const minInput = optionsDoc.getElementById('calc-min');
 			const maxInput = optionsDoc.getElementById('calc-max');
+			const stepInput = optionsDoc.getElementById('calc-step');
 			const rangeUnitsInput = optionsDoc.getElementById('calc-range-units');
 			const unitDisplays = optionsDoc.querySelectorAll('.calc-units');
 			const errorBox = optionsDoc.getElementById('calc-error');
+			const pathRepeatInput = optionsDoc.getElementById('calc-path-repeat');
+			const pathTranslateXInput = optionsDoc.getElementById('calc-translate-x');
+			const pathTranslateYInput = optionsDoc.getElementById('calc-translate-y');
+			const pathScaleInput = optionsDoc.getElementById('calc-scale');
+			const pathStretchInput = optionsDoc.getElementById('calc-stretch');
+			const pathShearRow = optionsDoc.getElementById('calc-shear-row');
+			const pathShearInput = optionsDoc.getElementById('calc-shear');
+			const pathClosedInput = optionsDoc.getElementById('calc-close-path');
 			let shapeNum = 0, pathNum = 0, pieceNum = 0;
 
 			$(optionsDoc.getElementById('calc-paths-tab')).on('show.bs.tab', function (event) {
@@ -101,21 +139,170 @@
 				pieceSelection.hidden = true;
 			});
 
-			optionsDoc.getElementById('calc-repeat').addEventListener('input', function (event) {
-				const value = parseInt(this.value);
-				me.minRepeat[shapeNum][pathNum] = 0;
-				if (value >= 0) {
-					me.maxRepeat[shapeNum][pathNum] = value;
-					progressiveBackgroundGen(me, 0);
+			const pathDelBtn = optionsDoc.getElementById('calc-del-path');
+			const pieceDelBtn = optionsDoc.getElementById('calc-del-piece');
+
+			function displayPath() {
+				pieceNum = 0;
+				pathInput.value = pathNum;
+				pathDelBtn.disabled = me.equations[shapeNum].length === 1;
+				const numPieces = me.equations[shapeNum][pathNum].length;
+				const numOptions = pieceInput.children.length;
+				for (let i = numPieces; i < numOptions; i++) {
+					pieceInput.removeChild(pieceInput.children[i]);
 				}
-			})
+				for (let i = numOptions; i < numPieces; i++) {
+					const option = document.createElement('OPTION');
+					option.innerHTML = i;
+					pieceInput.appendChild(option);
+				}
+				displayPiece();
+				pathRepeatInput.value = me.maxPathRepeat[shapeNum][pathNum];
+				pathTranslateXInput.value = me.translateX[shapeNum][pathNum + 1];
+				pathTranslateYInput.value = me.translateY[shapeNum][pathNum + 1];
+				pathScaleInput.value = me.scale[shapeNum][pathNum + 1];
+				pathStretchInput.value = me.stretch[shapeNum][pathNum + 1];
+				const rawShearX = me.shearX[shapeNum][pathNum + 1];
+				const rawShearY = me.shearY[shapeNum][pathNum + 1];
+				const shearDirection = me.shearDirection[shapeNum][pathNum + 1];
+				const shearX = rawShearX * Math.cos(shearDirection);
+				const shearY = rawShearY * Math.sin(shearDirection);
+				if (shearX >= shearY) {
+					pathShearInput.value = shearX;
+					checkInput(pathShearRow, 'calc-shear-direction', '0');
+				} else {
+					pathShearInput.value = shearY;
+					checkInput(pathShearRow, 'calc-shear-direction', '0.5');
+				}
+				pathClosedInput.checked = me.closePath[shapeNum][pathNum];
+			}
+
+			function displayPiece() {
+				pieceInput.value = pieceNum;
+				pieceDelBtn.disabled = me.equations[shapeNum][pathNum].length === 1;
+				const equation = me.equations[shapeNum][pathNum][pieceNum];
+				equationXInput.value = equation.xFormulaText;
+				equationYInput.value = equation.yFormulaText;
+				const unitsCode = me.rangeUnits[shapeNum][pathNum][pieceNum];
+				rangeUnitsInput.value = unitsCode;
+				updateUnitsDisplay();
+				const units = unitsCode === '1' ? 1 : Math.PI;
+				minInput.value = me.min[shapeNum][pathNum][pieceNum] / units;
+				maxInput.value = me.max[shapeNum][pathNum][pieceNum] / units;
+				stepInput.value = me.step[shapeNum][pathNum][pieceNum] / units;
+				errorBox.innerHTML = '';
+			}
+
+			pathInput.addEventListener('input', function (event) {
+				pathNum = parseInt(this.value);
+				displayPath();
+			});
+
+			pieceInput.addEventListener('input', function (event) {
+				pieceNum = parseInt(this.value);
+				displayPiece();
+			});
+
+			function addPath(event) {
+				const methodName = 'add' + this.value + 'Equation';
+				pathNum++;
+				pieceNum = 0;
+				me.addSubpath(shapeNum, pathNum);
+				me[methodName](shapeNum, pathNum, 0);
+				const option = document.createElement('OPTION');
+				option.innerHTML = me.equations[shapeNum].length - 1;
+				pathInput.appendChild(option);
+				pieceInput.innerHTML = '<option>0</option>';
+				displayPath();
+				progressiveBackgroundGen(me, 0);
+			}
+
+			for (let element of optionsDoc.getElementById('calc-equation-type').querySelectorAll('button')) {
+				element.addEventListener('click', addPath);
+			}
+
+			optionsDoc.getElementById('calc-add-piece').addEventListener('click', function (event) {
+				pieceNum++;
+				me.addParametricEquation(shapeNum, pathNum, pieceNum);
+				const option = document.createElement('OPTION');
+				option.innerHTML = me.equations[shapeNum][pathNum].length - 1;
+				pieceInput.appendChild(option);
+				const step = Math.abs(parseFraction(stepInput.value));
+				if (rangeUnitsInput.value === 'PI' && step > 0) {
+					me.step[shapeNum][pathNum][pieceNum] = step * Math.PI;
+				}
+				displayPiece();
+				progressiveBackgroundGen(me, 0);
+			});
+
+			pathDelBtn.addEventListener('click', function (event) {
+				me.removeSubpath(shapeNum, pathNum);
+				const numPaths = pathInput.children.length;
+				pathInput.removeChild(pathInput.children[numPaths - 1]);
+				if (pathNum === numPaths - 1) {
+					pathNum--;
+				}
+				displayPath();
+				progressiveBackgroundGen(me, 0);
+			});
+
+			pieceDelBtn.addEventListener('click', function (event) {
+				me.removeEquation(shapeNum, pathNum, pieceNum);
+				const numPieces = pieceInput.children.length;
+				pieceInput.removeChild(pieceInput.children[numPieces - 1]);
+				if (pieceNum === numPieces - 1) {
+					pieceNum--;
+				}
+				displayPiece();
+				progressiveBackgroundGen(me, 0);
+			});
+
+			function displayBoundingBox() {
+				const maxRepeat = me.maxPathRepeat[shapeNum][pathNum];
+				const variables = new Map();
+				variables.set('time', me.tween);
+				variables.set('N', maxRepeat);
+				variables.set('n', 0);
+				const equation = me.equations[shapeNum][pathNum][pieceNum];
+				const min = me.min[shapeNum][pathNum][pieceNum];
+				const max = me.max[shapeNum][pathNum][pieceNum];
+				const step = me.step[shapeNum][pathNum][pieceNum];
+				const box = equation.getBoundingBox(variables, min, max, step);
+				const formatter = new Intl.NumberFormat({maximumSignificantDigits: 10});
+				let minXStr = formatter.format(box.minX);
+				let maxXStr = formatter.format(box.maxX);
+				let minYStr = formatter.format(box.minY);
+				let maxYStr = formatter.format(box.maxY);
+				if (minXStr === '-0') { minXStr = '0'};
+				if (maxXStr === '-0') { maxXStr = '0'};
+				if (minYStr === '-0') { minYStr = '0'};
+				if (maxYStr === '-0') { maxYStr = '0'};
+				const table = document.createElement('TABLE');
+				let row = document.createElement('TR');
+				row.innerHTML = '<td class="pr-3"><var>x<sub>min</sub></var> =</td><td class="text-right">' + minXStr + '</td>';
+				table.appendChild(row);
+				row = document.createElement('TR');
+				row.innerHTML = '<td class="pr-3"><var>x<sub>max</sub></var> =</td><td class="text-right">' + maxXStr + '</td>';
+				table.appendChild(row);
+				row = document.createElement('TR');
+				row.innerHTML = '<td class="pr-3"><var>y<sub>min</sub></var> =</td><td class="text-right">' + minYStr + '</td>';
+				table.appendChild(row);
+				row = document.createElement('TR');
+				row.innerHTML = '<td class="pr-3"><var>y<sub>max</sub></var> =</td><td class="text-right">' + maxYStr + '</td>';
+				table.appendChild(row);
+				errorBox.innerHTML = '';
+				errorBox.appendChild(table);
+				const div = document.createElement('DIV');
+				div.innerHTML = 'when <var>n</var> = 0 ; <var>time</var> = ' + me.tween.toFixed(3) + ' (3 d.p.)';
+				errorBox.appendChild(div);
+			}
 
 			function compileEquationX() {
 				const formulaText = equationXInput.value;
 				try {
-					me.equations[shapeNum][pathNum][pieceNum].xFormula = realParser.parse(formulaText);
-					errorBox.innerHTML = '';
+					me.equations[shapeNum][pathNum][pieceNum].parseXFormula(formulaText);
 					progressiveBackgroundGen(me, 0);
+					displayBoundingBox();
 				} catch (e) {
 					errorBox.innerText = 'Error in equation for x. ' + e.message;
 				}
@@ -135,9 +322,9 @@
 			function compileEquationY() {
 				const formulaText = equationYInput.value;
 				try {
-					me.equations[shapeNum][pathNum][pieceNum].yFormula = realParser.parse(formulaText);
-					errorBox.innerHTML = '';
+					me.equations[shapeNum][pathNum][pieceNum].parseYFormula(formulaText);
 					progressiveBackgroundGen(me, 0);
+					displayBoundingBox();
 				} catch (e) {
 					errorBox.innerText = 'Error in equation for y. ' + e.message;
 				}
@@ -174,6 +361,7 @@
 					}
 				}
 				progressiveBackgroundGen(me, 0);
+				displayBoundingBox();
 			}
 
 			const rangeForm = optionsDoc.getElementById('calc-range-form');
@@ -186,21 +374,26 @@
 					updateRange();
 				}
 			});
-			optionsDoc.getElementById('calc-range-units').addEventListener('input', function (event) {
-				const options = this.children;
+			function updateUnitsDisplay() {
+				const unitsCode = rangeUnitsInput.value;
+				const options = rangeUnitsInput.children;
 				let units;
 				for (let i = 0; i < options.length; i++) {
 					const option = options[i];
-					if (option.value === this.value) {
+					if (option.value === unitsCode) {
 						units = option.innerHTML;
 						break;
 					}
 				}
 				for (let element of unitDisplays) {
 					element.innerHTML = units;
-				};
+				}
+			}
+			rangeUnitsInput.addEventListener('input', function (event) {
+				me.rangeUnits[shapeNum][pathNum][pieceNum] = this.value;
+				updateUnitsDisplay();
 			});
-			optionsDoc.getElementById('calc-step').addEventListener('input', function (event) {
+			stepInput.addEventListener('input', function (event) {
 				let value = Math.abs(parseFraction(this.value));
 				if (value > 0) {
 					if (rangeUnitsInput.value === 'PI') {
@@ -208,10 +401,21 @@
 					}
 					me.step[shapeNum][pathNum][pieceNum] = value;
 					progressiveBackgroundGen(me, 0);
+					displayBoundingBox();
 				}
 			});
 
-			optionsDoc.getElementById('calc-translate-x').addEventListener('input', function (event) {
+			pathRepeatInput.addEventListener('input', function (event) {
+				const value = parseInt(this.value);
+				if (value >= 0) {
+					me.minPathRepeat[shapeNum][pathNum] = 0;
+					me.maxPathRepeat[shapeNum][pathNum] = value;
+					progressiveBackgroundGen(me, 0);
+					displayBoundingBox();
+				}
+			});
+
+			pathTranslateXInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.translateX[shapeNum][pathNum + 1] = value;
@@ -219,7 +423,7 @@
 				}
 			});
 
-			optionsDoc.getElementById('calc-translate-y').addEventListener('input', function (event) {
+			pathTranslateYInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.translateY[shapeNum][pathNum + 1] = value;
@@ -227,7 +431,7 @@
 				}
 			});
 
-			optionsDoc.getElementById('calc-scale').addEventListener('input', function (event) {
+			pathScaleInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.scale[shapeNum][pathNum + 1] = value;
@@ -235,7 +439,7 @@
 				}
 			});
 
-			optionsDoc.getElementById('calc-stretch').addEventListener('input', function (event) {
+			pathStretchInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					me.stretch[shapeNum][pathNum + 1] = value;
@@ -243,7 +447,7 @@
 				}
 			});
 
-			optionsDoc.getElementById('calc-shear').addEventListener('input', function (event) {
+			pathShearInput.addEventListener('input', function (event) {
 				const value = parseFloat(this.value);
 				if (Number.isFinite(value)) {
 					if (me.shearDirection[shapeNum][pathNum + 1] === 0) {
@@ -272,11 +476,11 @@
 				progressiveBackgroundGen(me, 0);
 			}
 
-			for (let item of optionsDoc.querySelectorAll('input[name=calc-shear-direction')) {
+			for (let item of pathShearRow.querySelectorAll('input[name=calc-shear-direction')) {
 				item.addEventListener('input', setShearDirection);
 			};
 
-			optionsDoc.getElementById('calc-close-path').addEventListener('input', function (event) {
+			pathClosedInput.addEventListener('input', function (event) {
 				me.closePath[shapeNum][pathNum] = this.checked;
 				progressiveBackgroundGen(me, 0);
 			});
@@ -422,8 +626,9 @@
 		this.min = [];			// Per shape, per subpath, per piece
 		this.max = [];			// Per shape, per subpath, per piece
 		this.step = [];			// Per shape, per subpath, per piece
-		this.minRepeat = [];	// Per shape, per subpath
-		this.maxRepeat = [];	// Per shape, per subpath, range is min <= n < max
+		this.rangeUnits = [];	// Per shape, per subpath, per piece
+		this.minPathRepeat = [];	// Per shape, per subpath
+		this.maxPathRepeat = [];	// Per shape, per subpath, range is min <= n < max
 
 		this.rotation = [];		// Per shape
 		this.translateX = [];	// Per shape & per subpath
@@ -456,8 +661,8 @@
 		this.addSubpath(0, 0);
 		this.addParametricEquation(0, 0, 0);
 		const equation = this.equations[0][0][0];
-		equation.xFormula = realParser.parse('16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)');
-		equation.yFormula = realParser.parse('(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)');
+		equation.parseXFormula('16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)');
+		equation.parseYFormula('(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)');
 		this.tween = 0;
 	}
 
@@ -476,7 +681,7 @@
 			['max', 'min']	// min catches up to max.
 		],
 		pairedStepped: [
-			['maxRepeat', 'minRepeat']
+			['maxPathRepeat', 'minPathRepeat']
 		]
 	};
 
@@ -485,8 +690,9 @@
 		this.min.splice(index, 0, []);
 		this.max.splice(index, 0, []);
 		this.step.splice(index, 0, []);
-		this.minRepeat.splice(index, 0, []);
-		this.maxRepeat.splice(index, 0, []);
+		this.rangeUnits.splice(index, 0, []);
+		this.minPathRepeat.splice(index, 0, []);
+		this.maxPathRepeat.splice(index, 0, []);
 		this.rotation.splice(index, 0, 0);
 		this.translateX.splice(index, 0, [0]);
 		this.translateY.splice(index, 0, [0]);
@@ -508,8 +714,9 @@
 		this.min[shapeNum].splice(index, 0, []);
 		this.max[shapeNum].splice(index, 0, []);
 		this.step[shapeNum].splice(index, 0, []);
-		this.minRepeat[shapeNum].splice(index, 0, 0);
-		this.maxRepeat[shapeNum].splice(index, 0, 1);
+		this.rangeUnits[shapeNum].splice(index, 0, []);
+		this.minPathRepeat[shapeNum].splice(index, 0, 0);
+		this.maxPathRepeat[shapeNum].splice(index, 0, 1);
 		this.translateX[shapeNum].splice(index + 1, 0, 0);
 		this.translateY[shapeNum].splice(index + 1, 0, 0);
 		this.scale[shapeNum].splice(index + 1, 0, 1);
@@ -520,15 +727,52 @@
 		this.closePath[shapeNum].splice(index, 0, false);
 	}
 
+	GraphingCalculator.prototype.removeSubpath = function (shapeNum, index) {
+		this.equations[shapeNum].splice(index, 1);
+		this.min[shapeNum].splice(index, 1);
+		this.max[shapeNum].splice(index, 1);
+		this.step[shapeNum].splice(index, 1);
+		this.rangeUnits[shapeNum].splice(index, 1);
+		this.minPathRepeat[shapeNum].splice(index, 1);
+		this.maxPathRepeat[shapeNum].splice(index, 1);
+		this.translateX[shapeNum].splice(index + 1, 1);
+		this.translateY[shapeNum].splice(index + 1, 1);
+		this.scale[shapeNum].splice(index + 1, 1);
+		this.stretch[shapeNum].splice(index + 1, 1);
+		this.shearX[shapeNum].splice(index + 1, 1);
+		this.shearY[shapeNum].splice(index + 1, 1);
+		this.shearDirection[shapeNum].splice(index + 1, 1);
+		this.closePath[shapeNum].splice(index, 1);
+	}
+
+	GraphingCalculator.prototype.getExampleRadius = function () {
+		let r = 1;
+		for (let shape of this.equations) {
+			for (let subpath of shape) {
+				r += subpath.length;
+			}
+		}
+		return r;
+	};
+
 	GraphingCalculator.prototype.addParametricEquation = function (shapeNum, subpathNum, index) {
-		const r = this.equations[shapeNum][subpathNum].length + 1;
+		const r = this.getExampleRadius();
 		this.equations[shapeNum][subpathNum].splice(index, 0, new ParametricEquation(
-			realParser.parse(r + 'cos(t)'),
-			realParser.parse(r + 'sin(t)')
+			r + 'cos(t)',
+			r + 'sin(t)'
 		));
 		this.min[shapeNum][subpathNum].splice(index, 0, -Math.PI);
 		this.max[shapeNum][subpathNum].splice(index, 0, Math.PI);
 		this.step[shapeNum][subpathNum].splice(index, 0, Math.PI / 180);
+		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, 'PI');
+	};
+
+	GraphingCalculator.prototype.removeEquation = function (shapeNum, pathNum, pieceNum) {
+		this.equations[shapeNum][pathNum].splice(pieceNum, 1);
+		this.min[shapeNum][pathNum].splice(pieceNum, 1);
+		this.max[shapeNum][pathNum].splice(pieceNum, 1);
+		this.step[shapeNum][pathNum].splice(pieceNum, 1);
+		this.rangeUnits[shapeNum][pathNum].splice(pieceNum, 1);
 	};
 
 	GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
@@ -571,8 +815,8 @@
 			const shapeShearY = this.shearY[shapeNum][0] * Math.sin(shapeShearDirection);
 
 			for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
-				const pathMinRepeat = this.minRepeat[shapeNum][subpathNum];
-				const pathMaxRepeat = this.maxRepeat[shapeNum][subpathNum];
+				const pathMinRepeat = this.minPathRepeat[shapeNum][subpathNum];
+				const pathMaxRepeat = this.maxPathRepeat[shapeNum][subpathNum];
 				if (pathMaxRepeat <= pathMinRepeat) {
 					continue;
 				}

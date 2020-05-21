@@ -15,22 +15,22 @@
 		</a>
 	</li>
 </ul>
-<div class="form-row">
+<div class="form-row mb-1">
 	<div class="col-3"></div>
-	<div class="col-3 form-group" id="calc-shape-selection">
-		<label for="calc-shape">Shape</label>
+	<div class="col-3" id="calc-shape-selection">
+		<label class="col-form-label col-form-label-sm" for="calc-shape">Shape</label>
 		<select class="form-control form-control-sm" id="calc-shape">
 			<option>0</option>
 		</select>
 	</div>
-	<div class="col-3 form-group" id="calc-subpath-selection">
-		<label for="calc-shape">Subpath</label>
+	<div class="col-3" id="calc-subpath-selection">
+		<label class="col-form-label col-form-label-sm" for="calc-subpath">Subpath</label>
 		<select class="form-control form-control-sm" id="calc-subpath">
 			<option>0</option>
 		</select>
 	</div>
-	<div class="col-3 form-group" id="calc-piece-selection">
-		<label for="calc-shape">Piece</label>
+	<div class="col-3" id="calc-piece-selection">
+		<label class="col-form-label col-form-label-sm" for="calc-piece">Piece</label>
 		<select class="form-control form-control-sm" id="calc-piece">
 			<option>0</option>
 		</select>
@@ -39,6 +39,35 @@
 
 <div class="tab-content">
 	<div class="tab-pane active" id="calc-paths" role="tabpanel" aria-labelledby="calc-paths-tab">
+		<div class="form-row form-group">
+			<div class="col-3"></div>
+			<div class="col-3"></div>
+			<div class="col-3 text-right">
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-light" title="Delete subpath" id="calc-del-path" disabled>
+						<img src="../img/delete.png" alt="Delete">
+					</button>
+					<button type="button" class="btn btn-light dropdown-toggle" title="Add subpath" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<img src="../img/plus_light_blue.png" alt="Add">
+					</button>
+					<div class="dropdown-menu py-0 m-0 w-fit" id="calc-equation-type">
+						<button type="button" class="btn btn-light w-100 text-left" value="Parametric">
+							<span class="col-form-label col-form-label-sm">Parametric</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="col-3 text-right">
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-light" title="Delete piece" id="calc-del-piece" disabled>
+						<img src="../img/delete.png" alt="Delete">
+					</button>
+					<button type="button" class="btn btn-light" title="Add piece" id="calc-add-piece">
+						<img src="../img/plus_light_blue.png" alt="Add">
+					</button>
+				</div>
+			</div>
+		</div>
 		<form class="form-row form-group" id="calc-equation-x-form">
 			<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-x">
 				Equations
@@ -115,11 +144,11 @@
 					</div>
 				</div>
 			</div>
-			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-repeat">
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-path-repeat">
 				Repetitions
 			</label>
 			<div class="col-3">
-				<input type="number" min="0" value="1" class="form-control form-control-sm" id="calc-repeat">
+				<input type="number" min="0" value="1" class="form-control form-control-sm" id="calc-path-repeat">
 			</div>
 		</div>
 		<div class="form-group">
@@ -155,7 +184,7 @@
 					<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-stretch">
 				</div>
 			</div>
-			<div class="form-row">
+			<div class="form-row" id="calc-shear-row">
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-shear">
 					Shear
 				</label>

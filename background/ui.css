@@ -7,6 +7,10 @@ button[disabled], input[type=color][disabled] {
 	cursor: auto;
 }
 
+button[disabled] img {
+	filter: grayscale(1);
+}
+
 input[type=color] {
 	cursor: pointer;
 }
@@ -81,6 +85,11 @@ legend {
 }
 
 .max-w-fit {
+	max-width: fit-content;
+}
+
+.w-fit {
+	min-width: fit-content;
 	max-width: fit-content;
 }
 

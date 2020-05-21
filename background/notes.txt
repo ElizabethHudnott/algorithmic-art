@@ -63,3 +63,4 @@ ending in whitespace
 x(2) should only be interpreted as a function if it is a function
 (a+b)sin(x)
 (a+b)(c+d)
+3 * -sin(t)

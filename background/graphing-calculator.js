@@ -1,6 +1,92 @@
 'use strict';
 
 {
+
+	class RectangularEquation {
+		constructor(text) {
+			this.parseYFormula(text);
+		}
+
+		parseYFormula(input) {
+			const inputStr = String(input);
+			this.yFormula = realParser.parse(inputStr);
+			this.yFormulaText = inputStr;
+		}
+
+		variables = Object.freeze(['y']);
+
+		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
+			const formula = this.yFormula;
+			const xScale = yScale * stretch;
+			let i = 0;
+			let x, amountLeft;
+			do {
+				if (max >= min) {
+					x = min + i * step;
+					if (x > max) {
+						x = max;
+					}
+					amountLeft = max - x;
+				} else {
+					x = min - i * step;
+					if (x < max) {
+						x = max;
+					}
+					amountLeft = x - max;
+				}
+				variables.set('x', x);
+				let y = formula.eval(variables);
+				const initialX = xScale * x;
+				const initialY = yScale * y;
+				x = initialX + stretch * shearX * initialY;
+				y = initialY + shearY * initialX;
+				if (i === 0 && firstSegment) {
+					context.moveTo(x, y);
+				} else {
+					context.lineTo(x, y);
+				}
+				i++;
+			} while (amountLeft > 0);
+		}
+
+		getBoundingBox(variables, min, max, step) {
+			const formula = this.yFormula;
+			variables.set('x', min);
+			let minY = formula.eval(variables);
+			let maxY = minY;
+			let i = 1;
+			let x, amountLeft;
+			do {
+				if (max >= min) {
+					x = min + i * step;
+					if (x > max) {
+						x = max;
+					}
+					amountLeft = max - x;
+				} else {
+					x = min - i * step;
+					if (x < max) {
+						x = max;
+					}
+					amountLeft = x - max;
+				}
+				variables.set('x', x);
+				const y = formula.eval(variables);
+				if (y < minY) {
+					minY = y;
+				} else if (y > maxY) {
+					maxY = y;
+				}
+				i++;
+			} while (amountLeft > 0);
+			if (min < max) {
+				return new BoundingBox(min, max, minY, maxY);
+			} else {
+				return new BoundingBox(max, min, minY, maxY);
+			}
+		}
+	}
+
 	class ParametricEquation {
 		constructor(xText, yText) {
 			this.parseXFormula(xText);
@@ -630,6 +716,15 @@
 				}
 			});
 
+			function setLineJoin(event) {
+				me.lineJoin[shapeNum] = this.value;
+				progressiveBackgroundGen(me, 0);
+			}
+
+			for (let element of optionsDoc.querySelectorAll('input[name="calc-line-join"]')) {
+				element.addEventListener('input', setLineJoin);
+			}
+
 			const strokeColorInput = optionsDoc.getElementById('calc-stroke-color');
 			const strokeOpacityInput = optionsDoc.getElementById('calc-stroke-opacity');
 
@@ -775,7 +870,8 @@
 		this.shearDirection = []; // Per shape & per subpath
 		this.closePath = [];	// Per shape, per subpath
 		this.lineWidth = [];	// Per shape
-		this.dash = []			// Per shape
+		this.lineJoin = [];		// Per shape
+		this.dash = [];			// Per shape
 		this.strokeColor = [];	// Per shape
 		this.fillColor = [];	// Per shape
 		this.fillRule = [];		// Per shape
@@ -839,6 +935,7 @@
 		this.shearDirection.splice(index, 0, [0]);
 		this.closePath.splice(index, 0, []);
 		this.lineWidth.splice(index, 0, 3);
+		this.lineJoin.splice(index, 0, 'round');
 		this.dash.splice(index, 0, [1, 0]);
 		this.strokeColor.splice(index, 0, '#000000ff');
 		this.fillColor.splice(index, 0, '#ff00808c');
@@ -892,6 +989,19 @@
 		return r;
 	};
 
+	GraphingCalculator.prototype.addRectangularEquation = function (shapeNum, subpathNum, index) {
+		const m = this.getExampleRadius();
+		this.equations[shapeNum][subpathNum].splice(index, 0, new RectangularEquation(m + 'x'));
+		this.min[shapeNum][subpathNum].splice(index, 0, this.minorAxisMin);
+		this.max[shapeNum][subpathNum].splice(index, 0, this.minorAxisMax);
+		let step = (this.minorAxisMax - this.minorAxisMin) / screen.width;
+		let log = Math.floor(Math.log10(step));
+		const pow = log > 0 ? 1 : 10 ** log;
+		step = Math.round(step / pow) * pow;
+		this.step[shapeNum][subpathNum].splice(index, 0, step);
+		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, '1');
+	};
+
 	GraphingCalculator.prototype.addParametricEquation = function (shapeNum, subpathNum, index) {
 		const r = this.getExampleRadius();
 		this.equations[shapeNum][subpathNum].splice(index, 0, new ParametricEquation(
@@ -930,7 +1040,6 @@
 		const scaledWidth = canvasWidth / scale;
 		const scaledHeight = canvasHeight / scale;
 		context.scale(scale, -scale);
-		context.lineJoin = 'bevel';
 		let xTranslation, yTranslation, majorAxisMin, majorAxisMax;
 		if (canvasWidth >= canvasHeight) {
 			minDimension = canvasHeight;
@@ -963,7 +1072,16 @@
 
 			const lineWidth = this.lineWidth[shapeNum];
 			context.lineWidth = lineWidth / (scale * shapeScale);
-			const dash = this.dash[shapeNum];
+			const lineJoin = this.lineJoin[shapeNum];
+			context.lineJoin = lineJoin;
+			let dash = this.dash[shapeNum];
+			if (lineJoin === 'round') {
+				dash = dash.slice();
+				adjustLineDash(dash, lineWidth);
+				context.lineCap = 'round';
+			} else {
+				context.lineCap = 'butt';
+			}
 			const numDashLengths = dash.length;
 			const scaledDash = new Array(numDashLengths);
 			for (let i = 0; i < numDashLengths; i++) {

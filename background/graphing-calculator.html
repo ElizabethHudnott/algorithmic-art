@@ -56,6 +56,9 @@
 						<img src="../img/plus_light_blue.png" alt="Add">
 					</button>
 					<div class="dropdown-menu py-0 m-0 w-fit" id="calc-equation-type">
+						<button type="button" class="btn btn-light w-100 text-left" value="Rectangular">
+							Rectangular
+						</button>
 						<button type="button" class="btn btn-light w-100 text-left" value="Parametric">
 							Parametric
 						</button>
@@ -275,6 +278,23 @@
 			</label>
 			<div class="col-3">
 				<input type="text" value="1,0" class="form-control form-control-sm" id="calc-dash" pattern="\d+(,\s*\d+)*">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3 col-form-label col-form-label-sm">
+				Pen Shape
+			</div>
+			<div class="col-3">
+				<div class="form-check mt-1">
+					<input type="radio" name="calc-line-join" value="round" class="form-check-input" id="calc-join-round" checked>
+					<label class="form-check-label" for="calc-join-round">Round</label>
+				</div>
+			</div>
+			<div class="col-3 pl-4">
+				<div class="form-check mt-1">
+					<input type="radio" name="calc-line-join" value="bevel" class="form-check-input" id="calc-join-square">
+					<label class="form-check-label" for="calc-join-square">Square</label>
+				</div>
 			</div>
 		</div>
 		<div class="form-row form-group">

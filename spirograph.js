@@ -1129,23 +1129,8 @@ penWidthInput.addEventListener('input', function (event) {
 
 function parseAndTrimLineDash() {
 	if (lineDashInput.checkValidity()) {
-		const lineDash = parseLineDash(lineDashInput.value);
-		const halfLineWidth = Math.ceil(lineWidth / 2);
-		const numValues = lineDash.length;
-		for (let i = 0; i < numValues; i += 2) {
-			lineDash[i] -= halfLineWidth;
-			if (lineDash[i] < 1) {
-				if (lineDash[i + 1] > 0) {
-					lineDash[i + 1] += 1 - lineDash[i];
-				}
-				lineDash[i] = 1;
-			}
-		}
-		for (let i = 1; i < numValues; i += 2) {
-			if (lineDash[i] > 0) {
-				lineDash[i] += halfLineWidth;
-			}
-		}
+		lineDash = parseLineDash(lineDashInput.value);
+		adjustLineDash(lineDash, lineWidth);
 		setLineDash();
 	}
 }

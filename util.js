@@ -217,6 +217,21 @@ function parseLineDash(str) {
 	return lineDash;
 }
 
+function adjustLineDash(lineDash, lineWidth) {
+	const numValues = lineDash.length;
+	for (let i = 0; i < numValues; i += 2) {
+		lineDash[i] -= lineWidth;
+		if (lineDash[i] < 1) {
+			lineDash[i] = 1;
+		}
+	}
+	for (let i = 1; i < numValues; i += 2) {
+		if (lineDash[i] > 0) {
+			lineDash[i] += lineWidth;
+		}
+	}
+}
+
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;
 

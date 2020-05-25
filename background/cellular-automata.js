@@ -26,8 +26,9 @@
 			const weightsSection = $(optionsDoc.getElementById('ca-weights'));
 			const weightInputs = optionsDoc.getElementById('ca-weights').querySelectorAll('input');
 			const seedInput = optionsDoc.getElementById('ca-seed');
+			me.seedInput = seedInput;
 			const seedLengthInput = optionsDoc.getElementById('ca-seed-length');
-			const seedTypeRow = optionsDoc.getElementById('ca-seed-type');
+			const seedTypeRows = optionsDoc.getElementById('ca-seed-type');
 
 			function fullRedraw() {
 				progressiveBackgroundGen(me, 0);
@@ -146,42 +147,53 @@
 				input.addEventListener('input', setPreset);
 			}
 
-			function setSeed() {
-				const seed = parseInt(seedInput.value);
-
+			seedInput.addEventListener('input', function (event) {
+				const seed = parseInt(this.value);
 				if (seed >= 0) {
-					const seedType = queryChecked(seedTypeRow, 'ca-seed-type').value;
-					let length;
-					if (seedType === 'tri') {
-						length = 1;
-					} else {
-						length = parseInt(seedLengthInput.value);
-						if (!(length >= 1)) {
-							length = 1;
-						}
-					}
-					me.setSeed(seed, length);
+					me.seed = seed;
+					me.history = undefined;
 				}
+				progressiveBackgroundGen(me, 0);
+			});
+
+			function setSeedLength() {
+				const seedType = queryChecked(seedTypeRows, 'ca-seed-type').value;
+				let length;
+				if (seedType === 'tri') {
+					length = 1;
+				} else {
+					length = parseInt(seedLengthInput.value);
+					if (!(length >= 1)) {
+						length = 1;
+					}
+				}
+				me.seedLength = length;
+				me.history = undefined;
 				progressiveBackgroundGen(me, 0);
 			};
 
-			seedInput.addEventListener('input', setSeed);
-			seedLengthInput.addEventListener('input', setSeed);
+			seedLengthInput.addEventListener('input', setSeedLength);
 
 			function setSeedType(event) {
 				const type = this.value;
-				me.repeatSeed = type === 'repeat';
-				if (type === 'random') {
+				const random = type === 'random' || type === 'all-random';
+				const repeated = type === 'repeat' || type === 'random';
+				if (random) {
 					me.seed = undefined;
-					progressiveBackgroundGen(me, 0);
 				} else {
-					setSeed();
+					let seed = parseInt(seedInput.value);
+					if (!(seed >= 0)) {
+						seed = 1;
+					}
+					me.seed = seed;
 				}
-				seedInput.disabled = type === 'random';
-				seedLengthInput.disabled = type !== 'repeat';
+				me.repeatSeed = repeated;
+				seedInput.disabled = random;
+				seedLengthInput.disabled = !repeated;
+				setSeedLength();
 			}
 
-			for (let element of seedTypeRow.querySelectorAll('[name=ca-seed-type]')) {
+			for (let element of seedTypeRows.querySelectorAll('[name=ca-seed-type]')) {
 				element.addEventListener('input', setSeedType);
 			}
 
@@ -278,6 +290,7 @@
 		this.strokeIntensity = 1;
 
 		this.seed = [1];
+		this.seedLength = 1;
 		this.repeatSeed = false;
 		this.cellWidth = 11;
 		this.cellHeight = 11;
@@ -290,6 +303,7 @@
 		this.history = undefined;
 		this.cachedWidth = undefined;
 		this.cachedHeight = undefined;
+		this.cachedSeedLength = this.seedLength;
 	}
 
 	CellAutomaton.prototype.animatable = {
@@ -297,27 +311,37 @@
 			'hueMin', 'hueMax', 'strokeIntensity', 'gapX', 'gapY'
 		],
 		stepped: [
-			'repeatSeed', 'cellWidth', 'cellHeight', 'borderRow'
+			'seedLength', 'repeatSeed', 'cellWidth', 'cellHeight', 'borderRow'
 		],
 		pairedContinuous: [
 			['endHeight', 'startHeight']
 		]
 	};
 
-	CellAutomaton.prototype.setSeed = function (n, padLength) {
+	CellAutomaton.prototype.calcSeed = function () {
+		let n = this.seed;
+		const padLength = this.seedLength;
 		const numStates = this.numStates;
 		const seed = [];
-		do {
-			const value = n % numStates;
-			seed.push(value);
-			n = (n - value) / numStates;
-		} while (n > 0);
-		seed.reverse();
-		for (let i = seed.length; i < padLength; i++) {
-			seed[i] = 0;
+		if (n === undefined) {
+			if (!this.repeatSeed) {
+				return undefined;
+			}
+			for (let i = 0; i < padLength; i++) {
+				seed.push(Math.trunc(Math.random() * numStates));
+			}
+		} else {
+			do {
+				const value = n % numStates;
+				seed.push(value);
+				n = (n - value) / numStates;
+			} while (n > 0);
+			seed.reverse();
+			for (let i = seed.length; i < padLength; i++) {
+				seed[i] = 0;
+			}
 		}
-		this.seed = seed;
-		this.history = undefined;
+		return seed;
 	}
 
 	CellAutomaton.prototype.transitionNumToCellValues = function (transitionNum) {
@@ -498,19 +522,33 @@
 		this.history = undefined;
 	};
 
+	/**
+	 *	@returns {int[]} The seed used.
+	 */
 	CellAutomaton.prototype.generateFirstRow = function (width, height) {
 		const row = new Array(width);
 		this.history = [row];
 		this.cachedWidth = width;
 		this.cachedHeight = height;
-		const seed = this.seed;
+		this.cachedSeedLength = this.seedLength;
+		const seed = this.calcSeed();
+		const numStates = this.numStates;
 
 		if (seed === undefined) {
-			const numStates = this.numStates;
 			for (let i = 0; i < width; i++) {
 				row[i] = Math.trunc(Math.random() * numStates);
 			}
-			return;
+			return undefined;
+		}
+		if (this.seed === undefined) {
+			const seedLength = seed.length;
+			let n = 0;
+			let mult = numStates ** (seedLength - 1);
+			for (let i = 0; i < seedLength; i++) {
+				n += seed[i] * mult;
+				mult /= numStates;
+			}
+			this.seedInput.value = n;
 		}
 
 		const seedLength = seed.length;
@@ -536,9 +574,10 @@
 				}
 			}
 		}
+		return seed;
 	}
 
-	CellAutomaton.prototype.getCellValue = function (i, j) {
+	CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 		if (j < 0) {
 			if (this.borderRow) {
 				return 0;
@@ -550,18 +589,18 @@
 		const row = this.history[j];
 		const width = row.length;
 		if (i === -1) {
-			if (this.seed === undefined) {
+			if (seed === undefined) {
 				return Math.trunc(Math.random() * this.numStates);
 			} else if (j === 0 && this.repeatSeed) {
-				return this.seed[this.seed.length - 1];	// wrap seed
+				return seed[seed.length - 1];	// wrap seed
 			} else {
 				return row[width - 1];	// wrap row data
 			}
 		} else if (i === width) {
-			if (this.seed === undefined) {
+			if (seed === undefined) {
 				return Math.trunc(Math.random() * this.numStates);
 			} if (j === 0 && this.repeatSeed) {
-				return this.seed[(i + 1) % this.seed.length];	// wrap seed
+				return seed[(i + 1) % seed.length];	// wrap seed
 			} else {
 				return row[0];	// wrap row data
 			}
@@ -578,14 +617,18 @@
 		const gridWidth = Math.trunc(canvasWidth / totalWidth);
 		const emptyTopRow = this.borderRow;
 		const gridHeight = Math.ceil(canvasHeight / totalHeight) - emptyTopRow;
+		let seed;
 
 		if (
 			this.history === undefined ||
 			this.cachedWidth !== gridWidth ||
 			(!this.repeatSeed && this.cachedHeight !== gridHeight) ||
+			this.cachedSeedLength !== this.seedLength ||
 			this.seed === undefined
 		) {
-			this.generateFirstRow(gridWidth, gridHeight);
+			seed = this.generateFirstRow(gridWidth, gridHeight);
+		} else {
+			seed = this.calcSeed();
 		}
 
 		const history = this.history;
@@ -608,10 +651,10 @@
 		for (let j = history.length; j <= maxRow + 1; j++) {
 			const row = new Array(gridWidth);
 			for (let i = 0; i < gridWidth; i++) {
-				const left = this.getCellValue(i - 1, j - 1);
+				const left = this.getCellValue(seed, i - 1, j - 1);
 				const centre = this.history[j - 1][i];
-				const right = this.getCellValue(i + 1, j - 1);
-				const past = this.getCellValue(i, j - 2);
+				const right = this.getCellValue(seed, i + 1, j - 1);
+				const past = this.getCellValue(seed, i, j - 2);
 				const index =
 					left +
 					centre * numStates +
@@ -644,14 +687,14 @@
 
 					if (this.numStates === 2) {
 						let neighbourCount = 0;
-						neighbourCount += this.getCellValue(i - 1, j - 1) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i, j - 1) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i + 1, j - 1) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i - 1, j) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i + 1, j) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i - 1, j + 1) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i, j + 1) > 0 ? 1 : 0;
-						neighbourCount += this.getCellValue(i + 1, j + 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i - 1, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i + 1, j - 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i - 1, j) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i + 1, j) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i - 1, j + 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i, j + 1) > 0 ? 1 : 0;
+						neighbourCount += this.getCellValue(seed, i + 1, j + 1) > 0 ? 1 : 0;
 
 						hue = hueMin + j / (gridHeight - 1) * hueRange;
 						saturation = 1 - neighbourCount / 8;
@@ -681,7 +724,7 @@
 							const centreY = y + cellHeight / 2;
 							const r = cellHeight / 2 * Math.SQRT2;
 
-							let top = this.getCellValue(i, j - 1);
+							let top = this.getCellValue(seed, i, j - 1);
 							if (top === 0) {
 								top = value;
 							}
@@ -701,7 +744,7 @@
 							context.moveTo(scaledX + cellHeight, y);
 							context.lineTo(scaledX, y);
 
-							let left = this.getCellValue(i - 1, j);
+							let left = this.getCellValue(seed, i - 1, j);
 							if (left === 0) {
 								left = value;
 							}

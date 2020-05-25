@@ -140,43 +140,56 @@
 				<input type="number" min="1" value="30" class="form-control form-control-sm" id="ca-seed-length" disabled>
 			</div>
 		</div>
-		<div class="form-row" id="ca-seed-type">
-			<div class="col-3 col-form-label col-form-label-sm">
-				Seed Type
-			</div>
-			<div class="col-3">
-				<div class="form-check mt-1">
-					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
-					<label class="form-check-label small" for="ca-seed-type-tri">
-						Triangular
-					</label>
+		<div id="ca-seed-type">
+			<div class="form-row">
+				<div class="col-3 col-form-label col-form-label-sm">
+					Seed Type
+				</div>
+				<div class="col-3">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-tri" value="tri" checked>
+						<label class="form-check-label small" for="ca-seed-type-tri">
+							Triangular
+						</label>
+					</div>
+				</div>
+				<div class="col-3 pl-3">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-repeat" value="repeat">
+						<label class="form-check-label small" for="ca-seed-type-repeat">
+							Repeated
+						</label>
+					</div>
 				</div>
 			</div>
-			<div class="col-3 pl-3">
-				<div class="form-check mt-1">
-					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-repeat" value="repeat">
-					<label class="form-check-label small" for="ca-seed-type-repeat">
-						Repeated
-					</label>
+			<div class="form-row">
+				<div class="col-3"></div>
+				<div class="col-3">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-random" value="random">
+						<label class="form-check-label small" for="ca-seed-type-random">
+							Random repeat
+						</label>
+					</div>
+				</div>
+				<div class="col-3 pl-3">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-all-random" value="all-random">
+						<label class="form-check-label small" for="ca-seed-type-all-random">
+							All random
+						</label>
+					</div>
 				</div>
 			</div>
-			<div class="col-3">
-				<div class="form-check mt-1">
-					<input class="form-check-input" type="radio" name="ca-seed-type" id="ca-seed-type-random" value="random">
-					<label class="form-check-label small" for="ca-seed-type-random">
-						Random
-					</label>
-				</div>
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<div class="col-3"></div>
-			<div class="col-3">
-				<div class="form-check">
-					<input class="form-check-input" type="checkbox" checked id="ca-border-row">
-					<label class="form-check-label small" for="ca-border-row">
-						Border row
-					</label>
+			<div class="form-row">
+				<div class="col-3"></div>
+				<div class="col-3">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="checkbox" checked id="ca-border-row">
+						<label class="form-check-label small" for="ca-border-row">
+							Border row
+						</label>
+					</div>
 				</div>
 			</div>
 		</div>

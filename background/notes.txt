@@ -45,7 +45,11 @@ Phyllotaxis
 	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 Calculator
-	User-defined variables
+	Object groupings
+	User-defined variables (at piece, path, shape, object and global scopes)
+	Text
+	Polygons (not necessarily regular)
+	Fourier series
 
 Cellular Automata
 	Number base selection for preset: 10 or numStates

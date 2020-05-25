@@ -87,6 +87,119 @@
 		}
 	}
 
+	class MagXEquation {
+		constructor(text) {
+			this.parseMagXFormula(text);
+		}
+
+		parseMagXFormula(input) {
+			const inputStr = String(input);
+			this.magXFormula = realParser.parse(inputStr);
+			this.magXFormulaText = inputStr;
+		}
+
+		variables = Object.freeze(['magX']);
+
+		draw(context, variables, firstSegment, min, max, step, yScale, stretch, shearX, shearY) {
+			const formula = this.magXFormula;
+			const xScale = yScale * stretch;
+			const values = [];
+			let i = 0;
+			let initialX, initialY, x, y, amountLeft;
+			do {
+				if (max >= min) {
+					y = min + i * step;
+					if (y > max) {
+						y = max;
+					}
+					amountLeft = max - y;
+				} else {
+					y = min - i * step;
+					if (y < max) {
+						y = max;
+					}
+					amountLeft = y - max;
+				}
+				variables.set('y', y);
+				x = formula.eval(variables);
+				values.push(x);
+				initialX = xScale * x;
+				initialY = yScale * y;
+				x = initialX + stretch * shearX * initialY;
+				y = initialY + shearY * initialX;
+				if (i === 0 && firstSegment) {
+					context.moveTo(x, y);
+				} else {
+					context.lineTo(x, y);
+				}
+				i++;
+			} while (amountLeft > 0);
+
+			x = -values[values.length - 1];
+			initialX = xScale * x;
+			initialY = yScale * y;
+			x = initialX + stretch * shearX * initialY;
+			y = initialY + shearY * initialX;
+			context.moveTo(x, y);
+
+			for (i = values.length - 2; i >= 0; i--) {
+				x = -values[i];
+				if (max >= min) {
+					y = min + i * step;
+					if (y > max) {
+						y = max;
+					}
+					amountLeft = max - y;
+				} else {
+					y = min - i * step;
+					if (y < max) {
+						y = max;
+					}
+					amountLeft = y - max;
+				}
+				initialX = xScale * x;
+				initialY = yScale * y;
+				x = initialX + stretch * shearX * initialY;
+				y = initialY + shearY * initialX;
+				context.lineTo(x, y);
+			}
+		}
+
+		getBoundingBox(variables, min, max, step) {
+			const formula = this.magXFormula;
+			variables.set('y', min);
+			let maxMag = Math.abs(formula.eval(variables));
+			let i = 1;
+			let y, amountLeft;
+			do {
+				if (max >= min) {
+					y = min + i * step;
+					if (y > max) {
+						y = max;
+					}
+					amountLeft = max - y;
+				} else {
+					y = min - i * step;
+					if (y < max) {
+						y = max;
+					}
+					amountLeft = y - max;
+				}
+				variables.set('y', y);
+				const magX = Math.abs(formula.eval(variables));
+				if (magX > maxMag) {
+					maxMag = magX;
+				}
+				i++;
+			} while (amountLeft > 0);
+			if (min < max) {
+				return new BoundingBox(-maxMag, maxMag, min, max);
+			} else {
+				return new BoundingBox(-maxMag, maxMag, max, min);
+			}
+		}
+	}
+
 	class ParametricEquation {
 		constructor(xText, yText) {
 			this.parseXFormula(xText);
@@ -286,17 +399,21 @@
 			const equationXForm = optionsDoc.getElementById('calc-equation-x-form');
 			const equationYForm = optionsDoc.getElementById('calc-equation-y-form');
 			const equationRForm = optionsDoc.getElementById('calc-equation-r-form');
+			const equationMagXForm = optionsDoc.getElementById('calc-equation-mag-x-form');
 			const equationForms = new Map();
 			equationForms.set('x', equationXForm);
 			equationForms.set('y', equationYForm);
 			equationForms.set('r', equationRForm);
+			equationForms.set('magX', equationMagXForm);
 			const equationXInput = optionsDoc.getElementById('calc-equation-x');
 			const equationYInput = optionsDoc.getElementById('calc-equation-y');
 			const equationRInput = optionsDoc.getElementById('calc-equation-r');
+			const equationMagXInput = optionsDoc.getElementById('calc-equation-mag-x');
 			const equationInputs = new Map();
 			equationInputs.set('x', equationXInput);
 			equationInputs.set('y', equationYInput);
 			equationInputs.set('r', equationRInput);
+			equationInputs.set('magX', equationMagXInput);
 
 			const minInput = optionsDoc.getElementById('calc-min');
 			const maxInput = optionsDoc.getElementById('calc-max');
@@ -356,8 +473,8 @@
 					pieceInput.appendChild(option);
 				}
 				const variables = me.equations[shapeNum][pathNum][0].variables;
-				for (let varName of ['x', 'y', 'r']) {
-					equationForms.get(varName).hidden = !variables.includes(varName);
+				for (let [varName, form] of equationForms.entries()) {
+					form.hidden = !variables.includes(varName);
 				}
 				displayPiece();
 				pathRepeatInput.value = me.maxPathRepeat[shapeNum][pathNum];
@@ -385,9 +502,9 @@
 				pieceDelBtn.disabled = me.equations[shapeNum][pathNum].length === 1;
 				const equation = me.equations[shapeNum][pathNum][pieceNum];
 				const variables = equation.variables;
-				for (let varName of ['x', 'y', 'r']) {
+				for (let [varName, input] of equationInputs.entries()) {
 					if (variables.includes(varName)) {
-						equationInputs.get(varName).value = equation[varName + 'FormulaText'];
+						input.value = equation[varName + 'FormulaText'];
 					}
 				}
 				const unitsCode = me.rangeUnits[shapeNum][pathNum][pieceNum];
@@ -518,7 +635,7 @@
 			function compileEquation(varName) {
 				const formulaText = equationInputs.get(varName).value;
 				try {
-					const methodName = 'parse' + varName.toUpperCase() + 'Formula';
+					const methodName = 'parse' + varName[0].toUpperCase() + varName.slice(1) + 'Formula';
 					me.equations[shapeNum][pathNum][pieceNum][methodName](formulaText);
 					progressiveBackgroundGen(me, 0);
 					displayBoundingBox();
@@ -554,6 +671,16 @@
 			equationRForm.addEventListener('focusout', function (event) {
 				if (!this.contains(event.relatedTarget)) {
 					compileEquation('r');
+				}
+			});
+
+			equationMagXForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				compileEquation('magX');
+			});
+			equationMagXForm.addEventListener('focusout', function (event) {
+				if (!this.contains(event.relatedTarget)) {
+					compileEquation('magX');
 				}
 			});
 
@@ -989,17 +1116,21 @@
 		return r;
 	};
 
-	GraphingCalculator.prototype.addRectangularEquation = function (shapeNum, subpathNum, index) {
-		const m = this.getExampleRadius();
-		this.equations[shapeNum][subpathNum].splice(index, 0, new RectangularEquation(m + 'x'));
+	GraphingCalculator.prototype.setLinearRange = function (shapeNum, subpathNum, index) {
 		this.min[shapeNum][subpathNum].splice(index, 0, this.minorAxisMin);
 		this.max[shapeNum][subpathNum].splice(index, 0, this.minorAxisMax);
 		let step = (this.minorAxisMax - this.minorAxisMin) / screen.width;
 		let log = Math.floor(Math.log10(step));
 		const pow = log > 0 ? 1 : 10 ** log;
-		step = Math.round(step / pow) * pow;
+		step = Math.ceil(step / pow) * pow;
 		this.step[shapeNum][subpathNum].splice(index, 0, step);
 		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, '1');
+	};
+
+	GraphingCalculator.prototype.addRectangularEquation = function (shapeNum, subpathNum, index) {
+		const m = this.getExampleRadius();
+		this.equations[shapeNum][subpathNum].splice(index, 0, new RectangularEquation(m + 'x'));
+		this.setLinearRange(shapeNum, subpathNum, index);
 	};
 
 	GraphingCalculator.prototype.addParametricEquation = function (shapeNum, subpathNum, index) {
@@ -1021,6 +1152,12 @@
 		this.max[shapeNum][subpathNum].splice(index, 0, TWO_PI);
 		this.step[shapeNum][subpathNum].splice(index, 0, Math.PI / 180);
 		this.rangeUnits[shapeNum][subpathNum].splice(index, 0, 'PI');
+	};
+
+	GraphingCalculator.prototype.addMagXEquation = function (shapeNum, subpathNum, index) {
+		const r = this.getExampleRadius();
+		this.equations[shapeNum][subpathNum].splice(index, 0, new MagXEquation(r));
+		this.setLinearRange(shapeNum, subpathNum, index);
 	};
 
 	GraphingCalculator.prototype.removeEquation = function (shapeNum, pathNum, pieceNum) {

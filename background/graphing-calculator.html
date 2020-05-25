@@ -65,6 +65,9 @@
 						<button type="button" class="btn btn-light w-100 text-left" value="Polar">
 							Polar
 						</button>
+						<button type="button" class="btn btn-light w-100 text-left" value="MagX">
+							<var>|x| = f(y)</var>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -132,6 +135,24 @@
 					</div>
 				</div>
 			</form>
+			<form class="form-row form-group" id="calc-equation-mag-x-form" hidden>
+				<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-mag-x">
+					Equation
+				</label>
+				<div class="col-9">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="calc-equation-mag-x-lhs">|x| =</span>
+						</div>
+						<input type="text" value="1" class="form-control form-control-sm" id="calc-equation-mag-x" aria-describedby="calc-equation-mag-x-lhs" spellcheck="false" autocomplete="off">
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-secondary" tabindex="-1">
+								Set
+							</button>
+						</div>
+					</div>
+				</div>
+			</form>
 			<form class="form-row form-group" id="calc-range-form">
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-min">
 					Range</span>
@@ -139,7 +160,7 @@
 				<div class="col-9">
 					<div class="input-group input-group-sm">
 						<input type="text" value="-1" class="form-control text-right" id="calc-min" pattern="-?\d+(\.\d*)?(/[1-9]\d*)?">
-						<select class="form-control max-w-fit" id="calc-range-units">
+						<select class="form-control max-w-fit" id="calc-range-units" tabindex="-1">
 							<option value="1"></option>
 							<option value="PI" selected="">&pi;</option>
 						</select>
@@ -284,16 +305,16 @@
 			<div class="col-3 col-form-label col-form-label-sm">
 				Pen Shape
 			</div>
-			<div class="col-3">
+			<div class="col-2">
 				<div class="form-check mt-1">
 					<input type="radio" name="calc-line-join" value="round" class="form-check-input" id="calc-join-round" checked>
-					<label class="form-check-label" for="calc-join-round">Round</label>
+					<label class="form-check-label small" for="calc-join-round">Round</label>
 				</div>
 			</div>
-			<div class="col-3 pl-4">
+			<div class="col-2">
 				<div class="form-check mt-1">
 					<input type="radio" name="calc-line-join" value="bevel" class="form-check-input" id="calc-join-square">
-					<label class="form-check-label" for="calc-join-square">Square</label>
+					<label class="form-check-label small" for="calc-join-square">Square</label>
 				</div>
 			</div>
 		</div>
@@ -349,7 +370,7 @@
 				<div class="form-check mt-1">
 					<input type="checkbox" class="form-check-input" id="calc-clip">
 					<label class="form-check-label small" for="calc-clip">
-						Clip
+						Clip to first subpath
 					</label>
 				</div>
 			</div>

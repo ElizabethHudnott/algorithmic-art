@@ -1,6 +1,5 @@
 Environment
 -----------
-Set both frames button
 Warn about unsaved frame before playback/skip
 Link from home page
 Revise Patreon description
@@ -9,7 +8,6 @@ Add URL to signature
 User created sketches
 	documentation: template download link, GitHub, util functions
 	online editor
-Generalize left and top parameters
 Responsiveness issues
 	toolbar too wide, modal too high
 Static image rotation for non-animatable sketches
@@ -68,6 +66,7 @@ Parser Failures
 ---------------
 2cos(0)^2
 |t^3|
+x'
 ending in whitespace
 x(2) should only be interpreted as a function if it is a function
 (a+b)sin(x)

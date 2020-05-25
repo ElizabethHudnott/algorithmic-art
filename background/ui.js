@@ -341,8 +341,10 @@ function showBackgroundOptions() {
 			if ('tween' in gen) {
 				gen.tween = parseFloat(animPositionSlider.value);
 				animPositionSlider.disabled = false;
+				document.getElementById('btn-both-frames').hidden = false;
 			} else {
 				animPositionSlider.disabled = true;
+				document.getElementById('btn-both-frames').hidden = true;
 			}
 			generateBackground();
 
@@ -864,6 +866,12 @@ function showBackgroundOptions() {
 		}
 		showAlert(successAlert, 'End frame set.', document.body)
 		videoErrorAlert.alert('close');
+	});
+
+	document.getElementById('btn-both-frames').addEventListener('click', function (event) {
+		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
+		endFrame = startFrame;
+		showAlert(successAlert, 'Both frames set.', document.body);
 	});
 
 	function updateAnimPositionReadout(tween) {

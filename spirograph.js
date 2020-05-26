@@ -119,7 +119,7 @@ function maxRadii(stator, rotor, inOut, penX, penY, lineWidth) {
 }
 
 function setFillStyle() {
-	const [outerR, outerG, outerB] = hexToRGB(spiroContext.strokeStyle);
+	const [outerR, outerG, outerB] = hexToRGBA(spiroContext.strokeStyle);
 	const outerColor = rgba(outerR, outerG, outerB, parseFloat(opacityInput.value));
 
 	let innerColor = outerColor;
@@ -1366,7 +1366,7 @@ function floodFill(width, height, data, filled, startX, startY, newColor, transp
 		return;
 	}
 
-	const [newR, newG, newB] = hexToRGB(newColor);
+	const [newR, newG, newB] = hexToRGBA(newColor);
 	let offset = (startY * width + startX) * 4;
 	const targetR = data[offset];
 	const targetG = data[offset + 1];

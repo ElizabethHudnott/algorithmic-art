@@ -185,6 +185,51 @@
 	</div>
 </div>
 
+<div class="modal fade" id="assign-bg-change-modal" tabindex="-1" role="dialog" aria-labelledby="assign-bg-change-modal-title" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="assign-bg-change-modal-title">Unsaved Changes</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>
+					You have outstanding changes. How do you wish to proceed?
+				</p>
+				<ul class="list-unstyled text-center mb-0">
+					<li class="mb-2">
+						<button type="button" class="btn btn-primary w-100" id="btn-start-frame2" data-dismiss="modal">
+							Apply changes to the start frame
+						</button>
+					</li>
+					<li class="mb-2">
+						<button type="button" class="btn btn-primary w-100" id="btn-end-frame2" data-dismiss="modal">
+							Apply changes to the end frame
+						</button>
+					</li>
+					<li class="mb-2">
+						<button type="button" class="btn btn-secondary w-100" id="btn-both-frames2" data-dismiss="modal">
+							Apply changes to both frames
+						</button>
+					</li>
+					<li class="mb-2">
+						<button type="button" class="btn btn-danger w-100" id="btn-bg-change-discard" data-dismiss="modal">
+							Discard changes
+						</button>
+					</li>
+					<li>
+						<button type="button" class="btn btn-secondary w-100" data-dismiss="modal">
+							Cancel animation
+						</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="custom-file small" hidden id="background-gen-image">
 	<input type="file" class="custom-file-input" id="background-gen-image-upload" accept="image/*">
 	<label class="custom-file-label" for="background-gen-image-upload" id="background-gen-image-label">

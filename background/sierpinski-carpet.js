@@ -68,7 +68,7 @@ function SierpinskiCarpet() {
 		function changeColor(index, preview) {
 			return function (event) {
 				const color = colorControls[index].value;
-				const [r, g, b] = hexToRGB(color);
+				const [r, g, b] = hexToRGBA(color);
 				const alpha = parseFloat(opacitySliders[index].value);
 				me.colors[index] = rgba(r, g, b, alpha);
 				if (index === 4) {

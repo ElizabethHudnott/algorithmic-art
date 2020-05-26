@@ -853,7 +853,7 @@ function GraphingCalculator() {
 
 		function updateStrokeColor() {
 			const a = parseFloat(strokeOpacityInput.value);
-			const [r, g, b] = hexToRGB(strokeColorInput.value)
+			const [r, g, b] = hexToRGBA(strokeColorInput.value)
 			me.strokeColor[shapeNum] = rgba(r, g, b, a);
 			progressiveBackgroundGen(me, 0);
 		}
@@ -866,7 +866,7 @@ function GraphingCalculator() {
 
 		function updateFillColor() {
 			const a = parseFloat(fillOpacityInput.value);
-			const [r, g, b] = hexToRGB(fillColorInput.value)
+			const [r, g, b] = hexToRGBA(fillColorInput.value)
 			me.fillColor[shapeNum] = rgba(r, g, b, a);
 			progressiveBackgroundGen(me, 0);
 		}

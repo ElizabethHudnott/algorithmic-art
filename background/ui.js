@@ -3,7 +3,7 @@
 if (!window.debug) {
 	window.debug = {};
 }
-window.debug.video = false;
+debug.video = false;
 
 let store, showWelcome;
 try {
@@ -84,6 +84,11 @@ function showBackgroundOptions() {
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
 	let generatorURL, startFrame, endFrame, animController;
+	/* The current frame according to the interpolation, not necessarily what's displayed
+	 * on screen because there can be unsaved changes. */
+	let currentFrame;
+	// The action requested when unsaved changes were detected.
+	let animAction;
 	let fullRotations = 0, loopAnim = false;
 
 	const errorAlert = $('#error-alert');
@@ -116,19 +121,13 @@ function showBackgroundOptions() {
 			if (animatable !== undefined) {
 				if ('continuous' in animatable) {
 					for (let property of animatable.continuous) {
-						let value = generator[property];
-						if (Array.isArray(value)) {
-							value = deepCopy(value);
-						}
+						const value = deepArrayCopy(generator[property]);
 						this.continuous.set(property, value);
 					}
 				}
 				if ('stepped' in animatable) {
 					for (let property of animatable.stepped) {
-						let value = generator[property];
-						if (Array.isArray(value)) {
-							value = deepCopy(value);
-						}
+						const value = deepArrayCopy(generator[property]);
 						this.stepped.set(property, value);
 					}
 				}
@@ -136,14 +135,8 @@ function showBackgroundOptions() {
 					for (let pair of animatable.pairedContinuous) {
 						const property1 = pair[0];
 						const property2 = pair[1];
-						let value1 = generator[property1];
-						let value2;
-						if (Array.isArray(value1)) {
-							value1 = deepCopy(value1);
-							value2 = deepCopy(generator[property2])
-						} else {
-							value2 = generator[property2];
-						}
+						const value1 = deepArrayCopy(generator[property1]);
+						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedContinuous.set(property1, value1);
 						this.pairedContinuous.set(property2, value2);
 					}
@@ -152,14 +145,8 @@ function showBackgroundOptions() {
 					for (let pair of animatable.pairedStepped) {
 						const property1 = pair[0];
 						const property2 = pair[1];
-						let value1 = generator[property1];
-						let value2;
-						if (Array.isArray(value1)) {
-							value1 = deepCopy(value1);
-							value2 = deepCopy(generator[property2])
-						} else {
-							value2 = generator[property2];
-						}
+						const value1 = deepArrayCopy(generator[property1]);
+						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedStepped.set(property1, value1);
 						this.pairedStepped.set(property2, value2);
 					}
@@ -169,6 +156,116 @@ function showBackgroundOptions() {
 			this.backgroundColor = backgroundElement.style.backgroundColor;
 		}
 
+		isCurrentFrame() {
+			if (
+				this.rotation !== bgGeneratorRotation ||
+				this.backgroundColor !== backgroundElement.style.backgroundColor
+			) {
+				return false;
+			}
+
+			const animatable = bgGenerator.animatable;
+			if (animatable === undefined) {
+				return this.continuous.size === 0 && this.stepped.size === 0 &&
+					this.pairedContinuous.size === 0 && this.pairedStepped.size === 0;
+			}
+
+			const continuous = animatable.continuous;
+			if (continuous === undefined) {
+				if (this.continuous.size > 0) {
+					return false;
+				}
+			} else {
+				if (this.continuous.size !== continuous.length) {
+					return false;
+				}
+				for (let i = 0; i < continuous.length; i++) {
+					const key = continuous[i];
+					const frameValue = this.continuous.get(key);
+					const currentValue = bgGenerator[key];
+					if (!deepEquals(frameValue, currentValue)) {
+						return false;
+					}
+				}
+			}
+
+			const stepped = animatable.stepped;
+			if (stepped === undefined) {
+				if (this.stepped.size > 0) {
+					return false;
+				}
+			} else {
+				if (this.stepped.size !== stepped.length) {
+					return false;
+				}
+				for (let i = 0; i < stepped.length; i++) {
+					const key = stepped[i];
+					const frameValue = this.stepped.get(key);
+					const currentValue = bgGenerator[key];
+					if (!deepEquals(frameValue, currentValue)) {
+						return false;
+					}
+				}
+			}
+
+			const pairedContinuous = animatable.pairedContinuous;
+			if (pairedContinuous === undefined) {
+				if (this.pairedContinuous.size > 0) {
+					return false;
+				}
+			} else {
+				if (this.pairedContinuous.size !== pairedContinuous.length * 2) {
+					return false;
+				}
+				for (let i = 0; i < pairedContinuous.length; i++) {
+					const keys = pairedContinuous[i];
+					const key1 = keys[0];
+					const frameValue1 = this.pairedContinuous.get(key1);
+					const currentValue1 = bgGenerator[key1];
+					if (!deepEquals(frameValue1, currentValue1)) {
+						return false;
+					}
+					const key2 = keys[1];
+					const frameValue2 = this.pairedContinuous.get(key2);
+					const currentValue2 = bgGenerator[key2];
+					if (!deepEquals(frameValue2, currentValue2)) {
+						return false;
+					}
+				}
+			}
+
+			const pairedStepped = animatable.pairedStepped;
+			if (pairedStepped === undefined) {
+				if (this.pairedStepped.size > 0) {
+					return false;
+				}
+			} else {
+				if (this.pairedStepped.size !== pairedStepped.length * 2) {
+					return false;
+				}
+				for (let i = 0; i < pairedStepped.length; i++) {
+					const keys = pairedStepped[i];
+					const key1 = keys[0];
+					const frameValue1 = this.pairedStepped.get(key1);
+					const currentValue1 = bgGenerator[key1];
+					if (!deepEquals(frameValue1, currentValue1)) {
+						return false;
+					}
+					const key2 = keys[1];
+					const frameValue2 = this.pairedStepped.get(key2);
+					const currentValue2 = bgGenerator[key2];
+					if (!deepEquals(frameValue2, currentValue2)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+	}
+
+	function currentFrameData() {
+		return new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 	}
 
 	function hideAlert(jquery) {
@@ -329,15 +426,18 @@ function showBackgroundOptions() {
 			bgGenerator = gen;
 			const prevGenURL = generatorURL;
 			generatorURL = url;
-			startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
-			endFrame = startFrame;
+			currentFrame = currentFrameData();
+			startFrame = currentFrame;
+			endFrame = currentFrame;
 			if ('tween' in gen) {
 				gen.tween = parseFloat(animPositionSlider.value);
 				animPositionSlider.disabled = false;
 				document.getElementById('btn-both-frames').hidden = false;
+				document.getElementById('btn-both-frames2').hidden = false;
 			} else {
 				animPositionSlider.disabled = true;
 				document.getElementById('btn-both-frames').hidden = true;
+				document.getElementById('btn-both-frames2').hidden = true;
 			}
 			generateBackground();
 
@@ -736,7 +836,9 @@ function showBackgroundOptions() {
 			capturer.stop();
 			progressRow.hidden = true;
 			renderButton.disabled = false;
-			document.body.removeChild(context.canvas);
+			if (debug.video) {
+				document.body.removeChild(context.canvas);
+			}
 			canvas.style.display = 'block';
 		}
 		animController.promise = animController.promise.then(
@@ -759,6 +861,7 @@ function showBackgroundOptions() {
 		const day = String(now.getDate()).padStart(2, '0');
 		const hour = String(now.getHours()).padStart(2, '0');
 		const minute = String(now.getMinutes()).padStart(2, '0');
+		const generatorName = generatorURL.match(/(^|\/)([\w\-.]+)\.js$/)[2];
 		return `${generatorName} ${year}-${month}-${day} ${hour}${minute}`;
 	}
 
@@ -837,7 +940,8 @@ function showBackgroundOptions() {
 
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
-		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
+		currentFrame = currentFrameData();
+		startFrame = currentFrame;
 		animPositionSlider.value = 0;
 		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(0);
@@ -849,8 +953,14 @@ function showBackgroundOptions() {
 		videoErrorAlert.alert('close');
 	});
 
+	document.getElementById('btn-start-frame2').addEventListener('click', function (event) {
+		startFrame = currentFrameData();
+		animAction();
+	});
+
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
-		endFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
+		currentFrame = currentFrameData();
+		endFrame = currentFrame;
 		animPositionSlider.value = 1;
 		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(1);
@@ -862,10 +972,26 @@ function showBackgroundOptions() {
 		videoErrorAlert.alert('close');
 	});
 
+	document.getElementById('btn-end-frame2').addEventListener('click', function (event) {
+		endFrame = currentFrameData();
+		animAction();
+	});
+
 	document.getElementById('btn-both-frames').addEventListener('click', function (event) {
-		startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
-		endFrame = startFrame;
+		currentFrame = currentFrameData();
+		startFrame = currentFrame;
+		endFrame = currentFrame;
 		showAlert(successAlert, 'Both frames set.', document.body);
+	});
+
+	document.getElementById('btn-both-frames2').addEventListener('click', function (event) {
+		startFrame = currentFrameData();
+		endFrame = startFrame;
+		animAction();
+	});
+
+	document.getElementById('btn-bg-change-discard').addEventListener('click', function (event) {
+		animAction();
 	});
 
 	function updateAnimPositionReadout(tween) {
@@ -894,41 +1020,47 @@ function showBackgroundOptions() {
 		syncToPosition();
 	}
 
+	function play() {
+		const lengthInput = document.getElementById('anim-length');
+		const length = parseFloat(lengthInput.value);
+		if (length > 0) {
+			$(modal).modal('hide');
+			const button = document.getElementById('btn-play');
+			button.children[0].src = '../img/control_stop_blue.png';
+			button.title = 'Stop animation';
+			successAlert.alert('close');
+			errorAlert.alert('close');
+			document.getElementById('anim-position-readout').innerHTML = '';
+			let start = 0;
+			if (document.getElementById('anim-controls').classList.contains('show')) {
+				start = parseFloat(animPositionSlider.value);
+				if (start === 1) {
+					start = 0;
+				}
+			}
+			animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, start, length * 1000, loopAnim);
+			animController.promise = animController.promise.then(animFinished, animFinished);
+			animController.start();
+		} else {
+			showAlert(errorAlert, 'Invalid animation duration.', document.body);
+		}
+	}
+
 	document.getElementById('btn-play').addEventListener('click', function (event) {
 		if (animController && animController.status === 'running') {
+			// Stop
 			animController.abort();
 			return;
 		}
 
-		let errorMsg;
 		if (startFrame === endFrame && !('tween' in bgGenerator)) {
-			errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
-		} else {
-			const lengthInput = document.getElementById('anim-length');
-			const length = parseFloat(lengthInput.value);
-			if (length > 0) {
-				$(modal).modal('hide');
-				this.children[0].src = '../img/control_stop_blue.png';
-				this.title = 'Stop animation';
-				successAlert.alert('close');
-				errorAlert.alert('close');
-				document.getElementById('anim-position-readout').innerHTML = '';
-				let start = 0;
-				if (document.getElementById('anim-controls').classList.contains('show')) {
-					start = parseFloat(animPositionSlider.value);
-					if (start === 1) {
-						start = 0;
-					}
-				}
-				animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, start, length * 1000, loopAnim);
-				animController.promise = animController.promise.then(animFinished, animFinished);
-				animController.start();
-			} else {
-				errorMsg = 'Invalid animation duration.';
-			}
-		}
-		if (errorMsg !== undefined) {
+			const errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
 			showAlert(errorAlert, errorMsg, document.body);
+		} else if (!currentFrame.isCurrentFrame()) {
+			animAction = play;
+			$('#assign-bg-change-modal').modal('show');
+		} else {
+			play();
 		}
 	});
 
@@ -952,6 +1084,7 @@ function showBackgroundOptions() {
 		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
 		bgGeneratorRotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
 		rotationSlider.value = bgGeneratorRotation / TWO_PI;
+		currentFrame = currentFrameData();
 	}
 
 	function syncAndDraw() {

@@ -103,20 +103,51 @@ function checkInput(ancestor, name, value) {
 	return input;
 }
 
-function deepCopy(arr) {
+/**
+ * Doesn't check for cyclic array object references!
+ */
+function deepArrayCopy(arr) {
+	if (!Array.isArray(arr)) {
+		return arr;
+	}
 	const length = arr.length;
 	const result = arr.slice();
 	for (let i = 0; i < length; i++) {
 		const element = result[i];
 		if (Array.isArray(element)) {
-			result[i] = deepCopy(element);
-		}
+			result[i] = deepArrayCopy(element);
+		}	// handled above by slice() otherwise
 	}
 	return result;
 }
 
-const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?/i
-const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?/;
+/**
+ * Doesn't check for cyclic array object references!
+ */
+function deepEquals(arr1, arr2) {
+	if (!Array.isArray(arr1)) {
+		return canonicalForm(arr1) === canonicalForm(arr2);
+	}
+	const length = arr1.length;
+	if (!Array.isArray(arr2) || arr2.length !== length) {
+		return false;
+	}
+	for (let i = 0; i < length; i++) {
+		const value1 = arr1[i];
+		const value2 = arr2[i];
+		if (Array.isArray(value1)) {
+			if (!arrayDeepEquals(value1, value2)) {
+				return false;
+			}
+		} else if (canonicalForm(value1) !== canonicalForm(value2)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+const colorFuncRE = /^(rgb|hsl)a?\((-?\d+(?:\.\d*)?),\s*(\d+(?:\.\d*)?)%?,\s*(\d+(?:\.\d*)?)%?(?:,\s*(\d+(?:\.\d*)?))?\)$/i
+const hexColorRE = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
 
 /** Parses color values written rgb, rgba, hsl, hsla and 6 and 8 digit hexadecimal notations.
  *	Red, green and blue values must be given using numbers between 0 and 255 and not as percentages.
@@ -153,11 +184,13 @@ function parseColor(str) {
 	return [colorSystem, components];
 }
 
-function hexToRGB(color) {
+function hexToRGBA(color) {
 	const r = parseInt(color.slice(1, 3), 16);
 	const g = parseInt(color.slice(3, 5), 16);
 	const b = parseInt(color.slice(5, 7), 16);
-	return [r, g, b];
+	const alphaStr = color.slice(7,9);
+	const a = alphaStr === '' ? 255 : 0;
+	return [r, g, b, a];
 }
 
 function rgba(r, g, b, a) {
@@ -168,6 +201,16 @@ function hsla(hue, saturation, lightness, alpha) {
 	const s = saturation * 100;
 	const l = lightness * 100;
 	return `hsla(${hue}, ${s}%, ${l}%, ${alpha})`;
+}
+
+function canonicalForm(value) {
+	const type = typeof(value);
+	if (type === 'string' && hexColorRE.test(value)) {
+		const [r, g, b, a] = hexToRGBA(value);
+		return rgba(r, g, b, a);
+	} else {
+		return value;
+	}
 }
 
 function rgbToLuma(r, g, b) {

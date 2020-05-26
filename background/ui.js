@@ -83,7 +83,7 @@ function showBackgroundOptions() {
 	const urlParameters = new URLSearchParams(document.location.search);
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
-	let generatorName, startFrame, endFrame, animController;
+	let generatorURL, startFrame, endFrame, animController;
 	let fullRotations = 0, loopAnim = false;
 
 	const errorAlert = $('#error-alert');
@@ -327,8 +327,8 @@ function showBackgroundOptions() {
 				bgGenerator.purgeCache();
 			}
 			bgGenerator = gen;
-			const prevGenName = generatorName;
-			generatorName = name;
+			const prevGenURL = generatorURL;
+			generatorURL = url;
 			startFrame = new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
 			endFrame = startFrame;
 			if ('tween' in gen) {
@@ -358,7 +358,7 @@ function showBackgroundOptions() {
 
 			// Switch out previous DOM
 			const container = document.getElementById('background-gen-options');
-			const oldDOM = backgroundGenOptionsDOM.get(prevGenName);
+			const oldDOM = backgroundGenOptionsDOM.get(prevGenURL);
 			if (oldDOM !== undefined) {
 				const elements = container.children;
 				while (elements.length > 0) {
@@ -368,7 +368,7 @@ function showBackgroundOptions() {
 			}
 
 			// Try to get from cache first.
-			const dom = backgroundGenOptionsDOM.get(name);
+			const dom = backgroundGenOptionsDOM.get(url);
 			if (dom !== undefined) {
 				attachOptionsDOM(dom);
 			} else {
@@ -377,7 +377,7 @@ function showBackgroundOptions() {
 					optionsDocPromise.then(function (optionsDoc) {
 						const dom = optionsDoc.body;
 						attachOptionsDOM(dom);
-						backgroundGenOptionsDOM.set(name, dom);
+						backgroundGenOptionsDOM.set(url, dom);
 					});
 				}
 			}
@@ -387,10 +387,11 @@ function showBackgroundOptions() {
 			document.getElementById('background-gen-credits').innerHTML = credits;
 
 			if (pushToHistory) {
+				const name = url.slice(0, -3);	// trim .js
 				urlParameters.set('gen', name);
-				let url = document.location;
-				url = url.origin + url.pathname + '?' + urlParameters.toString();
-				history.replaceState(null, '', url.toString());
+				let envURL = document.location;
+				envURL = envURL.origin + envURL.pathname + '?' + urlParameters.toString();
+				history.replaceState(null, '', envURL.toString());
 			}
 		});
 	}
@@ -398,16 +399,16 @@ function showBackgroundOptions() {
 	downloadFile('sketches.json', 'json').then(function (result) {
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
-		if (firstGenURL === null) {
-			firstGenURL = 'ten-print.js';
-			nextStep = function () {
-				$('#sketches-modal').modal('show');
-			};
-		} else {
+		if (firstGenURL) {
 			firstGenURL += '.js';
 			nextStep = function () {
 				$(modal).modal('show');
 			}
+		} else {
+			firstGenURL = 'ten-print.js';
+			nextStep = function () {
+				$('#sketches-modal').modal('show');
+			};
 		}
 		for (let sketch of result.sketches) {
 			addSketch(sketch);

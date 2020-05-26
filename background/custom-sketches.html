@@ -109,7 +109,7 @@
 
 		document.getElementById('url-generator-form').addEventListener('submit', function (event) {
 			event.preventDefault();
-			const sketchURL = document.getElementById('sketch-url').value.slice(0, -3);
+			const sketchURL = document.getElementById('sketch-url').value;
 			let path = window.location.pathname;
 			const slashIndex = path.lastIndexOf('/');
 			if (slashIndex > 0) {

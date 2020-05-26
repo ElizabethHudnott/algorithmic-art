@@ -14,21 +14,11 @@ try {
 }
 
 const backgroundElement = document.body;
-const backgroundGenerators = new Map();
 let bgGenerator, backgroundRedraw;
 let bgGeneratorRotation = 0;
 
 const canvas = document.getElementById('background-canvas');
 canvas.getContext('2d').save();
-
-function urlToBgGeneratorName(url) {
-	return url.match(/(^|\/)([\w\-.]+)\.js$/)[2];
-}
-
-function addBgGenerator(func) {
-	const name = urlToBgGeneratorName(document.currentScript.src);
-	backgroundGenerators.set(name, new func());
-}
 
 function rotateCanvas(context, width, height, rotation) {
 	context.translate(width / 2, height / 2);
@@ -89,6 +79,7 @@ function showBackgroundOptions() {
 }
 
 {
+	const backgroundGenerators = new Map();
 	const urlParameters = new URLSearchParams(document.location.search);
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
@@ -238,11 +229,14 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function generatorFactory(name, url) {
-		let generator = backgroundGenerators.get(name);
+	function generatorFactory(url) {
+		let generator = backgroundGenerators.get(url);
 		if (generator === undefined) {
-			return injectScript(url).then(function () {
-				return  backgroundGenerators.get(name);
+			return downloadFile(url, 'text').then(function (sourceCode) {
+				const constructor = Function("'use strict';" + sourceCode)();
+				const generator = new constructor();
+				backgroundGenerators.set(url, generator);
+				return generator;
 			});
 		} else {
 			return new Promise(function (resolve, reject) {
@@ -327,8 +321,7 @@ function showBackgroundOptions() {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
-		const name = urlToBgGeneratorName(url);
-		generatorFactory(name, url).then(function (gen) {
+		generatorFactory(url).then(function (gen) {
 			document.title = gen.title;
 			if (bgGenerator && bgGenerator.purgeCache) {
 				bgGenerator.purgeCache();

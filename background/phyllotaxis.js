@@ -520,7 +520,6 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		maxR = this.radius * hypotenuse;
 	} else {
 		maxR = Math[this.radiusPreset](canvasWidth / aspectRatio, canvasHeight) / 2;
-		this.radius = maxR / hypotenuse;
 	}
 
 	const petalStretch = this.petalStretch;

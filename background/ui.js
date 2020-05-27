@@ -431,11 +431,9 @@ function showBackgroundOptions() {
 			endFrame = currentFrame;
 			if ('tween' in gen) {
 				gen.tween = parseFloat(animPositionSlider.value);
-				animPositionSlider.disabled = false;
 				document.getElementById('btn-both-frames').hidden = false;
 				document.getElementById('btn-both-frames2').hidden = false;
 			} else {
-				animPositionSlider.disabled = true;
 				document.getElementById('btn-both-frames').hidden = true;
 				document.getElementById('btn-both-frames2').hidden = true;
 			}
@@ -943,7 +941,6 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		animPositionSlider.value = 0;
-		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(0);
 		if ('tween' in bgGenerator) {
 			bgGenerator.tween = 0;
@@ -955,7 +952,6 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-start-frame2').addEventListener('click', function (event) {
 		startFrame = currentFrameData();
-		animPositionSlider.disabled = false;
 		animAction();
 	});
 
@@ -963,7 +959,6 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		endFrame = currentFrame;
 		animPositionSlider.value = 1;
-		animPositionSlider.disabled = false;
 		updateAnimPositionReadout(1);
 		if ('tween' in bgGenerator) {
 			bgGenerator.tween = 1;
@@ -975,7 +970,6 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-end-frame2').addEventListener('click', function (event) {
 		endFrame = currentFrameData();
-		animPositionSlider.disabled = false;
 		animAction();
 	});
 
@@ -1060,7 +1054,6 @@ function showBackgroundOptions() {
 			endFrame = currentFrame;
 			separateFrames = true;
 			unsavedChanges = false;
-			animPositionSlider.disabled = false;
 		}
 
 		const lengthInput = document.getElementById('anim-length');
@@ -1089,7 +1082,30 @@ function showBackgroundOptions() {
 		return activeElement.dataset.toggle === 'dropdown' && toolbar.contains(this);
 	});
 
+	 let seeking = false;
+
 	animPositionSlider.addEventListener('input', function (event) {
+		if (!seeking) {
+			let unsavedChanges = !currentFrame.isCurrentFrame();
+			let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
+			if (!separateFrames && unsavedChanges) {
+				currentFrame = currentFrameData();
+				endFrame = currentFrame;
+				separateFrames = true;
+				unsavedChanges = false;
+			}
+			if (!separateFrames) {
+				const errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
+				showAlert(errorAlert, errorMsg, document.body);
+				this.value = 1;
+				return;
+			} else if (unsavedChanges) {
+				animAction = renderAndSync;
+				$('#assign-bg-change-modal').modal('show');
+				return;
+			}
+			seeking = true;
+		}
 		const tween = parseFloat(this.value);
 		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 1);
 		updateAnimPositionReadout(tween);
@@ -1106,8 +1122,16 @@ function showBackgroundOptions() {
 	}
 
 	function syncAndDraw() {
+		seeking = false;
 		syncToPosition();
 		progressiveBackgroundGen(bgGenerator, 0);
+	}
+
+	function renderAndSync() {
+		const tween = parseFloat(animPositionSlider.value);
+		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
+		updateAnimPositionReadout(tween);
+		syncToPosition();
 	}
 
 	animPositionSlider.addEventListener('pointerup', syncAndDraw);
@@ -1180,7 +1204,6 @@ function showBackgroundOptions() {
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
 			unsavedChanges = false;
-			animPositionSlider.disabled = false;
 		}
 		if (unsavedChanges) {
 			animAction = function () {

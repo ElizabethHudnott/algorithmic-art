@@ -955,6 +955,7 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-start-frame2').addEventListener('click', function (event) {
 		startFrame = currentFrameData();
+		animPositionSlider.disabled = false;
 		animAction();
 	});
 
@@ -974,6 +975,7 @@ function showBackgroundOptions() {
 
 	document.getElementById('btn-end-frame2').addEventListener('click', function (event) {
 		endFrame = currentFrameData();
+		animPositionSlider.disabled = false;
 		animAction();
 	});
 
@@ -991,6 +993,9 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('btn-bg-change-discard').addEventListener('click', function (event) {
+		const tween = parseFloat(animPositionSlider.value);
+		renderFrame(canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
+		currentFrame = currentFrameData();
 		animAction();
 	});
 
@@ -1021,29 +1026,24 @@ function showBackgroundOptions() {
 	}
 
 	function play() {
-		const lengthInput = document.getElementById('anim-length');
-		const length = parseFloat(lengthInput.value);
-		if (length > 0) {
-			$(modal).modal('hide');
-			const button = document.getElementById('btn-play');
-			button.children[0].src = '../img/control_stop_blue.png';
-			button.title = 'Stop animation';
-			successAlert.alert('close');
-			errorAlert.alert('close');
-			document.getElementById('anim-position-readout').innerHTML = '';
-			let start = 0;
-			if (document.getElementById('anim-controls').classList.contains('show')) {
-				start = parseFloat(animPositionSlider.value);
-				if (start === 1) {
-					start = 0;
-				}
+		$(modal).modal('hide');
+		const button = document.getElementById('btn-play');
+		button.children[0].src = '../img/control_stop_blue.png';
+		button.title = 'Stop animation';
+		successAlert.alert('close');
+		errorAlert.alert('close');
+		document.getElementById('anim-position-readout').innerHTML = '';
+		let start = 0;
+		if (document.getElementById('anim-controls').classList.contains('show')) {
+			start = parseFloat(animPositionSlider.value);
+			if (start === 1) {
+				start = 0;
 			}
-			animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, start, length * 1000, loopAnim);
-			animController.promise = animController.promise.then(animFinished, animFinished);
-			animController.start();
-		} else {
-			showAlert(errorAlert, 'Invalid animation duration.', document.body);
 		}
+		const length = parseFloat(document.getElementById('anim-length').value) * 1000;
+		animController = animate(canvas.getContext('2d'), canvas.width, canvas.height, start, length, loopAnim);
+		animController.promise = animController.promise.then(animFinished, animFinished);
+		animController.start();
 	}
 
 	document.getElementById('btn-play').addEventListener('click', function (event) {
@@ -1053,10 +1053,28 @@ function showBackgroundOptions() {
 			return;
 		}
 
-		if (startFrame === endFrame && !('tween' in bgGenerator)) {
+		let unsavedChanges = !currentFrame.isCurrentFrame();
+		let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
+		if (!separateFrames && unsavedChanges) {
+			currentFrame = currentFrameData();
+			endFrame = currentFrame;
+			separateFrames = true;
+			unsavedChanges = false;
+			animPositionSlider.disabled = false;
+		}
+
+		const lengthInput = document.getElementById('anim-length');
+		const length = parseFloat(lengthInput.value);
+		if (!(length > 0)) {
+			showAlert(errorAlert, 'Invalid animation duration.', document.body);
+			lengthInput.focus();
+			return;
+		}
+
+		if (!separateFrames) {
 			const errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
 			showAlert(errorAlert, errorMsg, document.body);
-		} else if (!currentFrame.isCurrentFrame()) {
+		} else if (unsavedChanges) {
 			animAction = play;
 			$('#assign-bg-change-modal').modal('show');
 		} else {
@@ -1148,6 +1166,31 @@ function showBackgroundOptions() {
 		currentResOption.innerHTML = 'Full Screen (' + screen.height + 'p)';
 		currentResOption.selected = true;
 	}
+
+	document.getElementById('btn-video-opts').addEventListener('click', function (event) {
+		if (document.getElementById('btn-render-video').disabled) {
+			// Video rendering already in progress.
+			$('#video-modal').modal('show');
+			return;
+		}
+
+		let unsavedChanges = !currentFrame.isCurrentFrame();
+		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
+		if (!separateFrames && unsavedChanges) {
+			currentFrame = currentFrameData();
+			endFrame = currentFrame;
+			unsavedChanges = false;
+			animPositionSlider.disabled = false;
+		}
+		if (unsavedChanges) {
+			animAction = function () {
+				$('#video-modal').modal('show');
+			};
+			$('#assign-bg-change-modal').modal('show')
+		} else {
+			$('#video-modal').modal('show');
+		}
+	});
 
 	document.getElementById('btn-render-video').addEventListener('click', function (event) {
 		let errorMsg = '';

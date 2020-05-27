@@ -512,7 +512,7 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
  *		3	Don't recalculate the petal positions and sizes and redraw only a limited number of them.
  */
 Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
-	const previewMaxPetals = 1500;
+	const previewMaxPetals = 915;
 	const aspectRatio = this.aspectRatio;
 	const hypotenuse = Math.hypot(canvasWidth / aspectRatio, canvasHeight) / 2;
 	let maxR;

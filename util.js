@@ -167,7 +167,7 @@ function deepEquals(arr1, arr2) {
 		const value1 = arr1[i];
 		const value2 = arr2[i];
 		if (Array.isArray(value1)) {
-			if (!arrayDeepEquals(value1, value2)) {
+			if (!deepEquals(value1, value2)) {
 				return false;
 			}
 		} else if (canonicalForm(value1) !== canonicalForm(value2)) {

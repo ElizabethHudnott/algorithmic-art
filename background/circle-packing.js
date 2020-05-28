@@ -50,7 +50,7 @@ class PolygonRendering {
 		if (n % 2 === 0 && n !== 4) {
 			rotation = Math.PI * (1 / n - 0.5);
 		} else {
-			rotation = Math.PI * ((1 + random() * 0.5) * 2 / n - 0.5);
+			rotation = Math.PI * ((1 + random.next() * 0.5) * 2 / n - 0.5);
 		}
 
 
@@ -216,21 +216,21 @@ CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight
 
 	if (this.circular) {
 		for (let i = shapes.length; i < this.numSeeds; i++) {
-			const theta = random() * TWO_PI;
-			const radius = minSeedSize + random() * seedSizeRange;
+			const theta = random.next() * TWO_PI;
+			const radius = minSeedSize + random.next() * seedSizeRange;
 			const maxR = boundaryR - edgeBuffer - radius;
-			const r = Math.sqrt(random()) * maxR;
+			const r = Math.sqrt(random.next()) * maxR;
 			const x = centreX + r * Math.cos(theta);
 			const y = centreY + r * Math.sin(theta);
 			shapes.push(new Shape(x, y, radius, false));
 		}
 	} else {
 		for (let i = shapes.length; i < this.numSeeds; i++) {
-			const radius = minSeedSize + random() * seedSizeRange;
+			const radius = minSeedSize + random.next() * seedSizeRange;
 			const xRange = innerWidth - 2 * radius;
 			const yRange = innerHeight - 2 * radius;
-			const x = random() * xRange + edgeBuffer + radius;
-			const y = random() * yRange + edgeBuffer + radius;
+			const x = random.next() * xRange + edgeBuffer + radius;
+			const y = random.next() * yRange + edgeBuffer + radius;
 			shapes.push(new Shape(x, y, radius, false));
 		}
 	}
@@ -301,17 +301,17 @@ CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight
 				let x, y, radius;
 				attempts = 0;
 				do {
-					radius =  minSize + random() + newSizeRange;
+					radius =  minSize + random.next() + newSizeRange;
 					if (this.circular) {
-						const theta = random() * TWO_PI;
+						const theta = random.next() * TWO_PI;
 						const maxR = boundaryR - edgeBuffer;
-						const r = Math.sqrt(random()) * maxR;
+						const r = Math.sqrt(random.next()) * maxR;
 						x = centreX + r * Math.cos(theta);
 						y = centreY + r * Math.sin(theta);
 						radius = Math.min(radius, maxR - r);
 					} else {
-						x = random() * innerWidth;
-						y = random() * innerHeight;
+						x = random.next() * innerWidth;
+						y = random.next() * innerHeight;
 						radius = Math.min(radius, x, y, innerWidth - x, innerHeight - y);
 						x += edgeBuffer;
 						y += edgeBuffer;

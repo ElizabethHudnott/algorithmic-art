@@ -62,9 +62,22 @@
 	<button type="button" class="btn btn-light" id="btn-background-gen-options" title="Change parameters">
 		<img src="../img/gear_in.png" alt="Parameters">
 	</button>
-	<button type="button" class="btn btn-light" id="btn-generate-background" title="Build new background">
-		<img src="../img/brick.png" alt="Build">
-	</button>
+	<div class="btn-group" id="generate-btn-group">
+		<button type="button" class="btn btn-light" id="btn-generate-background" title="Build new background">
+			<img src="../img/brick.png" alt="Build">
+		</button>
+		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			<span class="sr-only">Toggle randomization options</span>
+		</button>
+		<div class="dropdown-menu drop-align-right pt-1 pb-0">
+			<form class="px-2">
+				<div class="form-group">
+					<label for="random-seed">Seed</label>
+					<textarea class="form-control text-right" id="random-seed" rows="4" minlength="7" maxlength="43"></textarea>
+				</div>
+			</form>
+		</div>
+	</div>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
 		<button type="button" class="btn btn-light" id="btn-play" title="Play animation">
 			<img src="../img/control_play_blue.png" alt="Play">
@@ -72,7 +85,7 @@
 		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-right" style="width: 500px" id="anim-controls">
+ 		<div class="dropdown-menu drop-align-abs-right" style="width: 500px" id="anim-controls">
  			<form class="px-2 bg-white opaque">
  				<div class="form-row">
  					<div class="col-7">

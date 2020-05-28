@@ -1353,7 +1353,7 @@ realParser = /*
     			}
     			switch (this.name) {
     			case 'random':
-    				return random();
+    				return random.next();
     				break;
     			default:
     				return Math[this.name](...argValues);

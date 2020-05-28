@@ -58,6 +58,12 @@ function TenPrint() {
 	this.strokeRatio = 0.12;
 }
 
+TenPrint.prototype.animatable = {
+	'continuous': [
+		'colors', 'strokeRatio'
+	]
+};
+
 TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let beginTime = performance.now();
 	const cellsDownScreen = 25;
@@ -120,7 +126,7 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const cellNumber = cellX + cellY * spacingShift + 1;
-			const randomBlank = random();
+			const randomBlank = random.next();
 			if (cellNumber % blankSpacing === 0 &&  randomBlank < blankProbability) {
 				if (blankRunLength < maxBlankRun) {
 					blankRunLength++;
@@ -140,7 +146,7 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 			const xLeft = cellX * cellWidth;
 			const xRight = xLeft + cellWidth;
 
-			const p = random();
+			const p = random.next();
 			context.beginPath();
 
 			if (p < this.probability) {

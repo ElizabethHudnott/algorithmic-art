@@ -1,6 +1,7 @@
 'use strict';
 
-let generateBackground;
+let bgGenerator, generateBackground;
+let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
 
 if (!window.debug) {
@@ -23,7 +24,7 @@ function showBackgroundOptions() {
 
 {
 	const backgroundElement = document.body;
-	let bgGenerator, backgroundRedraw;
+	let backgroundRedraw;
 	let bgGeneratorRotation = 0;
 
 	const canvas = document.getElementById('background-canvas');
@@ -76,7 +77,7 @@ function showBackgroundOptions() {
 	}
 
 	function progressiveBackgroundDraw(generator, context, width, height, preview) {
-		randomize(randomSeed);	// Reset random number stream
+		random.reset();
 		const redraw = generator.generate(context, width, height, preview);
 		backgroundRedraw = redraw;
 		let done = false;
@@ -145,6 +146,7 @@ function showBackgroundOptions() {
 	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const rotationSlider = document.getElementById('background-rotation');
+	const seedInput = document.getElementById('random-seed');
 	const progressBar = document.getElementById('video-progress');
 	const imageUpload = document.getElementById('background-gen-image');
 	imageUpload.remove();
@@ -196,12 +198,14 @@ function showBackgroundOptions() {
 			}
 			this.rotation = rotation;
 			this.backgroundColor = backgroundElement.style.backgroundColor;
+			this.random = random;
 		}
 
 		isCurrentFrame() {
 			if (
 				this.rotation !== bgGeneratorRotation ||
-				this.backgroundColor !== backgroundElement.style.backgroundColor
+				this.backgroundColor !== backgroundElement.style.backgroundColor ||
+				this.random.seed !== random.seed
 			) {
 				return false;
 			}
@@ -724,8 +728,10 @@ function showBackgroundOptions() {
 			let endValue = endFrame.stepped.get(property);
 			generator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
-		interpolatePairs('pairedContinuous', false, tween, loop);
-		interpolatePairs('pairedStepped', true, tween, loop);
+		if (generator.animatable) {
+			interpolatePairs('pairedContinuous', false, tween, loop);
+			interpolatePairs('pairedStepped', true, tween, loop);
+		}
 		if ('tween' in generator) {
 			if (loop) {
 				if (tween > 0.5) {
@@ -744,6 +750,7 @@ function showBackgroundOptions() {
 		endRotation += Math.sign(endRotation) * TWO_PI * fullRotations;
 		const rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
 		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween, loop);
+		random = tween < 0.5 ? startFrame.random : endFrame.random;
 
 		context.restore();
 		backgroundElement.style.backgroundColor = backgroundColor;
@@ -752,7 +759,7 @@ function showBackgroundOptions() {
 		rotateCanvas(context, width, height, rotation);
 		if (preview === 0) {
 			// Draw everything in one go when capturing video
-			randomize(randomSeed);	// Reset random number stream
+			random.reset();
 			const redraw = generator.generate(context, width, height, 0);
 			backgroundRedraw = redraw;
 			let done;
@@ -864,6 +871,8 @@ function showBackgroundOptions() {
 		return `${generatorName} ${year}-${month}-${day} ${hour}${minute}`;
 	}
 
+	seedInput.value = random.seed;
+
 	if (store !== undefined) {
 		document.getElementById('show-welcome').addEventListener('input', function (event) {
 			try {
@@ -936,8 +945,22 @@ function showBackgroundOptions() {
 
 	// Generate new background button.
 	document.getElementById('btn-generate-background').addEventListener('click', function (event) {
-		randomize();
+		random = new RandomNumberGenerator();
+		seedInput.value = random.seed;
 		progressiveBackgroundGen(0);
+	});
+
+	seedInput.addEventListener('change', function (event) {
+		const value = this.value;
+		if (/\d+\n\d+\n\d+\n\d+/.test(value)) {
+			random = new RandomNumberGenerator(value);
+			progressiveBackgroundGen(0);
+		}
+	});
+
+	$('#generate-btn-group').on('shown.bs.dropdown', function (event) {
+		seedInput.select();
+		seedInput.focus();
 	});
 
 	// Animation controls
@@ -1122,6 +1145,7 @@ function showBackgroundOptions() {
 		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
 		bgGeneratorRotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
 		rotationSlider.value = bgGeneratorRotation / TWO_PI;
+		seedInput.value = random.seed;
 		currentFrame = currentFrameData();
 	}
 

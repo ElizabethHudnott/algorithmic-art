@@ -325,7 +325,7 @@ CellAutomaton.prototype.calcSeed = function () {
 			return undefined;
 		}
 		for (let i = 0; i < padLength; i++) {
-			seed.push(Math.trunc(random() * numStates));
+			seed.push(Math.trunc(random.next() * numStates));
 		}
 	} else {
 		do {
@@ -533,7 +533,7 @@ CellAutomaton.prototype.generateFirstRow = function (width, height) {
 
 	if (seed === undefined) {
 		for (let i = 0; i < width; i++) {
-			row[i] = Math.trunc(random() * numStates);
+			row[i] = Math.trunc(random.next() * numStates);
 		}
 		return undefined;
 	}
@@ -587,7 +587,7 @@ CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 	const width = row.length;
 	if (i === -1) {
 		if (seed === undefined) {
-			return Math.trunc(random() * this.numStates);
+			return Math.trunc(random.next() * this.numStates);
 		} else if (j === 0 && this.repeatSeed) {
 			return seed[seed.length - 1];	// wrap seed
 		} else {
@@ -595,7 +595,7 @@ CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 		}
 	} else if (i === width) {
 		if (seed === undefined) {
-			return Math.trunc(random() * this.numStates);
+			return Math.trunc(random.next() * this.numStates);
 		} if (j === 0 && this.repeatSeed) {
 			return seed[(i + 1) % seed.length];	// wrap seed
 		} else {

@@ -44,6 +44,11 @@ legend {
 
 .drop-align-right {
 	left: unset !important;
+	transform: translate(calc(88px - 100%), calc(-100% - 5px)) !important;
+}
+
+.drop-align-abs-right {
+	left: unset !important;
 	right: 0 !important;
 	transform: translate(0%, calc(-100% - 5px)) !important;
 }

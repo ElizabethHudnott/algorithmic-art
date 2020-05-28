@@ -103,6 +103,37 @@ function checkInput(ancestor, name, value) {
 	return input;
 }
 
+
+let random, randomSeed;
+function randomize(seed) {
+	let a, b, c, d;
+	if (seed === undefined) {
+		a = Math.floor(Math.random() * 4294967295);
+		b = Math.floor(Math.random() * 4294967295);
+		c = Math.floor(Math.random() * 4294967295);
+		d = Math.floor(Math.random() * 4294967295);
+		seed = a + ',' + b + ',' + c + ',' + d;
+	} else {
+		const strings = seed.split(',', 4);
+		a = parseInt(strings[0]);
+		b = parseInt(strings[1]);
+		c = parseInt(strings[2]);
+		d = parseInt(strings[3]);
+	}
+
+	function generator() {
+		var t = b << 9, r = a * 5; r = (r << 7 | r >>> 25) * 9;
+		c ^= a; d ^= b;
+		b ^= c; a ^= d; c ^= t;
+		d = d << 11 | d >>> 21;
+		return (r >>> 0) / 4294967296;
+	}
+
+	random = generator;
+	randomSeed = seed;
+}
+randomize();
+
 /**
  * Doesn't check for cyclic array object references!
  */

@@ -50,7 +50,7 @@ class PolygonRendering {
 		if (n % 2 === 0 && n !== 4) {
 			rotation = Math.PI * (1 / n - 0.5);
 		} else {
-			rotation = Math.PI * ((1 + Math.random() * 0.5) * 2 / n - 0.5);
+			rotation = Math.PI * ((1 + random() * 0.5) * 2 / n - 0.5);
 		}
 
 
@@ -68,7 +68,7 @@ function CirclePacking() {
 
 		function setShape(event) {
 			me.circular = this.value === 'true';
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		for (let item of optionsDoc.querySelectorAll('input[name=circle-pack-shape]')) {
@@ -79,7 +79,7 @@ function CirclePacking() {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.numSeeds = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -87,7 +87,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.minSeedSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -97,7 +97,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.maxSeedSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -107,14 +107,14 @@ function CirclePacking() {
 				maxGrowthInput.value = value;
 				me.maxGrowth = value;
 			}
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('circle-pack-min-size').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.minSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -122,7 +122,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.maxNewSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -130,7 +130,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.growthRate = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -138,7 +138,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0.5) {
 				me.maxGrowth = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -146,7 +146,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.bufferSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -154,7 +154,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.edgeBufferSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -162,7 +162,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.maxShapes = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -170,7 +170,7 @@ function CirclePacking() {
 			const value = parseFloat(this.value);
 			if (value >= 1) {
 				me.maxAttempts = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -216,21 +216,21 @@ CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight
 
 	if (this.circular) {
 		for (let i = shapes.length; i < this.numSeeds; i++) {
-			const theta = Math.random() * TWO_PI;
-			const radius = minSeedSize + Math.random() * seedSizeRange;
+			const theta = random() * TWO_PI;
+			const radius = minSeedSize + random() * seedSizeRange;
 			const maxR = boundaryR - edgeBuffer - radius;
-			const r = Math.sqrt(Math.random()) * maxR;
+			const r = Math.sqrt(random()) * maxR;
 			const x = centreX + r * Math.cos(theta);
 			const y = centreY + r * Math.sin(theta);
 			shapes.push(new Shape(x, y, radius, false));
 		}
 	} else {
 		for (let i = shapes.length; i < this.numSeeds; i++) {
-			const radius = minSeedSize + Math.random() * seedSizeRange;
+			const radius = minSeedSize + random() * seedSizeRange;
 			const xRange = innerWidth - 2 * radius;
 			const yRange = innerHeight - 2 * radius;
-			const x = Math.random() * xRange + edgeBuffer + radius;
-			const y = Math.random() * yRange + edgeBuffer + radius;
+			const x = random() * xRange + edgeBuffer + radius;
+			const y = random() * yRange + edgeBuffer + radius;
 			shapes.push(new Shape(x, y, radius, false));
 		}
 	}
@@ -301,17 +301,17 @@ CirclePacking.prototype.generate = function* (context, canvasWidth, canvasHeight
 				let x, y, radius;
 				attempts = 0;
 				do {
-					radius =  minSize + Math.random() + newSizeRange;
+					radius =  minSize + random() + newSizeRange;
 					if (this.circular) {
-						const theta = Math.random() * TWO_PI;
+						const theta = random() * TWO_PI;
 						const maxR = boundaryR - edgeBuffer;
-						const r = Math.sqrt(Math.random()) * maxR;
+						const r = Math.sqrt(random()) * maxR;
 						x = centreX + r * Math.cos(theta);
 						y = centreY + r * Math.sin(theta);
 						radius = Math.min(radius, maxR - r);
 					} else {
-						x = Math.random() * innerWidth;
-						y = Math.random() * innerHeight;
+						x = random() * innerWidth;
+						y = random() * innerHeight;
 						radius = Math.min(radius, x, y, innerWidth - x, innerHeight - y);
 						x += edgeBuffer;
 						y += edgeBuffer;

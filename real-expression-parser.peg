@@ -99,7 +99,13 @@
 			for (let i = 0; i < numArgs; i++) {
 				argValues[i] = this.args[i].eval(variables);
 			}
-			return Math[this.name](...argValues);
+			switch (this.name) {
+			case 'random':
+				return random();
+				break;
+			default:
+				return Math[this.name](...argValues);
+			}
 		}
 	}
 

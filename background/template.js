@@ -21,7 +21,7 @@ function MySketch() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.myParameter = value;
-				progressiveBackgroundGen(me, 0); // Zero is the preview level. See generate().
+				generateBackground(0); // Zero is the preview level. See generate().
 			}
 		});
 

@@ -383,7 +383,7 @@ class PolarEquation {
 function GraphingCalculator() {
 	const me = this;
 	this.title = 'Graphing Calculator';
-	this.hasRandomness = false;
+	this.hasRandomness = true;
 	this.optionsDocument = downloadFile('graphing-calculator.html', 'document').then(function (optionsDoc) {
 		const shapeSelection = optionsDoc.getElementById('calc-shape-selection');
 		const subpathSelection = optionsDoc.getElementById('calc-subpath-selection');
@@ -537,7 +537,7 @@ function GraphingCalculator() {
 			pathControls.classList.remove('d-none');
 			pathDelBtn.disabled = false;
 			addPieceBtn.disabled = false;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		for (let element of optionsDoc.getElementById('calc-equation-type').querySelectorAll('button')) {
@@ -556,7 +556,7 @@ function GraphingCalculator() {
 				me.step[shapeNum][pathNum][pieceNum] = step * Math.PI;
 			}
 			displayPiece();
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		pathDelBtn.addEventListener('click', function (event) {
@@ -574,7 +574,7 @@ function GraphingCalculator() {
 				addPieceBtn.disabled = true;
 				pathControls.classList.add('d-none');
 			}
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		pieceDelBtn.addEventListener('click', function (event) {
@@ -585,7 +585,7 @@ function GraphingCalculator() {
 				pieceNum--;
 			}
 			displayPiece();
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		function displayBoundingBox() {
@@ -633,7 +633,7 @@ function GraphingCalculator() {
 			try {
 				const methodName = 'parse' + varName[0].toUpperCase() + varName.slice(1) + 'Formula';
 				me.equations[shapeNum][pathNum][pieceNum][methodName](formulaText);
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 				displayBoundingBox();
 			} catch (e) {
 				errorBox.innerText = 'Error in equation for ' + varName + '. ' + e.message;
@@ -699,7 +699,7 @@ function GraphingCalculator() {
 					me.min[shapeNum][pathNum][pieceNum + 1] = max;
 				}
 			}
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 			displayBoundingBox();
 		}
 
@@ -739,7 +739,7 @@ function GraphingCalculator() {
 					value *= Math.PI;
 				}
 				me.step[shapeNum][pathNum][pieceNum] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 				displayBoundingBox();
 			}
 		});
@@ -749,7 +749,7 @@ function GraphingCalculator() {
 			if (value >= 0) {
 				me.minPathRepeat[shapeNum][pathNum] = 0;
 				me.maxPathRepeat[shapeNum][pathNum] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 				displayBoundingBox();
 			}
 		});
@@ -758,7 +758,7 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.translateX[shapeNum][pathNum + 1] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -766,7 +766,7 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.translateY[shapeNum][pathNum + 1] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -774,7 +774,7 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.scale[shapeNum][pathNum + 1] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -782,7 +782,7 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.stretch[shapeNum][pathNum + 1] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -794,7 +794,7 @@ function GraphingCalculator() {
 				} else {
 					me.shearY[shapeNum][pathNum + 1] = value;
 				}
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -812,7 +812,7 @@ function GraphingCalculator() {
 				me.shearX[shapeNum][pathNum + 1] = 0;
 			}
 			me.shearDirection[shapeNum][pathNum + 1] = radians;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		for (let item of pathShearRow.querySelectorAll('input[name=calc-shear-direction')) {
@@ -821,27 +821,27 @@ function GraphingCalculator() {
 
 		pathClosedInput.addEventListener('input', function (event) {
 			me.closePath[shapeNum][pathNum] = this.checked;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-line-width').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.lineWidth[shapeNum] = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('calc-dash').addEventListener('input', function (event) {
 			if (this.checkValidity()) {
 				me.dash[shapeNum] = parseLineDash(this.value);
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		function setLineJoin(event) {
 			me.lineJoin[shapeNum] = this.value;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		for (let element of optionsDoc.querySelectorAll('input[name="calc-line-join"]')) {
@@ -855,7 +855,7 @@ function GraphingCalculator() {
 			const a = parseFloat(strokeOpacityInput.value);
 			const [r, g, b] = hexToRGBA(strokeColorInput.value)
 			me.strokeColor[shapeNum] = rgba(r, g, b, a);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		strokeColorInput.addEventListener('input', updateStrokeColor);
@@ -868,7 +868,7 @@ function GraphingCalculator() {
 			const a = parseFloat(fillOpacityInput.value);
 			const [r, g, b] = hexToRGBA(fillColorInput.value)
 			me.fillColor[shapeNum] = rgba(r, g, b, a);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		fillColorInput.addEventListener('input', updateFillColor);
@@ -876,39 +876,39 @@ function GraphingCalculator() {
 
 		optionsDoc.getElementById('calc-fill-rule').addEventListener('input', function (event) {
 			me.fillRule[shapeNum] = this.value;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-clip').addEventListener('input', function (event) {
 			me.clip[shapeNum] = this.checked;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		const rotationSlider = optionsDoc.getElementById('calc-rotation');
 		rotationSlider.addEventListener('input', function (event) {
 			me.rotation[shapeNum] = parseFloat(this.value) * TWO_PI;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-rotation-reset').addEventListener('click', function (event) {
 			rotationSlider.value = '0';
 			me.rotation[shapeNum] = 0;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-major-grid-intensity').addEventListener('input', function (event) {
 			me.majorGridlineIntensity = parseFloat(this.value);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-axis-intensity').addEventListener('input', function (event) {
 			me.axisIntensity = parseFloat(this.value);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('calc-grid-color').addEventListener('input', function (event) {
 			me.gridlineColor = this.value;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		const minorRangeForm = optionsDoc.getElementById('calc-minor-range-form');
@@ -927,7 +927,7 @@ function GraphingCalculator() {
 			}
 			me.minorAxisMin = min;
 			me.minorAxisMax = max;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		minorRangeForm.addEventListener('submit', function (event) {
@@ -944,14 +944,14 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.minorAxisMajorGridlines = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 		optionsDoc.getElementById('calc-major-axis-center').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.majorAxisTranslation = -value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -959,7 +959,7 @@ function GraphingCalculator() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.majorAxisMajorGridlines = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 

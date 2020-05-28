@@ -10,11 +10,11 @@ function Phyllotaxis() {
 		const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
 
 		function fullRedraw() {
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		function fullRecolor() {
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		}
 
 		const radiusSlider = optionsDoc.getElementById('phyllotaxis-radius');
@@ -27,12 +27,12 @@ function Phyllotaxis() {
 			if (isCustom) {
 				me.radius = parseFloat(radiusSlider.value);
 			}
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		radiusSlider.addEventListener('input', function (event) {
 			me.radius = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		radiusSlider.addEventListener('pointerup', fullRedraw);
 		radiusSlider.addEventListener('keyup', fullRedraw);
@@ -41,24 +41,24 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.maxPetals = value * 1000;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('phyllotaxis-clipping').addEventListener('input', function (event) {
 			me.clipping = this.checked ? 1 : -1;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('phyllotaxis-bidirectional').addEventListener('input', function (event) {
 			me.bidirectional = this.checked;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		const angleSlider = optionsDoc.getElementById('phyllotaxis-angle-range');
 		angleSlider.addEventListener('input', function (event) {
 			me.angle = parseFloat(this.value) * TWO_PI;
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		angleSlider.addEventListener('pointerup', fullRedraw);
 		angleSlider.addEventListener('keyup', fullRedraw);
@@ -67,7 +67,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.spread = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -75,7 +75,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.exponent = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -83,7 +83,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.scale = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -91,7 +91,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.aspectRatio = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -99,7 +99,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.start = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -107,7 +107,7 @@ function Phyllotaxis() {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.skip = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -122,7 +122,7 @@ function Phyllotaxis() {
 			if (shapeIsImage && bgGeneratorImage.src === '') {
 				document.getElementById('background-gen-image-upload').click();
 			} else {
-				progressiveBackgroundGen(me, 2);
+				generateBackground(2);
 			}
 		}
 
@@ -134,7 +134,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.petalSize = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -142,7 +142,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.petalEnlargement = parseFloat(this.value);
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -150,18 +150,18 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value > 0) {
 				me.petalStretch = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('phyllotaxis-petal-rotation').addEventListener('input', function (event) {
 			me.petalRotation = parseFloat(this.value) * Math.PI;
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		function setStacking(event) {
 			me.stacking = parseInt(this.value);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]')) {
@@ -176,7 +176,7 @@ function Phyllotaxis() {
 			} else {
 				me.angleMode[parseInt(field)] = value;
 			}
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		colorFieldSelect.addEventListener('input', function (event) {
@@ -200,14 +200,14 @@ function Phyllotaxis() {
 				} else {
 					me.colorMod[parseInt(field)] = value;
 				}
-				progressiveBackgroundGen(me, 2);
+				generateBackground(2);
 			}
 		});
 
 		const hueMinInput = optionsDoc.getElementById('phyllotaxis-hue-min');
 		hueMinInput.addEventListener('input', function (event) {
 			me.hueMin = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		hueMinInput.addEventListener('pointerup', fullRecolor);
 		hueMinInput.addEventListener('keyup', fullRecolor);
@@ -215,7 +215,7 @@ function Phyllotaxis() {
 		const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
 		hueMaxInput.addEventListener('input', function (event) {
 			me.hueMax = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		hueMaxInput.addEventListener('pointerup', fullRecolor);
 		hueMaxInput.addEventListener('keyup', fullRecolor);
@@ -223,13 +223,13 @@ function Phyllotaxis() {
 		optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
 			me.hueMode = this.value;
 			$('#phyllotaxis-hue-max').collapse(this.value === 'c' ? 'hide' : 'show');
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		const saturationMinInput = optionsDoc.getElementById('phyllotaxis-saturation-min');
 		saturationMinInput.addEventListener('input', function (event) {
 			me.saturationMin = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		saturationMinInput.addEventListener('pointerup', fullRecolor);
 		saturationMinInput.addEventListener('keyup', fullRecolor);
@@ -237,7 +237,7 @@ function Phyllotaxis() {
 		const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
 		saturationMaxInput.addEventListener('input', function (event) {
 			me.saturationMax = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		saturationMaxInput.addEventListener('pointerup', fullRecolor);
 		saturationMaxInput.addEventListener('keyup', fullRecolor);
@@ -245,13 +245,13 @@ function Phyllotaxis() {
 		optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
 			me.saturationMode = this.value;
 			$('#phyllotaxis-saturation-max').collapse(this.value === 'c' ? 'hide' : 'show');
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		const lightnessMinInput = optionsDoc.getElementById('phyllotaxis-lightness-min');
 		lightnessMinInput.addEventListener('input', function (event) {
 			me.lightnessMin = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		lightnessMinInput.addEventListener('pointerup', fullRecolor);
 		lightnessMinInput.addEventListener('keyup', fullRecolor);
@@ -259,7 +259,7 @@ function Phyllotaxis() {
 		const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
 		lightnessMaxInput.addEventListener('input', function (event) {
 			me.lightnessMax = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		lightnessMaxInput.addEventListener('pointerup', fullRecolor);
 		lightnessMaxInput.addEventListener('keyup', fullRecolor);
@@ -267,13 +267,13 @@ function Phyllotaxis() {
 		optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
 			me.lightnessMode = this.value;
 			$('#phyllotaxis-lightness-max').collapse(this.value === 'c' ? 'hide' : 'show');
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		const opacityMinInput = optionsDoc.getElementById('phyllotaxis-opacity-min');
 		opacityMinInput.addEventListener('input', function (event) {
 			me.opacityMin = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		opacityMinInput.addEventListener('pointerup', fullRecolor);
 		opacityMinInput.addEventListener('keyup', fullRecolor);
@@ -281,7 +281,7 @@ function Phyllotaxis() {
 		const opacityMaxInput = optionsDoc.getElementById('phyllotaxis-opacity-max');
 		opacityMaxInput.addEventListener('input', function (event) {
 			me.opacityMax = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		opacityMaxInput.addEventListener('pointerup', fullRecolor);
 		opacityMaxInput.addEventListener('keyup', fullRecolor);
@@ -289,13 +289,13 @@ function Phyllotaxis() {
 		optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
 			me.opacityMode = this.value;
 			$('#phyllotaxis-opacity-max').collapse(this.value === 'c' ? 'hide' : 'show');
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		const lightingInput = optionsDoc.getElementById('phyllotaxis-lighting');
 		lightingInput.addEventListener('input', function (event) {
 			me.lighting = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		lightingInput.addEventListener('pointerup', fullRecolor);
 		lightingInput.addEventListener('keyup', fullRecolor);
@@ -303,7 +303,7 @@ function Phyllotaxis() {
 		const contrastInput = optionsDoc.getElementById('phyllotaxis-contrast');
 		contrastInput.addEventListener('input', function (event) {
 			me.contrast = Math.sqrt(parseFloat(this.value));
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		contrastInput.addEventListener('pointerup', fullRecolor);
 		contrastInput.addEventListener('keyup', fullRecolor);
@@ -311,7 +311,7 @@ function Phyllotaxis() {
 		const shadowAngleInput = optionsDoc.getElementById('phyllotaxis-shadow-angle');
 		shadowAngleInput.addEventListener('input', function (event) {
 			me.shadowAngle = (parseFloat(this.value) - 0.5) * Math.PI;
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		shadowAngleInput.addEventListener('pointerup', fullRecolor);
 		shadowAngleInput.addEventListener('keyup', fullRecolor);
@@ -321,7 +321,7 @@ function Phyllotaxis() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.shadowBlur = value;
-				progressiveBackgroundGen(me, 3);
+				generateBackground(3);
 			}
 		});
 		shadowBlurInput.addEventListener('pointerup', fullRecolor);
@@ -330,7 +330,7 @@ function Phyllotaxis() {
 		const shadowOffsetInput = optionsDoc.getElementById('phyllotaxis-shadow-offset');
 		shadowOffsetInput.addEventListener('input', function (event) {
 			me.shadowOffset = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		shadowOffsetInput.addEventListener('pointerup', fullRecolor);
 		shadowOffsetInput.addEventListener('keyup', fullRecolor);
@@ -338,7 +338,7 @@ function Phyllotaxis() {
 		const spotOffsetInput = optionsDoc.getElementById('phyllotaxis-spot-offset');
 		spotOffsetInput.addEventListener('input', function (event) {
 			me.spotOffset = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		spotOffsetInput.addEventListener('pointerup', fullRecolor);
 		spotOffsetInput.addEventListener('keyup', fullRecolor);
@@ -346,7 +346,7 @@ function Phyllotaxis() {
 		const shadowColorInput = optionsDoc.getElementById('phyllotaxis-shadow-color');
 		shadowColorInput.addEventListener('input', function (event) {
 			me.shadowColor = rgba(0, 0, 0, parseFloat(this.value));
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		shadowColorInput.addEventListener('pointerup', fullRecolor);
 		shadowColorInput.addEventListener('keyup', fullRecolor);
@@ -354,7 +354,7 @@ function Phyllotaxis() {
 		const outlineInput = optionsDoc.getElementById('phyllotaxis-outline');
 		outlineInput.addEventListener('input', function (event) {
 			me.strokeStyle = 'rgba(0, 0, 0, ' + this.value + ')';
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		outlineInput.addEventListener('pointerup', fullRecolor);
 		outlineInput.addEventListener('keyup', fullRecolor);
@@ -362,7 +362,7 @@ function Phyllotaxis() {
 		const centerInnerRadiusInput = optionsDoc.getElementById('phyllotaxis-center-inner-radius');
 		centerInnerRadiusInput.addEventListener('input', function (event) {
 			me.centerInnerRadius = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		centerInnerRadiusInput.addEventListener('pointerup', fullRecolor);
 		centerInnerRadiusInput.addEventListener('keyup', fullRecolor);
@@ -370,7 +370,7 @@ function Phyllotaxis() {
 		const centerMidRadiusInput = optionsDoc.getElementById('phyllotaxis-center-mid-radius');
 		centerMidRadiusInput.addEventListener('input', function (event) {
 			me.centerMidRadius = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		centerMidRadiusInput.addEventListener('pointerup', fullRecolor);
 		centerMidRadiusInput.addEventListener('keyup', fullRecolor);
@@ -378,19 +378,19 @@ function Phyllotaxis() {
 		const centerOuterRadiusInput = optionsDoc.getElementById('phyllotaxis-center-outer-radius');
 		centerOuterRadiusInput.addEventListener('input', function (event) {
 			me.centerOuterRadius = parseFloat(this.value);
-			progressiveBackgroundGen(me, 3);
+			generateBackground(3);
 		});
 		centerOuterRadiusInput.addEventListener('pointerup', fullRecolor);
 		centerOuterRadiusInput.addEventListener('keyup', fullRecolor);
 
 		optionsDoc.getElementById('phyllotaxis-center-inner-color').addEventListener('input', function (event) {
 			me.centerInnerColor = this.value;
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		optionsDoc.getElementById('phyllotaxis-center-mid-color').addEventListener('input', function (event) {
 			me.centerMidColor = this.value;
-			progressiveBackgroundGen(me, 2);
+			generateBackground(2);
 		});
 
 		return optionsDoc;

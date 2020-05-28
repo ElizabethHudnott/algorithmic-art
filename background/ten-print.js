@@ -10,33 +10,33 @@ function TenPrint() {
 	this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {
 		optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
 			me.zoomOut = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 
 		optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
 			me.angle = parseFloat(this.value) * Math.PI / 180;
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 
 		optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
 			me.strokeRatio = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 
 		optionsDoc.getElementById('ten-print-gap-probability').addEventListener('input', function (event) {
 			me.blankProbability = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 
 		optionsDoc.getElementById('ten-print-probability').addEventListener('input', function (event) {
 			me.probability = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 
 		function changeColor(index) {
 			return function (event) {
 				me.colors[index] = this.value;
-				progressiveBackgroundGen(me, 1);
+				generateBackground(1);
 			};
 		}
 
@@ -120,7 +120,7 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const cellNumber = cellX + cellY * spacingShift + 1;
-			const randomBlank = Math.random();
+			const randomBlank = random();
 			if (cellNumber % blankSpacing === 0 &&  randomBlank < blankProbability) {
 				if (blankRunLength < maxBlankRun) {
 					blankRunLength++;
@@ -140,7 +140,7 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 			const xLeft = cellX * cellWidth;
 			const xRight = xLeft + cellWidth;
 
-			const p = Math.random();
+			const p = random();
 			context.beginPath();
 
 			if (p < this.probability) {

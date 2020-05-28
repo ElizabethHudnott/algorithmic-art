@@ -1,6 +1,5 @@
 Environment
 -----------
-Warn about unsaved frame before playback/skip
 Link from home page
 Revise Patreon description
 Add credits

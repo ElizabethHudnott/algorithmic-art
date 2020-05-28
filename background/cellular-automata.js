@@ -28,7 +28,7 @@ function CellAutomaton() {
 		const seedTypeRows = optionsDoc.getElementById('ca-seed-type');
 
 		function fullRedraw() {
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		function setPreset() {
@@ -113,7 +113,7 @@ function CellAutomaton() {
 			weightsSection.collapse(type === 'a' || type === 't' ? 'show' : 'hide');
 			weightInputs[0].disabled = memoryFunction === 'i';
 			weightInputs[2].disabled = excludeCentreCheck.checked || memoryFunction === 'c';
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		ruleTypeInput.addEventListener('input', function (event) {
@@ -150,7 +150,7 @@ function CellAutomaton() {
 				me.seed = seed;
 				me.history = undefined;
 			}
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		function setSeedLength() {
@@ -166,7 +166,7 @@ function CellAutomaton() {
 			}
 			me.seedLength = length;
 			me.history = undefined;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		};
 
 		seedLengthInput.addEventListener('input', setSeedLength);
@@ -197,14 +197,14 @@ function CellAutomaton() {
 		optionsDoc.getElementById('ca-border-row').addEventListener('input', function (event) {
 			me.borderRow = this.checked;
 			me.history = undefined;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('ca-cell-width').addEventListener('change', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 1) {
 				me.cellWidth = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -212,14 +212,14 @@ function CellAutomaton() {
 			const value = parseInt(this.value);
 			if (value >= 1) {
 				me.cellHeight = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		const gapXSlider = optionsDoc.getElementById('ca-gap-x');
 		gapXSlider.addEventListener('input', function (event) {
 			me.gapX = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		gapXSlider.addEventListener('pointerup', fullRedraw);
 		gapXSlider.addEventListener('keyup', fullRedraw);
@@ -227,25 +227,25 @@ function CellAutomaton() {
 		const gapYSlider = optionsDoc.getElementById('ca-gap-y');
 		gapYSlider.addEventListener('input', function (event) {
 			me.gapY = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		gapYSlider.addEventListener('pointerup', fullRedraw);
 		gapYSlider.addEventListener('keyup', fullRedraw);
 
 		optionsDoc.getElementById('ca-hue-min').addEventListener('input', function (event) {
 			me.hueMin = parseFloat(this.value);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('ca-hue-max').addEventListener('input', function (event) {
 			me.hueMax = parseFloat(this.value);
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		const strokeSlider = optionsDoc.getElementById('ca-stroke');
 		strokeSlider.addEventListener('input', function (event) {
 			me.strokeIntensity = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		strokeSlider.addEventListener('pointerup', fullRedraw);
 		strokeSlider.addEventListener('keyup', fullRedraw);
@@ -253,7 +253,7 @@ function CellAutomaton() {
 		const startSlider = optionsDoc.getElementById('ca-start-row');
 		startSlider.addEventListener('input', function (event) {
 			me.startHeight = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		startSlider.addEventListener('pointerup', fullRedraw);
 		startSlider.addEventListener('keyup', fullRedraw);
@@ -261,7 +261,7 @@ function CellAutomaton() {
 		const endSlider = optionsDoc.getElementById('ca-end-row');
 		endSlider.addEventListener('input', function (event) {
 			me.endHeight = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		endSlider.addEventListener('pointerup', fullRedraw);
 		endSlider.addEventListener('keyup', fullRedraw);
@@ -325,7 +325,7 @@ CellAutomaton.prototype.calcSeed = function () {
 			return undefined;
 		}
 		for (let i = 0; i < padLength; i++) {
-			seed.push(Math.trunc(Math.random() * numStates));
+			seed.push(Math.trunc(random() * numStates));
 		}
 	} else {
 		do {
@@ -533,7 +533,7 @@ CellAutomaton.prototype.generateFirstRow = function (width, height) {
 
 	if (seed === undefined) {
 		for (let i = 0; i < width; i++) {
-			row[i] = Math.trunc(Math.random() * numStates);
+			row[i] = Math.trunc(random() * numStates);
 		}
 		return undefined;
 	}
@@ -587,7 +587,7 @@ CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 	const width = row.length;
 	if (i === -1) {
 		if (seed === undefined) {
-			return Math.trunc(Math.random() * this.numStates);
+			return Math.trunc(random() * this.numStates);
 		} else if (j === 0 && this.repeatSeed) {
 			return seed[seed.length - 1];	// wrap seed
 		} else {
@@ -595,7 +595,7 @@ CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 		}
 	} else if (i === width) {
 		if (seed === undefined) {
-			return Math.trunc(Math.random() * this.numStates);
+			return Math.trunc(random() * this.numStates);
 		} if (j === 0 && this.repeatSeed) {
 			return seed[(i + 1) % seed.length];	// wrap seed
 		} else {

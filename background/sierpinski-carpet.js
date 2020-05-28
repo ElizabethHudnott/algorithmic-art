@@ -6,7 +6,7 @@ function SierpinskiCarpet() {
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
 		function fullRedraw() {
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		}
 
 		const concentricOpts = optionsDoc.getElementById('carpet-concentric-opts');
@@ -15,13 +15,13 @@ function SierpinskiCarpet() {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.patternDepth = value - 1;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('carpet-composition-op').addEventListener('input', function (event) {
 			me.compositionOp = this.value;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		function setFilling(event) {
@@ -33,7 +33,7 @@ function SierpinskiCarpet() {
 			if (filling === 'i' && bgGeneratorImage.src === '') {
 				document.getElementById('background-gen-image-upload').click();
 			} else {
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		}
 
@@ -45,20 +45,20 @@ function SierpinskiCarpet() {
 			item.addEventListener('input', function (event) {
 				const locations = parseInt(this.value);
 				me.patternLocations = locations;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			});
 		};
 
 		optionsDoc.getElementById('carpet-patterned-centre').addEventListener('input', function (event) {
 			me.patternedCentre = this.checked;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.centreEmphasis = value - 1;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -94,21 +94,21 @@ function SierpinskiCarpet() {
 
 		optionsDoc.getElementById('carpet-bipartite').addEventListener('input', function (event) {
 			me.bipartite = this.checked;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('carpet-concentric-density').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 2) {
 				me.concentricDensity = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		const fgSpacingSlider = optionsDoc.getElementById('carpet-relative-spacing');
 		fgSpacingSlider.addEventListener('input', function (event) {
 			me.fgSpacingFraction = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		fgSpacingSlider.addEventListener('pointerup', fullRedraw);
 		fgSpacingSlider.addEventListener('keyup', fullRedraw);
@@ -116,7 +116,7 @@ function SierpinskiCarpet() {
 		const tlxCornerSlider = optionsDoc.getElementById('carpet-tlx-corner');
 		tlxCornerSlider.addEventListener('input', function (event) {
 			me.topLeftCornerX = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		tlxCornerSlider.addEventListener('pointerup', fullRedraw);
 		tlxCornerSlider.addEventListener('keyup', fullRedraw);
@@ -124,7 +124,7 @@ function SierpinskiCarpet() {
 		const tlyCornerSlider = optionsDoc.getElementById('carpet-tly-corner');
 		tlyCornerSlider.addEventListener('input', function (event) {
 			me.topLeftCornerY = parseFloat(this.max) - parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		tlyCornerSlider.addEventListener('pointerup', fullRedraw);
 		tlyCornerSlider.addEventListener('keyup', fullRedraw);
@@ -132,7 +132,7 @@ function SierpinskiCarpet() {
 		const llCornerSlider = optionsDoc.getElementById('carpet-ll-corner');
 		llCornerSlider.addEventListener('input', function (event) {
 			me.lowerLeftCorner = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		llCornerSlider.addEventListener('pointerup', fullRedraw);
 		llCornerSlider.addEventListener('keyup', fullRedraw);
@@ -140,7 +140,7 @@ function SierpinskiCarpet() {
 		const lrCornerSlider = optionsDoc.getElementById('carpet-lr-corner');
 		lrCornerSlider.addEventListener('input', function (event) {
 			me.lowerRightCorner = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		lrCornerSlider.addEventListener('pointerup', fullRedraw);
 		lrCornerSlider.addEventListener('keyup', fullRedraw);
@@ -149,14 +149,14 @@ function SierpinskiCarpet() {
 			const value = parseInt(this.value);
 			if (value >= 1) {
 				me.maxDepth = value - 1;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsided-x');
 		lopsidedXInput.addEventListener('input', function (event) {
 			me.lopsidednessX = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		lopsidedXInput.addEventListener('pointerup', fullRedraw);
 		lopsidedXInput.addEventListener('keyup', fullRedraw);
@@ -164,7 +164,7 @@ function SierpinskiCarpet() {
 		const lopsidedYInput = optionsDoc.getElementById('carpet-lopsided-y');
 		lopsidedYInput.addEventListener('input', function (event) {
 			me.lopsidednessY = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		lopsidedYInput.addEventListener('pointerup', fullRedraw);
 		lopsidedYInput.addEventListener('keyup', fullRedraw);
@@ -172,7 +172,7 @@ function SierpinskiCarpet() {
 		const middleWidthInput = optionsDoc.getElementById('carpet-middle-width');
 		middleWidthInput.addEventListener('input', function (event) {
 			me.middleWidth = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		middleWidthInput.addEventListener('pointerup', fullRedraw);
 		middleWidthInput.addEventListener('keyup', fullRedraw);
@@ -180,7 +180,7 @@ function SierpinskiCarpet() {
 		const sizeInput = optionsDoc.getElementById('carpet-size');
 		sizeInput.addEventListener('input', function (event) {
 			me.size = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		sizeInput.addEventListener('pointerup', fullRedraw);
 		sizeInput.addEventListener('keyup', fullRedraw);
@@ -188,7 +188,7 @@ function SierpinskiCarpet() {
 		const stretchInput = optionsDoc.getElementById('carpet-stretch');
 		stretchInput.addEventListener('input', function (event) {
 			me.stretch = parseFloat(this.value);
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		stretchInput.addEventListener('pointerup', fullRedraw);
 		stretchInput.addEventListener('keyup', fullRedraw);
@@ -197,7 +197,7 @@ function SierpinskiCarpet() {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= 1) {
 				me.left = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
@@ -205,14 +205,14 @@ function SierpinskiCarpet() {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= 1) {
 				me.top = value;
-				progressiveBackgroundGen(me, 0);
+				generateBackground(0);
 			}
 		});
 
 		const rotationInput = optionsDoc.getElementById('carpet-rotation');
 		rotationInput.addEventListener('input', function (event) {
 			me.rotation = parseFloat(this.value) * TWO_PI;
-			progressiveBackgroundGen(me, 1);
+			generateBackground(1);
 		});
 		rotationInput.addEventListener('pointerup', fullRedraw);
 		rotationInput.addEventListener('keyup', fullRedraw);
@@ -220,7 +220,7 @@ function SierpinskiCarpet() {
 		optionsDoc.getElementById('carpet-rotation-reset').addEventListener('click', function (event) {
 			rotationInput.value = '0';
 			me.rotation = 0;
-			progressiveBackgroundGen(me, 0);
+			generateBackground(0);
 		});
 
 		return optionsDoc;

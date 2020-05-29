@@ -146,6 +146,8 @@ function showBackgroundOptions() {
 	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const rotationSlider = document.getElementById('background-rotation');
+	const generateButton = document.getElementById('btn-generate-background');
+	const seedForm = document.getElementById('random-seed-form');
 	const seedInput = document.getElementById('random-seed');
 	const progressBar = document.getElementById('video-progress');
 	const imageUpload = document.getElementById('background-gen-image');
@@ -204,11 +206,18 @@ function showBackgroundOptions() {
 		isCurrentFrame() {
 			if (
 				this.rotation !== bgGeneratorRotation ||
-				this.backgroundColor !== backgroundElement.style.backgroundColor ||
-				this.random.seed !== random.seed
+				this.backgroundColor !== backgroundElement.style.backgroundColor
 			) {
 				return false;
 			}
+			if (
+				this.random.seed !== random.seed &&
+				this.random.startGenerator.seed !== random.seed &&
+				this.random.endGenerator.seed !== random.seed
+			) {
+				return false;
+			}
+
 
 			const animatable = bgGenerator.animatable;
 			if (animatable === undefined) {
@@ -430,9 +439,11 @@ function showBackgroundOptions() {
 			bgGenerator = gen;
 			const prevGenURL = generatorURL;
 			generatorURL = url;
+			random = new RandomNumberGenerator();
+			seedInput.value = random.seed;
 			currentFrame = currentFrameData();
 			startFrame = currentFrame;
-			endFrame = currentFrame;
+			endFrame = startFrame;
 			if ('tween' in gen) {
 				gen.tween = parseFloat(animPositionSlider.value);
 				document.getElementById('btn-both-frames').hidden = false;
@@ -483,7 +494,7 @@ function showBackgroundOptions() {
 					});
 				}
 			}
-			document.getElementById('btn-generate-background').hidden = !gen.hasRandomness;
+			generateButton.hidden = !gen.hasRandomness;
 
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
 			document.getElementById('background-gen-credits').innerHTML = credits;
@@ -534,6 +545,18 @@ function showBackgroundOptions() {
 		}
 	});
 
+	function calcTween(tween, loop) {
+		if (loop) {
+			if (tween > 0.5) {
+				return 1 - (tween - 0.5) * 2;
+			} else {
+				return tween * 2;
+			}
+		} else {
+			return tween;
+		}
+	}
+
 	function interpolateValue(startValue, endValue, tween, loop) {
 		if (Array.isArray(startValue)) {
 			const numStartComponents = startValue.length;
@@ -556,13 +579,7 @@ function showBackgroundOptions() {
 			return output;
 		}
 
-		if (loop) {
-			if (tween > 0.5) {
-				tween = 1 - (tween - 0.5) * 2;
-			} else {
-				tween = tween * 2;
-			}
-		}
+		tween = calcTween(tween, loop);
 		const type = typeof(startValue);
 		if (type === 'number') {
 			return (endValue - startValue) * tween + startValue;
@@ -704,6 +721,43 @@ function showBackgroundOptions() {
 		}
 	}
 
+
+	class InterpolatedRandom {
+		constructor(startGenerator, endGenerator, tween) {
+			this.startGenerator = startGenerator;
+			this.endGenerator = endGenerator;
+			this.tween = tween;
+			this.seed = startGenerator.seed + '\n' + endGenerator.seed;
+		}
+
+		next() {
+			const tween = this.tween;
+			return (1 - tween) * this.startGenerator.next() + tween * this.endGenerator.next();
+		}
+
+		reset() {
+			this.startGenerator.reset();
+			this.endGenerator.reset();
+		}
+	}
+
+	function interpolateRandom(startGenerator, endGenerator, tween) {
+		switch (tween) {
+		case 0:
+			random = startGenerator;
+			break;
+		case 1:
+			random = endGenerator;
+			break;
+		default:
+			if (startGenerator === endGenerator) {
+				random = startGenerator;
+			} else {
+				random = new InterpolatedRandom(startGenerator, endGenerator, tween);
+			}
+		}
+	}
+
 	const tempCanvas = document.createElement('CANVAS');
 	const tempContext = tempCanvas.getContext('2d');
 
@@ -720,9 +774,10 @@ function showBackgroundOptions() {
 	}
 
 	function renderFrame(generator, context, width, height, tween, loop, paintBackground, preview) {
+		const tweenPrime = calcTween(tween, loop);
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
-			generator[property] = interpolateValue(startValue, endValue, tween, loop);
+			generator[property] = interpolateValue(startValue, endValue, tweenPrime, false);
 		}
 		for (let [property, startValue] of startFrame.stepped.entries()) {
 			let endValue = endFrame.stepped.get(property);
@@ -733,15 +788,7 @@ function showBackgroundOptions() {
 			interpolatePairs('pairedStepped', true, tween, loop);
 		}
 		if ('tween' in generator) {
-			if (loop) {
-				if (tween > 0.5) {
-					generator.tween = 1 - (tween - 0.5) * 2;
-				} else {
-					generator.tween = tween * 2;
-				}
-			} else {
-				generator.tween = tween;
-			}
+			generator.tween = tweenPrime;
 		}
 
 		const startRotation = startFrame.rotation;
@@ -749,8 +796,8 @@ function showBackgroundOptions() {
 		const loopedRotation = loop && (startRotation + TWO_PI) % TWO_PI !== (endRotation + TWO_PI) % TWO_PI;
 		endRotation += Math.sign(endRotation) * TWO_PI * fullRotations;
 		const rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
-		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tween, loop);
-		random = tween < 0.5 ? startFrame.random : endFrame.random;
+		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tweenPrime, false);
+		interpolateRandom(startFrame.random, endFrame.random, tweenPrime);
 
 		context.restore();
 		backgroundElement.style.backgroundColor = backgroundColor;
@@ -944,29 +991,83 @@ function showBackgroundOptions() {
 	});
 
 	// Generate new background button.
-	document.getElementById('btn-generate-background').addEventListener('click', function (event) {
+	generateButton.addEventListener('click', function (event) {
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 		progressiveBackgroundGen(0);
 	});
 
-	seedInput.addEventListener('change', function (event) {
-		const value = this.value;
-		if (/\d+\n\d+\n\d+\n\d+/.test(value)) {
-			random = new RandomNumberGenerator(value);
+	function displaySeed() {
+		if (startFrame.random.seed === endFrame.random.seed) {
+			seedInput.value = startFrame.random.seed;
+		} else {
+			seedInput.value = startFrame.random.seed + '\n' + endFrame.random.seed;
+		}
+	}
+
+	function parseSeed(seed) {
+		if (seed === undefined) {
+			seed = seedInput.value;
+		}
+		const match = seed.match(/(\d+\n\d+\n\d+\n\d+)(?:\n(\d+\n\d+\n\d+\n\d+))?/);
+		if (match !== null) {
+			if (match[2] === undefined) {
+				random = new RandomNumberGenerator(seed);
+			} else {
+				const startGenerator = new RandomNumberGenerator(match[1]);
+				startFrame.random = startGenerator;
+				if (match[2] === match[1]) {
+					endFrame.random = startGenerator;
+					random = startGenerator;
+				} else {
+					const endGenerator = new RandomNumberGenerator(match[2]);
+					if (startFrame === endFrame) {
+						endFrame = currentFrameData();
+					}
+					endFrame.random = endGenerator;
+					const tween = calcTween(parseFloat(animPositionSlider.value), loopAnim);
+					interpolateRandom(startGenerator, endGenerator, tween);
+					currentFrame.random = random;
+				}
+			}
 			progressiveBackgroundGen(0);
+		}
+	}
+
+	seedInput.addEventListener('focus', function (event) {
+		this.select();
+	});
+
+	seedInput.addEventListener('paste', function (event) {
+		parseSeed(event.clipboardData.getData('text-plain'));
+	});
+
+	seedForm.addEventListener('focusout', function (event) {
+		if (!this.contains(event.relatedTarget)) {
+			parseSeed();
 		}
 	});
 
+	seedForm.addEventListener('submit', function (event) {
+		event.preventDefault();
+		parseSeed();
+	});
+
 	$('#generate-btn-group').on('shown.bs.dropdown', function (event) {
-		seedInput.select();
 		seedInput.focus();
+	});
+
+	$('#generate-btn-group').on('hide.bs.dropdown', function(event) {
+		const target = document.activeElement;
+		return target !== generateButton && !seedForm.contains(target);
 	});
 
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
+		random = random.startGenerator;
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
+		displaySeed();
 		animPositionSlider.value = 0;
 		updateAnimPositionReadout(0);
 		if ('tween' in bgGenerator) {
@@ -978,13 +1079,17 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('btn-start-frame2').addEventListener('click', function (event) {
+		random = random.startGenerator;
 		startFrame = currentFrameData();
+		displaySeed();
 		animAction();
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
+		random = random.endGenerator;
 		currentFrame = currentFrameData();
 		endFrame = currentFrame;
+		displaySeed();
 		animPositionSlider.value = 1;
 		updateAnimPositionReadout(1);
 		if ('tween' in bgGenerator) {
@@ -996,25 +1101,43 @@ function showBackgroundOptions() {
 	});
 
 	document.getElementById('btn-end-frame2').addEventListener('click', function (event) {
+		random = random.endGenerator;
 		endFrame = currentFrameData();
+		displaySeed();
 		animAction();
 	});
 
 	document.getElementById('btn-both-frames').addEventListener('click', function (event) {
+		const tween = parseFloat(animPositionSlider.value);
+		if (loopAnim) {
+			random = tween < 0.25 || tween > 0.75 ? random.startGenerator : random.endGenerator;
+		} else {
+			random = tween < 0.5 ? random.startGenerator : random.endGenerator;
+		}
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = currentFrame;
+		seedInput.value = random.seed;
 		showAlert(successAlert, 'Both frames set.', document.body);
 	});
 
 	document.getElementById('btn-both-frames2').addEventListener('click', function (event) {
-		startFrame = currentFrameData();
-		endFrame = startFrame;
+		const tween = parseFloat(animPositionSlider.value);
+		if (loopAnim) {
+			random = tween < 0.25 || tween > 0.75 ? random.startGenerator : random.endGenerator;
+		} else {
+			random = tween < 0.5 ? random.startGenerator : random.endGenerator;
+		}
+		currentFrame = currentFrameData();
+		startFrame = currentFrame;
+		endFrame = currentFrame;
+		seedInput.value = random.seed;
 		animAction();
 	});
 
 	document.getElementById('btn-bg-change-discard').addEventListener('click', function (event) {
 		const tween = parseFloat(animPositionSlider.value);
+		random = interpolateRandom(startFrame.random, endFrame.random, calcTween(tween, loopAnim));
 		renderFrame(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
 		currentFrame = currentFrameData();
 		animAction();
@@ -1077,6 +1200,7 @@ function showBackgroundOptions() {
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
 		if (!separateFrames && unsavedChanges) {
+			random = random.endGenerator;
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
 			separateFrames = true;
@@ -1105,8 +1229,8 @@ function showBackgroundOptions() {
 
 	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
 	 	const toolbar = document.getElementById('background-gen-toolbar');
-		const activeElement = document.activeElement;
-		return activeElement.dataset.toggle === 'dropdown' && toolbar.contains(this);
+		const target = document.activeElement;
+		return target.dataset.toggle === 'dropdown' && toolbar.contains(target);
 	});
 
 	 let seeking = false;
@@ -1116,6 +1240,7 @@ function showBackgroundOptions() {
 			let unsavedChanges = !currentFrame.isCurrentFrame();
 			let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
 			if (!separateFrames && unsavedChanges) {
+				random = random.endGenerator;
 				currentFrame = currentFrameData();
 				endFrame = currentFrame;
 				separateFrames = true;
@@ -1149,17 +1274,17 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 	}
 
-	function syncAndDraw() {
-		seeking = false;
-		syncToPosition();
-		progressiveBackgroundGen(0);
-	}
-
 	function renderAndSync() {
 		const tween = parseFloat(animPositionSlider.value);
 		renderFrame(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
 		updateAnimPositionReadout(tween);
 		syncToPosition();
+	}
+
+	function syncAndDraw() {
+		syncToPosition();
+		seeking = false;
+		progressiveBackgroundGen(0);
 	}
 
 	animPositionSlider.addEventListener('pointerup', syncAndDraw);
@@ -1229,6 +1354,7 @@ function showBackgroundOptions() {
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
 		if (!separateFrames && unsavedChanges) {
+			random = random.endGenerator;
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
 			unsavedChanges = false;

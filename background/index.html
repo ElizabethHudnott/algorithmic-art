@@ -69,11 +69,14 @@
 		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			<span class="sr-only">Toggle randomization options</span>
 		</button>
-		<div class="dropdown-menu drop-align-right pt-1 pb-0">
-			<form class="px-2">
+		<div class="dropdown-menu drop-align-right">
+			<form class="px-2" id="random-seed-form">
 				<div class="form-group">
 					<label for="random-seed">Seed</label>
-					<textarea class="form-control text-right" id="random-seed" rows="4" minlength="7" maxlength="43"></textarea>
+					<textarea class="form-control text-right" id="random-seed" rows="8" minlength="7" style="resize: none"></textarea>
+				</div>
+				<div class="text-right">
+					<button type="submit" class="btn btn-primary btn-sm">Set Seed</button>
 				</div>
 			</form>
 		</div>

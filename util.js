@@ -124,6 +124,8 @@ class RandomNumberGenerator {
 		this.originalC = this.c;
 		this.originalD = this.d;
 		this.seed = seed;
+		this.startGenerator = this;
+		this.endGenerator = this;
 	}
 
 	next() {

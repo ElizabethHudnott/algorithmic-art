@@ -1009,6 +1009,7 @@ function showBackgroundOptions() {
 		if (seed === undefined) {
 			seed = seedInput.value;
 		}
+		seed = seed.replace(/\r/g, '');
 		const match = seed.match(/(\d+\n\d+\n\d+\n\d+)(?:\n(\d+\n\d+\n\d+\n\d+))?/);
 		if (match !== null) {
 			if (match[2] === undefined) {
@@ -1039,7 +1040,7 @@ function showBackgroundOptions() {
 	});
 
 	seedInput.addEventListener('paste', function (event) {
-		parseSeed(event.clipboardData.getData('text-plain'));
+		parseSeed(event.clipboardData.getData('text/plain'));
 	});
 
 	seedForm.addEventListener('focusout', function (event) {

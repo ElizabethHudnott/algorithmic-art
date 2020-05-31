@@ -1,6 +1,6 @@
 'use strict';
 
-let bgGenerator, generateBackground;
+let bgGenerator, generateBackground, assignBgAttribute;
 let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
 
@@ -28,19 +28,370 @@ function showBackgroundOptions() {
 	let bgGeneratorRotation = 0;
 
 	const canvas = document.getElementById('background-canvas');
-	canvas.getContext('2d').save();
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+
+	const vertexShaderSource = `
+ 		attribute vec4 aVertexPosition;
+		uniform mat4 uModelViewMatrix;
+		uniform mat4 uProjectionMatrix;
+
+		void main() {
+			gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+		}
+	`;
+
+	const fragmentShaderHeader = `
+		precision highp float;
+		#define PI 3.141592654
+		uniform float canvasWidth;
+		uniform float canvasHeight;
+		uniform float tween;
+		uniform int preview;
+	`;
+
+	function shaderDeclarations(generator) {
+		let str = '';
+		const animatable = generator.animatable;
+		if (animatable !== undefined) {
+			const continuous = animatable.continuous;
+			if (continuous !== undefined) {
+				for (let property of continuous) {
+					const value = generator[property];
+					if (Array.isArray(value)) {
+						const length = value.length;
+						if (Array.isArray(value[0])) {
+							str += 'uniform mat' + length + ' ' + property + ';\n';
+						} else {
+							str += 'uniform vec' + length + ' ' + property + ';\n';
+						}
+					} else {
+						str += 'uniform float ' + property + ';\n';
+					}
+				}
+			}
+			const stepped = animatable.stepped;
+			if (stepped !== undefined) {
+				for (let property of stepped) {
+					const value = generator[property];
+					if (Array.isArray(value)) {
+						const length = value.length;
+						str += 'uniform ivec' + length + ' ' + property + ';\n';
+					} else {
+						str += 'uniform int ' + property + ';\n';
+					}
+				}
+			}
+			const pairedContinuous = animatable.pairedContinuous;
+			if (pairedContinuous !== undefined) {
+				for (let [property1, property2] of pairedContinuous) {
+					const value1 = generator[property1];
+					let typeName;
+					if (Array.isArray(value1)) {
+						const length = value1.length;
+						if (Array.isArray(value1[0])) {
+							typeName = 'mat' + length;
+						} else {
+							typeName = 'vec' + length;
+						}
+					} else {
+						typeName = 'float';
+					}
+					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
+					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
+				}
+			}
+			const pairedStepped = animatable.pairedStepped;
+			if (pairedStepped !== undefined) {
+				for (let [property1, property2] of pairedStepped) {
+					const value1 = generator[property1];
+					let typeName;
+					if (Array.isArray(value1)) {
+						typeName = 'ivec' + value1.length;
+					} else {
+						typeName = 'int';
+					}
+					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
+					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
+				}
+			}
+		}
+		return str;
+	}
+
+	function loadShader(context, type, source) {
+		const shader = context.createShader(type);
+		context.shaderSource(shader, source);
+		context.compileShader(shader);
+
+		if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
+			console.error('Unable to compile shader: ' + context.getShaderInfoLog(shader));
+			context.deleteShader(shader);
+			return null;
+		}
+
+		return shader;
+	}
+
+	class DrawingContext {
+		constructor(canvas, width, height, scale) {
+			const twoD = canvas.getContext('2d');
+			this.twoD = twoD;
+			const glCanvas = document.createElement('CANVAS');
+			const gl = glCanvas.getContext('webgl');
+			this.gl = gl;
+			this.scale = scale;
+			this.resize(width, height);
+			const positionBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+			const points = [
+				-1,  1,
+				 1,  1,
+				-1, -1,
+				 1, -1,
+			];
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
+			gl.enable(gl.DEPTH_TEST);
+			const modelViewMatrix = mat4.create();
+			mat4.translate(
+				modelViewMatrix,	// destination matrix
+				modelViewMatrix,	// matrix to translate
+				[0, 0, -1]			// amount to translate
+			);
+			this.modelViewMatrix = modelViewMatrix;
+		}
+
+		resize(width, height) {
+			const canvas = this.twoD.canvas;
+			canvas.width = width;
+			canvas.height = height;
+			const twoD = this.twoD;
+			const scale = this.scale;
+			if (scale !== 1) {
+				twoD.scale(scale, scale);
+				twoD.save();
+			}
+			twoD.save();
+			const gl = this.gl;
+			const glCanvas = gl.canvas;
+			glCanvas.width = width / scale;
+			glCanvas.height = height / scale;
+			gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+
+			const fieldOfView = Math.PI / 4;
+			const aspect = width / height;
+			const zNear = 0.1;
+			const zFar = 100;
+			const projectionMatrix = mat4.create();
+			mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+			this.projectionMatrix = projectionMatrix;
+
+			const uniformLocations = this.uniformLocations;
+			if (uniformLocations) {
+				gl.uniformMatrix4fv(
+					uniformLocations.projectionMatrix,
+					false,
+					projectionMatrix
+				);
+				gl.uniform1f(uniformLocations.width, glCanvas.width);
+				gl.uniform1f(uniformLocations.height, glCanvas.height);
+			}
+        }
+
+		initializeShader(generator) {
+			if (generator.shaderSource === undefined) {
+				return;
+			}
+			const gl = this.gl;
+			const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+			const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, generator.shaderSource);
+			const program = gl.createProgram();
+			this.program = program;
+			gl.attachShader(program, vertexShader);
+			gl.attachShader(program, fragmentShader);
+			gl.linkProgram(program);
+			if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+				console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+				return null;
+			}
+
+			const vertexPosition = gl.getAttribLocation(program, 'aVertexPosition');
+			gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0);
+			const uniformLocations = {
+				projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
+				modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
+				width: gl.getUniformLocation(program, 'canvasWidth'),
+				height: gl.getUniformLocation(program, 'canvasHeight'),
+				tween: gl.getUniformLocation(program, 'tween'),
+				preview: gl.getUniformLocation(program, 'preview'),
+			};
+			this.uniformLocations = uniformLocations;
+			gl.enableVertexAttribArray(vertexPosition);
+			gl.useProgram(program);
+			gl.uniformMatrix4fv(
+				uniformLocations.projectionMatrix,
+				false,
+				this.projectionMatrix
+			);
+			gl.uniformMatrix4fv(
+				uniformLocations.modelViewMatrix,
+				false,
+				this.modelViewMatrix
+			);
+			gl.uniform1f(uniformLocations.width, gl.canvas.width);
+			gl.uniform1f(uniformLocations.height, gl.canvas.height);
+		}
+
+		assignAttribute(generator, property, value) {
+			if (arguments.length === 2) {
+				value = generator[property];
+			} else {
+				generator[property] = value;
+			}
+			const gl = this.gl;
+			const location = gl.getUniformLocation(this.program, property);
+			let length, methodName;
+			const isArray = Array.isArray(value);
+			if (isArray) {
+				length = value.length;
+				if (Array.isArray(value[0])) {
+					methodName = 'uniformMatrix' + length + 'fv';
+					value = new Float32Array(value.flat());
+					gl[methodName](location, false, value);
+					return;
+				}
+			}
+
+			const stepped = generator.animatable.stepped;
+			let isInt = stepped !== undefined && stepped.includes(property);
+			const pairedStepped = generator.animatable.pairedStepped;
+			if (pairedStepped !== undefined) {
+				for (let [property1, property2] of pairedStepped) {
+					if (property1 === property || property2 === property) {
+						isInt = true;
+						break;
+					}
+				}
+			}
+			const type = isInt ? 'i' : 'f';
+
+			if (isArray) {
+				if (isInt) {
+					value = new Int32Array(value);
+				}
+				methodName = 'uniform' + length + type + 'v';
+			} else {
+				methodName = 'uniform1' + type;
+			}
+			gl[methodName](location, value);
+		}
+
+		assignAttributes(generator) {
+			const animatable = generator.animatable;
+			if (animatable !== undefined) {
+				const gl = this.gl;
+				const continuous = animatable.continuous;
+				if (continuous !== undefined) {
+					for (let property of continuous) {
+						const location = gl.getUniformLocation(this.program, property);
+						let value = generator[property];
+						let methodName;
+						if (Array.isArray(value)) {
+							const length = value.length;
+							if (Array.isArray(value[0])) {
+								methodName = 'uniformMatrix' + length + 'fv';
+								value = new Float32Array(value.flat());
+								gl[methodName](location, false, value);
+								continue;
+							} else {
+								methodName = 'uniform' + length + 'fv';
+							}
+						} else {
+							methodName = 'uniform1f';
+						}
+						gl[methodName](location, value);
+					}
+				}
+				const stepped = animatable.stepped;
+				if (stepped !== undefined) {
+					for (let property of stepped) {
+						const location = gl.getUniformLocation(this.program, property);
+						let value = generator[property];
+						let methodName;
+						if (Array.isArray(value)) {
+							const length = value.length;
+							methodName = 'uniform' + length + 'iv';
+							value = new Int32Array(value);
+						} else {
+							methodName = 'uniform1i';
+						}
+						gl[methodName](location, value);
+					}
+				}
+				const pairedContinuous = animatable.pairedContinuous;
+				if (pairedContinuous !== undefined) {
+					for (let [property1, property2] of pairedContinuous) {
+						const location1 = gl.getUniformLocation(this.program, property1);
+						const location2 = gl.getUniformLocation(this.program, property1);
+						let value1 = generator[property1];
+						let value2 = generator[property2];
+						let methodName;
+						if (Array.isArray(value1)) {
+							const length = value1.length;
+							if (Array.isArray(value1[0])) {
+								methodName = 'uniformMatrix' + length + 'fv';
+								value1 = new Float32Array(value1.flat());
+								value2 = new Float32Array(value2.flat());
+								gl[methodName](location1, false, value1);
+								gl[methodName](location2, false, value2);
+								continue;
+							} else {
+								methodName = 'uniform' + length + 'fv';
+							}
+						} else {
+							methodName = 'uniform1f';
+						}
+						gl[methodName](location1, value1);
+						gl[methodName](location2, value2);
+					}
+				}
+				const pairedStepped = animatable.pairedStepped;
+				if (pairedStepped !== undefined) {
+					for (let [property1, property2] of pairedStepped) {
+						const location1 = gl.getUniformLocation(this.program, property1);
+						const location2 = gl.getUniformLocation(this.program, property1);
+						let value1 = generator[property1];
+						let value2 = generator[property2];
+						let methodName;
+						if (Array.isArray(value1)) {
+							const length = value1.length;
+							methodName = 'uniform' + length + 'iv';
+							value1 = new Int32Array(value1);
+							value2 = new Int32Array(value2);
+						} else {
+							methodName = 'uniform1i';
+						}
+						gl[methodName](location1, value1);
+						gl[methodName](location2, value2);
+					}
+				}
+			}
+		}
+
+		drawGL(tween, preview) {
+			const gl = this.gl;
+			gl.uniform1f(this.uniformLocations.tween, tween);
+			gl.uniform1i(this.uniformLocations.preview, preview);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+			this.twoD.drawImage(gl.canvas, 0, 0);
+		}
+
+	}
+
+	const drawingContext = new DrawingContext(canvas, window.innerWidth, window.innerHeight, 1);
 
 	const signatureFont = 'italic 20px "Pacifico", cursive';
 
-	function drawSignature(context) {
-		context.restore();
-		context.save();
-		context.shadowColor = 'transparent';
-		context.font = signatureFont;
-		context.textAlign = 'left';
-		context.textBaseline = 'bottom';
+	function drawSignature(contextualInfo) {
 		let text = '';
 		let sketchAuthor;
 		if (currentSketch) {
@@ -60,8 +411,16 @@ function showBackgroundOptions() {
 			signatureWidth = 100;
 			signatureHeight = 30;
 		} else {
+			const context = contextualInfo.twoD;
+			const scale = contextualInfo.scale;
+			context.restore();
+			context.save();
+			context.shadowColor = 'transparent';
+			const fontSize = Math.ceil(20 / scale);
+			context.font = signatureFont.replace('20', fontSize);
+			context.textAlign = 'left';
+			context.textBaseline = 'bottom';
 			const metrics = context.measureText(text);
-			const scale = context.savedScale || 1;
 			const paddingX = Math.ceil(3 / scale);
 			const paddingY = Math.ceil(4 / scale);
 			signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
@@ -76,28 +435,39 @@ function showBackgroundOptions() {
 		}
 	}
 
-	function progressiveBackgroundDraw(generator, context, width, height, preview) {
-		random.reset();
-		const redraw = generator.generate(context, width, height, preview);
-		backgroundRedraw = redraw;
-		let done = false;
-		function drawSection() {
-			if (backgroundRedraw === redraw) {
-				done = redraw.next().done;
-				if (done) {
-					if (document.fonts.check(signatureFont)) {
-						drawSignature(context);
+	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview) {
+		if (generator.isShader) {
+			contextualInfo.drawGL(parseFloat(animPositionSlider.value), preview);
+			if (document.fonts.check(signatureFont)) {
+				drawSignature(contextualInfo);
+			} else {
+				document.fonts.load(signatureFont).then(function () {
+					drawSignature(contextualInfo);
+				});
+			}
+		} else {
+			random.reset();
+			const redraw = generator.generate(contextualInfo.twoD, width, height, preview);
+			backgroundRedraw = redraw;
+			let done = false;
+			function drawSection() {
+				if (backgroundRedraw === redraw) {
+					done = redraw.next().done;
+					if (done) {
+						if (document.fonts.check(signatureFont)) {
+							drawSignature(contextualInfo);
+						} else {
+							document.fonts.load(signatureFont).then(function () {
+								drawSignature(contextualInfo);
+							});
+						}
 					} else {
-						document.fonts.load(signatureFont).then(function () {
-							drawSignature(context);
-						});
+						setTimeout(drawSection, 0);
 					}
-				} else {
-					setTimeout(drawSection, 0);
 				}
 			}
+			drawSection();
 		}
-		drawSection();
 	}
 
 	function rotateCanvas(context, width, height, rotation) {
@@ -107,16 +477,17 @@ function showBackgroundOptions() {
 	}
 
 	function progressiveBackgroundGen(preview) {
-		const context = canvas.getContext('2d');
+		const context = drawingContext.twoD;
 		const width = canvas.width;
 		const height = canvas.height;
 		context.restore();
 		context.clearRect(0, 0, width, height);
 		context.save();
 		rotateCanvas(context, width, height, bgGeneratorRotation);
-		progressiveBackgroundDraw(bgGenerator, context, width, height, preview);
+		progressiveBackgroundDraw(bgGenerator, drawingContext, width, height, preview);
 	}
 	generateBackground = progressiveBackgroundGen;
+	assignBgAttribute = drawingContext.assignAttribute.bind(drawingContext);
 
 	bgGeneratorImage.onload = function () {
 		progressiveBackgroundGen(0);
@@ -178,9 +549,7 @@ function showBackgroundOptions() {
 					}
 				}
 				if ('pairedContinuous' in animatable) {
-					for (let pair of animatable.pairedContinuous) {
-						const property1 = pair[0];
-						const property2 = pair[1];
+					for (let [property1, property2] of animatable.pairedContinuous) {
 						const value1 = deepArrayCopy(generator[property1]);
 						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedContinuous.set(property1, value1);
@@ -188,9 +557,7 @@ function showBackgroundOptions() {
 					}
 				}
 				if ('pairedStepped' in animatable) {
-					for (let pair of animatable.pairedStepped) {
-						const property1 = pair[0];
-						const property2 = pair[1];
+					for (let [property1, property2] of animatable.pairedStepped) {
 						const value1 = deepArrayCopy(generator[property1]);
 						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedStepped.set(property1, value1);
@@ -349,9 +716,7 @@ function showBackgroundOptions() {
 				return generator;
 			});
 		} else {
-			return new Promise(function (resolve, reject) {
-				return resolve(generator);
-			});
+			return new Promise.resolve(generator);
 		}
 	}
 
@@ -432,6 +797,16 @@ function showBackgroundOptions() {
 			currentSketch = undefined;
 		}
 		generatorFactory(url).then(function (gen) {
+			let shaderDownload;
+			if (gen.isShader && !gen.shaderSource) {
+				shaderDownload = downloadFile(url.slice(0, -3) + '.frag', 'text').then(function (source) {
+					gen.shaderSource = fragmentShaderHeader +
+						shaderDeclarations(gen) +
+						source;
+				});
+			} else {
+				shaderDownload = Promise.resolve();
+			}
 			document.title = gen.title;
 			if (bgGenerator && bgGenerator.purgeCache) {
 				bgGenerator.purgeCache();
@@ -452,7 +827,11 @@ function showBackgroundOptions() {
 				document.getElementById('btn-both-frames').hidden = true;
 				document.getElementById('btn-both-frames2').hidden = true;
 			}
-			progressiveBackgroundGen(0);
+			shaderDownload.then(function () {
+				drawingContext.initializeShader(bgGenerator);
+				drawingContext.assignAttributes(bgGenerator);
+				progressiveBackgroundGen(0);
+			});
 
 			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
 
@@ -773,7 +1152,7 @@ function showBackgroundOptions() {
 		context.drawImage(tempCanvas, 0, 0, width, height);
 	}
 
-	function renderFrame(generator, context, width, height, tween, loop, paintBackground, preview) {
+	function renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview) {
 		const tweenPrime = calcTween(tween, loop);
 		for (let [property, startValue] of startFrame.continuous.entries()) {
 			let endValue = endFrame.continuous.get(property);
@@ -799,12 +1178,17 @@ function showBackgroundOptions() {
 		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tweenPrime, false);
 		interpolateRandom(startFrame.random, endFrame.random, tweenPrime);
 
+		const context = contextualInfo.twoD;
 		context.restore();
 		backgroundElement.style.backgroundColor = backgroundColor;
 		context.clearRect(0, 0, width, height);
 		context.save();
 		rotateCanvas(context, width, height, rotation);
-		if (preview === 0) {
+		if (generator.isShader) {
+			contextualInfo.assignAttributes(generator);
+			contextualInfo.drawGL(tweenPrime, preview);
+			drawSignature(contextualInfo);
+		} else if (preview === 0) {
 			// Draw everything in one go when capturing video
 			random.reset();
 			const redraw = generator.generate(context, width, height, 0);
@@ -813,16 +1197,16 @@ function showBackgroundOptions() {
 			do {
 				done = redraw.next().done;
 			} while (!done);
-			drawSignature(context);
-			if (paintBackground) {
-				fillBackground(context, backgroundColor, width, height);
-			}
+			drawSignature(contextualInfo);
 		} else {
-			progressiveBackgroundDraw(generator, context, width, height, preview);
+			progressiveBackgroundDraw(generator, contextualInfo, width, height, preview);
+		}
+		if (paintBackground) {
+			fillBackground(context, backgroundColor, width, height);
 		}
 	}
 
-	function animate(generator, context, width, height, startTween, length, loop, capturer) {
+	function animate(generator, contextualInfo, width, height, startTween, length, loop, capturer) {
 		const paintBackground = capturer !== undefined;
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
@@ -841,11 +1225,11 @@ function showBackgroundOptions() {
 				if (newAnimController.status === 'aborted') {
 					return;
 				}
-				renderFrame(generator, context, width, height, tween, loop, paintBackground, 0);
+				renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, 0);
 				newAnimController.progress = tween;
 
 				if (capturer) {
-					capturer.capture(context.canvas);
+					capturer.capture(contextualInfo.twoD.canvas);
 					let percent = (tween - startTween) / (1 - startTween) * 100;
 					progressBar.style.width = percent + '%';
 					percent = Math.trunc(percent);
@@ -870,7 +1254,7 @@ function showBackgroundOptions() {
 		return newAnimController;
 	}
 
-	function captureVideo(context, width, height, startTween, length, properties) {
+	function captureVideo(contextualInfo, width, height, startTween, length, properties) {
 		progressBar.style.width = '0';
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
@@ -883,14 +1267,14 @@ function showBackgroundOptions() {
 		stopButton.disabled = false;
 
 		const capturer = new CCapture(properties);
-		animController = animate(bgGenerator, context, width, height, startTween, length, loopAnim, capturer);
+		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
 		function reset() {
 			stopButton.disabled = true;
 			capturer.stop();
 			progressRow.hidden = true;
 			renderButton.disabled = false;
 			if (debug.video) {
-				document.body.removeChild(context.canvas);
+				document.body.removeChild(contextualInfo.twoD.canvas);
 			}
 			canvas.style.display = 'block';
 		}
@@ -925,7 +1309,7 @@ function showBackgroundOptions() {
 			try {
 				store.setItem('no-welcome', !this.checked);
 			} catch (e) {
-				console.log(e);
+				console.warn(e);
 			}
 		});
 	}
@@ -987,7 +1371,7 @@ function showBackgroundOptions() {
 	// Changing background colour.
 	document.getElementById('paper-color').addEventListener('input', function (event) {
 		backgroundElement.style.backgroundColor = this.value;
-		drawSignature(canvas.getContext('2d'));
+		drawSignature(drawingContext);
 	});
 
 	// Generate new background button.
@@ -1139,7 +1523,7 @@ function showBackgroundOptions() {
 	document.getElementById('btn-bg-change-discard').addEventListener('click', function (event) {
 		const tween = parseFloat(animPositionSlider.value);
 		random = interpolateRandom(startFrame.random, endFrame.random, calcTween(tween, loopAnim));
-		renderFrame(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
+		renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, tween, loopAnim, false, 0);
 		currentFrame = currentFrameData();
 		animAction();
 	});
@@ -1186,7 +1570,7 @@ function showBackgroundOptions() {
 			}
 		}
 		const length = parseFloat(document.getElementById('anim-length').value) * 1000;
-		animController = animate(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, start, length, loopAnim);
+		animController = animate(bgGenerator, drawingContext, canvas.width, canvas.height, start, length, loopAnim);
 		animController.promise = animController.promise.then(animFinished, animFinished);
 		animController.start();
 	}
@@ -1260,7 +1644,7 @@ function showBackgroundOptions() {
 			seeking = true;
 		}
 		const tween = parseFloat(this.value);
-		renderFrame(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 1);
+		renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, tween, loopAnim, false, 1);
 		updateAnimPositionReadout(tween);
 	});
 
@@ -1277,7 +1661,7 @@ function showBackgroundOptions() {
 
 	function renderAndSync() {
 		const tween = parseFloat(animPositionSlider.value);
-		renderFrame(bgGenerator, canvas.getContext('2d'), canvas.width, canvas.height, tween, loopAnim, false, 0);
+		renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, tween, loopAnim, false, 0);
 		updateAnimPositionReadout(tween);
 		syncToPosition();
 	}
@@ -1408,19 +1792,19 @@ function showBackgroundOptions() {
 			const resolutionStr = videoResolutionInput.value;
 			const videoWidth = parseInt(resolutionStr);
 			const videoHeight = parseInt(resolutionStr.slice(resolutionStr.indexOf('x') + 1));
-			const captureCanvas = document.createElement('canvas');
+			const captureCanvas = document.createElement('CANVAS');
 			captureCanvas.width = videoWidth;
 			captureCanvas.height = videoHeight;
 			if (debug.video) {
 				canvas.style.display = 'none';
 				document.body.appendChild(captureCanvas);
 			}
-			const context = captureCanvas.getContext('2d');
 			const scale = videoHeight / screen.height;
-			context.scale(scale, scale);
-			context.savedScale = scale;
-			context.save();
-			captureVideo(context, videoWidth / scale, screen.height, startTween, length * 1000, properties);
+			const drawWidth = videoWidth / scale;
+			const drawHeight = screen.height;
+			const contextualInfo = new DrawingContext(captureCanvas, videoWidth, videoHeight, scale);
+			contextualInfo.initializeShader(bgGenerator);
+			captureVideo(contextualInfo, drawWidth, drawHeight, startTween, length * 1000, properties);
 
 		} else {
 
@@ -1474,8 +1858,7 @@ function showBackgroundOptions() {
 	let resizeTimer;
 	function resizeWindow() {
 		repositionModal(false);
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		drawingContext.resize(window.innerWidth, window.innerHeight);
 		progressiveBackgroundGen(0);
 	}
 

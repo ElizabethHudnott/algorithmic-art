@@ -1,4 +1,3 @@
-
 /* A template for creating new sketches. At present this is beta quality and subject to
  * potential future revisions (including the possibility of breaking changes).
  */

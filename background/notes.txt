@@ -1,6 +1,7 @@
 Environment
 -----------
 Bug: changing start frame or end frame while rendering video
+Handle attempting to download non-existent files (e.g. wrong generator name)
 Link from home page
 Revise Patreon description
 Add credits
@@ -19,12 +20,14 @@ Download picture sizing
 Ability to animate sketches that use random numbers
 Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
+	Share to: Facebook, YouTube, Instagram, Tumblr, Twitter, Pinterest, DeviantArt?
 Ability to incorporate video data
 	as component image and as background
 Radial blur
 Background: color, picture, video or layered sketches
 Animation easing
 WebGL shader sketches
+Progressive Web App
 
 Existing Sketches
 -----------------

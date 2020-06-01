@@ -18,7 +18,9 @@ function WebGLDemo() {
 }
 
 WebGLDemo.prototype.animatable = {
-	continuous: ['red'],
+	continuous: [
+		'red'
+	],
 }
 
 return WebGLDemo;

@@ -46,6 +46,12 @@ function showBackgroundOptions() {
 		uniform float canvasHeight;
 		uniform float tween;
 		uniform int preview;
+
+		vec4 hsla(in float h, in float s, in float l, in float a) {
+			vec3 c = vec3(h, s, l);
+			vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
+			return vec4(c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0)), a);
+		}
 	`;
 
 	function shaderDeclarations(generator) {
@@ -136,7 +142,7 @@ function showBackgroundOptions() {
 			const twoD = canvas.getContext('2d');
 			this.twoD = twoD;
 			const glCanvas = document.createElement('CANVAS');
-			const gl = glCanvas.getContext('webgl');
+			const gl = glCanvas.getContext('webgl2');
 			this.gl = gl;
 			this.scale = scale;
 			this.resize(width, height);

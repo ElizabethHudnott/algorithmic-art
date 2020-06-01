@@ -29,11 +29,18 @@
 			"keywords": ["mathematics"]
 		},
 		{
+			"title": "Julia Set",
+			"url": "julia-set.js",
+			"thumbnail": "thumbnail/julia-set.png",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["fractals"]
+		},
+		{
 			"title": "Phyllotaxis",
 			"url": "phyllotaxis.js",
 			"thumbnail": "thumbnail/phyllotaxis.png",
 			"author": "Elizabeth Hudnott",
-			"keywords": ["plants", "golden ratio", "spirals"]
+			"keywords": ["plants", "nature", "golden ratio", "spirals"]
 		},
 		{
 			"title": "Sierpinski Carpet",

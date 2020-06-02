@@ -39,7 +39,9 @@ function JuliaSet() {
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
-		'cReal', 'cIm',
+	],
+	xy: [
+		['cReal', 'cIm'],
 	],
 	stepped: [
 		'maxIterations'

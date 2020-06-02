@@ -67,6 +67,11 @@ MySketch.prototype.animatable = {
 		['myThingyMax', 'myThingyMin']
 	],
 	pairedStepped: [
+	],
+	/* (x, y) pairs are described in the same way as other pairs but instead we interpret
+	 * the start and end values as two points on a plane and perform a circular motion.
+	 */
+	xy: [
 	]
 };
 

@@ -1,5 +1,6 @@
 Environment
 -----------
+WebGL: use position relative to the vertices
 Bug: changing start frame or end frame while rendering video
 Handle attempting to download non-existent files (e.g. wrong generator name)
 Link from home page
@@ -26,6 +27,7 @@ Ability to incorporate video data
 Radial blur
 Background: color, picture, video or layered sketches
 Animation easing
+	XY properties should pass through the endFrame point at the halfway point in the animation
 WebGL shader sketches
 Progressive Web App
 
@@ -59,6 +61,15 @@ Cellular Automata
 	Rule table compression: reflection, map permutations of colors to the same/different values
 	Brick wall neighbourhoods (odd left, even right)
 	Alternate neighbourhoods
+
+Julia Set
+	Possible functions
+		Divisions of polynomials
+		z = c*sin(z)
+		z = ci * cos(z)
+		z = c * exp(z);
+		z = c * z * (1-z)
+
 
 New Sketches
 ------------

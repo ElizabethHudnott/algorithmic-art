@@ -105,6 +105,14 @@ function showBackgroundOptions() {
 					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
 				}
 			}
+			const xy = animatable.xy;
+			if (xy !== undefined) {
+				for (let [property1, property2] of xy) {
+					str += 'uniform float ' + property1 + ';\n';
+					str += 'uniform float ' + property2 + ';\n';
+				}
+
+			}
 			const pairedStepped = animatable.pairedStepped;
 			if (pairedStepped !== undefined) {
 				for (let [property1, property2] of pairedStepped) {
@@ -130,6 +138,7 @@ function showBackgroundOptions() {
 
 		if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
 			console.error('Unable to compile shader: ' + context.getShaderInfoLog(shader));
+			console.log(source);
 			context.deleteShader(shader);
 			return null;
 		}
@@ -336,7 +345,7 @@ function showBackgroundOptions() {
 				if (pairedContinuous !== undefined) {
 					for (let [property1, property2] of pairedContinuous) {
 						const location1 = gl.getUniformLocation(this.program, property1);
-						const location2 = gl.getUniformLocation(this.program, property1);
+						const location2 = gl.getUniformLocation(this.program, property2);
 						let value1 = generator[property1];
 						let value2 = generator[property2];
 						let methodName;
@@ -359,11 +368,22 @@ function showBackgroundOptions() {
 						gl[methodName](location2, value2);
 					}
 				}
+				const xy = animatable.xy;
+				if (xy !== undefined) {
+					for (let [property1, property2] of xy) {
+						const location1 = gl.getUniformLocation(this.program, property1);
+						const location2 = gl.getUniformLocation(this.program, property2);
+						let value1 = generator[property1];
+						let value2 = generator[property2];
+						gl.uniform1f(location1, value1);
+						gl.uniform1f(location2, value2);
+					}
+				}
 				const pairedStepped = animatable.pairedStepped;
 				if (pairedStepped !== undefined) {
 					for (let [property1, property2] of pairedStepped) {
 						const location1 = gl.getUniformLocation(this.program, property1);
-						const location2 = gl.getUniformLocation(this.program, property1);
+						const location2 = gl.getUniformLocation(this.program, property2);
 						let value1 = generator[property1];
 						let value2 = generator[property2];
 						let methodName;
@@ -503,7 +523,7 @@ function showBackgroundOptions() {
 	const urlParameters = new URLSearchParams(document.location.search);
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
-	let generatorURL, startFrame, endFrame, animController;
+	let generatorURL, startFrame, endFrame, tweenData, animController;
 	/* The current frame according to the interpolation, not necessarily what's displayed
 	 * on screen because there can be unsaved changes. */
 	let currentFrame;
@@ -539,31 +559,45 @@ function showBackgroundOptions() {
 			this.continuous = new Map();
 			this.stepped = new Map();
 			this.pairedContinuous = new Map();
+			this.xy = new Map();
 			this.pairedStepped = new Map();
 			const animatable = generator.animatable
 			if (animatable !== undefined) {
-				if ('continuous' in animatable) {
-					for (let property of animatable.continuous) {
+				const continuous = animatable.continuous;
+				if (continuous !== undefined) {
+					for (let property of continuous) {
 						const value = deepArrayCopy(generator[property]);
 						this.continuous.set(property, value);
 					}
 				}
-				if ('stepped' in animatable) {
-					for (let property of animatable.stepped) {
+				const stepped = animatable.stepped;
+				if (stepped !== undefined) {
+					for (let property of stepped) {
 						const value = deepArrayCopy(generator[property]);
 						this.stepped.set(property, value);
 					}
 				}
-				if ('pairedContinuous' in animatable) {
-					for (let [property1, property2] of animatable.pairedContinuous) {
+				const pairedContinuous = animatable.pairedContinuous;
+				if (pairedContinuous !== undefined) {
+					for (let [property1, property2] of pairedContinuous) {
 						const value1 = deepArrayCopy(generator[property1]);
 						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedContinuous.set(property1, value1);
 						this.pairedContinuous.set(property2, value2);
 					}
 				}
-				if ('pairedStepped' in animatable) {
-					for (let [property1, property2] of animatable.pairedStepped) {
+				const xy = animatable.xy;
+				if (xy !== undefined) {
+					for (let [property1, property2] of xy) {
+						const value1 = generator[property1];
+						const value2 = generator[property2];
+						this.xy.set(property1, value1);
+						this.xy.set(property2, value2);
+					}
+				}
+				const pairedStepped = animatable.pairedStepped;
+				if (pairedStepped !== undefined) {
+					for (let [property1, property2] of pairedStepped) {
 						const value1 = deepArrayCopy(generator[property1]);
 						const value2 = deepArrayCopy(generator[property2]);
 						this.pairedStepped.set(property1, value1);
@@ -657,6 +691,32 @@ function showBackgroundOptions() {
 					const frameValue2 = this.pairedContinuous.get(key2);
 					const currentValue2 = bgGenerator[key2];
 					if (!deepEquals(frameValue2, currentValue2)) {
+						return false;
+					}
+				}
+			}
+
+			const xy = animatable.xy;
+			if (xy === undefined) {
+				if (this.xy.size > 0) {
+					return false;
+				}
+			} else {
+				if (this.xy.size !== xy.length * 2) {
+					return false;
+				}
+				for (let i = 0; i < xy.length; i++) {
+					const keys = xy[i];
+					const key1 = keys[0];
+					const frameValue1 = this.xy.get(key1);
+					const currentValue1 = bgGenerator[key1];
+					if (frameValue1 !== currentValue1) {
+						return false;
+					}
+					const key2 = keys[1];
+					const frameValue2 = this.xy.get(key2);
+					const currentValue2 = bgGenerator[key2];
+					if (frameValue2 !== currentValue2) {
 						return false;
 					}
 				}
@@ -834,8 +894,10 @@ function showBackgroundOptions() {
 				document.getElementById('btn-both-frames2').hidden = true;
 			}
 			shaderDownload.then(function () {
-				drawingContext.initializeShader(bgGenerator);
-				drawingContext.assignAttributes(bgGenerator);
+				if (bgGenerator.isShader) {
+					drawingContext.initializeShader(bgGenerator);
+					drawingContext.assignAttributes(bgGenerator);
+				}
 				progressiveBackgroundGen(0);
 			});
 
@@ -1106,6 +1168,50 @@ function showBackgroundOptions() {
 		}
 	}
 
+	class TweenData {
+
+		constructor(generator, startFrame, endFrame) {
+			// Map x property name to the calculated value.
+			this.radii = new Map();
+			this.startTheta = new Map();
+			this.centreX = new Map();
+			this.centreY = new Map();
+
+			if (generator.animatable === undefined || generator.animatable.xy === undefined) {
+				return;
+			}
+
+			const startXY = startFrame.xy;
+			const endXY = endFrame.xy;
+
+			for (let [keyX, keyY] of generator.animatable.xy) {
+				const startX = startXY.get(keyX);
+				const startY = startXY.get(keyY);
+				const endX = endXY.get(keyX);
+				const endY = endXY.get(keyY);
+				const centreX = (startX + endX) / 2;
+				const centreY = (startY + endY) / 2;
+				const distX = startX - centreX;
+				const distY = startY - centreY;
+				const r = Math.hypot(distX, distY);
+				const theta = Math.atan2(distY, distX);
+				this.radii.set(keyX, r);
+				this.startTheta.set(keyX, theta);
+				this.centreX.set(keyX, centreX);
+				this.centreY.set(keyX, centreY);
+			}
+		}
+
+		interpolateXY(keyX, tween) {
+			const r = this.radii.get(keyX);
+			const startTheta = this.startTheta.get(keyX);
+			const theta = tween * TWO_PI + startTheta;
+			const x = r * Math.cos(theta) + this.centreX.get(keyX);
+			const y = r * Math.sin(theta) + this.centreY.get(keyX);
+			return [x, y];
+		}
+
+	}
 
 	class InterpolatedRandom {
 		constructor(startGenerator, endGenerator, tween) {
@@ -1161,14 +1267,31 @@ function showBackgroundOptions() {
 	function renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview) {
 		const tweenPrime = calcTween(tween, loop);
 		for (let [property, startValue] of startFrame.continuous.entries()) {
-			let endValue = endFrame.continuous.get(property);
+			const endValue = endFrame.continuous.get(property);
 			generator[property] = interpolateValue(startValue, endValue, tweenPrime, false);
 		}
 		for (let [property, startValue] of startFrame.stepped.entries()) {
-			let endValue = endFrame.stepped.get(property);
+			const endValue = endFrame.stepped.get(property);
 			generator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
 		if (generator.animatable) {
+			const xy = generator.animatable.xy;
+			if (xy !== undefined && startFrame !== endFrame) {
+				if (loop) {
+					for (let [propertyX, propertyY] of xy) {
+						const [x, y] = tweenData.interpolateXY(propertyX, tween);
+						generator[propertyX] = x;
+						generator[propertyY] = y;
+					}
+				} else {
+					for (let [property, startValue] of startFrame.xy.entries()) {
+						const endValue = endFrame.xy.get(property);
+						generator[property] = interpolateValue(startValue, endValue, tween, false);
+					}
+				}
+
+			}
+
 			interpolatePairs('pairedContinuous', false, tween, loop);
 			interpolatePairs('pairedStepped', true, tween, loop);
 		}
@@ -1414,6 +1537,7 @@ function showBackgroundOptions() {
 					const endGenerator = new RandomNumberGenerator(match[2]);
 					if (startFrame === endFrame) {
 						endFrame = currentFrameData();
+						tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 					}
 					endFrame.random = endGenerator;
 					const tween = calcTween(parseFloat(animPositionSlider.value), loopAnim);
@@ -1458,6 +1582,7 @@ function showBackgroundOptions() {
 		random = random.startGenerator;
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		displaySeed();
 		animPositionSlider.value = 0;
 		updateAnimPositionReadout(0);
@@ -1472,6 +1597,7 @@ function showBackgroundOptions() {
 	document.getElementById('btn-start-frame2').addEventListener('click', function (event) {
 		random = random.startGenerator;
 		startFrame = currentFrameData();
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		displaySeed();
 		animAction();
 	});
@@ -1480,6 +1606,7 @@ function showBackgroundOptions() {
 		random = random.endGenerator;
 		currentFrame = currentFrameData();
 		endFrame = currentFrame;
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		displaySeed();
 		animPositionSlider.value = 1;
 		updateAnimPositionReadout(1);
@@ -1494,6 +1621,7 @@ function showBackgroundOptions() {
 	document.getElementById('btn-end-frame2').addEventListener('click', function (event) {
 		random = random.endGenerator;
 		endFrame = currentFrameData();
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		displaySeed();
 		animAction();
 	});
@@ -1594,6 +1722,7 @@ function showBackgroundOptions() {
 			random = random.endGenerator;
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
+			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 			separateFrames = true;
 			unsavedChanges = false;
 		}
@@ -1634,6 +1763,7 @@ function showBackgroundOptions() {
 				random = random.endGenerator;
 				currentFrame = currentFrameData();
 				endFrame = currentFrame;
+				tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 				separateFrames = true;
 				unsavedChanges = false;
 			}
@@ -1748,6 +1878,7 @@ function showBackgroundOptions() {
 			random = random.endGenerator;
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
+			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 			unsavedChanges = false;
 		}
 		if (unsavedChanges) {

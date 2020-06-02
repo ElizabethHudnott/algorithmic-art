@@ -29,8 +29,8 @@ function showBackgroundOptions() {
 
 	const canvas = document.getElementById('background-canvas');
 
-	const vertexShaderSource = `
- 		attribute vec4 aVertexPosition;
+	const vertexShaderSource = `#version 300 es
+ 		in vec4 aVertexPosition;
 		uniform mat4 uModelViewMatrix;
 		uniform mat4 uProjectionMatrix;
 
@@ -39,8 +39,9 @@ function showBackgroundOptions() {
 		}
 	`;
 
-	const fragmentShaderHeader = `
+	const fragmentShaderHeader = `#version 300 es
 		precision highp float;
+		out vec4 fragColor;
 		#define PI 3.141592654
 		uniform float canvasWidth;
 		uniform float canvasHeight;

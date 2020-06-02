@@ -5,21 +5,18 @@ void main() {
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
 
-	int exitTime = maxIterations;
-	for (int i = 0; i < 1000000; i++) {
+	int i = 0;
+	while (x * x + y * y < escapeRSquared && i < maxIterations) {
 		float newX = x * x - y * y + cReal;
 		y = 2.0 * x * y + cIm;
 		x = newX;
-		if (i == maxIterations || x * x + y * y > escapeRSquared) {
-			exitTime = i;
-			break;
-		}
+		i++;
 	}
-	if (exitTime == maxIterations) {
-		gl_FragColor = vec4(0, 0, 0, 1);
+	if (i == maxIterations) {
+		fragColor = vec4(0, 0, 0, 1);
 	} else {
-		float hue = 1.0 - float(exitTime) / float(maxIterations);
+		float hue = 1.0 - float(i) / float(maxIterations);
 		float lightness = 0.5 + 0.1 * hue;
-		gl_FragColor = hsla(hue, 1.0, lightness, 1.0);
+		fragColor = hsla(hue, 1.0, lightness, 1.0);
 	}
 }

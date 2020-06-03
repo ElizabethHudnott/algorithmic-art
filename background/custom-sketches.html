@@ -116,7 +116,7 @@
 				path = path.slice(0, slashIndex);
 			}
 			const encodedURL = encodeURIComponent(sketchURL);
-			const preloadURL = window.location.origin + path + '/?gen=' + encodedURL;
+			const preloadURL = window.location.origin + path + '/?gen=' + encodedURL.slice(0, -3);
 			document.getElementById('preload-url').value = preloadURL;
 		});
 	</script>

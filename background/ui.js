@@ -139,8 +139,13 @@ function showBackgroundOptions() {
 
 		if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
 			console.error('Unable to compile shader: ' + context.getShaderInfoLog(shader));
-			console.log(source);
 			context.deleteShader(shader);
+			const sourceLines = source.split('\n');
+			let annotatedLines = ''
+			for (let i = 0; i < sourceLines.length; i++) {
+				annotatedLines += String(i + 1) + '\t' + sourceLines[i] + '\n';
+			}
+			console.log(annotatedLines);
 			return null;
 		}
 
@@ -611,6 +616,24 @@ function showBackgroundOptions() {
 			this.random = random;
 		}
 
+		toObject() {
+			const properties = {};
+			const categories = [
+				'continuous', 'stepped', 'pairedContinuous', 'xy', 'pairedStepped'
+			];
+			for (let category of categories) {
+				for (let [key, value] of this[category].entries()) {
+					properties[key] = value;
+				}
+			}
+			const data = {};
+			data.properties = properties;
+			data.rotation = this.rotation;
+			data.backgroundColor = this.backgroundColor;
+			data.seed = this.random.seed;
+			return data;
+		}
+
 		isCurrentFrame() {
 			if (
 				this.rotation !== bgGeneratorRotation ||
@@ -863,6 +886,10 @@ function showBackgroundOptions() {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
+		const enableSave = (new URL(url, document.location)).hostname === document.location.hostname;
+		const saveBtn = document.getElementById('btn-save-form');
+		saveBtn.hidden = !enableSave;
+
 		generatorFactory(url).then(function (gen) {
 			let shaderDownload;
 			if (gen.isShader && !gen.shaderSource) {
@@ -1990,6 +2017,51 @@ function showBackgroundOptions() {
 		this.download = generateFilename() + '.png';
 		this.href = saveCanvas.toDataURL();
 		$(downloadModal).modal('hide');
+	});
+
+	$('#save-dropdown').on('shown.bs.dropdown', function (event) {
+		document.getElementById('save-result').innerHTML = '';
+		const titleInput = document.getElementById('work-title');
+		if (titleInput.value.trim() === '') {
+			titleInput.focus();
+		} else {
+			document.getElementById('work-keywords').focus();
+		}
+	});
+
+	document.getElementById('save-form').addEventListener('submit', async function (event) {
+		event.preventDefault();
+		const data = {};
+		data.title = document.getElementById('work-title').value.trim();
+		const keywords = [];
+		for (let keyword of document.getElementById('work-keywords').value.split(',')) {
+			keyword = keyword.trim();
+			if (keyword !== '') {
+				keywords.push(keyword);
+			}
+		}
+		data.keywords = keywords;
+		const doc = {};
+		data.document = doc;
+		doc.sketch = currentSketch.url;
+		doc.startFrame = startFrame.toObject();
+		if (startFrame !== endFrame) {
+			doc.endFrame = endFrame.toObject();
+		}
+
+		const options = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		};
+		const response = await fetch('/save', options);
+		const responseData = await response.json();
+		const resultBox = document.getElementById('save-result');
+		if (responseData.success) {
+			resultBox.innerHTML = 'Saved.';
+		}
 	});
 
 	// After resizing, generate a new background to fit the new window size.

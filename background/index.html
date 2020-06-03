@@ -89,7 +89,7 @@
 		<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-abs-right" style="width: 500px" id="anim-controls">
+ 		<div class="dropdown-menu drop-align-right" style="width: 500px" id="anim-controls">
  			<form class="px-2 bg-white opaque">
  				<div class="form-row">
  					<div class="col-7">
@@ -127,6 +127,30 @@
 	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
 		<img src="../img/picture_save.png" alt="Download">
 	</button>
+	<div class="dropdown" id="save-dropdown">
+		<button type="button" class="btn btn-light" id="btn-save-form" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			<img src="../img/diskette.png" alt="Save">
+		</button>
+		<div class="dropdown-menu drop-align-right" aria-labelledby="btn-save-form" style="width: 375px">
+			<form class="px-2" id="save-form">
+				<div class="form-group">
+					<label for="work-title">Title</label>
+					<input type="text" required class="form-control form-control-sm" id="work-title" autocomplete="off" minlength="4">
+				</div>
+				<div class="form-group">
+					<label for="work-keywords">Keywords</label>
+					<input type="text" class="form-control form-control-sm" id="work-keywords" aria-describedby="work-keywords-help">
+					<small id="work-keywords-help" class="form-text text-muted">
+						Separate your keywords using commas.
+					</small>
+				</div>
+				<output id="save-result"></output>
+				<div class="text-right">
+					<button type="submit" class="btn btn-primary btn-sm" id="btn-save">Save</button>
+				</div>
+			</form>
+		</div>
+	</div>
 	<button type="button" class="btn btn-light" data-toggle="modal" data-target="#help-modal" title="Help">
 		<img src="../img/help_32.png" alt="Help">
 	</button>
@@ -142,7 +166,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="card-deck btn-group-toggle thumbnails px-2 justify-content-center" data-toggle="buttons" id="sketch-list">
+				<div class="card-deck btn-group-toggle thumbnails justify-content-center m-0 px-1 border" data-toggle="buttons" id="sketch-list">
 				</div>
 			</div>
 			<div class="modal-footer">

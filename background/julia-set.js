@@ -8,7 +8,15 @@ function JuliaSet() {
 
 		optionsDoc.getElementById('julia-c-real').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value > -1 && value < 1) {
+			if (Number.isFinite(value)) {
+				const r = Math.sqrt(me.escapeRSquared);
+				if (value < -r) {
+					value = -r;
+					this.value = value;
+				} else if (value > r) {
+					value = r;
+					this.value = value;
+				}
 				assignBgAttribute(me, 'cReal', value);
 				generateBackground(0);
 			}
@@ -16,7 +24,15 @@ function JuliaSet() {
 
 		optionsDoc.getElementById('julia-c-im').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value > -1 && value < 1) {
+			if (Number.isFinite(value)) {
+				const r = Math.sqrt(me.escapeRSquared);
+				if (value < -r) {
+					value = -r;
+					this.value = value;
+				} else if (value > r) {
+					value = r;
+					this.value = value;
+				}
 				assignBgAttribute(me, 'cIm', value);
 				generateBackground(0);
 			}

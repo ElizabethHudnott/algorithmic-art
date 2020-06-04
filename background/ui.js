@@ -969,7 +969,7 @@ function showBackgroundOptions() {
 					});
 				}
 			}
-			generateButton.hidden = !gen.hasRandomness;
+			generateButton.parentElement.hidden = !gen.hasRandomness;
 
 			const credits = gen.credits ? '<hr>' + gen.credits : '';
 			document.getElementById('background-gen-credits').innerHTML = credits;
@@ -2032,6 +2032,8 @@ function showBackgroundOptions() {
 	document.getElementById('save-form').addEventListener('submit', async function (event) {
 		event.preventDefault();
 		const data = {};
+		// TODO Add user authentication
+		data.userID = '1';
 		data.title = document.getElementById('work-title').value.trim();
 		const keywords = [];
 		for (let keyword of document.getElementById('work-keywords').value.split(',')) {
@@ -2040,6 +2042,7 @@ function showBackgroundOptions() {
 				keywords.push(keyword);
 			}
 		}
+		data.category = currentSketch.title;
 		data.keywords = keywords;
 		const doc = {};
 		data.document = doc;

@@ -575,12 +575,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	if (numPoints === 0) {
 		return;
 	}
-	const lastCalculatedR = this.points[numPoints - 1].r
 	if (preview >= 3) {
 		numPoints = Math.min(numPoints, previewMaxPetals);
 	}
 	const lastR = this.points[numPoints - 1].r;
-	const zoom = lastCalculatedR / lastR;
+	const zoom = preview === 0 ? 1 : maxR / lastR;
 	const lastRSquared = lastR * lastR;
 	let stacking = this.stacking;
 	if (stacking == 0) {

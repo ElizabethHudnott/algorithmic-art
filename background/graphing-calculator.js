@@ -552,8 +552,9 @@ function GraphingCalculator() {
 			option.innerHTML = me.equations[shapeNum][pathNum].length - 1;
 			pieceInput.appendChild(option);
 			const step = Math.abs(parseFraction(stepInput.value));
-			if (rangeUnitsInput.value === 'PI' && step > 0) {
-				me.step[shapeNum][pathNum][pieceNum] = step * Math.PI;
+			if (step > 0) {
+				const stepUnits = rangeUnitsInput.value === 'PI' ? Math.PI : 1;
+				me.step[shapeNum][pathNum][pieceNum] = step * stepUnits;
 			}
 			displayPiece();
 			generateBackground(0);

@@ -38,6 +38,38 @@ function JuliaSet() {
 			}
 		});
 
+		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				assignBgAttribute(me, 'xCentre', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('julia-centre-y').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				assignBgAttribute(me, 'yCentre', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('julia-range-x').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				assignBgAttribute(me, 'xRange', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('julia-range-y').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				assignBgAttribute(me, 'yRange', value);
+				generateBackground(0);
+			}
+		});
+
 		return optionsDoc;
 	});
 

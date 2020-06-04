@@ -135,7 +135,7 @@
 			<form class="px-2" id="save-form">
 				<div class="form-group">
 					<label for="work-title">Title</label>
-					<input type="text" required class="form-control form-control-sm" id="work-title" autocomplete="off" minlength="4">
+					<input type="text" required class="form-control form-control-sm" id="work-title" autocomplete="off" pattern="\S.*\S" title="Cannot be blank.">
 				</div>
 				<div class="form-group">
 					<label for="work-keywords">Keywords</label>

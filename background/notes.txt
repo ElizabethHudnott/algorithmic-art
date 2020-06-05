@@ -1,7 +1,7 @@
 Environment
 -----------
 WebGL: use position relative to the vertices
-Bug: changing start frame or end frame while rendering video
+Bug: changing startFrame, endFrame or tweenData while rendering video
 Handle attempting to download non-existent files (e.g. wrong generator name)
 Link from home page
 Revise Patreon description

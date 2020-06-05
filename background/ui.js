@@ -23,6 +23,7 @@ function showBackgroundOptions() {
 }
 
 {
+	const backendRoot = 'http://localhost/';
 	const backgroundElement = document.body;
 	let backgroundRedraw;
 	let bgGeneratorRotation = 0;
@@ -567,6 +568,10 @@ function showBackgroundOptions() {
 			this.pairedContinuous = new Map();
 			this.xy = new Map();
 			this.pairedStepped = new Map();
+			if (arguments.length === 0) {
+				return;
+			}
+
 			const animatable = generator.animatable
 			if (animatable !== undefined) {
 				const continuous = animatable.continuous;
@@ -616,7 +621,7 @@ function showBackgroundOptions() {
 			this.random = random;
 		}
 
-		toObject() {
+		toObject(hasRandomness) {
 			const properties = {};
 			const categories = [
 				'continuous', 'stepped', 'pairedContinuous', 'xy', 'pairedStepped'
@@ -630,8 +635,49 @@ function showBackgroundOptions() {
 			data.properties = properties;
 			data.rotation = this.rotation;
 			data.backgroundColor = this.backgroundColor;
-			data.seed = this.random.seed;
+			if (hasRandomness) {
+				data.seed = this.random.seed;
+			}
 			return data;
+		}
+
+		static fromObject(data, generator) {
+			const frame = new FrameData();
+			const animatable = generator.animatable;
+			if (animatable !== undefined) {
+				const values = data.properties;
+				const continuous = animatable.continuous;
+				if (continuous !== undefined) {
+					for (let property of continuous) {
+						frame.continuous.set(property, values[property]);
+					}
+				}
+				const stepped = animatable.stepped;
+				if (stepped !== undefined) {
+					for (let property of stepped) {
+						frame.stepped.set(property, values[property]);
+					}
+				}
+				const maps = ['pairedContinuous', 'xy', 'pairedStepped'];
+				for (let mapName of maps) {
+					const list = animatable[mapName];
+					if (list !== undefined) {
+						const map = frame[mapName];
+						for (let [property1, property2] of list) {
+							map.set(property1, values[property1]);
+							map.set(property2, values[property2]);
+						}
+					}
+				}
+			}
+			frame.rotation = data.rotation;
+			frame.backgroundColor = data.backgroundColor;
+			if ('random' in data) {
+				frame.random = data.random;
+			} else {
+				frame.random = random;
+			}
+			return frame;
 		}
 
 		isCurrentFrame() {
@@ -806,7 +852,7 @@ function showBackgroundOptions() {
 				return generator;
 			});
 		} else {
-			return new Promise.resolve(generator);
+			return Promise.resolve(generator);
 		}
 	}
 
@@ -882,7 +928,13 @@ function showBackgroundOptions() {
 		label.addEventListener('dblclick', openSketch);
 	}
 
-	function switchGenerator(url, pushToHistory) {
+	function updateURL() {
+		let envURL = document.location;
+		envURL = envURL.origin + envURL.pathname + '?' + urlParameters.toString();
+		history.replaceState(null, '', envURL.toString());
+	}
+
+	async function switchGenerator(url, pushToHistory) {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
@@ -890,101 +942,129 @@ function showBackgroundOptions() {
 		const saveBtn = document.getElementById('btn-save-form');
 		saveBtn.hidden = !enableSave;
 
-		generatorFactory(url).then(function (gen) {
-			let shaderDownload;
-			if (gen.isShader && !gen.shaderSource) {
-				shaderDownload = downloadFile(url.slice(0, -3) + '.frag', 'text').then(function (source) {
-					gen.shaderSource = fragmentShaderHeader +
-						shaderDeclarations(gen) +
-						source;
-				});
-			} else {
-				shaderDownload = Promise.resolve();
-			}
-			document.title = gen.title;
-			if (bgGenerator && bgGenerator.purgeCache) {
-				bgGenerator.purgeCache();
-			}
-			bgGenerator = gen;
-			const prevGenURL = generatorURL;
-			generatorURL = url;
-			random = new RandomNumberGenerator();
-			seedInput.value = random.seed;
-			currentFrame = currentFrameData();
-			startFrame = currentFrame;
-			endFrame = startFrame;
-			if ('tween' in gen) {
-				gen.tween = parseFloat(animPositionSlider.value);
-				document.getElementById('btn-both-frames').hidden = false;
-				document.getElementById('btn-both-frames2').hidden = false;
-			} else {
-				document.getElementById('btn-both-frames').hidden = true;
-				document.getElementById('btn-both-frames2').hidden = true;
-			}
-			shaderDownload.then(function () {
-				if (bgGenerator.isShader) {
-					drawingContext.initializeShader(bgGenerator);
-					drawingContext.assignAttributes(bgGenerator);
-				}
-				progressiveBackgroundGen(0);
-			});
+		const gen = await generatorFactory(url)
+		document.title = gen.title;
+		if (bgGenerator && bgGenerator.purgeCache) {
+			bgGenerator.purgeCache();
+		}
+		bgGenerator = gen;
+		const prevGenURL = generatorURL;
+		generatorURL = url;
+		random = new RandomNumberGenerator();
+		seedInput.value = random.seed;
+		currentFrame = currentFrameData();
+		startFrame = currentFrame;
+		endFrame = startFrame;
+		if ('tween' in gen) {
+			gen.tween = parseFloat(animPositionSlider.value);
+			document.getElementById('btn-both-frames').hidden = false;
+			document.getElementById('btn-both-frames2').hidden = false;
+		} else {
+			document.getElementById('btn-both-frames').hidden = true;
+			document.getElementById('btn-both-frames2').hidden = true;
+		}
+		if (gen.isShader && !gen.shaderSource) {
+			const fragFileContent = await downloadFile(url.slice(0, -3) + '.frag', 'text');
+			gen.shaderSource = fragmentShaderHeader + shaderDeclarations(gen) + fragFileContent;
+			drawingContext.initializeShader(bgGenerator);
+			drawingContext.assignAttributes(bgGenerator);
+		}
+		progressiveBackgroundGen(0);
 
-			document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
+		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
 
-			function attachOptionsDOM(dom) {
-				const container = document.getElementById('background-gen-options');
-				const elements = dom.children;
-				while (elements.length > 0) {
-					container.appendChild(elements[0]);
-				}
-				const imageCtrlLocation = container.querySelector('[data-attach=image]');
-				if (imageCtrlLocation !== null) {
-					imageCtrlLocation.appendChild(imageUpload);
-				}
-				repositionModal(true);
-			}
-
-			// Switch out previous DOM
+		function attachOptionsDOM(dom) {
 			const container = document.getElementById('background-gen-options');
-			const oldDOM = backgroundGenOptionsDOM.get(prevGenURL);
-			if (oldDOM !== undefined) {
-				const elements = container.children;
-				while (elements.length > 0) {
-					const oldElement = container.removeChild(elements[0]);
-					oldDOM.appendChild(oldElement);
-				}
+			const elements = dom.children;
+			while (elements.length > 0) {
+				container.appendChild(elements[0]);
 			}
-
-			// Try to get from cache first.
-			const dom = backgroundGenOptionsDOM.get(url);
-			if (dom !== undefined) {
-				attachOptionsDOM(dom);
-			} else {
-				const optionsDocPromise = gen.optionsDocument;
-				if (optionsDocPromise !== undefined) {
-					optionsDocPromise.then(function (optionsDoc) {
-						const dom = optionsDoc.body;
-						attachOptionsDOM(dom);
-						backgroundGenOptionsDOM.set(url, dom);
-					});
-				}
+			const imageCtrlLocation = container.querySelector('[data-attach=image]');
+			if (imageCtrlLocation !== null) {
+				imageCtrlLocation.appendChild(imageUpload);
 			}
-			generateButton.parentElement.hidden = !gen.hasRandomness;
+			repositionModal(true);
+		}
 
-			const credits = gen.credits ? '<hr>' + gen.credits : '';
-			document.getElementById('background-gen-credits').innerHTML = credits;
-
-			if (pushToHistory) {
-				const name = url.slice(0, -3);	// trim .js
-				urlParameters.set('gen', name);
-				let envURL = document.location;
-				envURL = envURL.origin + envURL.pathname + '?' + urlParameters.toString();
-				history.replaceState(null, '', envURL.toString());
+		// Switch out previous DOM
+		const container = document.getElementById('background-gen-options');
+		const oldDOM = backgroundGenOptionsDOM.get(prevGenURL);
+		if (oldDOM !== undefined) {
+			const elements = container.children;
+			while (elements.length > 0) {
+				const oldElement = container.removeChild(elements[0]);
+				oldDOM.appendChild(oldElement);
 			}
-		});
+		}
+
+		// Try to get from cache first.
+		const dom = backgroundGenOptionsDOM.get(url);
+		if (dom !== undefined) {
+			attachOptionsDOM(dom);
+		} else {
+			const optionsDocPromise = gen.optionsDocument;
+			if (optionsDocPromise !== undefined) {
+				optionsDocPromise.then(function (optionsDoc) {
+					const dom = optionsDoc.body;
+					attachOptionsDOM(dom);
+					backgroundGenOptionsDOM.set(url, dom);
+				});
+			}
+		}
+		generateButton.parentElement.hidden = !gen.hasRandomness;
+
+		const credits = gen.credits ? '<hr>' + gen.credits : '';
+		document.getElementById('background-gen-credits').innerHTML = credits;
+
+		if (pushToHistory) {
+			const name = url.slice(0, -3);	// trim .js
+			urlParameters.set('gen', name);
+			updateURL();
+		}
 	}
 
-	downloadFile('sketches.json', 'json').then(function (result) {
+	async function loadDocument(documentID) {
+		const data = {};
+		// TODO Add user authentication
+		data.user = '1';
+		data.documentID = documentID;
+		const options = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		};
+		try {
+			const response = await fetch(backendRoot + 'load', options);
+			const doc = await response.json();
+			if (doc) {
+				await switchGenerator(doc.sketch, false);
+				startFrame = FrameData.fromObject(doc.startFrame, bgGenerator);
+				currentFrame = startFrame;
+				random = startFrame.random;
+				if ('endFrame' in doc) {
+					endFrame = FrameData.fromObject(doc.endFrame, bgGenerator);
+				} else {
+					endFrame = startFrame;
+				}
+				tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+				renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, 0, loopAnim, false, 0);
+				displaySeed();
+				animPositionSlider.value = 0;
+				updateAnimPositionReadout(0);
+				return doc.sketch;
+			} else {
+				return undefined;
+			}
+		} catch (e) {
+			console.error(e);
+			return undefined;
+		}
+	}
+
+	async function init() {
+		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
 		if (firstGenURL) {
@@ -998,13 +1078,28 @@ function showBackgroundOptions() {
 				$('#sketches-modal').modal('show');
 			};
 		}
-		for (let sketch of result.sketches) {
+		if (firstDocID) {
+			const sketchURL = await loadDocument(firstDocID);
+			if (sketchURL !== undefined) {
+				firstGenURL = sketchURL;
+				nextStep = function () {
+					$(modal).modal('show');
+				}
+			} else {
+				firstDocID = null;
+			}
+		}
+		if (!firstDocID) {
+			switchGenerator(firstGenURL, false);
+		}
+
+		const sketchFile = await downloadFile('sketches.json', 'json');
+		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {
 				currentSketch = sketch;
 			}
 		}
-		switchGenerator(firstGenURL, false);
 
 		if (store === undefined || store.getItem('no-welcome') !== 'true') {
 			const helpModal = $('#help-modal');
@@ -1018,7 +1113,8 @@ function showBackgroundOptions() {
 			document.getElementById('show-welcome').checked = false;
 			nextStep();
 		}
-	});
+	}
+	init();
 
 	function calcTween(tween, loop) {
 		if (loop) {
@@ -2033,12 +2129,13 @@ function showBackgroundOptions() {
 		event.preventDefault();
 		const data = {};
 		// TODO Add user authentication
-		data.userID = '1';
+		data.user = '1';
+		data.documentID = urlParameters.get('doc');
 		data.title = document.getElementById('work-title').value.trim();
 		const keywords = [];
 		for (let keyword of document.getElementById('work-keywords').value.split(',')) {
 			keyword = keyword.trim();
-			if (keyword !== '') {
+			if (keyword !== '' && !keywords.includes(keyword)) {
 				keywords.push(keyword);
 			}
 		}
@@ -2046,10 +2143,13 @@ function showBackgroundOptions() {
 		data.keywords = keywords;
 		const doc = {};
 		data.document = doc;
+		data.attachments = [];
+
 		doc.sketch = currentSketch.url;
-		doc.startFrame = startFrame.toObject();
+		const hasRandomness = bgGenerator.hasRandomness
+		doc.startFrame = startFrame.toObject(hasRandomness);
 		if (startFrame !== endFrame) {
-			doc.endFrame = endFrame.toObject();
+			doc.endFrame = endFrame.toObject(hasRandomness);
 		}
 
 		const options = {
@@ -2059,11 +2159,39 @@ function showBackgroundOptions() {
 			},
 			body: JSON.stringify(data),
 		};
-		const response = await fetch('/save', options);
-		const responseData = await response.json();
+		let success;
+		let constraint;
+		try {
+			const response = await fetch(backendRoot + 'save', options);
+			const responseData = await response.json();
+			success = responseData.success;
+			constraint = responseData.constraint;
+			if (success || constraint === 'unique_document') {
+				urlParameters.set('doc', responseData.documentID);
+				urlParameters.delete('gen');
+				updateURL();
+			}
+		} catch (e) {
+			console.error(e);
+			success = false;
+		}
 		const resultBox = document.getElementById('save-result');
-		if (responseData.success) {
+		if (success) {
 			resultBox.innerHTML = 'Saved.';
+			setTimeout(function () {
+				resultBox.innerHTML = '';
+			}, 10000);
+		} else {
+			switch (constraint) {
+			case 'unique_document':
+				resultBox.innerHTML = 'This artwork has been created before.';
+				break;
+			case 'unique_title':
+				resultBox.innerHTML = 'You already have an artwork called <i>' + data.title + '</i>.';
+				break;
+			default:
+				resultBox.innerHTML = 'Sorry, an error occurred.';
+			}
 		}
 	});
 

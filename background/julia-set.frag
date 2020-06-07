@@ -1,15 +1,57 @@
+vec2 complexPower(float r, float theta, float n) {
+	float magnitude = pow(r, n);
+	float angle = n * theta;
+	return vec2(magnitude * cos(angle), magnitude * sin(angle));
+}
+
 void main() {
 	float xMin = xCentre - xRange / 2.0;
 	float yMin = yCentre - yRange / 2.0;
-
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
 
+	vec2 point;
+	float cReal, cIm;
+	if (mandelbrot == 1) {
+		// Mandelbrot set
+		point = vec2(0.0, 0.0);
+		cReal = x;
+		cIm = y;
+	} else {
+		// Julia set
+		point = vec2(x, y);
+		cReal = finalRealConstant;
+		cIm = finalImConstant;
+	}
+
+	float r = length(point);
 	int i = 0;
-	while (x * x + y * y < escapeRSquared && i < maxIterations) {
-		float newX = x * x - y * y + cReal;
-		y = 2.0 * x * y + cIm;
-		x = newX;
+
+	while (r < escapeRadius && i < maxIterations) {
+		float theta = atan(point.y, point.x);
+		vec2 numerator = vec2(numeratorRealConstant, numeratorImConstant);
+		for (int j = 0; j <=3; j++) {
+			float coefficient = numeratorCoefficients[j];
+			if (coefficient != 0.0) {
+				float exponent = numeratorExponents[j];
+				numerator += coefficient * complexPower(r, theta, exponent);
+			}
+		}
+		vec2 denominator = vec2(denominatorRealConstant, denominatorImConstant);
+		for (int j = 0; j <=3; j++) {
+			float coefficient = denominatorCoefficients[j];
+			if (coefficient != 0.0) {
+				float exponent = denominatorExponents[j];
+				denominator += coefficient * complexPower(r, theta, exponent);
+			}
+		}
+
+		float divisor = denominator.x * denominator.x + denominator.y * denominator.y;
+		point = vec2(
+			(numerator.x * denominator.x + numerator.y * denominator.y) / divisor + cReal,
+			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm
+		);
+		r = length(point);
 		i++;
 	}
 	if (i == maxIterations) {

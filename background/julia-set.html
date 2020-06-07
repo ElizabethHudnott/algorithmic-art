@@ -1,45 +1,160 @@
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="julia-c-real">
-		Constant
-	</label>
-	<div class="col-9">
-		<div class="input-group input-group-sm">
-			<input type="number" min="-2" max="2" step="0.01" value="-0.4" class="form-control text-right" id="julia-c-real">
-			<div class="input-group-prepend input-group-append">
-				<span class="input-group-text">+</span>
+<ul class="nav nav-tabs mb-3" role="tablist">
+	<li class="nav-item">
+		<a class="nav-link active" id="julia-formula-tab" data-toggle="tab" href="#julia-formula" role="tab" aria-controls="julia-formula" aria-selected="true">
+			Formula
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" id="julia-viewport-tab" data-toggle="tab" href="#julia-viewport" role="tab" aria-controls="julia-viewport" aria-selected="false">
+			Viewport
+		</a>
+	</li>
+</ul>
+
+<div class="tab-content">
+	<div class="tab-pane active" id="julia-formula" role="tabpanel" aria-labelledby="julia-formula-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-type">
+				Type
+			</label>
+			<div class="col-4">
+				<select id="julia-type" class="form-control form-control-sm">
+					<option value="julia" selected>Julia Set</option>
+					<option value="mandelbrot">Mandelbrot Set</option>
+				</select>
 			</div>
-			<input type="number" min="-2" max="2" step="0.01" value="0.6" class="form-control text-right" id="julia-c-im">
-			<div class="input-group-append">
-				<var class="input-group-text">i</var>
+		</div>
+		<div class="form-row form-group" id="julia-constant">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-c-real">
+				Constant (<var>c<sub>3</sub></var>)
+			</label>
+			<div class="col-9">
+				<div class="input-group input-group-sm">
+					<input type="number" min="-2" max="2" step="0.01" value="-0.4" class="form-control text-right" id="julia-c-real">
+					<div class="input-group-prepend input-group-append">
+						<span class="input-group-text">+</span>
+					</div>
+					<input type="number" min="-2" max="2" step="0.01" value="0.6" class="form-control text-right" id="julia-c-im">
+					<div class="input-group-append">
+						<var class="input-group-text">i</var>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="col-12">
+				<var>Z<sub>N+1</sub></var> =
+				<table class="d-inline-block align-middle">
+					<tr class="border-bottom border-dark">
+						<th class="sr-only">Numerator</th>
+						<td>
+							<var>m<sub>1</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> p<sub>1</sub></sup></var> +
+							<var>m<sub>2</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> p<sub>2</sub></sup></var> +
+							<var>m<sub>3</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> p<sub>3</sub></sup></var> +
+							<var>m<sub>4</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> p<sub>4</sub></sup></var> +
+							<var>c<sub>1</sub></var>
+						</td>
+					</tr>
+					<tr>
+						<th class="sr-only">Denominator</th>
+						<td>
+							<var>n<sub>1</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> q<sub>1</sub></sup></var> +
+							<var>n<sub>2</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> q<sub>2</sub></sup></var> +
+							<var>n<sub>3</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> q<sub>3</sub></sup></var> +
+							<var>n<sub>4</sub>&nbsp;&times;&nbsp;</var><var>Z<sub>N</sub><sup> q<sub>4</sub></sup></var> +
+							<var>c<sub>2</sub></var>
+						</td>
+					</tr>
+				</table>
+				+ <var>c<sub>3</sub></var>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-m1">
+				<var>m<sub>1</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="1" class="form-control form-control-sm" id="julia-m1">
+			</div>
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-p1">
+				<var>p<sub>1</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="2" class="form-control form-control-sm" id="julia-p1">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-m2">
+				<var>m<sub>2</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" class="form-control form-control-sm" id="julia-m2">
+			</div>
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-p2">
+				<var>p<sub>2</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="3" class="form-control form-control-sm" id="julia-p2">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-m3">
+				<var>m<sub>3</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" class="form-control form-control-sm" id="julia-m3">
+			</div>
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-p3">
+				<var>p<sub>3</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="4" class="form-control form-control-sm" id="julia-p3">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-m4">
+				<var>m<sub>4</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" class="form-control form-control-sm" id="julia-m4">
+			</div>
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-p4">
+				<var>p<sub>4</sub></var> =
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="5" class="form-control form-control-sm" id="julia-p4">
 			</div>
 		</div>
 	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="julia-centre-x">
-		Centre X
-	</label>
-	<div class="col-3">
-		<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-x">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-centre-y">
-		Centre Y
-	</label>
-	<div class="col-3">
-		<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-y">
-	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="julia-range-x">
-		Range X
-	</label>
-	<div class="col-3">
-		<input type="number" min="0.05" value="3" step="0.05" class="form-control form-control-sm" id="julia-range-x">
-	</div>
-	<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-range-y">
-		Range Y
-	</label>
-	<div class="col-3">
-		<input type="number" min="0.05" value="2" step="0.05" class="form-control form-control-sm" id="julia-range-y">
+
+	<div class="tab-pane" id="julia-viewport" role="tabpanel" aria-labelledby="julia-viewport-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-centre-x">
+				Centre X
+			</label>
+			<div class="col-3">
+				<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-x">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-centre-y">
+				Centre Y
+			</label>
+			<div class="col-3">
+				<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-y">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-range-x">
+				Range X
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.05" value="3" step="0.05" class="form-control form-control-sm" id="julia-range-x">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-range-y">
+				Range Y
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.05" value="2" step="0.05" class="form-control form-control-sm" id="julia-range-y">
+			</div>
+		</div>
 	</div>
 </div>

@@ -1,5 +1,7 @@
 Environment
 -----------
+Bug: Moving position slider while playing is considered to have changes
+Add full screen toggle button?
 Save As button
 WebGL: use position relative to the vertices
 Bug: changing startFrame, endFrame or tweenData while rendering video

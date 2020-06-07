@@ -5,16 +5,14 @@ function JuliaSet() {
 	this.isShader = true;
 
 	this.optionsDocument = downloadFile('julia-set.html', 'document').then(function (optionsDoc) {
-		const constantRow = optionsDoc.getElementById('julia-constant');
 
 		optionsDoc.getElementById('julia-type').addEventListener('input', function (event) {
 			const mandelbrotSelected = this.value === 'mandelbrot';
 			assignBgAttribute(me, 'mandelbrot', mandelbrotSelected);
-			constantRow.hidden = mandelbrotSelected;
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('julia-c-real').addEventListener('input', function (event) {
+		optionsDoc.getElementById('julia-c3-real').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				const r = me.escapeRadius;
@@ -30,7 +28,7 @@ function JuliaSet() {
 			}
 		});
 
-		optionsDoc.getElementById('julia-c-im').addEventListener('input', function (event) {
+		optionsDoc.getElementById('julia-c3-im').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				const r = me.escapeRadius;
@@ -79,11 +77,40 @@ function JuliaSet() {
 			}
 		}
 
-		for (let propertyType of ['m', 'p']) {
+		for (let propertyType of ['m', 'p', 'n', 'q']) {
 			for (let i = 1; i <= 4; i++) {
 				optionsDoc.getElementById('julia-' + propertyType + i).addEventListener('input', updateConstant);
 			}
 		}
+
+		function setAttribute(attributeName, text) {
+			let value;
+			if (text.trim() === '') {
+				value = 0;
+			} else {
+				value = parseFloat(text);
+			}
+			if (Number.isFinite(value)) {
+				assignBgAttribute(me, attributeName, value);
+				generateBackground(0);
+			}
+		}
+
+		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
+			setAttribute('numeratorRealConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c1-im').addEventListener('input', function (event) {
+			setAttribute('numeratorIm', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c2-real').addEventListener('input', function (event) {
+			setAttribute('denominatorRealConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c2-im').addEventListener('input', function (event) {
+			setAttribute('denominatorIm', this.value);
+		});
 
 		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);

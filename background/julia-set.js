@@ -7,41 +7,50 @@ function JuliaSet() {
 	this.optionsDocument = downloadFile('julia-set.html', 'document').then(function (optionsDoc) {
 
 		optionsDoc.getElementById('julia-type').addEventListener('input', function (event) {
-			const mandelbrotSelected = this.value === 'mandelbrot';
-			assignBgAttribute(me, 'mandelbrot', mandelbrotSelected);
+			assignBgAttribute(me, 'mandelbrot', parseInt(this.value));
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('julia-c3-real').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
+		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
+			assignBgAttribute(me, 'inverse', this.checked);
+			generateBackground(0);
+		});
+
+		function setAttribute(attributeName, text) {
+			let value;
+			if (text.trim() === '') {
+				value = 0;
+			} else {
+				value = parseFloat(text);
+			}
 			if (Number.isFinite(value)) {
-				const r = me.escapeRadius;
-				if (value < -r) {
-					value = -r;
-					this.value = value;
-				} else if (value > r) {
-					value = r;
-					this.value = value;
-				}
-				assignBgAttribute(me, 'finalRealConstant', value);
+				assignBgAttribute(me, attributeName, value);
 				generateBackground(0);
 			}
+		}
+
+		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
+			setAttribute('numeratorRealConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c1-im').addEventListener('input', function (event) {
+			setAttribute('numeratorImConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c2-real').addEventListener('input', function (event) {
+			setAttribute('denominatorRealConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c2-im').addEventListener('input', function (event) {
+			setAttribute('denominatorImConstant', this.value);
+		});
+
+		optionsDoc.getElementById('julia-c3-real').addEventListener('input', function (event) {
+			setAttribute('finalRealConstant', this.value);
 		});
 
 		optionsDoc.getElementById('julia-c3-im').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				const r = me.escapeRadius;
-				if (value < -r) {
-					value = -r;
-					this.value = value;
-				} else if (value > r) {
-					value = r;
-					this.value = value;
-				}
-				assignBgAttribute(me, 'finalImConstant', value);
-				generateBackground(0);
-			}
+			setAttribute('finalImConstant', this.value);
 		});
 
 		function updateConstant(event) {
@@ -82,35 +91,6 @@ function JuliaSet() {
 				optionsDoc.getElementById('julia-' + propertyType + i).addEventListener('input', updateConstant);
 			}
 		}
-
-		function setAttribute(attributeName, text) {
-			let value;
-			if (text.trim() === '') {
-				value = 0;
-			} else {
-				value = parseFloat(text);
-			}
-			if (Number.isFinite(value)) {
-				assignBgAttribute(me, attributeName, value);
-				generateBackground(0);
-			}
-		}
-
-		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
-			setAttribute('numeratorRealConstant', this.value);
-		});
-
-		optionsDoc.getElementById('julia-c1-im').addEventListener('input', function (event) {
-			setAttribute('numeratorIm', this.value);
-		});
-
-		optionsDoc.getElementById('julia-c2-real').addEventListener('input', function (event) {
-			setAttribute('denominatorRealConstant', this.value);
-		});
-
-		optionsDoc.getElementById('julia-c2-im').addEventListener('input', function (event) {
-			setAttribute('denominatorIm', this.value);
-		});
 
 		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -158,6 +138,7 @@ function JuliaSet() {
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
 	this.mandelbrot = false;
+	this.inverse = false;
 
 	this.xRange = 3;
 	this.xCentre = 0;
@@ -179,7 +160,7 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot'
+		'maxIterations', 'mandelbrot', 'inverse'
 	]
 };
 

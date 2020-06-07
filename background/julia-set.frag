@@ -9,19 +9,25 @@ void main() {
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
+	vec2 point = vec2(x, y);
+	float cReal, cIm, divisor;
 
-	vec2 point;
-	float cReal, cIm;
 	if (mandelbrot == 1) {
 		// Mandelbrot set
-		point = vec2(0.0, 0.0);
+		if (inverse == 1) {
+			point = vec2(0.0, 0.0);
+		}
 		cReal = x;
 		cIm = y;
 	} else {
 		// Julia set
-		point = vec2(x, y);
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
+	}
+	if (inverse == 1) {
+		divisor = sqrt(cReal * cReal + cIm * cIm);
+		cReal = cReal / divisor;
+		cIm = -cIm / divisor;
 	}
 
 	float r = length(point);
@@ -46,7 +52,7 @@ void main() {
 			}
 		}
 
-		float divisor = denominator.x * denominator.x + denominator.y * denominator.y;
+		divisor = denominator.x * denominator.x + denominator.y * denominator.y;
 		point = vec2(
 			(numerator.x * denominator.x + numerator.y * denominator.y) / divisor + cReal,
 			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm

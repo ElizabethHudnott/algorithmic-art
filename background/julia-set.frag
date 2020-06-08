@@ -9,6 +9,9 @@ void main() {
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
+	if (burningShip == 1) {
+		y = -y;
+	}
 	vec2 point = vec2(x, y);
 	float cReal, cIm, divisor;
 
@@ -25,7 +28,7 @@ void main() {
 		cIm = finalImConstant;
 	}
 	if (inverse == 1) {
-		divisor = sqrt(cReal * cReal + cIm * cIm);
+		divisor = cReal * cReal + cIm * cIm;
 		cReal = cReal / divisor;
 		cIm = -cIm / divisor;
 	}
@@ -34,6 +37,9 @@ void main() {
 	int i = 0;
 
 	while (r < escapeRadius && i < maxIterations) {
+		if (burningShip == 1) {
+			point = vec2(abs(point.x), abs(point.y));
+		}
 		float theta = atan(point.y, point.x);
 		vec2 numerator = vec2(numeratorRealConstant, numeratorImConstant);
 		for (int j = 0; j <=3; j++) {

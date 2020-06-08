@@ -16,6 +16,11 @@ function JuliaSet() {
 			generateBackground(0);
 		});
 
+		optionsDoc.getElementById('julia-burning-ship').addEventListener('input', function (event) {
+			assignBgAttribute(me, 'burningShip', this.checked);
+			generateBackground(0);
+		});
+
 		function setAttribute(attributeName, text) {
 			let value;
 			if (text.trim() === '') {
@@ -127,9 +132,9 @@ function JuliaSet() {
 		return optionsDoc;
 	});
 
-	this.numeratorExponents = [2, 0, 0, 0];
+	this.numeratorExponents = [2, 3, 4, 5];
 	this.numeratorCoefficients = [1, 0, 0, 0];
-	this.denominatorExponents = [0, 0, 0, 0];
+	this.denominatorExponents = [2, 3, 4, 5];
 	this.denominatorCoefficients = [0, 0, 0, 0];
 	this.numeratorRealConstant = 0;
 	this.numeratorImConstant = 0;
@@ -139,6 +144,7 @@ function JuliaSet() {
 	this.finalImConstant = 0.6;
 	this.mandelbrot = false;
 	this.inverse = false;
+	this.burningShip = false;
 
 	this.xRange = 3;
 	this.xCentre = 0;
@@ -160,7 +166,7 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot', 'inverse'
+		'maxIterations', 'mandelbrot', 'inverse', 'burningShip'
 	]
 };
 

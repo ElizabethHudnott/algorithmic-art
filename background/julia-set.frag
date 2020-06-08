@@ -49,9 +49,13 @@ void main() {
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
-	divisor = cReal * cReal + cIm * cIm;
-	cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
-	cIm = nonInverse * cIm + inverse * -cIm / divisor;
+	cReal = nonInverse * cReal;
+	cIm = nonInverse * cIm;
+	if (inverse > 0.0) {
+		divisor = cReal * cReal + cIm * cIm;
+		cReal += inverse * (cReal / divisor - muTranslation);
+		cIm += inverse * -cIm / divisor;
+	}
 
 	float r = length(point);
 	int i = 0;
@@ -60,7 +64,12 @@ void main() {
 		if (burningShip == 1) {
 			point = vec2(abs(point.x), abs(point.y));
 		}
-		float theta = atan(point.y, point.x);
+		float theta;
+		if (point.x == 0.0) {
+			theta = sign(point.y) * PI / 2.0;
+		} else {
+			theta = atan(point.y, point.x);
+		}
 		vec2 numerator = vec2(numeratorRealConstant, numeratorImConstant);
 		for (int j = 0; j <=3; j++) {
 			float coefficient = numeratorCoefficients[j];
@@ -87,7 +96,7 @@ void main() {
 		i++;
 	}
 	if (i == maxIterations) {
-		fragColor = vec4(0, 0, 0, 1);
+		fragColor = vec4(0, 0, 0, 0);
 	} else {
 		float hue = 1.0 - float(i) / float(maxIterations);
 		float lightness = 0.5 + 0.1 * hue;

@@ -12,25 +12,48 @@ void main() {
 	if (burningShip == 1) {
 		y = -y;
 	}
-	vec2 point = vec2(x, y);
+	vec2 point;
 	float nonInverse = 1.0 - inverse;
+	float julia = 1.0 - mandelbrot;
 	float cReal, cIm, divisor;
 
-	if (mandelbrot == 1) {
-		// Mandelbrot set
-		point += vec2(finalRealConstant, finalImConstant);
-		divisor = point.x * point.x + point.y * point.y;
-		point = point * nonInverse + inverse * vec2(point.x / divisor, -point.y / divisor);
-		cReal = x;
-		cIm = y;
+	// Mandelbrot set
+	if (finalRealConstant == 0.0 && finalImConstant == 0.0) {
+		bool badZero = false;
+		for (int i = 0; i < 3; i++) {
+			if (
+				(numeratorCoefficients[i] != 0.0 && numeratorExponents[i] <= 0.0) ||
+				(denominatorCoefficients[i] != 0.0 && denominatorExponents[i] <= 0.0)
+			) {
+				badZero = true;
+				break;
+			}
+		}
+		if (badZero) {
+			point = vec2(x, y);
+		} else {
+			point = vec2(0.0, 0.0);
+		}
 	} else {
-		// Julia set
-		cReal = finalRealConstant;
-		cIm = finalImConstant;
+		point = vec2(finalRealConstant, finalImConstant);
 	}
-	divisor = cReal * cReal + cIm * cIm;
-	cReal = cReal * (nonInverse + inverse / divisor);
-	cIm = cIm * (nonInverse - inverse / divisor);
+	float offsetX = x + finalRealConstant;
+	float offsetY = y + finalImConstant;
+	divisor = offsetX * offsetX + offsetY * offsetY;
+	point = nonInverse * point + inverse * vec2(offsetX / divisor - muTranslation, -offsetY / divisor);
+	divisor = x * x + y * y;
+	cReal = nonInverse * x + inverse * (x / divisor - muTranslation);
+	cIm = nonInverse * y + inverse * -y / divisor;
+
+	// Julia set
+	point = mandelbrot * point + julia * vec2(x, y);
+	divisor = finalRealConstant * finalRealConstant + finalImConstant * finalImConstant;
+	cReal = mandelbrot * cReal + julia * nonInverse * finalRealConstant;
+	cIm = mandelbrot * cIm + julia * nonInverse * finalImConstant;
+	if (divisor > 0.0) {
+		cReal += julia * inverse * (finalRealConstant / divisor - muTranslation);
+		cIm += inverse * -finalImConstant / divisor;
+	}
 
 	float r = length(point);
 	int i = 0;

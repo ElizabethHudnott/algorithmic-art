@@ -13,8 +13,9 @@ function JuliaSet() {
 		const z0ImInput = optionsDoc.getElementById('julia-z0-im');
 
 		optionsDoc.getElementById('julia-type').addEventListener('input', function (event) {
-			const isMandelbrot = this.value === '1';
-			assignBgAttribute(me, 'mandelbrot', isMandelbrot);
+			const value = parseInt(this.value);
+			const isMandelbrot = value === 1;
+			assignBgAttribute(me, 'mandelbrot', value);
 			if (isMandelbrot) {
 				setAttribute('finalRealConstant', z0RealInput.value, false);
 				setAttribute('finalImConstant', z0ImInput.value, false);
@@ -48,7 +49,15 @@ function JuliaSet() {
 		}
 
 		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
-			setAttribute('inverse', this.value, true);
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				assignBgAttribute(me, 'inverse', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('julia-mu-translation').addEventListener('input', function (event) {
+			setAttribute('muTranslation', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
@@ -167,9 +176,10 @@ function JuliaSet() {
 	this.denominatorImConstant = 0;
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
-	this.mandelbrot = false;
-	this.inverse = 0;
+	this.mandelbrot = 0;
 	this.burningShip = false;
+	this.inverse = 0;
+	this.muTranslation = 0;
 
 	this.xRange = 3;
 	this.xCentre = 0;
@@ -183,7 +193,7 @@ function JuliaSet() {
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
-		'inverse', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
+		'mandelbrot', 'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
 	],
 	xy: [
 		['numeratorRealConstant', 'numeratorImConstant'],
@@ -191,7 +201,7 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot', 'burningShip'
+		'maxIterations', 'burningShip'
 	]
 };
 

@@ -12,25 +12,46 @@ void main() {
 	if (burningShip == 1) {
 		y = -y;
 	}
-	vec2 point = vec2(x, y);
+	vec2 point;
 	float nonInverse = 1.0 - inverse;
 	float cReal, cIm, divisor;
 
 	if (mandelbrot == 1) {
 		// Mandelbrot set
-		point += vec2(finalRealConstant, finalImConstant);
-		divisor = point.x * point.x + point.y * point.y;
-		point = point * nonInverse + inverse * vec2(point.x / divisor, -point.y / divisor);
+		if (finalRealConstant == 0.0 && finalImConstant == 0.0) {
+			bool badZero = false;
+			for (int i = 0; i < 3; i++) {
+				if (
+					(numeratorCoefficients[i] != 0.0 && numeratorExponents[i] <= 0.0) ||
+					(denominatorCoefficients[i] != 0.0 && denominatorExponents[i] <= 0.0)
+				) {
+					badZero = true;
+					break;
+				}
+			}
+			if (badZero) {
+				point = vec2(x, y);
+			} else {
+				point = vec2(0.0, 0.0);
+			}
+		} else {
+			point = vec2(finalRealConstant, finalImConstant);
+		}
+		float offsetX = x + finalRealConstant;
+		float offsetY = y + finalImConstant;
+		divisor = offsetX * offsetX + offsetY * offsetY;
+		point = nonInverse * point + inverse * vec2(offsetX / divisor - muTranslation, -offsetY / divisor);
 		cReal = x;
 		cIm = y;
 	} else {
 		// Julia set
+		point = vec2(x, y);
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
 	divisor = cReal * cReal + cIm * cIm;
-	cReal = cReal * (nonInverse + inverse / divisor);
-	cIm = cIm * (nonInverse - inverse / divisor);
+	cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
+	cIm = nonInverse * cIm + inverse * -cIm / divisor;
 
 	float r = length(point);
 	int i = 0;

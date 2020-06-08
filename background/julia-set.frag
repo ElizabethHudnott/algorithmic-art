@@ -17,8 +17,10 @@ void main() {
 
 	if (mandelbrot == 1) {
 		// Mandelbrot set
+		point += vec2(finalRealConstant, finalImConstant);
 		if (inverse == 1) {
-			point = vec2(0.0, 0.0);
+			divisor = point.x * point.x + point.y * point.y;
+			point = vec2(point.x / divisor, -point.y / divisor);
 		}
 		cReal = x;
 		cIm = y;

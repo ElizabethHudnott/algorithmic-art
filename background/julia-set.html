@@ -13,7 +13,7 @@
 
 <div class="tab-content">
 	<div class="tab-pane active" id="julia-formula" role="tabpanel" aria-labelledby="julia-formula-tab">
-		<div class="form-row form-group">
+		<div class="form-row">
 			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-type">
 				Type
 			</label>
@@ -23,17 +23,22 @@
 					<option value="1">Mandelbrot Set</option>
 				</select>
 			</div>
-			<div class="col-2">
-				<div class="form-check mt-1">
-					<input type="checkbox" class="form-check-input" id="julia-inverse">
-					<label class="form-check-label small" for="julia-inverse">Invert</label>
-				</div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3 text-right col-form-label col-form-label-sm">
+				Transform
 			</div>
 			<div class="col-3">
 				<div class="form-check mt-1">
 					<input type="checkbox" class="form-check-input" id="julia-burning-ship">
 					<label class="form-check-label small" for="julia-burning-ship">Burning ship</label>
 				</div>
+			</div>
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-inverse">
+				Inversion
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.05" value="0" class="form-control form-control-sm" id="julia-inverse">
 			</div>
 		</div>
 		<div class="form-row form-group" id="julia-z0" hidden>

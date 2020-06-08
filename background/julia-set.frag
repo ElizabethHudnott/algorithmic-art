@@ -13,15 +13,14 @@ void main() {
 		y = -y;
 	}
 	vec2 point = vec2(x, y);
+	float nonInverse = 1.0 - inverse;
 	float cReal, cIm, divisor;
 
 	if (mandelbrot == 1) {
 		// Mandelbrot set
 		point += vec2(finalRealConstant, finalImConstant);
-		if (inverse == 1) {
-			divisor = point.x * point.x + point.y * point.y;
-			point = vec2(point.x / divisor, -point.y / divisor);
-		}
+		divisor = point.x * point.x + point.y * point.y;
+		point = point * nonInverse + inverse * vec2(point.x / divisor, -point.y / divisor);
 		cReal = x;
 		cIm = y;
 	} else {
@@ -29,11 +28,9 @@ void main() {
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
-	if (inverse == 1) {
-		divisor = cReal * cReal + cIm * cIm;
-		cReal = cReal / divisor;
-		cIm = -cIm / divisor;
-	}
+	divisor = cReal * cReal + cIm * cIm;
+	cReal = cReal * (nonInverse + inverse / divisor);
+	cIm = cIm * (nonInverse - inverse / divisor);
 
 	float r = length(point);
 	int i = 0;

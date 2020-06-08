@@ -27,11 +27,6 @@ function JuliaSet() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
-			assignBgAttribute(me, 'inverse', this.checked);
-			generateBackground(0);
-		});
-
 		optionsDoc.getElementById('julia-burning-ship').addEventListener('input', function (event) {
 			assignBgAttribute(me, 'burningShip', this.checked);
 			generateBackground(0);
@@ -51,6 +46,10 @@ function JuliaSet() {
 				}
 			}
 		}
+
+		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
+			setAttribute('inverse', this.value, true);
+		});
 
 		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
 			setAttribute('numeratorRealConstant', this.value, true);
@@ -169,7 +168,7 @@ function JuliaSet() {
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
 	this.mandelbrot = false;
-	this.inverse = false;
+	this.inverse = 0;
 	this.burningShip = false;
 
 	this.xRange = 3;
@@ -184,7 +183,7 @@ function JuliaSet() {
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
-		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
+		'inverse', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
 	],
 	xy: [
 		['numeratorRealConstant', 'numeratorImConstant'],
@@ -192,7 +191,7 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot', 'inverse', 'burningShip'
+		'maxIterations', 'mandelbrot', 'burningShip'
 	]
 };
 

@@ -100,9 +100,11 @@ void main() {
 		i++;
 	}
 	if (i == maxIterations) {
-		fragColor = vec4(0, 0, 0, 0);
+		fragColor = innerColor;
 	} else {
-		float hue = 1.0 - float(i) / float(maxIterations);
+		float colorIndex = float(i) + interpolation * (1.0 - log(log2(r)));
+
+		float hue = 1.0 - colorIndex / float(maxIterations);
 		float lightness = 0.5 + 0.1 * hue;
 		fragColor = hsla(hue, 1.0, lightness, 1.0);
 	}

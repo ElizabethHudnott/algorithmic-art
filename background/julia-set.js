@@ -162,6 +162,11 @@ function JuliaSet() {
 			}
 		});
 
+		optionsDoc.getElementById('julia-color-interpolation').addEventListener('input', function (event) {
+			assignBgAttribute(me, 'interpolation', this.value);
+			generateBackground(0);
+		});
+
 		return optionsDoc;
 	});
 
@@ -188,12 +193,16 @@ function JuliaSet() {
 	this.maxIterations = 80;
 	this.escapeRadius = 4;
 
+	this.innerColor = [0, 0, 0, 0];
+	this.interpolation = 1;
+
 }
 
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
+		'innerColor', 'interpolation'
 	],
 	xy: [
 		['numeratorRealConstant', 'numeratorImConstant'],

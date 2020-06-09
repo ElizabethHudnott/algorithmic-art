@@ -9,7 +9,8 @@ void main() {
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
-	if (burningShip == 1) {
+	if (preOperation == 2) {
+		// Burning ship
 		y = -y;
 	}
 	vec2 point;
@@ -61,8 +62,13 @@ void main() {
 	int i = 0;
 
 	while (r < escapeRadius && i < maxIterations) {
-		if (burningShip == 1) {
+		switch (preOperation) {
+		case 1:
+			point = vec2(point.x, -point.y);
+			break;
+		case 2:
 			point = vec2(abs(point.x), abs(point.y));
+			break;
 		}
 		float theta;
 		if (point.x == 0.0) {

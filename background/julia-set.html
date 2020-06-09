@@ -14,30 +14,34 @@
 <div class="tab-content">
 	<div class="tab-pane active" id="julia-formula" role="tabpanel" aria-labelledby="julia-formula-tab">
 		<div class="form-row form-group">
-			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-type">
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-type">
 				Type
 			</label>
-			<div class="col-5">
+			<div class="col-4">
 				<select id="julia-type" class="form-control form-control-sm">
 					<option value="0" selected>Julia Set</option>
 					<option value="1">Mandelbrot Set</option>
 				</select>
 			</div>
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-pre-operation">
+				Pre-Operation
+			</label>
 			<div class="col-3">
-				<div class="form-check mt-1">
-					<input type="checkbox" class="form-check-input" id="julia-burning-ship">
-					<label class="form-check-label small" for="julia-burning-ship">Burning ship</label>
-				</div>
+				<select class="form-control form-control-sm" id="julia-pre-operation">
+					<option value="0" selected>None</option>
+					<option value="1">Conjugation</option>
+					<option value="2">Burning Ship</option>
+				</select>
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-inverse">
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-inverse">
 				Inversion
 			</label>
-			<div class="col-3">
+			<div class="col-4">
 				<input type="number" min="0" max="1" step="0.05" value="0" class="form-control form-control-sm" id="julia-inverse">
 			</div>
-			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-mu-translation">
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-mu-translation">
 				Translation
 			</label>
 			<div class="col-3">
@@ -45,10 +49,10 @@
 			</div>
 		</div>
 		<div class="form-row form-group" id="julia-z0" hidden>
-			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-z0-real">
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-z0-real">
 				<var>Z<sub>0</sub></var> =
 			</label>
-			<div class="col-8">
+			<div class="col-10">
 				<div class="input-group input-group-sm">
 					<input type="number" step="0.05" value="0" class="form-control text-right" id="julia-z0-real">
 					<div class="input-group-prepend input-group-append">
@@ -62,10 +66,10 @@
 			</div>
 		</div>
 		<div class="form-row form-group" id="julia-constant">
-			<label class="col-3 text-right col-form-label col-form-label-sm" for="julia-c3-real">
+			<label class="col-2 text-right col-form-label col-form-label-sm" for="julia-c3-real">
 				<var>c<sub>3</sub></var> =
 			</label>
-			<div class="col-8">
+			<div class="col-10">
 				<div class="input-group input-group-sm">
 					<input type="number" step="0.01" value="-0.4" class="form-control text-right" id="julia-c3-real">
 					<div class="input-group-prepend input-group-append">

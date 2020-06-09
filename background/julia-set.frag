@@ -50,12 +50,10 @@ void main() {
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
-	cReal = nonInverse * cReal;
-	cIm = nonInverse * cIm;
 	if (inverse > 0.0) {
 		divisor = cReal * cReal + cIm * cIm;
-		cReal += inverse * (cReal / divisor - muTranslation);
-		cIm += inverse * -cIm / divisor;
+		cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
+		cIm = nonInverse * cIm + inverse * -cIm / divisor;
 	}
 
 	float r = length(point);
@@ -63,10 +61,10 @@ void main() {
 
 	while (r < escapeRadius && i < maxIterations) {
 		switch (preOperation) {
-		case 1:
+		case 1:	// Conjugation
 			point = vec2(point.x, -point.y);
 			break;
-		case 2:
+		case 2:	// Burning Ship
 			point = vec2(abs(point.x), abs(point.y));
 			break;
 		}

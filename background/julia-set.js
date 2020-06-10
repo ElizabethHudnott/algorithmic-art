@@ -191,7 +191,7 @@ function JuliaSet() {
 	this.yRange = 2;
 	this.yCentre = 0;
 	this.maxIterations = 80;
-	this.escapeRadius = 4;
+	this.escapeRSquared = 4;
 
 	this.innerColor = [0, 0, 0, 0];
 	this.interpolation = 1;
@@ -201,7 +201,7 @@ function JuliaSet() {
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
-		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRadius',
+		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
 		'innerColor', 'interpolation'
 	],
 	xy: [

@@ -1,5 +1,5 @@
-vec2 complexPower(float r, float theta, float n) {
-	float magnitude = pow(r, n);
+vec2 complexPower(float rSquared, float theta, float n) {
+	float magnitude = pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
@@ -56,10 +56,10 @@ void main() {
 		cIm = nonInverse * cIm + inverse * -cIm / divisor;
 	}
 
-	float r = length(point);
+	float rSquared = point.x * point.x + point.y * point.y;
 	int i = 0;
 
-	while (r < escapeRadius && i < maxIterations) {
+	while (rSquared < escapeRSquared && i < maxIterations) {
 		switch (preOperation) {
 		case 1:	// Conjugation
 			point = vec2(point.x, -point.y);
@@ -79,7 +79,11 @@ void main() {
 			float coefficient = numeratorCoefficients[j];
 			if (coefficient != 0.0) {
 				float exponent = numeratorExponents[j];
-				numerator += coefficient * complexPower(r, theta, exponent);
+				if (exponent == 1.0) {
+					numerator += coefficient * point;
+				} else {
+					numerator += coefficient * complexPower(rSquared, theta, exponent);
+				}
 			}
 		}
 		vec2 denominator = vec2(denominatorRealConstant, denominatorImConstant);
@@ -87,7 +91,11 @@ void main() {
 			float coefficient = denominatorCoefficients[j];
 			if (coefficient != 0.0) {
 				float exponent = denominatorExponents[j];
-				denominator += coefficient * complexPower(r, theta, exponent);
+				if (exponent == 1.0) {
+					denominator += coefficient * point;
+				} else {
+					denominator += coefficient * complexPower(rSquared, theta, exponent);
+				}
 			}
 		}
 
@@ -96,13 +104,13 @@ void main() {
 			(numerator.x * denominator.x + numerator.y * denominator.y) / divisor + cReal,
 			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm
 		);
-		r = length(point);
+		rSquared = point.x * point.x + point.y * point.y;
 		i++;
 	}
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {
-		float colorIndex = float(i) + interpolation * (1.0 - log(log2(r)));
+		float colorIndex = float(i) + interpolation * (1.0 - log(log2(rSquared) / 2.0));
 
 		float hue = 1.0 - colorIndex / float(maxIterations);
 		float lightness = 0.5 + 0.1 * hue;

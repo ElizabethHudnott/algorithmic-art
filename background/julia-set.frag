@@ -4,6 +4,14 @@ vec2 complexPower(float rSquared, float theta, float n) {
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
 
+float colorFunc(float value) {
+	if (colorPower == 0.0) {
+		return 0.0;
+	} else {
+		return pow(value, colorPower);
+	}
+}
+
 void main() {
 	float xMin = xCentre - xRange / 2.0;
 	float yMin = yCentre - yRange / 2.0;
@@ -111,9 +119,13 @@ void main() {
 		fragColor = innerColor;
 	} else {
 		float colorIndex = float(i) + interpolation * (1.0 - log(log2(rSquared) / 2.0));
+		colorIndex = colorMultiple * colorFunc(colorIndex) / colorFunc(float(maxIterations));
+		if (colorIndex > 1.0) {
+			colorIndex = 1.0;
+		}
 
-		float hue = 1.0 - colorIndex / float(maxIterations);
-		float lightness = 0.5 + 0.1 * hue;
+		float hue = 1.0 - colorIndex;
+		float lightness = 0.5 ;
 		fragColor = hsla(hue, 1.0, lightness, 1.0);
 	}
 }

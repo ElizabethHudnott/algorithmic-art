@@ -1,5 +1,6 @@
 Environment
 -----------
+Bug: Clicking settings button should unminimize window.
 Bug: Moving position slider while playing is considered to have changes
 Add full screen toggle button?
 Save As button

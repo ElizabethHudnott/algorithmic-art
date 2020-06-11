@@ -47,6 +47,14 @@ function JuliaSet() {
 			}
 		}
 
+		function setNonNegativeAttribute(attributeName, text) {
+			const value = parseFloat(text);
+			if (value >= 0) {
+				assignBgAttribute(me, attributeName, value);
+				generateBackground(0);
+			}
+		}
+
 		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= 1) {
@@ -162,6 +170,15 @@ function JuliaSet() {
 			}
 		});
 
+
+		optionsDoc.getElementById('julia-color-multiple').addEventListener('input', function (event) {
+			setNonNegativeAttribute('colorMultiple', this.value);
+		});
+
+		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
+			setNonNegativeAttribute('colorPower', this.value);
+		});
+
 		optionsDoc.getElementById('julia-color-interpolation').addEventListener('input', function (event) {
 			assignBgAttribute(me, 'interpolation', this.value);
 			generateBackground(0);
@@ -195,18 +212,20 @@ function JuliaSet() {
 
 	this.innerColor = [0, 0, 0, 0];
 	this.interpolation = 1;
+	this.colorMultiple = 1;
+	this.colorPower = 1;
+	this.colorOffset = 0;
 
 }
 
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
+		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
 		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
-		'innerColor', 'interpolation'
+		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset'
 	],
 	xy: [
-		['numeratorRealConstant', 'numeratorImConstant'],
-		['denominatorRealConstant', 'denominatorImConstant'],
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [

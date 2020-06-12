@@ -1,10 +1,10 @@
-vec2 complexPower(float rSquared, float theta, float n) {
+vec2 complexPower(in float rSquared, in float theta, in float n) {
 	float magnitude = pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
 
-float colorFunc(float value) {
+float colorFunc(in float value) {
 	if (colorPower == 0.0) {
 		return 0.0;
 	} else {
@@ -25,7 +25,7 @@ void main() {
 	float nonInverse = 1.0 - inverse;
 	float cReal, cIm, divisor;
 
-	if (mandelbrot == 1) {
+	if (mandelbrot) {
 		// Mandelbrot set
 		if (finalRealConstant == 0.0 && finalImConstant == 0.0) {
 			bool badZero = false;
@@ -118,14 +118,28 @@ void main() {
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {
-		float colorIndex = float(i) + interpolation * (1.0 - log(log2(rSquared) / 2.0));
-		colorIndex = colorMultiple * colorFunc(colorIndex) / colorFunc(float(maxIterations));
-		if (colorIndex > 1.0) {
-			colorIndex = 1.0;
+		float colorNumber = float(i) + interpolation * (1.0 - log(log2(rSquared) / 2.0));
+		float numColorsF = float(numColors);
+		colorNumber = (numColorsF - 1.0) * colorMultiple *
+			colorFunc(colorNumber) / colorFunc(float(maxIterations)) + colorOffset;
+
+		if (colorNumber >= numColorsF) {
+			if (wrapPalette) {
+				colorNumber = colorNumber - trunc(colorNumber / numColorsF) * numColorsF;
+			} else {
+				colorNumber = numColorsF - 1.0;
+			}
 		}
 
-		float hue = 1.0 - colorIndex;
-		float lightness = 0.5 ;
-		fragColor = hsla(hue, 1.0, lightness, 1.0);
+		int colorIndex1 = int(colorNumber);
+		vec4 color1 = palette[colorIndex1];
+		vec4 finalColor;
+		if (colorIndex1 < numColors - 1) {
+			vec4 color2 = palette[colorIndex1 + 1];
+			finalColor = mix(color1, color2, interpolation * fract(colorNumber));
+		} else {
+			finalColor = color1;
+		}
+		fragColor = hsla(finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
 	}
 }

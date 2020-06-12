@@ -14,13 +14,13 @@ function JuliaSet() {
 
 		optionsDoc.getElementById('julia-type').addEventListener('input', function (event) {
 			const isMandelbrot = this.value === '1';
-			assignBgAttribute(me, 'mandelbrot', isMandelbrot);
+			setBgProperty(me, 'mandelbrot', isMandelbrot);
 			if (isMandelbrot) {
-				setAttribute('finalRealConstant', z0RealInput.value, false);
-				setAttribute('finalImConstant', z0ImInput.value, false);
+				setProperty('finalRealConstant', z0RealInput.value, false);
+				setProperty('finalImConstant', z0ImInput.value, false);
 			} else {
-				setAttribute('finalRealConstant', c3RealInput.value, false);
-				setAttribute('finalImConstant', c3ImInput.value, false);
+				setProperty('finalRealConstant', c3RealInput.value, false);
+				setProperty('finalImConstant', c3ImInput.value, false);
 			}
 			constantRow.hidden = isMandelbrot;
 			z0Row.hidden = !isMandelbrot;
@@ -28,11 +28,11 @@ function JuliaSet() {
 		});
 
 		optionsDoc.getElementById('julia-pre-operation').addEventListener('input', function (event) {
-			assignBgAttribute(me, 'preOperation', parseInt(this.value));
+			setBgProperty(me, 'preOperation', parseInt(this.value));
 			generateBackground(0);
 		});
 
-		function setAttribute(attributeName, text, redraw) {
+		function setProperty(attributeName, text, redraw) {
 			let value;
 			if (text.trim() === '') {
 				value = 0;
@@ -40,17 +40,17 @@ function JuliaSet() {
 				value = parseFloat(text);
 			}
 			if (Number.isFinite(value)) {
-				assignBgAttribute(me, attributeName, value);
+				setBgProperty(me, attributeName, value);
 				if (redraw) {
 					generateBackground(0);
 				}
 			}
 		}
 
-		function setNonNegativeAttribute(attributeName, text) {
+		function setNonNegativeProperty(attributeName, text) {
 			const value = parseFloat(text);
 			if (value >= 0) {
-				assignBgAttribute(me, attributeName, value);
+				setBgProperty(me, attributeName, value);
 				generateBackground(0);
 			}
 		}
@@ -58,45 +58,45 @@ function JuliaSet() {
 		optionsDoc.getElementById('julia-inverse').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= 1) {
-				assignBgAttribute(me, 'inverse', value);
+				setBgProperty(me, 'inverse', value);
 				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('julia-mu-translation').addEventListener('input', function (event) {
-			setAttribute('muTranslation', this.value, true);
+			setProperty('muTranslation', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
-			setAttribute('numeratorRealConstant', this.value, true);
+			setProperty('numeratorRealConstant', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-c1-im').addEventListener('input', function (event) {
-			setAttribute('numeratorImConstant', this.value, true);
+			setProperty('numeratorImConstant', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-c2-real').addEventListener('input', function (event) {
-			setAttribute('denominatorRealConstant', this.value, true);
+			setProperty('denominatorRealConstant', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-c2-im').addEventListener('input', function (event) {
-			setAttribute('denominatorImConstant', this.value, true);
+			setProperty('denominatorImConstant', this.value, true);
 		});
 
 		c3RealInput.addEventListener('input', function (event) {
-			setAttribute('finalRealConstant', this.value, true);
+			setProperty('finalRealConstant', this.value, true);
 		});
 
 		c3ImInput.addEventListener('input', function (event) {
-			setAttribute('finalImConstant', this.value, true);
+			setProperty('finalImConstant', this.value, true);
 		});
 
 		z0RealInput.addEventListener('input', function (event) {
-			setAttribute('finalRealConstant', this.value, true);
+			setProperty('finalRealConstant', this.value, true);
 		});
 
 		z0ImInput.addEventListener('input', function (event) {
-			setAttribute('finalImConstant', this.value, true);
+			setProperty('finalImConstant', this.value, true);
 		});
 
 		function updateConstant(event) {
@@ -125,9 +125,7 @@ function JuliaSet() {
 				value = parseFloat(this.value);
 			}
 			if (Number.isFinite(value)) {
-				const arr = me[property];
-				arr[parseInt(this.id[7]) - 1] = value;
-				assignBgAttribute(me, property);
+				setBgPropertyElement(me, property, parseInt(this.id[7]) - 1, value);
 				generateBackground(0);
 			}
 		}
@@ -141,7 +139,7 @@ function JuliaSet() {
 		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
-				assignBgAttribute(me, 'xCentre', value);
+				setBgProperty(me, 'xCentre', value);
 				generateBackground(0);
 			}
 		});
@@ -149,7 +147,7 @@ function JuliaSet() {
 		optionsDoc.getElementById('julia-centre-y').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
-				assignBgAttribute(me, 'yCentre', value);
+				setBgProperty(me, 'yCentre', value);
 				generateBackground(0);
 			}
 		});
@@ -157,7 +155,7 @@ function JuliaSet() {
 		optionsDoc.getElementById('julia-range-x').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
-				assignBgAttribute(me, 'xRange', value);
+				setBgProperty(me, 'xRange', value);
 				generateBackground(0);
 			}
 		});
@@ -165,22 +163,22 @@ function JuliaSet() {
 		optionsDoc.getElementById('julia-range-y').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
-				assignBgAttribute(me, 'yRange', value);
+				setBgProperty(me, 'yRange', value);
 				generateBackground(0);
 			}
 		});
 
 
 		optionsDoc.getElementById('julia-color-multiple').addEventListener('input', function (event) {
-			setNonNegativeAttribute('colorMultiple', this.value);
+			setNonNegativeProperty('colorMultiple', this.value);
 		});
 
 		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
-			setNonNegativeAttribute('colorPower', this.value);
+			setNonNegativeProperty('colorPower', this.value);
 		});
 
 		optionsDoc.getElementById('julia-color-interpolation').addEventListener('input', function (event) {
-			assignBgAttribute(me, 'interpolation', this.value);
+			setBgProperty(me, 'interpolation', this.value);
 			generateBackground(0);
 		});
 
@@ -216,6 +214,19 @@ function JuliaSet() {
 	this.colorPower = 1;
 	this.colorOffset = 0;
 
+	const palette = new Array(256);
+	this.palette = palette;
+	for (let i = 6; i < 256; i++) {
+		palette[i] = [0, 0, 0, 1];
+	}
+	palette[0] = [0, 1, 0.5, 1];
+	palette[1] = [1/6, 1, 0.5, 1];
+	palette[2] = [1/6, 1, 0.5, 1];
+	palette[3] = [3/6, 1, 0.5, 1];
+	palette[4] = [4/6, 1, 0.5, 1];
+	palette[5] = [5/6, 1, 0.5, 1];
+	this.numColors = 6;
+	this.wrapPalette = true;
 }
 
 JuliaSet.prototype.animatable = {
@@ -223,13 +234,13 @@ JuliaSet.prototype.animatable = {
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
 		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
-		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset'
+		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
 	],
 	xy: [
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot', 'preOperation'
+		'maxIterations', 'mandelbrot', 'preOperation', 'numColors', 'wrapPalette'
 	]
 };
 

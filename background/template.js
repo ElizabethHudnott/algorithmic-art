@@ -1,5 +1,5 @@
 /* A template for creating new sketches. At present this is beta quality and subject to
- * potential future revisions (including the possibility of breaking changes).
+ * potential future revisions, including the possibility of incompatible changes.
  */
 
 function MySketch() {
@@ -20,7 +20,7 @@ function MySketch() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				me.myParameter = value;
-				generateBackground(0); // Zero is the preview level. See generate().
+				generateBackground(0); // Zero is the preview level. See generate() comments.
 			}
 		});
 
@@ -29,15 +29,15 @@ function MySketch() {
 		return optionsDoc;
 	});
 
-	// Establish the initial values for the sketch's parameters.
+	// Establish initial values for the sketch's parameters.
 	this.myParameter = 0;
 	this.myThingyMin = 0;
 	this.myThingyMax = 10;
 }
 
 /** This method is optional. During animation the environment will assign values
- *  directly to the sketch's parameters' properties. If this causes the results of any
- *  cached calculations to become invalid then erase that data here.
+ *  directly to the sketch's parameters' properties. If this causes any cached
+ *	calculation results to become invalid then erase that data here.
  */
 MySketch.prototype.purgeCache = function () {
 
@@ -48,7 +48,7 @@ MySketch.prototype.purgeCache = function () {
  *  specifies the manner in which they should be animated.
  */
 MySketch.prototype.animatable = {
-	/* Floating point numbers, colours and arrays containing these values of these
+	/* Floating point numbers, colours and arrays containing values of these
 	 * types can be interpolated between the start and end frames in a smooth manner.
 	 */
 	continuous: [

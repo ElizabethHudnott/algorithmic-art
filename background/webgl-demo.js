@@ -6,7 +6,7 @@ function WebGLDemo() {
 
 	this.optionsDocument = downloadFile('webgl-demo.html', 'document').then(function (optionsDoc) {
 		optionsDoc.getElementById('gldemo-red').addEventListener('input', function (event) {
-			assignBgAttribute(me, 'red', parseFloat(this.value));
+			setBgProperty(me, 'red', parseFloat(this.value));
 			generateBackground(0);
 		});
 

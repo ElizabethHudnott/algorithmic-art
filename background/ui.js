@@ -1,6 +1,6 @@
 'use strict';
 
-let bgGenerator, generateBackground, assignBgAttribute;
+let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
 
@@ -56,83 +56,6 @@ function showBackgroundOptions() {
 		}
 	`;
 
-	function shaderDeclarations(generator) {
-		let str = '';
-		const animatable = generator.animatable;
-		if (animatable !== undefined) {
-			const continuous = animatable.continuous;
-			if (continuous !== undefined) {
-				for (let property of continuous) {
-					const value = generator[property];
-					if (Array.isArray(value)) {
-						const length = value.length;
-						if (Array.isArray(value[0])) {
-							str += 'uniform mat' + length + ' ' + property + ';\n';
-						} else {
-							str += 'uniform vec' + length + ' ' + property + ';\n';
-						}
-					} else {
-						str += 'uniform float ' + property + ';\n';
-					}
-				}
-			}
-			const stepped = animatable.stepped;
-			if (stepped !== undefined) {
-				for (let property of stepped) {
-					const value = generator[property];
-					if (Array.isArray(value)) {
-						const length = value.length;
-						str += 'uniform ivec' + length + ' ' + property + ';\n';
-					} else {
-						str += 'uniform int ' + property + ';\n';
-					}
-				}
-			}
-			const pairedContinuous = animatable.pairedContinuous;
-			if (pairedContinuous !== undefined) {
-				for (let [property1, property2] of pairedContinuous) {
-					const value1 = generator[property1];
-					let typeName;
-					if (Array.isArray(value1)) {
-						const length = value1.length;
-						if (Array.isArray(value1[0])) {
-							typeName = 'mat' + length;
-						} else {
-							typeName = 'vec' + length;
-						}
-					} else {
-						typeName = 'float';
-					}
-					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
-					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
-				}
-			}
-			const xy = animatable.xy;
-			if (xy !== undefined) {
-				for (let [property1, property2] of xy) {
-					str += 'uniform float ' + property1 + ';\n';
-					str += 'uniform float ' + property2 + ';\n';
-				}
-
-			}
-			const pairedStepped = animatable.pairedStepped;
-			if (pairedStepped !== undefined) {
-				for (let [property1, property2] of pairedStepped) {
-					const value1 = generator[property1];
-					let typeName;
-					if (Array.isArray(value1)) {
-						typeName = 'ivec' + value1.length;
-					} else {
-						typeName = 'int';
-					}
-					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
-					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
-				}
-			}
-		}
-		return str;
-	}
-
 	function loadShader(context, type, source) {
 		const shader = context.createShader(type);
 		context.shaderSource(shader, source);
@@ -151,6 +74,220 @@ function showBackgroundOptions() {
 		}
 
 		return shader;
+	}
+
+	const GLTypeCategory = Object.freeze({
+		'SCALAR': 0,
+		'VECTOR': 1,
+		'MATRIX': 2,
+	});
+
+	class GLType {
+		constructor(category, baseType, width, height, length) {
+			this.category = category;
+			this.baseType = baseType;
+			this.width = width;
+			this.height = height;
+			this.length = length;
+		}
+
+		toString() {
+			let category = this.category;
+			if (category === GLTypeCategory.VECTOR && this.width === 1) {
+				category = GLTypeCategory.SCALAR;
+			}
+			let typeName;
+			switch (category) {
+			case GLTypeCategory.SCALAR:
+				switch (this.baseType) {
+				case 'b':
+					typeName = 'bool';
+					break;
+				case 'i':
+					typeName = 'int';
+					break;
+				case 'f':
+					typeName = 'float';
+					break;
+				}
+				break;
+			case GLTypeCategory.VECTOR:
+				typeName = (this.baseType === 'f' ? 'vec' : this.baseType + 'vec') + this.width;
+				break;
+			case GLTypeCategory.MATRIX:
+				typeName = 'mat' + this.width + 'x' + height;
+				break;
+			}
+			if (this.length !== undefined) {
+				typeName += '[' + this.length + ']';
+			}
+			return typeName;
+		}
+
+		assignValue(gl, location, value) {
+			let baseType = this.baseType;
+			if (baseType === 'b') {
+				baseType = 'f';
+			}
+			if (this.length !== undefined) {
+				value = value.flat();
+			}
+			if (this.category === GLTypeCategory.SCALAR && this.length === undefined) {
+				gl['uniform1' + baseType](location, value);
+			} else if (this.category === GLTypeCategory.MATRIX) {
+				value = new Float32Array(value.flat());
+				if (this.width === this.height) {
+					gl['uniformMatrix' + this.width + 'fv'](location, false, value);
+				} else {
+					gl['uniformMatrix' + this.width + 'x' + this.height + 'fv'](location, false, value);
+				}
+			} else {
+				if (baseType === 'i') {
+					value = new Int32Array(value);
+				}
+				gl['uniform' + this.width + baseType + 'v'](location, value);
+			}
+		}
+
+		assignArrayElement(gl, location, index, value) {
+			let offset;
+			let baseType = this.baseType;
+			if (baseType === 'b') {
+				baseType = 'f';
+			}
+			switch (this.category) {
+			case GLTypeCategory.SCALAR:
+				if (baseType === 'i') {
+					value = new Int32Array([value]);
+				} else {
+					value = [value];
+				}
+				gl['uniform1' + baseType + 'v'](location, value, index, 0);
+				break;
+
+			case GLTypeCategory.VECTOR:
+				if (baseType === 'i') {
+					value = new Int32Array(value);
+				}
+				offset = index * this.width;
+				gl['uniform' + this.width + baseType + 'v'](location, value, offset, 0);
+				break;
+
+			case GLTypeCategory.MATRIX:
+				value = new Float32Array(value.flat());
+				offset = index * this.width * this.height;
+				if (this.width === this.height) {
+					gl['uniformMatrix' + this.width + 'fv'](location, false, value, offset);
+				} else {
+					gl['uniformMatrix' + this.width + 'x' + this.height + 'fv'](location, false, value, offset, 0);
+				}
+				break;
+			}
+		}
+
+	}
+
+	const glTypes = new Map();
+	glTypes.set('b', new GLType(GLTypeCategory.SCALAR, 'b'));
+	glTypes.set('i', new GLType(GLTypeCategory.SCALAR, 'i'));
+	glTypes.set('f', new GLType(GLTypeCategory.SCALAR, 'f'));
+	for (let i = 1; i <= 4; i++) {
+		glTypes.set('bvec' + i, new GLType(GLTypeCategory.VECTOR, 'b', i));
+		glTypes.set('ivec' + i, new GLType(GLTypeCategory.VECTOR, 'i', i));
+		glTypes.set('fvec' + i, new GLType(GLTypeCategory.VECTOR, 'f', i));
+	}
+
+	function glBaseType(example, isInteger) {
+		if (isInteger) {
+			if (example === true || example === false) {
+				return 'b';
+			} else {
+				return 'i';
+			}
+		} else {
+			return 'f';
+		}
+	}
+
+	function inferGLType(example, isInteger) {
+
+		if (Array.isArray(example)) {
+			const dim1 = example.length;
+
+			if (Array.isArray(example[0])) {
+				const dim2 = example[0].length;
+
+				if (Array.isArray(example[0][0])) {
+					const dim3 = example[0][0].length;
+					// Array of matrices
+					return new GLType(GLTypeCategory.MATRIX, 'f', dim3, dim2, dim1);
+				} else if (!isInteger && dim1 > 1 && dim1 < 5 && dim2 > 1 && dim2 < 5) {
+					// Matrix
+					return new GLType(GLTypeCategory.MATRIX, 'f', dim2, dim1);
+				} else {
+					// Array of vectors
+					return new GLType(GLTypeCategory.VECTOR, glBaseType(example[0][0]), dim2, 1, dim1);
+				}
+			} else if (dim1 < 5) {
+				// Vector
+				return glTypes.get(glBaseType(example[0], isInteger) + 'vec' + dim1);
+			} else {
+				// Array of scalars
+				return new GLType(GLTypeCategory.SCALAR, glBaseType(example[0]), 1, 1, dim1);
+			}
+		} else {
+			return glTypes.get(glBaseType(example, isInteger));
+		}
+	}
+
+	function shaderDeclarations(generator) {
+		let str = '';
+		const animatable = generator.animatable;
+		if (animatable !== undefined) {
+			const continuous = animatable.continuous;
+			if (continuous !== undefined) {
+				for (let property of continuous) {
+					const value = generator[property];
+					const typeName = inferGLType(value, false).toString();
+					str += 'uniform ' + typeName + ' ' + property + ';\n';
+				}
+			}
+			const stepped = animatable.stepped;
+			if (stepped !== undefined) {
+				for (let property of stepped) {
+					const value = generator[property];
+					const typeName = inferGLType(value, true).toString();
+					str += 'uniform ' + typeName + ' ' + property + ';\n';
+				}
+			}
+			const pairedContinuous = animatable.pairedContinuous;
+			if (pairedContinuous !== undefined) {
+				for (let [property1, property2] of pairedContinuous) {
+					const value1 = generator[property1];
+					const typeName = inferGLType(value1, false).toString();
+					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
+					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
+				}
+			}
+			const xy = animatable.xy;
+			if (xy !== undefined) {
+				for (let [property1, property2] of xy) {
+					str += 'uniform float ' + property1 + ';\n';
+					str += 'uniform float ' + property2 + ';\n';
+				}
+
+			}
+			const pairedStepped = animatable.pairedStepped;
+			if (pairedStepped !== undefined) {
+				for (let [property1, property2] of pairedStepped) {
+					const value1 = generator[property1];
+					const typeName = inferGLType(value1, true).toString();
+					str += 'uniform ' + typeName + ' ' + property1 + ';\n';
+					str += 'uniform ' + typeName + ' ' + property2 + ';\n';
+				}
+			}
+		}
+		return str;
 	}
 
 	class DrawingContext {
@@ -179,6 +316,9 @@ function showBackgroundOptions() {
 				[0, 0, -1]			// amount to translate
 			);
 			this.modelViewMatrix = modelViewMatrix;
+			this.uniformLocations = undefined;
+			this.program = undefined;
+			this.types = new Map();
 		}
 
 		resize(width, height) {
@@ -260,9 +400,47 @@ function showBackgroundOptions() {
 			);
 			gl.uniform1f(uniformLocations.width, gl.canvas.width);
 			gl.uniform1f(uniformLocations.height, gl.canvas.height);
+
+			this.types.clear();
+			const animatable = generator.animatable;
+			if (animatable !== undefined) {
+				const continuous = animatable.continuous;
+				if (continuous !== undefined) {
+					for (let property of continuous) {
+						this.types.set(property, inferGLType(generator[property], false));
+					}
+				}
+				const stepped = animatable.stepped;
+				if (stepped !== undefined) {
+					for (let property of stepped) {
+						this.types.set(property, inferGLType(generator[property], true));
+					}
+				}
+				const pairedContinuous = animatable.pairedContinuous;
+				if (pairedContinuous !== undefined) {
+					for (let [property1, property2] of pairedContinuous) {
+						this.types.set(property1, inferGLType(generator[property1], false));
+						this.types.set(property2, inferGLType(generator[property2], false));
+					}
+				}
+				const xy = animatable.xy;
+				if (xy !== undefined) {
+					for (let [property1, property2] of xy) {
+						this.types.set(property1, inferGLType(generator[property1], false));
+						this.types.set(property2, inferGLType(generator[property2], false));
+					}
+				}
+				const pairedStepped = animatable.pairedStepped;
+				if (pairedStepped !== undefined) {
+					for (let [property1, property2] of pairedStepped) {
+						this.types.set(property1, inferGLType(generator[property1], true));
+						this.types.set(property2, inferGLType(generator[property2], true));
+					}
+				}
+			}
 		}
 
-		assignAttribute(generator, property, value) {
+		setProperty(generator, property, value) {
 			if (arguments.length === 2) {
 				value = generator[property];
 			} else {
@@ -270,142 +448,29 @@ function showBackgroundOptions() {
 			}
 			const gl = this.gl;
 			const location = gl.getUniformLocation(this.program, property);
-			let length, methodName;
-			const isArray = Array.isArray(value);
-			if (isArray) {
-				length = value.length;
-				if (Array.isArray(value[0])) {
-					methodName = 'uniformMatrix' + length + 'fv';
-					value = new Float32Array(value.flat());
-					gl[methodName](location, false, value);
-					return;
-				}
-			}
-
-			const stepped = generator.animatable.stepped;
-			let isInt = stepped !== undefined && stepped.includes(property);
-			const pairedStepped = generator.animatable.pairedStepped;
-			if (pairedStepped !== undefined) {
-				for (let [property1, property2] of pairedStepped) {
-					if (property1 === property || property2 === property) {
-						isInt = true;
-						break;
-					}
-				}
-			}
-			const type = isInt ? 'i' : 'f';
-
-			if (isArray) {
-				if (isInt) {
-					value = new Int32Array(value);
-				}
-				methodName = 'uniform' + length + type + 'v';
-			} else {
-				methodName = 'uniform1' + type;
-			}
-			gl[methodName](location, value);
+			const type = this.types.get(property);
+			type.assignValue(gl, location, value);
 		}
 
-		assignAttributes(generator) {
-			const animatable = generator.animatable;
-			if (animatable !== undefined) {
-				const gl = this.gl;
-				const continuous = animatable.continuous;
-				if (continuous !== undefined) {
-					for (let property of continuous) {
-						const location = gl.getUniformLocation(this.program, property);
-						let value = generator[property];
-						let methodName;
-						if (Array.isArray(value)) {
-							const length = value.length;
-							if (Array.isArray(value[0])) {
-								methodName = 'uniformMatrix' + length + 'fv';
-								value = new Float32Array(value.flat());
-								gl[methodName](location, false, value);
-								continue;
-							} else {
-								methodName = 'uniform' + length + 'fv';
-							}
-						} else {
-							methodName = 'uniform1f';
-						}
-						gl[methodName](location, value);
-					}
-				}
-				const stepped = animatable.stepped;
-				if (stepped !== undefined) {
-					for (let property of stepped) {
-						const location = gl.getUniformLocation(this.program, property);
-						let value = generator[property];
-						let methodName;
-						if (Array.isArray(value)) {
-							const length = value.length;
-							methodName = 'uniform' + length + 'iv';
-							value = new Int32Array(value);
-						} else {
-							methodName = 'uniform1i';
-						}
-						gl[methodName](location, value);
-					}
-				}
-				const pairedContinuous = animatable.pairedContinuous;
-				if (pairedContinuous !== undefined) {
-					for (let [property1, property2] of pairedContinuous) {
-						const location1 = gl.getUniformLocation(this.program, property1);
-						const location2 = gl.getUniformLocation(this.program, property2);
-						let value1 = generator[property1];
-						let value2 = generator[property2];
-						let methodName;
-						if (Array.isArray(value1)) {
-							const length = value1.length;
-							if (Array.isArray(value1[0])) {
-								methodName = 'uniformMatrix' + length + 'fv';
-								value1 = new Float32Array(value1.flat());
-								value2 = new Float32Array(value2.flat());
-								gl[methodName](location1, false, value1);
-								gl[methodName](location2, false, value2);
-								continue;
-							} else {
-								methodName = 'uniform' + length + 'fv';
-							}
-						} else {
-							methodName = 'uniform1f';
-						}
-						gl[methodName](location1, value1);
-						gl[methodName](location2, value2);
-					}
-				}
-				const xy = animatable.xy;
-				if (xy !== undefined) {
-					for (let [property1, property2] of xy) {
-						const location1 = gl.getUniformLocation(this.program, property1);
-						const location2 = gl.getUniformLocation(this.program, property2);
-						let value1 = generator[property1];
-						let value2 = generator[property2];
-						gl.uniform1f(location1, value1);
-						gl.uniform1f(location2, value2);
-					}
-				}
-				const pairedStepped = animatable.pairedStepped;
-				if (pairedStepped !== undefined) {
-					for (let [property1, property2] of pairedStepped) {
-						const location1 = gl.getUniformLocation(this.program, property1);
-						const location2 = gl.getUniformLocation(this.program, property2);
-						let value1 = generator[property1];
-						let value2 = generator[property2];
-						let methodName;
-						if (Array.isArray(value1)) {
-							const length = value1.length;
-							methodName = 'uniform' + length + 'iv';
-							value1 = new Int32Array(value1);
-							value2 = new Int32Array(value2);
-						} else {
-							methodName = 'uniform1i';
-						}
-						gl[methodName](location1, value1);
-						gl[methodName](location2, value2);
-					}
-				}
+		setPropertyElement(generator, property, index, value) {
+			const arr = generator[property];
+			arr[index] = value;
+			const gl = this.gl;
+			const location = gl.getUniformLocation(this.program, property);
+			const type = this.types.get(property);
+			if (type.length === undefined) {
+				type.assignValue(gl, location, arr);
+			} else {
+				type.assignArrayElement(gl, location, index, value);
+			}
+		}
+
+		setProperties(generator) {
+			const gl = this.gl;
+			const program = this.program;
+			for (let [property, type] of this.types.entries()) {
+				const location = gl.getUniformLocation(program, property);
+				type.assignValue(gl, location, generator[property]);
 			}
 		}
 
@@ -520,7 +585,8 @@ function showBackgroundOptions() {
 		progressiveBackgroundDraw(bgGenerator, drawingContext, width, height, preview);
 	}
 	generateBackground = progressiveBackgroundGen;
-	assignBgAttribute = drawingContext.assignAttribute.bind(drawingContext);
+	setBgProperty = drawingContext.setProperty.bind(drawingContext);
+	setBgPropertyElement = drawingContext.setPropertyElement.bind(drawingContext);
 
 	bgGeneratorImage.onload = function () {
 		progressiveBackgroundGen(0);
@@ -967,7 +1033,7 @@ function showBackgroundOptions() {
 			const fragFileContent = await downloadFile(url.slice(0, -3) + '.frag', 'text');
 			gen.shaderSource = fragmentShaderHeader + shaderDeclarations(gen) + fragFileContent;
 			drawingContext.initializeShader(bgGenerator);
-			drawingContext.assignAttributes(bgGenerator);
+			drawingContext.setProperties(bgGenerator);
 		}
 		progressiveBackgroundGen(0);
 
@@ -1438,7 +1504,7 @@ function showBackgroundOptions() {
 		context.save();
 		rotateCanvas(context, width, height, rotation);
 		if (generator.isShader) {
-			contextualInfo.assignAttributes(generator);
+			contextualInfo.setProperties(generator);
 			contextualInfo.drawGL(tweenPrime, preview);
 			drawSignature(contextualInfo);
 		} else if (preview === 0) {

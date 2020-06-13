@@ -178,7 +178,9 @@ function JuliaSet() {
 		});
 
 		optionsDoc.getElementById('julia-color-interpolation').addEventListener('input', function (event) {
-			setBgProperty(me, 'interpolation', this.value);
+			let value = parseFloat(this.value);
+			value = Math.pow(value, 0.15);
+			setBgProperty(me, 'interpolation', value);
 			generateBackground(0);
 		});
 

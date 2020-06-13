@@ -118,7 +118,7 @@ void main() {
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {
-		float colorNumber = float(i) + interpolation * (1.0 - log(log2(rSquared) / 2.0));
+		float colorNumber = float(i) + 1.0 - log(log2(rSquared) / 2.0);
 		float numColorsF = float(numColors);
 		colorNumber = (numColorsF - 1.0) * colorMultiple *
 			colorFunc(colorNumber) / colorFunc(float(maxIterations)) + colorOffset;
@@ -136,7 +136,14 @@ void main() {
 		vec4 finalColor;
 		if (colorIndex1 < numColors - 1) {
 			vec4 color2 = palette[colorIndex1 + 1];
-			finalColor = mix(color1, color2, interpolation * fract(colorNumber));
+			float mixing;
+			float interpolationInverse = 1.0 - interpolation;
+			if (interpolationInverse == 0.0) {
+				mixing = fract(colorNumber);
+			} else {
+				mixing = round(fract(colorNumber) / interpolationInverse) * interpolationInverse;
+			}
+			finalColor = mix(color1, color2, mixing);
 		} else {
 			finalColor = color1;
 		}

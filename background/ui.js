@@ -42,6 +42,7 @@ function showBackgroundOptions() {
 
 	const fragmentShaderHeader = `#version 300 es
 		precision highp float;
+		precision highp int;
 		out vec4 fragColor;
 		#define PI 3.141592654
 		uniform float canvasWidth;

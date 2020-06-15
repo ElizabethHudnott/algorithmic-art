@@ -230,7 +230,7 @@ function JuliaSet() {
 	for (let i = 6; i < 256; i++) {
 		palette[i] = [0, 0, 0, 1];
 	}
-	palette[0] = [0, 1, 0.5, 1];
+	palette[0] = [2/6, 1, 0.15, 1];
 	palette[1] = [1/6, 1, 0.5, 1];
 	palette[2] = [2/6, 1, 0.5, 1];
 	palette[3] = [3/6, 1, 0.5, 1];

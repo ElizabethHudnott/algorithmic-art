@@ -1,10 +1,10 @@
-vec2 complexPower(in float rSquared, in float theta, in float n) {
+vec2 complexPower(float rSquared, float theta, float n) {
 	float magnitude = pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
 
-int intMod(in int n, in int m) {
+int intMod(int n, int m) {
 	int result = abs(n) % m;
 	if (n < 0 && result != 0) {
 		result = m - result;
@@ -12,7 +12,7 @@ int intMod(in int n, in int m) {
 	return result;
 }
 
-float colorFunc(in float value) {
+float colorFunc(float value) {
 	if (colorPower == 0.0) {
 		return 0.0;
 	} else {
@@ -151,6 +151,7 @@ void main() {
 		} else if (hueDifference < -0.5) {
 			color2[0] += 1.0;
 		}
+		mixing = smoothstep(0.0, 1.0, mixing);
 		vec4 finalColor = mix(color1, color2, mixing);
 		fragColor = hsla(finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
 	}

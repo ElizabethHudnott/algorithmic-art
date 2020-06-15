@@ -177,10 +177,19 @@ function JuliaSet() {
 			setNonNegativeProperty('colorPower', this.value);
 		});
 
+		optionsDoc.getElementById('julia-color-offset').addEventListener('input', function (event) {
+			setProperty('colorOffset', this.value, true);
+		});
+
 		optionsDoc.getElementById('julia-color-interpolation').addEventListener('input', function (event) {
 			let value = parseFloat(this.value);
 			value = Math.pow(value, 0.15);
 			setBgProperty(me, 'interpolation', value);
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('julia-color-wrap').addEventListener('input', function (event) {
+			setBgProperty(me, 'wrapPalette', this.checked);
 			generateBackground(0);
 		});
 
@@ -223,7 +232,7 @@ function JuliaSet() {
 	}
 	palette[0] = [0, 1, 0.5, 1];
 	palette[1] = [1/6, 1, 0.5, 1];
-	palette[2] = [1/6, 1, 0.5, 1];
+	palette[2] = [2/6, 1, 0.5, 1];
 	palette[3] = [3/6, 1, 0.5, 1];
 	palette[4] = [4/6, 1, 0.5, 1];
 	palette[5] = [5/6, 1, 0.5, 1];

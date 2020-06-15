@@ -308,6 +308,10 @@
 							<span class="input-group-text">&times;&nbsp;<var>n</var>^</span>
 						</div>
 						<input type="number" min="0" step="0.05" value="1" class="form-control" id="julia-color-power">
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">+</span>
+						</div>
+						<input type="number" value="0" class="form-control" id="julia-color-offset">
 					</div>
 				</div>
 			</div>
@@ -316,7 +320,13 @@
 					Interpolation
 				</label>
 				<div class="col-3">
-					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-1" id="julia-color-interpolation">
+					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="julia-color-interpolation">
+				</div>
+				<div class="col-3 pl-4">
+					<div class="form-check mt-1">
+						<input type="checkbox" checked class="form-check-input" id="julia-color-wrap">
+						<label class="form-check-label small mt-1" for="julia-color-wrap">Wrap</label>
+					</div>
 				</div>
 			</div>
 		</fieldset>

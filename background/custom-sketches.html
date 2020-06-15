@@ -5,6 +5,23 @@
 	<link rel="icon" href="../img/spirograph.png">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="../site.css">
+	<style>
+		.codebox {
+  			border: 1px solid #dee2e6;
+			border-radius: 0.75rem;
+			font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+			font-size: 80%;
+			font-weight: 400;
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+			overflow: auto;
+			padding: 0.75rem;
+			white-space: pre-wrap;
+		}
+		.codebox-long {
+			max-height: 500px;
+		}
+	</style>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -39,8 +56,7 @@
 					The code that draws the sketch onto the screen, which is contained inside the <code>generate()</code> method.
 				</li>
 			</ol>
-			<div class="text-monospace border small overflow-auto my-3" id="code-template" style="white-space: pre-wrap; max-height: 500px; border-radius: 0.75rem; padding: 0.75rem">
-			</div>
+			<div class="codebox codebox-long" id="js-template"></div>
 			<p>
 				There is a particularly challenging need to be able to redraw the sketch quickly in response to events like dragging a slider, while at the same time having the desire to create complex and intricate sketches that arouse artistic interest. There are two measures available which you should use to protect the application's performance.
 			</p>
@@ -77,7 +93,7 @@
 
 			<h2>Intrinsic Time</h2>
 			<p>
-				If your constructor contains the line <code>this.tween&nbsp;=&nbsp;0;</code> then the environment interprets this as meaning the sketch has an intrinsic sense of time. That is to say, it's capable of rendering more than one image from the same set of parameter values. The environment will set <code>tween</code> to a number between zero and one before it calls <code>generate()</code>, where zero represents the start frame and one represents the end frame. When a sketch uses the <code>tween</code> property a user can use animation features right away without the need to set distinct start and end frames, although they can still do so if they wish.
+				If your constructor contains the line <code>this.tween&nbsp;=&nbsp;0;</code> then the environment interprets this as meaning the sketch has an intrinsic sense of time. That is to say, it is capable of rendering more than one image from the same set of parameter values. The environment will set <code>tween</code> to a number between zero and one before it calls <code>generate()</code>, where zero represents the start frame and one represents the end frame. When a sketch uses the <code>tween</code> property a user can use animation features right away without the need to explicitly mark distinct start and end frames, although they can still do that if they wish.
 			</p>
 
 			<h2>Utility Functions</h2>
@@ -116,21 +132,38 @@
 
 			<h1>WebGL2 Fragment Shaders</h1>
 			<p>
-				As well as using the 2D canvas API you also have the option of expressing yourself artistically by writing code in the form of a WebGL fragment shader. Sketches that use shaders have much faster performance and create a better user experience than the 2D canvas for designs that are calculation intensive. Although hardware acceleration features of the 3D graphics card are used to speed up rendering in this section we're not discussing how to create 3D shapes.
+				As well as using the 2D canvas API you also have the option of expressing yourself artistically by writing code in the form of a WebGL fragment shader. Sketches that use shaders have much faster performance and create a better user experience than the 2D canvas for designs that are calculation intensive. Although hardware acceleration features of the 3D graphics card are used to speed up rendering in this section we're not discussing creating 3D shapes.
 			</p>
 			<p>
 				A sketch that uses a shader must contain the line <code>this.isShader&nbsp;=&nbsp;true;</code> in its constructor and the code for the shader must be contained in a file with the same name and location as the JavaScript file but with the <kdb>.frag</kdb> extension. For convenience <code>canvasWidth</code>, <code>canvasHeight</code> and <code>tween</code> are predefined as <code>float</code> variables and <code>preview</code> as <code>int</code>, <code>PI</code> as a constant and the <code>hsla</code> function (with four <code>float</code> parameters), all with the same meanings as for 2D canvas sketches. The <code>out</code> variable is named <code>fragColor</code>.
 			</p>
 			<p>
-				There are some differences compared to 2D canvas sketches. Only properties which are declared as animatable get passed to the shader. To ensure new values get passed to the shader you should not assign to JavaScript properties directly but instead call <code>setBgProperty(me, '<var>name</var>', <var>value</var>);</code>. A word about type conversions is needed. Properties declared in the continuous, pairedContinuous and xy sections are passed to the shader as <code>float</code>, <code>vec2</code>, <code>vec3</code>, <code>vec4</code> and matrices and arrays of these types. Properties declared in the stepped and pairedStepped sections are passed as <code>int</code>, <code>bool</code>, <code>ivec2</code>, <code>ivec3</code>, <code>ivec4</code>, <code>bvec2</code>, <code>bvec3</code> or <code>bvec4</code>, or as an array of one of these types. The necessary GSGL declarations will be written for you automatically. In your JavaScript code you can have a property that is an array of arrays and it will automatically be converted into a matrix or an array of vectors when it's passed to the shader. However, the length of an array typed property should not change after the sketch is initialized and when using an array of arrays the individual array components must all have the same length.
+				There are some differences compared to 2D canvas sketches. Only properties which are declared as animatable get passed to the shader. To ensure new values get passed to the shader, in most cases you won't want to assign to JavaScript properties directly inside your event handlers but instead you'll call <code>setBgProperty(me, '<var>name</var>', <var>value</var>);</code>. A word about type conversion is needed. Properties declared in the continuous, pairedContinuous and xy sections are passed to the shader as <code>float</code>, <code>vec2</code>, <code>vec3</code>, <code>vec4</code> and matrices and arrays of these types. Properties declared in the stepped and pairedStepped sections are passed as <code>int</code>, <code>bool</code>, <code>ivec2</code>, <code>ivec3</code>, <code>ivec4</code>, <code>bvec2</code>, <code>bvec3</code> or <code>bvec4</code>, or as an array of one of these types. The necessary GSGL declarations will be written for you automatically. In your JavaScript code you can have a property that is an array of arrays and it will automatically be converted into a matrix or an array of vectors when it's passed to the shader. However, the length of an array typed property should not change after the sketch is initialized. When using an array of arrays the individual array components must all have the same length.
 			</p>
+			<p>
+				There are a couple of variant formats, which are particularly useful when working with arrays. The two parameter format <code>setBgProperty(me, '<var>name</var>');</code> forwards the <em>current value</em> of <code>me.<var>name</var></code> to the shader, which is useful when you've altered some elements of an array property directly. This may be easier than passing a whole replacement array in one using the three parameter version. Finally, if you only need to update a single array element then there's <code>setPropertyElement(me, '<var>name</var>', <var>index</var>, <var>value</var>);</code>
+			</p>
+			<h2>WebGL Demo Sketch</h2>
+			<a href="index.html?gen=webgl-demo" class="btn btn-primary" role="button">Launch Live Sketch</a>
+			<h3>webgl-demo.js</h3>
+			<div class="codebox" id="webgl-demo-js"></div>
+			<h3>webgl-demo.frag</h3>
+			<div class="codebox" id="webgl-demo-frag"></div>
 		</main>
 	</div>
 	<script src="../util.js"></script>
 	<script>
 
 		downloadFile('template.js', 'text').then(function (code) {
-			document.getElementById('code-template').innerText = code;
+			document.getElementById('js-template').innerText = code;
+		});
+
+		downloadFile('webgl-demo.js', 'text').then(function (code) {
+			document.getElementById('webgl-demo-js').innerText = code;
+		});
+
+		downloadFile('webgl-demo.frag', 'text').then(function (code) {
+			document.getElementById('webgl-demo-frag').innerText = code;
 		});
 
 		document.getElementById('url-generator-form').addEventListener('submit', function (event) {

@@ -4,6 +4,14 @@ vec2 complexPower(in float rSquared, in float theta, in float n) {
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
 
+int intMod(in int n, in int m) {
+	int result = abs(n) % m;
+	if (n < 0 && result != 0) {
+		result = m - result;
+	}
+	return result;
+}
+
 float colorFunc(in float value) {
 	if (colorPower == 0.0) {
 		return 0.0;
@@ -118,35 +126,32 @@ void main() {
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {
-		float colorNumber = float(i) + 1.0 - log(log2(rSquared) / 2.0);
+		float colorNumber = float(maxIterations - 2 - i) + log(log2(rSquared) / 2.0);
 		float numColorsF = float(numColors);
-		colorNumber = (numColorsF - 1.0) * colorMultiple *
-			colorFunc(colorNumber) / colorFunc(float(maxIterations)) + colorOffset;
+		colorNumber = numColorsF * colorMultiple *
+			colorFunc(colorNumber) / colorFunc(float(maxIterations)) + colorOffset - 1.0;
 
-		if (colorNumber >= numColorsF) {
-			if (wrapPalette) {
-				colorNumber = colorNumber - trunc(colorNumber / numColorsF) * numColorsF;
-			} else {
-				colorNumber = numColorsF - 1.0;
-			}
+		if (!wrapPalette && colorNumber >= numColorsF) {
+			colorNumber = numColorsF - 1.0;
 		}
 
-		int colorIndex1 = int(colorNumber);
-		vec4 color1 = palette[colorIndex1];
-		vec4 finalColor;
-		if (colorIndex1 < numColors - 1) {
-			vec4 color2 = palette[colorIndex1 + 1];
-			float mixing;
-			float interpolationInverse = 1.0 - interpolation;
-			if (interpolationInverse == 0.0) {
-				mixing = fract(colorNumber);
-			} else {
-				mixing = round(fract(colorNumber) / interpolationInverse) * interpolationInverse;
-			}
-			finalColor = mix(color1, color2, mixing);
+		int colorIndex1 = int(floor(colorNumber));
+		vec4 color1 = palette[intMod(colorIndex1, numColors)];
+		vec4 color2 = palette[intMod(colorIndex1 + 1, numColors)];
+		float mixing;
+		if (interpolation == 1.0) {
+			mixing = fract(colorNumber);
 		} else {
-			finalColor = color1;
+			float interpolationInverse = 1.0 - interpolation;
+			mixing = round(fract(colorNumber) / interpolationInverse) * interpolationInverse;
 		}
+		float hueDifference = color2[0] - color1[0];
+		if (hueDifference > 0.5) {
+			color1[0] += 1.0;
+		} else if (hueDifference < -0.5) {
+			color2[0] += 1.0;
+		}
+		vec4 finalColor = mix(color1, color2, mixing);
 		fragColor = hsla(finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
 	}
 }

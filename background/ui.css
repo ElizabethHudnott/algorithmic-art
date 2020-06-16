@@ -97,6 +97,22 @@ legend {
 	max-width: fit-content;
 }
 
+.palette {
+	background-color: #c0c0c0;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 0.5rem;
+}
+
+.palette-item {
+	border-radius: 1px;
+	border-width: 0;
+	flex-grow: 1;
+	width: 16px;
+	height: 16px;
+	margin: 2px;
+}
+
 .thumbnails>.active {
 	background-color: var(--light);
 	box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);

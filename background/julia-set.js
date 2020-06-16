@@ -4,13 +4,56 @@ function JuliaSet() {
 	this.hasRandomness = false;
 	this.isShader = true;
 
+	const palette = new Array(256);
+	this.palette = palette;
+	for (let i = 6; i < 256; i++) {
+		palette[i] = [0, 0, 0, 1];
+	}
+	palette[0] = [2/6, 1, 0.2, 1];
+	palette[1] = [1/6, 1, 0.5, 1];
+	palette[2] = [2/6, 1, 0.5, 1];
+	palette[3] = [3/6, 1, 0.5, 1];
+	palette[4] = [4/6, 1, 0.5, 1];
+	palette[5] = [5/6, 1, 0.5, 1];
+	this.numColors = 7;
+
 	this.optionsDocument = downloadFile('julia-set.html', 'document').then(function (optionsDoc) {
-		const constantRow = optionsDoc.getElementById('julia-constant');
-		const c3RealInput = optionsDoc.getElementById('julia-c3-real');
-		const c3ImInput = optionsDoc.getElementById('julia-c3-im');
+		const inversionRow = optionsDoc.getElementById('julia-inversion');
 		const z0Row = optionsDoc.getElementById('julia-z0');
 		const z0RealInput = optionsDoc.getElementById('julia-z0-real');
 		const z0ImInput = optionsDoc.getElementById('julia-z0-im');
+		const constantRow = optionsDoc.getElementById('julia-constant');
+		const c3RealInput = optionsDoc.getElementById('julia-c3-real');
+		const c3ImInput = optionsDoc.getElementById('julia-c3-im');
+
+		const paletteUI = optionsDoc.getElementById('julia-palette');
+		for (let i = 0; i < 256; i++) {
+			const button = optionsDoc.createElement('BUTTON');
+			button.type = 'button';
+			button.hidden = i >= me.numColors;
+			const color = palette[i];
+			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			button.classList.add('palette-item');
+			paletteUI.appendChild(button);
+		}
+
+		optionsDoc.getElementById('julia-num-colors').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value > 0 && value <= 256) {
+				const buttons = paletteUI.children;
+				if (value > me.numColors) {
+					for (let i = me.numColors; i < value; i++) {
+						buttons[i].hidden = false;
+					}
+				} else {
+					for (let i = value; i < me.numColors; i++) {
+						buttons[i].hidden = true;
+					}
+				}
+				setBgProperty(me, 'numColors', value);
+				generateBackground(0);
+			}
+		})
 
 		optionsDoc.getElementById('julia-type').addEventListener('input', function (event) {
 			const isMandelbrot = this.value === '1';
@@ -23,6 +66,7 @@ function JuliaSet() {
 				setProperty('finalImConstant', c3ImInput.value, false);
 			}
 			constantRow.hidden = isMandelbrot;
+			inversionRow.hidden = !isMandelbrot;
 			z0Row.hidden = !isMandelbrot;
 			generateBackground(0);
 		});
@@ -61,6 +105,14 @@ function JuliaSet() {
 				setBgProperty(me, 'inverse', value);
 				generateBackground(0);
 			}
+		});
+
+		optionsDoc.getElementById('julia-feedback-real').addEventListener('input', function (event) {
+			setProperty('realFeedback', this.value, true);
+		});
+
+		optionsDoc.getElementById('julia-feedback-im').addEventListener('input', function (event) {
+			setProperty('imFeedback', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-mu-translation').addEventListener('input', function (event) {
@@ -206,6 +258,8 @@ function JuliaSet() {
 	this.denominatorImConstant = 0;
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
+	this.realFeedback = 0;
+	this.imFeedback = 0;
 	this.mandelbrot = false;
 	// 0 = normal, 1 = conjugate, 2 = burning ship
 	this.preOperation = 0;
@@ -224,19 +278,6 @@ function JuliaSet() {
 	this.colorMultiple = 1;
 	this.colorPower = 1;
 	this.colorOffset = 0;
-
-	const palette = new Array(256);
-	this.palette = palette;
-	for (let i = 6; i < 256; i++) {
-		palette[i] = [0, 0, 0, 1];
-	}
-	palette[0] = [2/6, 1, 0.15, 1];
-	palette[1] = [1/6, 1, 0.5, 1];
-	palette[2] = [2/6, 1, 0.5, 1];
-	palette[3] = [3/6, 1, 0.5, 1];
-	palette[4] = [4/6, 1, 0.5, 1];
-	palette[5] = [5/6, 1, 0.5, 1];
-	this.numColors = 6;
 	this.wrapPalette = true;
 }
 
@@ -244,7 +285,8 @@ JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
-		'inverse', 'muTranslation', 'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
+		'realFeedback', 'imFeedback', 'inverse', 'muTranslation',
+		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
 	],
 	xy: [

@@ -25,15 +25,21 @@ void main() {
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
+	float theta, cReal, cIm, divisor;
+	vec2 point;
+
+	theta = clamp(-realFeedback, -0.5, 0.5) * PI;
+	float temp = x;
+	x = x * cos(theta) - y * sin(theta);
+	y = temp * sin(theta) + y * cos(theta);
+
 	if (preOperation == 2) {
 		// Burning ship
 		y = -y;
 	}
-	vec2 point;
-	float nonInverse = 1.0 - inverse;
-	float cReal, cIm, divisor;
 
 	if (mandelbrot) {
+
 		// Mandelbrot set
 		if (finalRealConstant == 0.0 && finalImConstant == 0.0) {
 			bool badZero = false;
@@ -54,24 +60,29 @@ void main() {
 		} else {
 			point = vec2(finalRealConstant, finalImConstant);
 		}
+
+		float nonInverse = 1.0 - inverse;
 		float offsetX = x + finalRealConstant;
 		float offsetY = y + finalImConstant;
 		divisor = offsetX * offsetX + offsetY * offsetY;
 		point = nonInverse * point + inverse * vec2(offsetX / divisor - muTranslation, -offsetY / divisor);
 		cReal = x;
 		cIm = y;
+
+		if (inverse > 0.0) {
+			divisor = cReal * cReal + cIm * cIm;
+			cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
+			cIm = nonInverse * cIm + inverse * -cIm / divisor;
+		}
+
 	} else {
+
 		// Julia set
 		point = vec2(x, y);
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
-	if (inverse > 0.0) {
-		divisor = cReal * cReal + cIm * cIm;
-		cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
-		cIm = nonInverse * cIm + inverse * -cIm / divisor;
-	}
-
+	vec2 previousPoint = vec2(0.0, 0.0);
 	float rSquared = point.x * point.x + point.y * point.y;
 	int i = 0;
 
@@ -84,7 +95,6 @@ void main() {
 			point = vec2(abs(point.x), abs(point.y));
 			break;
 		}
-		float theta;
 		if (point.x == 0.0) {
 			theta = sign(point.y) * PI / 2.0;
 		} else {
@@ -116,13 +126,20 @@ void main() {
 		}
 
 		divisor = denominator.x * denominator.x + denominator.y * denominator.y;
+		vec2 temp = point;
 		point = vec2(
 			(numerator.x * denominator.x + numerator.y * denominator.y) / divisor + cReal,
 			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm
 		);
+		point += vec2(
+			realFeedback * previousPoint.x - imFeedback * previousPoint.y,
+			realFeedback * previousPoint.y + imFeedback * previousPoint.x
+		);
+		previousPoint = temp;
 		rSquared = point.x * point.x + point.y * point.y;
 		i++;
 	}
+
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {

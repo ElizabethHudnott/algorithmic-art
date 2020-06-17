@@ -115,6 +115,14 @@ function JuliaSet() {
 			setProperty('imFeedback', this.value, true);
 		});
 
+		optionsDoc.getElementById('julia-feedback2-real').addEventListener('input', function (event) {
+			setProperty('realFeedback2', this.value, true);
+		});
+
+		optionsDoc.getElementById('julia-feedback2-im').addEventListener('input', function (event) {
+			setProperty('imFeedback2', this.value, true);
+		});
+
 		optionsDoc.getElementById('julia-mu-translation').addEventListener('input', function (event) {
 			setProperty('muTranslation', this.value, true);
 		});
@@ -248,9 +256,9 @@ function JuliaSet() {
 		return optionsDoc;
 	});
 
-	this.numeratorExponents = [2, 3, 4, 5];
+	this.numeratorExponents = [2, 0, 0, 0];
 	this.numeratorCoefficients = [1, 0, 0, 0];
-	this.denominatorExponents = [2, 3, 4, 5];
+	this.denominatorExponents = [0, 0, 0, 0];
 	this.denominatorCoefficients = [0, 0, 0, 0];
 	this.numeratorRealConstant = 0;
 	this.numeratorImConstant = 0;
@@ -260,6 +268,8 @@ function JuliaSet() {
 	this.finalImConstant = 0.6;
 	this.realFeedback = 0;
 	this.imFeedback = 0;
+	this.realFeedback2 = 0;
+	this.imFeedback2 = 0;
 	this.mandelbrot = false;
 	// 0 = normal, 1 = conjugate, 2 = burning ship
 	this.preOperation = 0;
@@ -285,7 +295,7 @@ JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
-		'realFeedback', 'imFeedback', 'inverse', 'muTranslation',
+		'realFeedback', 'imFeedback', 'realFeedback2', 'imFeedback2', 'inverse', 'muTranslation',
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
 	],

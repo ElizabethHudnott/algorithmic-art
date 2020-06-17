@@ -82,7 +82,8 @@ void main() {
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
-	vec2 previousPoint = vec2(0.0, 0.0);
+	vec2 lastZ = vec2(0.0, 0.0);
+	vec2 lastZ2 = vec2(0.0, 0.0);
 	float rSquared = point.x * point.x + point.y * point.y;
 	int i = 0;
 
@@ -132,10 +133,15 @@ void main() {
 			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm
 		);
 		point += vec2(
-			realFeedback * previousPoint.x - imFeedback * previousPoint.y,
-			realFeedback * previousPoint.y + imFeedback * previousPoint.x
+			realFeedback * lastZ.x - imFeedback * lastZ.y,
+			realFeedback * lastZ.y + imFeedback * lastZ.x
 		);
-		previousPoint = temp;
+		point += vec2(
+			realFeedback2 * lastZ2.x - imFeedback2 * lastZ2.y,
+			realFeedback2 * lastZ2.y + imFeedback2 * lastZ2.x
+		);
+		lastZ2 = lastZ;
+		lastZ = temp;
 		rSquared = point.x * point.x + point.y * point.y;
 		i++;
 	}

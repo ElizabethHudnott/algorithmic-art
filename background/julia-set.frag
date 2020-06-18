@@ -1,7 +1,59 @@
+vec2 complexDivide(vec2 numerator, vec2 denominator) {
+	float divisor = denominator.x * denominator.x + denominator.y * denominator.y;
+	return vec2(
+		(numerator.x * denominator.x + numerator.y * denominator.y) / divisor,
+		(numerator.y * denominator.x - numerator.x * denominator.y) / divisor
+	);
+}
+
 vec2 complexPower(float rSquared, float theta, float n) {
 	float magnitude = pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
+}
+
+vec2 complexFunction(int function, vec2 z) {
+	vec2 result;
+	switch (function) {
+	case 0: // identity
+		return vec2(1.0, 0.0);
+	case 1: // multiply by i
+		return vec2(0.0, 1.0);
+	case 2: // e^z
+		float expX = exp(z.x);
+		return vec2(expX * cos(z.y), expX * sin(z.y));
+	case 3: // sin(z)
+	case 7: // cosec(z) = 1 / sin(z)
+		result = vec2(sin(z.x) * cosh(z.y), cos(z.x) * sinh(z.y));
+		break;
+	case 4: // cos(z)
+	case 6: // sec(z) = 1 / cos(z)
+		result = vec2(cos(z.x) * cosh(z.y), -sin(z.x) * sinh(z.y));
+		break;
+	case 5: // tan(z) = sin(z) / cos(z)
+	case 8: // cot(z) = cos(z) / sin(z)
+		float sinX = sin(z.x);
+		float coshY = cosh(z.y);
+		float cosX = cos(z.x);
+		float sinhY = sinh(z.y);
+		result = vec2(sinX * coshY, cosX * sinhY);
+		vec2 result2 = vec2(cosX * coshY, -sinX * sinhY);
+		if (function == 5) {
+			// tan(z) = sin(z) / cos(z)
+			return complexDivide(result, result2);
+		} else {
+			// cot(z) = cos(z) / sin(z)
+			return complexDivide(result2, result);
+		}
+		break;
+	}
+	if (function > 5) {
+		// sec(z) & cosec(z)
+		return complexDivide(vec2(1.0, 0.0), result);
+	} else {
+		// sin(z) & cos(z)
+		return result;
+	}
 }
 
 int intMod(int n, int m) {
@@ -26,7 +78,7 @@ void main() {
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
 	float theta, cReal, cIm, divisor;
-	vec2 point;
+	vec2 point, functionOfZ;
 
 	theta = clamp(-realFeedback, -0.5, 0.5) * PI;
 	float temp = x;
@@ -82,12 +134,17 @@ void main() {
 		cReal = finalRealConstant;
 		cIm = finalImConstant;
 	}
+
 	vec2 lastZ = vec2(0.0, 0.0);
 	vec2 lastZ2 = vec2(0.0, 0.0);
 	float rSquared = point.x * point.x + point.y * point.y;
+	float escapeRSquared = escapeValue * escapeValue;
 	int i = 0;
 
-	while (rSquared < escapeRSquared && i < maxIterations) {
+	while (i < maxIterations &&
+		(escapeType == 0 ? rSquared <= escapeRSquared : abs(point.y) <= escapeValue)
+	) {
+
 		switch (preOperation) {
 		case 1:	// Conjugation
 			point = vec2(point.x, -point.y);
@@ -126,11 +183,11 @@ void main() {
 			}
 		}
 
-		divisor = denominator.x * denominator.x + denominator.y * denominator.y;
 		vec2 temp = point;
-		point = vec2(
-			(numerator.x * denominator.x + numerator.y * denominator.y) / divisor + cReal,
-			(numerator.y * denominator.x - numerator.x * denominator.y) / divisor + cIm
+		functionOfZ = complexFunction(finalFunction, point);
+		point = complexDivide(numerator, denominator) + vec2(
+			cReal * functionOfZ.x - cIm * functionOfZ.y,
+			cReal * functionOfZ.y + cIm * functionOfZ.x
 		);
 		point += vec2(
 			realFeedback * lastZ.x - imFeedback * lastZ.y,

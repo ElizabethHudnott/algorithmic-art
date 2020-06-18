@@ -151,6 +151,11 @@ function JuliaSet() {
 			setProperty('finalImConstant', this.value, true);
 		});
 
+		optionsDoc.getElementById('julia-c3-function').addEventListener('input', function (event) {
+			setBgProperty(me, 'finalFunction', parseInt(this.value));
+			generateBackground(0);
+		});
+
 		z0RealInput.addEventListener('input', function (event) {
 			setProperty('finalRealConstant', this.value, true);
 		});
@@ -195,6 +200,19 @@ function JuliaSet() {
 				optionsDoc.getElementById('julia-' + propertyType + i).addEventListener('input', updateConstant);
 			}
 		}
+
+		optionsDoc.getElementById('julia-escape-type').addEventListener('input', function (event) {
+			setBgProperty(me, 'escapeType', parseInt(this.value));
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('julia-escape-value').addEventListener('input', function (event) {
+			setNonNegativeProperty('escapeValue', this.value);
+		});
+
+		optionsDoc.getElementById('julia-iterations').addEventListener('input', function (event) {
+			setNonNegativeProperty('maxIterations', this.value);
+		});
 
 		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -266,6 +284,7 @@ function JuliaSet() {
 	this.denominatorImConstant = 0;
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
+	this.finalFunction = 0; // identity function
 	this.realFeedback = 0;
 	this.imFeedback = 0;
 	this.realFeedback2 = 0;
@@ -281,7 +300,8 @@ function JuliaSet() {
 	this.yRange = 2;
 	this.yCentre = 0;
 	this.maxIterations = 80;
-	this.escapeRSquared = 4;
+	this.escapeValue = 2;
+	this.escapeType = 0; // 0 = circular, 1 = use y-coordinate only
 
 	this.innerColor = [0, 0, 0, 0];
 	this.interpolation = 1;
@@ -296,14 +316,14 @@ JuliaSet.prototype.animatable = {
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
 		'realFeedback', 'imFeedback', 'realFeedback2', 'imFeedback2', 'inverse', 'muTranslation',
-		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeRSquared',
+		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeValue',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
 	],
 	xy: [
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'maxIterations', 'mandelbrot', 'preOperation', 'numColors', 'wrapPalette'
+		'finalFunction', 'maxIterations', 'escapeType', 'mandelbrot', 'preOperation', 'numColors', 'wrapPalette'
 	]
 };
 

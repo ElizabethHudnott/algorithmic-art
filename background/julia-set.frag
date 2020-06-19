@@ -1,3 +1,10 @@
+vec2 complexMultiply(vec2 z1, vec2 z2) {
+	return vec2(
+		z1.x * z2.x - z1.y * z2.y,
+		z1.x * z2.y + z1.y * z2.x
+	);
+}
+
 vec2 complexDivide(vec2 numerator, vec2 denominator) {
 	float divisor = denominator.x * denominator.x + denominator.y * denominator.y;
 	return vec2(
@@ -7,13 +14,13 @@ vec2 complexDivide(vec2 numerator, vec2 denominator) {
 }
 
 vec2 complexPower(float rSquared, float theta, float n) {
-	float magnitude = pow(rSquared, n / 2.0);
+	// Define 0^0 as equal to 1
+	float magnitude = n == 0.0 ? 1.0 : pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
 
 vec2 complexFunction(int function, vec2 z) {
-	vec2 result;
 	switch (function) {
 	case 0: // identity
 		return vec2(1.0, 0.0);
@@ -23,36 +30,17 @@ vec2 complexFunction(int function, vec2 z) {
 		float expX = exp(z.x);
 		return vec2(expX * cos(z.y), expX * sin(z.y));
 	case 3: // sin(z)
-	case 7: // cosec(z) = 1 / sin(z)
-		result = vec2(sin(z.x) * cosh(z.y), cos(z.x) * sinh(z.y));
-		break;
+		return vec2(sin(z.x) * cosh(z.y), cos(z.x) * sinh(z.y));
 	case 4: // cos(z)
-	case 6: // sec(z) = 1 / cos(z)
-		result = vec2(cos(z.x) * cosh(z.y), -sin(z.x) * sinh(z.y));
-		break;
+		return vec2(cos(z.x) * cosh(z.y), -sin(z.x) * sinh(z.y));
 	case 5: // tan(z) = sin(z) / cos(z)
-	case 8: // cot(z) = cos(z) / sin(z)
 		float sinX = sin(z.x);
 		float coshY = cosh(z.y);
 		float cosX = cos(z.x);
 		float sinhY = sinh(z.y);
-		result = vec2(sinX * coshY, cosX * sinhY);
-		vec2 result2 = vec2(cosX * coshY, -sinX * sinhY);
-		if (function == 5) {
-			// tan(z) = sin(z) / cos(z)
-			return complexDivide(result, result2);
-		} else {
-			// cot(z) = cos(z) / sin(z)
-			return complexDivide(result2, result);
-		}
-		break;
-	}
-	if (function > 5) {
-		// sec(z) & cosec(z)
-		return complexDivide(vec2(1.0, 0.0), result);
-	} else {
-		// sin(z) & cos(z)
-		return result;
+		vec2 sinZ = vec2(sinX * coshY, cosX * sinhY);
+		vec2 cosZ = vec2(cosX * coshY, -sinX * sinhY);
+		return complexDivide(sinZ, cosZ);
 	}
 }
 
@@ -66,6 +54,7 @@ int intMod(int n, int m) {
 
 float colorFunc(float value) {
 	if (colorPower == 0.0) {
+		// Single colour scenario
 		return 0.0;
 	} else {
 		return pow(value, colorPower);
@@ -77,8 +66,8 @@ void main() {
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
 	float y = gl_FragCoord.y / canvasHeight * yRange + yMin;
-	float theta, cReal, cIm, divisor;
-	vec2 point, functionOfZ;
+	float theta, divisor;
+	vec2 finalConstant, point, functionOfZ;
 
 	theta = clamp(-realFeedback, -0.5, 0.5) * PI;
 	float temp = x;
@@ -95,7 +84,7 @@ void main() {
 		// Mandelbrot set
 		if (finalRealConstant == 0.0 && finalImConstant == 0.0) {
 			bool badZero = false;
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i <= 3; i++) {
 				if (
 					(numeratorCoefficients[i] != 0.0 && numeratorExponents[i] <= 0.0) ||
 					(denominatorCoefficients[i] != 0.0 && denominatorExponents[i] <= 0.0)
@@ -110,29 +99,31 @@ void main() {
 				point = vec2(0.0, 0.0);
 			}
 		} else {
+			// Explicit Z0 provided
 			point = vec2(finalRealConstant, finalImConstant);
 		}
 
-		float nonInverse = 1.0 - inverse;
-		float offsetX = x + finalRealConstant;
-		float offsetY = y + finalImConstant;
-		divisor = offsetX * offsetX + offsetY * offsetY;
-		point = nonInverse * point + inverse * vec2(offsetX / divisor - muTranslation, -offsetY / divisor);
-		cReal = x;
-		cIm = y;
+		float cReal = x;
+		float cIm = y;
 
 		if (inverse > 0.0) {
+			float nonInverse = 1.0 - inverse;
+			float offsetX = x + finalRealConstant;
+			float offsetY = y + finalImConstant;
+			divisor = offsetX * offsetX + offsetY * offsetY;
+			point = nonInverse * point + inverse * vec2(offsetX / divisor - muTranslation, -offsetY / divisor);
 			divisor = cReal * cReal + cIm * cIm;
 			cReal = nonInverse * cReal + inverse * (cReal / divisor - muTranslation);
 			cIm = nonInverse * cIm + inverse * -cIm / divisor;
 		}
+		finalConstant = vec2(cReal, cIm);
 
 	} else {
 
 		// Julia set
 		point = vec2(x, y);
-		cReal = finalRealConstant;
-		cIm = finalImConstant;
+		finalConstant = vec2(finalRealConstant, finalImConstant);
+
 	}
 
 	vec2 lastZ = vec2(0.0, 0.0);
@@ -158,37 +149,39 @@ void main() {
 		} else {
 			theta = atan(point.y, point.x);
 		}
-		vec2 numerator = vec2(numeratorRealConstant, numeratorImConstant);
-		for (int j = 0; j <=3; j++) {
+		vec2 numerator = vec2(0.0, 0.0);
+		if (numeratorCoefficients[0] != 0.0) {
+			numerator = numeratorCoefficients[0] * complexPower(rSquared, theta, numeratorExponents[0]);
+			functionOfZ = complexFunction(numeratorFunction, point);
+			numerator = complexMultiply(numerator, functionOfZ);
+		}
+		for (int j = 1; j <=3; j++) {
 			float coefficient = numeratorCoefficients[j];
 			if (coefficient != 0.0) {
 				float exponent = numeratorExponents[j];
-				if (exponent == 1.0) {
-					numerator += coefficient * point;
-				} else {
-					numerator += coefficient * complexPower(rSquared, theta, exponent);
-				}
+				numerator += coefficient * complexPower(rSquared, theta, exponent);
 			}
 		}
-		vec2 denominator = vec2(denominatorRealConstant, denominatorImConstant);
-		for (int j = 0; j <=3; j++) {
+		numerator += vec2(numeratorRealConstant, numeratorImConstant);
+
+		vec2 denominator = vec2(0.0, 0.0);
+		if (denominatorCoefficients[0] != 0.0) {
+			denominator = denominatorCoefficients[0] * complexPower(rSquared, theta, denominatorExponents[0]);
+			functionOfZ = complexFunction(denominatorFunction, point);
+			denominator = complexMultiply(denominator, functionOfZ);
+		}
+		for (int j = 1; j <=3; j++) {
 			float coefficient = denominatorCoefficients[j];
 			if (coefficient != 0.0) {
 				float exponent = denominatorExponents[j];
-				if (exponent == 1.0) {
-					denominator += coefficient * point;
-				} else {
-					denominator += coefficient * complexPower(rSquared, theta, exponent);
-				}
+				denominator += coefficient * complexPower(rSquared, theta, exponent);
 			}
 		}
+		denominator += vec2(denominatorRealConstant, denominatorImConstant);
 
 		vec2 temp = point;
 		functionOfZ = complexFunction(finalFunction, point);
-		point = complexDivide(numerator, denominator) + vec2(
-			cReal * functionOfZ.x - cIm * functionOfZ.y,
-			cReal * functionOfZ.y + cIm * functionOfZ.x
-		);
+		point = complexDivide(numerator, denominator) + complexMultiply(finalConstant, functionOfZ);
 		point += vec2(
 			realFeedback * lastZ.x - imFeedback * lastZ.y,
 			realFeedback * lastZ.y + imFeedback * lastZ.x

@@ -6,7 +6,7 @@
 	</li>
 	<li class="nav-item">
 		<a class="nav-link" id="julia-viewport-tab" data-toggle="tab" href="#julia-viewport" role="tab" aria-controls="julia-viewport" aria-selected="false">
-			Viewport
+			View
 		</a>
 	</li>
 	<li class="nav-item">
@@ -85,15 +85,12 @@
 						<var class="input-group-text">i</var>
 					</div>
 					<select class="form-control form-control-sm" id="julia-c3-function">
-						<option value="0">1</option>
-						<option value="1">i</option>
+						<option value="0"></option>
+						<!-- Omit multiplying by i -->
 						<option value="2">e^z</option>
 						<option value="3">sin(z)</option>
 						<option value="4">cos(z)</option>
 						<option value="5">tan(z)</option>
-						<option value="6">sec(z)</option>
-						<option value="7">cosec(z)</option>
-						<option value="8">cot(z)</option>
 					</select>
 				</div>
 			</div>
@@ -136,21 +133,27 @@
 			<div class="col-12">
 				<table>
 					<tr>
-						<th colspan="2" class="text-center">Numerator</th>
-						<th colspan="2" class="text-center">Denominator</th>
+						<th colspan="3" class="text-center">Numerator</th>
+						<th colspan="3" class="text-center">Denominator</th>
 					</tr>
 					<tr>
-						<th class="col-form-label col-form-label-sm">
+						<th class="col-form-label col-form-label-sm" style="width: 93px">
 							Coefficient
 						</th>
-						<th class="col-form-label col-form-label-sm">
+						<th class="col-form-label col-form-label-sm" style="width: 65px">
 							Exponent
 						</th>
-						<th class="col-form-label col-form-label-sm">
+						<th class="col-form-label col-form-label-sm text-center" style="width: 75px">
+							Function
+						</th>
+						<th class="col-form-label col-form-label-sm" style="width: 93px">
 							Coefficient
 						</th>
-						<th class="col-form-label col-form-label-sm">
+						<th class="col-form-label col-form-label-sm" style="width: 65px">
 							Exponent
+						</th>
+						<th class="col-form-label col-form-label-sm text-center" style="width: 75px">
+							Function
 						</th>
 					</tr>
 					<tr>
@@ -161,10 +164,30 @@
 							<input type="number" value="2" step="0.05" class="form-control form-control-sm" id="julia-p1">
 						</td>
 						<td class="pb-1">
+							<select class="form-control form-control-sm" id="julia-c1-function">
+								<option value="0"></option>
+								<option value="1">i</option>
+								<option value="2">e^z</option>
+								<option value="3">sin(z)</option>
+								<option value="4">cos(z)</option>
+								<option value="5">tan(z)</option>
+							</select>
+						</td>
+						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-n1">
 						</td>
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-q1">
+						</td>
+						<td class="pb-1">
+							<select class="form-control form-control-sm" id="julia-c2-function">
+								<option value="0"></option>
+								<option value="1">i</option>
+								<option value="2">e^z</option>
+								<option value="3">sin(z)</option>
+								<option value="4">cos(z)</option>
+								<option value="5">tan(z)</option>
+							</select>
 						</td>
 					</tr>
 					<tr>
@@ -174,6 +197,7 @@
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-p2">
 						</td>
+						<td class="pb-1"></td>
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-n2">
 						</td>
@@ -188,6 +212,7 @@
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-p3">
 						</td>
+						<td class="pb-1"></td>
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-n3">
 						</td>
@@ -202,6 +227,7 @@
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-p4">
 						</td>
+						<td class="pb-1"></td>
 						<td class="pb-1">
 							<input type="number" step="0.05" class="form-control form-control-sm" id="julia-n4">
 						</td>
@@ -210,11 +236,11 @@
 						</td>
 					</tr>
 					<tr>
-						<th colspan="2" class="col-form-label col-form-label-sm">Constant</th>
-						<th colspan="2" class="col-form-label col-form-label-sm">Constant</th>
+						<th colspan="3" class="col-form-label col-form-label-sm">Constant</th>
+						<th colspan="3" class="col-form-label col-form-label-sm">Constant</th>
 					</tr>
 					<tr>
-						<td colspan="2">
+						<td colspan="3">
 							<div class="input-group input-group-sm">
 								<input type="number" step="0.02" value="0" class="form-control text-right" id="julia-c1-real">
 								<div class="input-group-prepend input-group-append">
@@ -226,7 +252,7 @@
 								</div>
 							</div>
 						</td>
-						<td colspan="2">
+						<td colspan="3">
 							<div class="input-group input-group-sm">
 								<input type="number" step="0.02" value="1" class="form-control text-right" id="julia-c2-real">
 								<div class="input-group-prepend input-group-append">

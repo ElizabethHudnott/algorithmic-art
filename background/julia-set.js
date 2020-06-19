@@ -83,7 +83,7 @@ function JuliaSet() {
 			} else {
 				value = parseFloat(text);
 			}
-			if (Number.isFinite(value)) {
+			if (Number.isFinite(value) && value !== me[attributeName]) {
 				setBgProperty(me, attributeName, value);
 				if (redraw) {
 					generateBackground(0);
@@ -149,6 +149,16 @@ function JuliaSet() {
 
 		c3ImInput.addEventListener('input', function (event) {
 			setProperty('finalImConstant', this.value, true);
+		});
+
+		optionsDoc.getElementById('julia-c1-function').addEventListener('input', function (event) {
+			setBgProperty(me, 'numeratorFunction', parseInt(this.value));
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('julia-c2-function').addEventListener('input', function (event) {
+			setBgProperty(me, 'denominatorFunction', parseInt(this.value));
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('julia-c3-function').addEventListener('input', function (event) {
@@ -284,7 +294,9 @@ function JuliaSet() {
 	this.denominatorImConstant = 0;
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
-	this.finalFunction = 0; // identity function
+	this.numeratorFunction = 0; // identity function
+	this.denominatorFunction = 0;
+	this.finalFunction = 0;
 	this.realFeedback = 0;
 	this.imFeedback = 0;
 	this.realFeedback2 = 0;
@@ -323,7 +335,9 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'finalFunction', 'maxIterations', 'escapeType', 'mandelbrot', 'preOperation', 'numColors', 'wrapPalette'
+		'numeratorFunction', 'denominatorFunction', 'finalFunction',
+		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
+		'numColors', 'wrapPalette'
 	]
 };
 

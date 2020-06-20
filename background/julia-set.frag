@@ -14,8 +14,7 @@ vec2 complexDivide(vec2 numerator, vec2 denominator) {
 }
 
 vec2 complexPower(float rSquared, float theta, float n) {
-	// Define 0^0 as equal to 1
-	float magnitude = n == 0.0 ? 1.0 : pow(rSquared, n / 2.0);
+	float magnitude = pow(rSquared, n / 2.0);
 	float angle = n * theta;
 	return vec2(magnitude * cos(angle), magnitude * sin(angle));
 }
@@ -69,7 +68,7 @@ void main() {
 	float theta, divisor;
 	vec2 finalConstant, point, functionOfZ;
 
-	theta = clamp(-realFeedback, -0.5, 0.5) * PI;
+	theta = clamp(feedback.x, -0.5, 0.5) * PI;
 	float temp = x;
 	x = x * cos(theta) - y * sin(theta);
 	y = temp * sin(theta) + y * cos(theta);
@@ -126,6 +125,7 @@ void main() {
 
 	}
 
+	vec2 extraTerm = vec2(0.0, 0.0);
 	vec2 lastZ = vec2(0.0, 0.0);
 	vec2 lastZ2 = vec2(0.0, 0.0);
 	float rSquared = point.x * point.x + point.y * point.y;
@@ -162,7 +162,7 @@ void main() {
 				numerator += coefficient * complexPower(rSquared, theta, exponent);
 			}
 		}
-		numerator += vec2(numeratorRealConstant, numeratorImConstant);
+		numerator += numeratorConstant;
 
 		vec2 denominator = vec2(0.0, 0.0);
 		if (denominatorCoefficients[0] != 0.0) {
@@ -177,19 +177,20 @@ void main() {
 				denominator += coefficient * complexPower(rSquared, theta, exponent);
 			}
 		}
-		denominator += vec2(denominatorRealConstant, denominatorImConstant);
+		denominator += denominatorConstant;
 
 		vec2 temp = point;
+		if (extraTermCoefficient != 0.0) {
+			extraTerm = complexFunction(extraTermFunction, point);
+			divisor = extraTerm.x * extraTerm.x + extraTerm.y * extraTerm.y;
+			extraTerm = extraTermCoefficient * vec2(extraTerm.x / divisor, -extraTerm.y / divisor);
+		}
 		functionOfZ = complexFunction(finalFunction, point);
-		point = complexDivide(numerator, denominator) + complexMultiply(finalConstant, functionOfZ);
-		point += vec2(
-			realFeedback * lastZ.x - imFeedback * lastZ.y,
-			realFeedback * lastZ.y + imFeedback * lastZ.x
-		);
-		point += vec2(
-			realFeedback2 * lastZ2.x - imFeedback2 * lastZ2.y,
-			realFeedback2 * lastZ2.y + imFeedback2 * lastZ2.x
-		);
+		point = complexDivide(numerator, denominator);
+		point += extraTerm;
+		point += complexMultiply(finalConstant, functionOfZ);
+		point += complexMultiply(feedback, lastZ);
+		point += complexMultiply(feedback2, lastZ2);
 		lastZ2 = lastZ;
 		lastZ = temp;
 		rSquared = point.x * point.x + point.y * point.y;

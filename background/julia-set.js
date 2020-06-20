@@ -91,6 +91,19 @@ function JuliaSet() {
 			}
 		}
 
+		function setPropertyElement(attributeName, index, text) {
+			let value;
+			if (text.trim() === '') {
+				value = 0;
+			} else {
+				value = parseFloat(text);
+			}
+			if (Number.isFinite(value) && value !== me[attributeName][index]) {
+				setBgPropertyElement(me, attributeName, index, value);
+				generateBackground(0);
+			}
+		}
+
 		function setNonNegativeProperty(attributeName, text) {
 			const value = parseFloat(text);
 			if (value >= 0) {
@@ -108,19 +121,19 @@ function JuliaSet() {
 		});
 
 		optionsDoc.getElementById('julia-feedback-real').addEventListener('input', function (event) {
-			setProperty('realFeedback', this.value, true);
+			setPropertyElement('feedback', 0, this.value);
 		});
 
 		optionsDoc.getElementById('julia-feedback-im').addEventListener('input', function (event) {
-			setProperty('imFeedback', this.value, true);
+			setPropertyElement('feedback', 1, this.value);
 		});
 
 		optionsDoc.getElementById('julia-feedback2-real').addEventListener('input', function (event) {
-			setProperty('realFeedback2', this.value, true);
+			setPropertyElement('feedback2', 0, this.value);
 		});
 
 		optionsDoc.getElementById('julia-feedback2-im').addEventListener('input', function (event) {
-			setProperty('imFeedback2', this.value, true);
+			setPropertyElement('feedback2', 1, this.value);
 		});
 
 		optionsDoc.getElementById('julia-mu-translation').addEventListener('input', function (event) {
@@ -128,19 +141,28 @@ function JuliaSet() {
 		});
 
 		optionsDoc.getElementById('julia-c1-real').addEventListener('input', function (event) {
-			setProperty('numeratorRealConstant', this.value, true);
+			setPropertyElement('numeratorConstant', 0, this.value);
 		});
 
 		optionsDoc.getElementById('julia-c1-im').addEventListener('input', function (event) {
-			setProperty('numeratorImConstant', this.value, true);
+			setPropertyElement('numeratorConstant', 1, this.value);
 		});
 
 		optionsDoc.getElementById('julia-c2-real').addEventListener('input', function (event) {
-			setProperty('denominatorRealConstant', this.value, true);
+			setPropertyElement('denominatorConstant', 0, this.value);
 		});
 
 		optionsDoc.getElementById('julia-c2-im').addEventListener('input', function (event) {
-			setProperty('denominatorImConstant', this.value, true);
+			setPropertyElement('denominatorConstant', 1, this.value);
+		});
+
+		optionsDoc.getElementById('julia-extra-multiple').addEventListener('input', function (event) {
+			setProperty('extraTermCoefficient', this.value, true);
+		});
+
+		optionsDoc.getElementById('julia-extra-function').addEventListener('input', function (event) {
+			setBgProperty(me, 'extraTermFunction', parseInt(this.value));
+			generateBackground(0);
 		});
 
 		c3RealInput.addEventListener('input', function (event) {
@@ -288,19 +310,17 @@ function JuliaSet() {
 	this.numeratorCoefficients = [1, 0, 0, 0];
 	this.denominatorExponents = [0, 0, 0, 0];
 	this.denominatorCoefficients = [0, 0, 0, 0];
-	this.numeratorRealConstant = 0;
-	this.numeratorImConstant = 0;
-	this.denominatorRealConstant = 1;
-	this.denominatorImConstant = 0;
+	this.numeratorConstant = [0, 0];
+	this.denominatorConstant = [1, 0];
+	this.extraTermCoefficient = 0;
 	this.finalRealConstant = -0.4;
 	this.finalImConstant = 0.6;
 	this.numeratorFunction = 0; // identity function
 	this.denominatorFunction = 0;
+	this.extraTermFunction = 3; // sin(z)
 	this.finalFunction = 0;
-	this.realFeedback = 0;
-	this.imFeedback = 0;
-	this.realFeedback2 = 0;
-	this.imFeedback2 = 0;
+	this.feedback = [0, 0];
+	this.feedback2 = [0, 0];
 	this.mandelbrot = false;
 	// 0 = normal, 1 = conjugate, 2 = burning ship
 	this.preOperation = 0;
@@ -326,8 +346,8 @@ function JuliaSet() {
 JuliaSet.prototype.animatable = {
 	continuous: [
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
-		'numeratorRealConstant', 'numeratorImConstant', 'denominatorRealConstant', 'denominatorImConstant',
-		'realFeedback', 'imFeedback', 'realFeedback2', 'imFeedback2', 'inverse', 'muTranslation',
+		'numeratorConstant', 'denominatorConstant', 'extraTermCoefficient', 'feedback', 'feedback2',
+		'inverse', 'muTranslation',
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeValue',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
 	],
@@ -335,7 +355,7 @@ JuliaSet.prototype.animatable = {
 		['finalRealConstant', 'finalImConstant'],
 	],
 	stepped: [
-		'numeratorFunction', 'denominatorFunction', 'finalFunction',
+		'numeratorFunction', 'denominatorFunction', 'extraTermFunction', 'finalFunction',
 		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
 		'numColors', 'wrapPalette'
 	]

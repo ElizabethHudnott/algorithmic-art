@@ -421,7 +421,11 @@ function showBackgroundOptions() {
 
 		setPropertyElement(generator, property, index, value) {
 			const arr = generator[property];
-			arr[index] = value;
+			if (arguments.length === 3) {
+				value = arr[index];
+			} else {
+				arr[index] = value;
+			}
 			const gl = this.gl;
 			const type = this.types.get(property);
 			if (type.length === undefined) {

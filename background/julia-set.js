@@ -29,6 +29,9 @@ function JuliaSet() {
 		const colorMultipleIntInput = optionsDoc.getElementById('julia-color-multiple-int');
 		const colorMultipleFracInput = optionsDoc.getElementById('julia-color-multiple-frac');
 		const paletteUI = optionsDoc.getElementById('julia-palette');
+		const hueSlider = optionsDoc.getElementById('julia-hue');
+		const saturationSlider = optionsDoc.getElementById('julia-saturation');
+		const lightnessSlider = optionsDoc.getElementById('julia-lightness');
 
 		function setColorMultiple() {
 			let multiple = parseFloat(colorMultipleIntInput.value);
@@ -45,16 +48,73 @@ function JuliaSet() {
 		colorMultipleIntInput.addEventListener('input', setColorMultiple);
 		colorMultipleFracInput.addEventListener('input', setColorMultiple);
 
+		let selectedColorIndex = 0;
+		function selectColor(event) {
+			selectedColorIndex = parseInt(this.dataset.index);
+			const color = me.palette[selectedColorIndex];
+			hueSlider.value = color[0];
+			saturationSlider.value = color[1];
+			lightnessSlider.value = color[2];
+		}
 
 		for (let i = 0; i < 256; i++) {
-			const button = optionsDoc.createElement('BUTTON');
-			button.type = 'button';
-			button.hidden = i >= me.numColors;
+			const label = optionsDoc.createElement('LABEL');
+			label.classList.add('btn');
+			const span = optionsDoc.createElement('SPAN');
+			span.classList.add('sr-only');
+			span.innerHTML = 'Colour ' + String(i + 1);
+			label.appendChild(span);
+			const button = optionsDoc.createElement('INPUT');
+			label.appendChild(button);
+			button.type = 'radio';
+			button.name = 'julia-swatch';
+			button.dataset.index = i;
+			button.addEventListener('click', selectColor);
+			label.hidden = i >= me.numColors;
 			const color = palette[i];
-			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
-			button.classList.add('palette-item');
-			paletteUI.appendChild(button);
+			label.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			paletteUI.appendChild(label);
 		}
+		paletteUI.children[0].classList.add('active');
+		paletteUI.children[0].children[1].checked = true;
+
+		let redrawTimeout;
+		function previewColor() {
+			const color = me.palette[selectedColorIndex];
+			const swatch = paletteUI.children[selectedColorIndex];
+			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			if (redrawTimeout === undefined) {
+				redrawTimeout = setTimeout(setColor, 50);
+			}
+		}
+		function setColor() {
+			setBgPropertyElement(me, 'palette', selectedColorIndex);
+			generateBackground(0);
+			redrawTimeout = undefined;
+		}
+		hueSlider.value = me.palette[0][0];
+		hueSlider.addEventListener('input', function (event) {
+			me.palette[selectedColorIndex][0] = parseFloat(this.value) % 1;
+			previewColor();
+		});
+		hueSlider.addEventListener('pointerup', setColor);
+		hueSlider.addEventListener('keyup', setColor);
+
+		saturationSlider.value = me.palette[0][1];
+		saturationSlider.addEventListener('input', function (event) {
+			me.palette[selectedColorIndex][1] = parseFloat(this.value);
+			previewColor();
+		});
+		saturationSlider.addEventListener('pointerup', setColor);
+		saturationSlider.addEventListener('keyup', setColor);
+
+		lightnessSlider.value = me.palette[0][2];
+		lightnessSlider.addEventListener('input', function (event) {
+			me.palette[selectedColorIndex][2] = parseFloat(this.value);
+			previewColor();
+		});
+		lightnessSlider.addEventListener('pointerup', setColor);
+		lightnessSlider.addEventListener('keyup', setColor);
 
 		optionsDoc.getElementById('julia-num-colors').addEventListener('input', function (event) {
 			const value = parseInt(this.value);

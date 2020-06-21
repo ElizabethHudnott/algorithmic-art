@@ -104,13 +104,17 @@ legend {
 	padding: 0.5rem;
 }
 
-.palette-item {
-	border-radius: 1px;
+.palette .btn {
+	border-radius: 0px !important;
 	border-width: 0;
 	flex-grow: 1;
 	width: 16px;
 	height: 16px;
-	margin: 2px;
+	margin: 2px 3px;
+}
+
+.palette .active {
+	outline: solid 2px white;
 }
 
 .thumbnails>.active {

@@ -231,7 +231,13 @@ void main() {
 			mixing = round(fract(colorNumber) / interpolationInverse) * interpolationInverse;
 		}
 		float hueDifference = color2[0] - color1[0];
-		if (hueDifference > 0.5) {
+		if (color1[1] == 0.0 || color1[2] == 0.0) {
+			// Color 1 is a grey, so equalize hues.
+			color1[0] = color2[0];
+		} else if (color2[1] == 0.0 || color2[2] == 0.0) {
+			// Color 2 is a grey, so equalize hues.
+			color2[0] = color1[0];
+		} else if (hueDifference > 0.5) {
 			color1[0] += 1.0;
 		} else if (hueDifference < -0.5) {
 			color2[0] += 1.0;

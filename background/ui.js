@@ -51,9 +51,11 @@ function showBackgroundOptions() {
 		uniform int preview;
 
 		vec4 hsla(in float h, in float s, in float l, in float a) {
-			vec3 c = vec3(h, s, l);
-			vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
-			return vec4(c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0)), a);
+			vec3 rgb = clamp(
+				abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0,
+				0.0, 1.0
+			);
+			return vec4(l + s * (rgb - 0.5) * (1.0 - abs(2.0 * l - 1.0)), a);
 		}
 	`;
 
@@ -125,12 +127,12 @@ function showBackgroundOptions() {
 			return typeName;
 		}
 
-		assignValue(gl, location, value) {
+		assignValue(gl, location, value, isArrayElement) {
 			let baseType = this.baseType;
 			if (baseType === 'b') {
 				baseType = 'f';
 			}
-			if (this.length !== undefined) {
+			if (!isArrayElement && this.length !== undefined) {
 				value = value.flat();
 			}
 			if (this.category === GLTypeCategory.SCALAR && this.length === undefined) {
@@ -147,42 +149,6 @@ function showBackgroundOptions() {
 					value = new Int32Array(value);
 				}
 				gl['uniform' + this.width + baseType + 'v'](location, value);
-			}
-		}
-
-		assignArrayElement(gl, location, index, value) {
-			let offset;
-			let baseType = this.baseType;
-			if (baseType === 'b') {
-				baseType = 'f';
-			}
-			switch (this.category) {
-			case GLTypeCategory.SCALAR:
-				if (baseType === 'i') {
-					value = new Int32Array([value]);
-				} else {
-					value = [value];
-				}
-				gl['uniform1' + baseType + 'v'](location, value, index, 0);
-				break;
-
-			case GLTypeCategory.VECTOR:
-				if (baseType === 'i') {
-					value = new Int32Array(value);
-				}
-				offset = index * this.width;
-				gl['uniform' + this.width + baseType + 'v'](location, value, offset, 0);
-				break;
-
-			case GLTypeCategory.MATRIX:
-				value = new Float32Array(value.flat());
-				offset = index * this.width * this.height;
-				if (this.width === this.height) {
-					gl['uniformMatrix' + this.width + 'fv'](location, false, value, offset);
-				} else {
-					gl['uniformMatrix' + this.width + 'x' + this.height + 'fv'](location, false, value, offset, 0);
-				}
-				break;
 			}
 		}
 
@@ -296,7 +262,7 @@ function showBackgroundOptions() {
 			const twoD = canvas.getContext('2d');
 			this.twoD = twoD;
 			const glCanvas = document.createElement('CANVAS');
-			const gl = glCanvas.getContext('webgl2');
+			const gl = glCanvas.getContext('webgl2', {premultipliedAlpha : false});
 			this.gl = gl;
 			this.scale = scale;
 			this.resize(width, height);
@@ -450,19 +416,20 @@ function showBackgroundOptions() {
 			const gl = this.gl;
 			const location = gl.getUniformLocation(this.program, property);
 			const type = this.types.get(property);
-			type.assignValue(gl, location, value);
+			type.assignValue(gl, location, value, false);
 		}
 
 		setPropertyElement(generator, property, index, value) {
 			const arr = generator[property];
 			arr[index] = value;
 			const gl = this.gl;
-			const location = gl.getUniformLocation(this.program, property);
 			const type = this.types.get(property);
 			if (type.length === undefined) {
-				type.assignValue(gl, location, arr);
+				const location = gl.getUniformLocation(this.program, property)
+				type.assignValue(gl, location, arr, false);
 			} else {
-				type.assignArrayElement(gl, location, index, value);
+				const location = gl.getUniformLocation(this.program, property + '[' + index + ']');
+				type.assignValue(gl, location, value, true);
 			}
 		}
 
@@ -471,7 +438,7 @@ function showBackgroundOptions() {
 			const program = this.program;
 			for (let [property, type] of this.types.entries()) {
 				const location = gl.getUniformLocation(program, property);
-				type.assignValue(gl, location, generator[property]);
+				type.assignValue(gl, location, generator[property], false);
 			}
 		}
 

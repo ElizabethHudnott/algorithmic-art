@@ -26,7 +26,26 @@ function JuliaSet() {
 		const c3RealInput = optionsDoc.getElementById('julia-c3-real');
 		const c3ImInput = optionsDoc.getElementById('julia-c3-im');
 
+		const colorMultipleIntInput = optionsDoc.getElementById('julia-color-multiple-int');
+		const colorMultipleFracInput = optionsDoc.getElementById('julia-color-multiple-frac');
 		const paletteUI = optionsDoc.getElementById('julia-palette');
+
+		function setColorMultiple() {
+			let multiple = parseFloat(colorMultipleIntInput.value);
+			if (Number.isNaN(multiple)) {
+				multiple = Math.floor(me.colorMultiple);
+			}
+			multiple += parseInt(colorMultipleFracInput.value) / me.numColors;
+
+			if (multiple > 0) {
+				setBgProperty(me, 'colorMultiple', multiple);
+				generateBackground(0);
+			}
+		}
+		colorMultipleIntInput.addEventListener('input', setColorMultiple);
+		colorMultipleFracInput.addEventListener('input', setColorMultiple);
+
+
 		for (let i = 0; i < 256; i++) {
 			const button = optionsDoc.createElement('BUTTON');
 			button.type = 'button';
@@ -51,6 +70,8 @@ function JuliaSet() {
 					}
 				}
 				setBgProperty(me, 'numColors', value);
+				colorMultipleFracInput.max = value - 1;
+				setColorMultiple();
 				generateBackground(0);
 			}
 		})
@@ -278,11 +299,6 @@ function JuliaSet() {
 			}
 		});
 
-
-		optionsDoc.getElementById('julia-color-multiple').addEventListener('input', function (event) {
-			setNonNegativeProperty('colorMultiple', this.value);
-		});
-
 		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
 			setNonNegativeProperty('colorPower', this.value);
 		});
@@ -336,11 +352,11 @@ function JuliaSet() {
 	this.escapeType = 0; // 0 = circular, 1 = use y-coordinate only
 
 	this.innerColor = [0, 0, 0, 0];
-	this.interpolation = 1;
 	this.colorMultiple = 1;
 	this.colorPower = 1;
 	this.colorOffset = 0;
 	this.wrapPalette = true;
+	this.interpolation = 1;
 }
 
 JuliaSet.prototype.animatable = {
@@ -349,7 +365,8 @@ JuliaSet.prototype.animatable = {
 		'numeratorConstant', 'denominatorConstant', 'extraTermCoefficient', 'feedback', 'feedback2',
 		'inverse', 'muTranslation',
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeValue',
-		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset', 'palette'
+		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset',
+		'palette'
 	],
 	xy: [
 		['finalRealConstant', 'finalImConstant'],

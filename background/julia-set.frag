@@ -205,13 +205,24 @@ void main() {
 		colorNumber = numColorsF * colorMultiple *
 			colorFunc(colorNumber) / colorFunc(float(maxIterations)) + colorOffset - 1.0;
 
-		if (!wrapPalette && colorNumber >= numColorsF) {
-			colorNumber = numColorsF - 1.0;
+		float maxColor = (colorMultiple > 1.0 ? trunc(colorMultiple) : colorMultiple) * numColorsF;
+		vec4 color1, color2;
+		int colorIndex1;
+		if (!wrapPalette && colorNumber >= maxColor) {
+			colorNumber = maxColor;
+			color1 = palette[numColors - 1];
+			color1.a = 0.0;
+		} else {
+			colorIndex1 = int(floor(colorNumber));
+			color1 = palette[intMod(colorIndex1, numColors)];
+		}
+		if (!wrapPalette && colorNumber + 1.0 >= maxColor) {
+			color2 = palette[numColors - 1];
+			color2.a = 0.0;
+		} else {
+			color2 = palette[intMod(colorIndex1 + 1, numColors)];
 		}
 
-		int colorIndex1 = int(floor(colorNumber));
-		vec4 color1 = palette[intMod(colorIndex1, numColors)];
-		vec4 color2 = palette[intMod(colorIndex1 + 1, numColors)];
 		float mixing;
 		if (interpolation == 1.0) {
 			mixing = fract(colorNumber);
@@ -225,7 +236,6 @@ void main() {
 		} else if (hueDifference < -0.5) {
 			color2[0] += 1.0;
 		}
-		mixing = smoothstep(0.0, 1.0, mixing);
 		vec4 finalColor = mix(color1, color2, mixing);
 		fragColor = hsla(finalColor[0], finalColor[1], finalColor[2], finalColor[3]);
 	}

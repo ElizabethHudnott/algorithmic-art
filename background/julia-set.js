@@ -56,6 +56,8 @@ function JuliaSet() {
 			'SWAP': 2,
 			'SPREAD': 3,
 			'REVERSE': 4,
+			'SHUFFLE': 5,
+			'RANDOMIZE': 6,
 		});
 		const ColorComponents = Object.freeze({
 			'HUE': 0,
@@ -151,6 +153,18 @@ function JuliaSet() {
 				}
 				generateBackground(0);
 				break;
+
+			default:
+				let rangeStart, rangeEnd;
+				if (clickIndex < colorSelectionStart) {
+					rangeStart = clickIndex;
+					rangeEnd = colorSelectionStart;
+				} else {
+					rangeStart = colorSelectionStart;
+					rangeEnd = clickIndex;
+				}
+				colorRangeOperation(colorOperation, rangeStart, rangeEnd);
+
 			}
 
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
@@ -177,9 +191,56 @@ function JuliaSet() {
 			colorOperation = ColorOperation.SELECT;
 		}
 
+		function colorRangeOperation(operation, rangeStart, rangeEnd) {
+			switch (operation) {
+			case ColorOperation.REVERSE:
+				while (rangeEnd - rangeStart > 0) {
+					if (colorComponent === ColorComponents.ALL) {
+						const temp = activePalette[rangeStart];
+						activePalette[rangeStart] = activePalette[rangeEnd];
+						activePalette[rangeEnd] = temp;
+					} else {
+						const temp = activePalette[rangeStart][colorComponent];
+						activePalette[rangeStart][colorComponent] = activePalette[rangeEnd][colorComponent];
+						activePalette[rangeEnd][colorComponent] = temp;
+					}
+					rangeStart++;
+					rangeEnd--;
+				}
+				break;
+
+			case ColorOperation.RANDOMIZE:
+				if (colorComponent === ColorComponents.ALL) {
+					for (let i = rangeStart; i <= rangeEnd; i++) {
+						for (let j = 0; j < 3; j++) {
+							activePalette[i][j] = Math.random();
+						}
+					}
+				} else {
+					for (let i = rangeStart; i <= rangeEnd; i++) {
+						activePalette[i][colorComponent] = Math.random();
+					}
+				}
+				break;
+
+			}
+
+			for (let i = rangeStart; i <= rangeEnd; i++) {
+				updateSwatch(i);
+				setBgPropertyElement(me, paletteProperty, i);
+			}
+			generateBackground(0);
+		}
+
 		function colorAction(event) {
 			colorOperation = parseInt(this.dataset.colorOp);
 			colorComponent = parseInt(this.dataset.colorComponent);
+			if (colorOperation === ColorOperation.RANDOMIZE ||
+				(colorOperation >= ColorOperation.SPREAD && colorSelectionStart !== colorSelectionEnd)
+			) {
+				colorRangeOperation(colorOperation, colorSelectionStart, colorSelectionEnd);
+				colorOperation = ColorOperation.SELECT;
+			}
 		}
 
 		for (let element of optionsDoc.querySelectorAll('button[data-color-op]')) {
@@ -263,6 +324,7 @@ function JuliaSet() {
 				colorMultipleFracInput.max = value - 1;
 				setColorMultiple();
 				generateBackground(0);
+				colorSelectionEnd = Math.min(colorSelectionEnd, numColors - 1);
 			}
 		})
 

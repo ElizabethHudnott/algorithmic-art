@@ -1241,12 +1241,11 @@ function showBackgroundOptions() {
 				}
 			} else {
 				if (steps > 0) {
-					steps++;
+					return Math.floor((steps + 1) * tween + startValue);
 				} else {
 					// End value smaller than start value
-					steps--;
+					return Math.ceil((steps - 1) * tween + startValue);
 				}
-				return Math.floor(steps * tween + startValue);
 			}
 		} else {
 			return tween < 0.5 ? startValue : endValue;

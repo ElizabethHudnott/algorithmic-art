@@ -41,26 +41,26 @@
 			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-max-petals">
 				Max Petals
 			</label>
-			<div class="col-4">
+			<div class="col-3">
 				<div class="input-group input-group-sm">
 					<input type="number" min="0" max="99" value="10" id="phyllotaxis-max-petals" class="form-control" aria-describedby="phyllotaxis-max-petals-label">
 					<div class="input-group-append">
-						<span class="input-group-text" id="phyllotaxis-max-petals-label">
-							thousand
-						</span>
+						<span class="input-group-text" id="phyllotaxis-max-petals-label">k</span>
 					</div>
 				</div>
 			</div>
-			<div class="col-2"></div>
-			<div class="col-3">
+			<div class="col-3 mt-1">
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox" id="phyllotaxis-clipping">
 					<label class="form-check-label small" for="phyllotaxis-clipping">Partial petals</label>
 				</div>
-				<div class="form-check">
-					<input class="form-check-input" type="checkbox" id="phyllotaxis-bidirectional">
-					<label class="form-check-label small" for="phyllotaxis-bidirectional">Bidirectional</label>
-				</div>
+			</div>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="phyllotaxis-direction">
+					<option value="1" selected>Direction 1</option>
+					<option value="-1">Direction 2</option>
+					<option value="0">Both</option>
+				</select>
 			</div>
 		</div>
 		<div class="form-row form-group">

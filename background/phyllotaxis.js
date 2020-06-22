@@ -50,8 +50,8 @@ function Phyllotaxis() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('phyllotaxis-bidirectional').addEventListener('input', function (event) {
-			me.bidirectional = this.checked;
+		optionsDoc.getElementById('phyllotaxis-direction').addEventListener('input', function (event) {
+			me.direction = parseInt(this.value);
 			generateBackground(0);
 		});
 
@@ -407,7 +407,7 @@ function Phyllotaxis() {
 	this.radius = 1;
 	this.aspectRatio = 1;
 	this.clipping = -1;
-	this.bidirectional = false;
+	this.direction = 1;
 
 	this.exponent = 0.5;
 	this.angle = TWO_PI * 0.382;
@@ -471,7 +471,7 @@ Phyllotaxis.prototype.animatable = {
 		'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
 	],
 	stepped: [
-		'bidirectional', 'skip', 'stacking', 'petalShape', 'angleMode',
+		'direction', 'skip', 'stacking', 'petalShape', 'angleMode',
 		'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 	],
 	pairedStepped: [
@@ -533,6 +533,8 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const petalEnlargement = this.petalEnlargement;
 		const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 		const clipping = this.clipping;
+		const bidirectional = this.direction === 0;
+		const direction = bidirectional ? 1 : this.direction;
 
 		this.points = []
 		let n = this.start;
@@ -552,10 +554,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 
 		const loopConditionMultiplier = clipping *  petalDistortion;
 		while (numPetals < maxPetals && r < maxR + currentPetalSize * loopConditionMultiplier) {
-			const phi = n * angle;
+			const phi = direction * n * angle;
 			if (numPetals % skip !== skip - 1) {
 				this.points.push(new Petal(r, phi, currentPetalSize));
-				if (this.bidirectional) {
+				if (bidirectional) {
 					this.points.push(new Petal(r, -phi, currentPetalSize));
 				}
 			}
@@ -579,7 +581,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		numPoints = Math.min(numPoints, previewMaxPetals);
 	}
 	const lastR = this.points[numPoints - 1].r;
-	const zoom = preview === 0 ? 1 : maxR / lastR;
+	const zoom = (preview & 1) === 0 ? 1 : maxR / lastR;
 	const lastRSquared = lastR * lastR;
 	let stacking = this.stacking;
 	if (stacking == 0) {

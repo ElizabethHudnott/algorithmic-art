@@ -402,7 +402,7 @@
 			</div>
 			<div class="form-row form-group">
 				<div class="col-12">
-					<div class="palette btn-group btn-group-toggle" id="julia-palette"></div>
+					<div class="palette btn-group btn-group-toggle" id="julia-palette" aria-describedby="julia-palette-help"></div>
 				</div>
 			</div>
 		</fieldset>
@@ -431,15 +431,21 @@
 			</div>
 		</div>
 		<div class="form-row">
-			<div class="col-3 col-form-label mt-1">
+			<div class="col-3 col-form-label mt-2">
 				All
 			</div>
 			<div class="col-9">
 				<div class="btn-group" role="group" aria-label="Change colors">
-					<button type="button" class="btn btn-light" title="Copy color" id="julia-copy-color">
+					<button type="button" class="btn btn-light" title="Copy color" data-color-op="1" data-color-component="4">
 						<img src="../img/page_copy.png" alt="Copy">
 					</button>
+					<button type="button" class="btn btn-light" title="Swap colors" data-color-op="2" data-color-component="4">
+						<img src="../img/arrow_refresh.png" alt="Swap">
+					</button>
 				</div>
+				<small id="julia-palette-help" class="form-text text-muted">
+					Use the Shift key, a right mouse click, or tap and hold to select multiple colours.
+				</small>
 			</div>
 		</div>
 	</div>

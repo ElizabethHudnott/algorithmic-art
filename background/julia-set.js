@@ -61,20 +61,23 @@ function JuliaSet() {
 			'HUE': 0,
 			'SATURATION': 1,
 			'LIGHTNESS': 2,
-			'ALL': 3,
+			'OPACITY': 3,
+			'ALL': 4,
 		});
+		let activePalette = me.palette;
+		let paletteProperty = 'palette';
 		let colorOperation = ColorOperation.SELECT;
 		let colorComponent = ColorComponents.ALL;
 
 		function updateSwatch(i) {
-			const color = me.palette[i];
+			const color = activePalette[i];
 			const swatch = paletteUI.children[i];
 			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
 		}
 
 		function selectColor(event) {
 			const shift = event.shiftKey || event.longPress;
-			const sourceColor = me.palette[colorSelectionStart];
+			const sourceColor = activePalette[colorSelectionStart];
 			const clickIndex = parseInt(event.target.dataset.index);
 
 			switch (colorOperation) {
@@ -96,15 +99,15 @@ function JuliaSet() {
 					}
 					if (colorComponent === ColorComponents.ALL) {
 						for (let i = destRangeStart; i <= destRangeEnd; i++) {
-							me.palette[i] = sourceColor.slice();
+							activePalette[i] = sourceColor.slice();
 							updateSwatch(i);
-							setBgPropertyElement(me, 'palette', i);
+							setBgPropertyElement(me, paletteProperty, i);
 						}
 					} else {
 						for (let i = destRangeStart; i <= destRangeEnd; i++) {
-							me.palette[i][colorComponent] = sourceColor[colorComponent];
+							activePalette[i][colorComponent] = sourceColor[colorComponent];
 							updateSwatch(i);
-							setBgPropertyElement(me, 'palette', i);
+							setBgPropertyElement(me, paletteProperty, i);
 						}
 					}
 				} else {
@@ -115,13 +118,36 @@ function JuliaSet() {
 							break;
 						}
 						if (colorComponent === ColorComponents.ALL) {
-							me.palette[destIndex] = me.palette[i].slice();
+							activePalette[destIndex] = activePalette[i].slice();
 						} else {
-							me.palette[destIndex][colorComponent] = me.palette[i][colorComponent];
+							activePalette[destIndex][colorComponent] = activePalette[i][colorComponent];
 						}
 						updateSwatch(destIndex);
-						setBgPropertyElement(me, 'palette', destIndex);
+						setBgPropertyElement(me, paletteProperty, destIndex);
 					}
+				}
+				generateBackground(0);
+				break;
+
+			case ColorOperation.SWAP:
+				for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
+						const destIndex = clickIndex + i - colorSelectionStart;
+						if (destIndex >= me.numColors) {
+							break;
+						}
+						if (colorComponent === ColorComponents.ALL) {
+							const temp = activePalette[i];
+							activePalette[i] = activePalette[destIndex];
+							activePalette[destIndex] = temp;
+						} else {
+							const temp = activePalette[i][colorComponent];
+							activePalette[i][colorComponent] = activePalette[destIndex][colorComponent];
+							activePalette[destIndex][colorComponent] = temp;
+						}
+						updateSwatch(i);
+						updateSwatch(destIndex);
+						setBgPropertyElement(me, paletteProperty, i);
+						setBgPropertyElement(me, paletteProperty, destIndex);
 				}
 				generateBackground(0);
 				break;
@@ -144,17 +170,21 @@ function JuliaSet() {
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
 				paletteUI.children[i].classList.add('active');
 			}
-			const color = me.palette[clickIndex];
+			const color = activePalette[clickIndex];
 			hueSlider.value = color[0];
 			saturationSlider.value = color[1];
 			lightnessSlider.value = color[2];
 			colorOperation = ColorOperation.SELECT;
 		}
 
-		optionsDoc.getElementById('julia-copy-color').addEventListener('click', function (event) {
-			colorOperation = ColorOperation.COPY;
-			colorComponent = ColorComponents.ALL;
-		});
+		function colorAction(event) {
+			colorOperation = parseInt(this.dataset.colorOp);
+			colorComponent = parseInt(this.dataset.colorComponent);
+		}
+
+		for (let element of optionsDoc.querySelectorAll('button[data-color-op]')) {
+			element.addEventListener('click', colorAction);
+		}
 
 		function rightClickColor(event) {
 			event.preventDefault();
@@ -185,29 +215,29 @@ function JuliaSet() {
 			}
 		}
 		function setColor() {
-			setBgPropertyElement(me, 'palette', colorSelectionStart);
+			setBgPropertyElement(me, paletteProperty, colorSelectionStart);
 			generateBackground(0);
 			redrawTimeout = undefined;
 		}
-		hueSlider.value = me.palette[0][ColorComponents.HUE];
+		hueSlider.value = activePalette[0][ColorComponents.HUE];
 		hueSlider.addEventListener('input', function (event) {
-			me.palette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
+			activePalette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
 			previewColor();
 		});
 		hueSlider.addEventListener('pointerup', setColor);
 		hueSlider.addEventListener('keyup', setColor);
 
-		saturationSlider.value = me.palette[0][ColorComponents.SATURATION];
+		saturationSlider.value = activePalette[0][ColorComponents.SATURATION];
 		saturationSlider.addEventListener('input', function (event) {
-			me.palette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
+			activePalette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
 			previewColor();
 		});
 		saturationSlider.addEventListener('pointerup', setColor);
 		saturationSlider.addEventListener('keyup', setColor);
 
-		lightnessSlider.value = me.palette[0][ColorComponents.LIGHTNESS];
+		lightnessSlider.value = activePalette[0][ColorComponents.LIGHTNESS];
 		lightnessSlider.addEventListener('input', function (event) {
-			me.palette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
+			activePalette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
 			previewColor();
 		});
 		lightnessSlider.addEventListener('pointerup', setColor);

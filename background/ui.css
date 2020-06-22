@@ -101,16 +101,17 @@ legend {
 	background-color: #c0c0c0;
 	display: flex;
 	flex-wrap: wrap;
-	padding: 0.5rem;
+	padding: 3px 3px 3px 6px;
 }
 
 .palette .btn {
 	border-radius: 0px !important;
 	border-width: 0;
 	flex-grow: 1;
-	width: 16px;
-	height: 16px;
-	margin: 2px 3px;
+	width: 15px;
+	height: 15px;
+	margin: 2px 3px 2px 0;
+	padding: 0;
 }
 
 .palette .active {

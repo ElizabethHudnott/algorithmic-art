@@ -402,33 +402,45 @@
 			</div>
 			<div class="form-row form-group">
 				<div class="col-12">
-					<div class="palette btn-group btn-group-toggle" id="julia-palette" data-toggle="buttons"></div>
-				</div>
-			</div>
-			<div class="form-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-hue">
-					Hue
-				</label>
-				<div class="col-9">
-					<input type="range" min="0" max="1" step="0.0005" class="form-control-range mt-1" id="julia-hue">
-				</div>
-			</div>
-			<div class="form-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-saturation">
-					Saturation
-				</label>
-				<div class="col-9">
-					<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-saturation">
-				</div>
-			</div>
-			<div class="form-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-lightness">
-					Lightness
-				</label>
-				<div class="col-9">
-					<input type="range" min="0" max="1" step="0.002" class="form-control-range mt-1" id="julia-lightness">
+					<div class="palette btn-group btn-group-toggle" id="julia-palette"></div>
 				</div>
 			</div>
 		</fieldset>
+		<div class="form-row">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-hue">
+				Hue
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="0.0005" class="form-control-range mt-1" id="julia-hue">
+			</div>
+		</div>
+		<div class="form-row">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-saturation">
+				Saturation
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-saturation">
+			</div>
+		</div>
+		<div class="form-row">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-lightness">
+				Lightness
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="0.002" class="form-control-range mt-1" id="julia-lightness">
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="col-3 col-form-label mt-1">
+				All
+			</div>
+			<div class="col-9">
+				<div class="btn-group" role="group" aria-label="Change colors">
+					<button type="button" class="btn btn-light" title="Copy color" id="julia-copy-color">
+						<img src="../img/page_copy.png" alt="Copy">
+					</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>

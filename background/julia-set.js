@@ -48,77 +48,177 @@ function JuliaSet() {
 		colorMultipleIntInput.addEventListener('input', setColorMultiple);
 		colorMultipleFracInput.addEventListener('input', setColorMultiple);
 
-		let selectedColorIndex = 0;
+		let colorSelectionStart = 0;
+		let colorSelectionEnd = 0;
+		const ColorOperation = Object.freeze({
+			'SELECT': 0,
+			'COPY': 1,
+			'SWAP': 2,
+			'SPREAD': 3,
+			'REVERSE': 4,
+		});
+		const ColorComponents = Object.freeze({
+			'HUE': 0,
+			'SATURATION': 1,
+			'LIGHTNESS': 2,
+			'ALL': 3,
+		});
+		let colorOperation = ColorOperation.SELECT;
+		let colorComponent = ColorComponents.ALL;
+
+		function updateSwatch(i) {
+			const color = me.palette[i];
+			const swatch = paletteUI.children[i];
+			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+		}
+
 		function selectColor(event) {
-			selectedColorIndex = parseInt(this.dataset.index);
-			const color = me.palette[selectedColorIndex];
+			const shift = event.shiftKey || event.longPress;
+			const sourceColor = me.palette[colorSelectionStart];
+			const clickIndex = parseInt(event.target.dataset.index);
+
+			switch (colorOperation) {
+			case ColorOperation.COPY:
+				if (colorSelectionStart === colorSelectionEnd) {
+					// Copy a single colour, possibly multiple times.
+					let destRangeStart, destRangeEnd;
+					if (shift) {
+						if (clickIndex < colorSelectionStart) {
+							destRangeStart = clickIndex;
+							destRangeEnd = colorSelectionStart - 1;
+						} else {
+							destRangeStart = colorSelectionStart + 1;
+							destRangeEnd = clickIndex;
+						}
+					} else {
+						destRangeStart = clickIndex;
+						destRangeEnd = clickIndex;
+					}
+					if (colorComponent === ColorComponents.ALL) {
+						for (let i = destRangeStart; i <= destRangeEnd; i++) {
+							me.palette[i] = sourceColor.slice();
+							updateSwatch(i);
+							setBgPropertyElement(me, 'palette', i);
+						}
+					} else {
+						for (let i = destRangeStart; i <= destRangeEnd; i++) {
+							me.palette[i][colorComponent] = sourceColor[colorComponent];
+							updateSwatch(i);
+							setBgPropertyElement(me, 'palette', i);
+						}
+					}
+				} else {
+					// Copy multiple colours once
+					for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
+						const destIndex = clickIndex + i - colorSelectionStart;
+						if (destIndex >= me.numColors) {
+							break;
+						}
+						if (colorComponent === ColorComponents.ALL) {
+							me.palette[destIndex] = me.palette[i].slice();
+						} else {
+							me.palette[destIndex][colorComponent] = me.palette[i][colorComponent];
+						}
+						updateSwatch(destIndex);
+						setBgPropertyElement(me, 'palette', destIndex);
+					}
+				}
+				generateBackground(0);
+				break;
+			}
+
+			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
+				paletteUI.children[i].classList.remove('active');
+			}
+			if (shift && colorOperation === ColorOperation.SELECT) {
+				if (clickIndex < colorSelectionStart) {
+					colorSelectionEnd = colorSelectionStart;
+					colorSelectionStart = clickIndex;
+				} else {
+					colorSelectionEnd = clickIndex;
+				}
+			} else {
+				colorSelectionStart = clickIndex;
+				colorSelectionEnd = clickIndex;
+			}
+			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
+				paletteUI.children[i].classList.add('active');
+			}
+			const color = me.palette[clickIndex];
 			hueSlider.value = color[0];
 			saturationSlider.value = color[1];
 			lightnessSlider.value = color[2];
+			colorOperation = ColorOperation.SELECT;
+		}
+
+		optionsDoc.getElementById('julia-copy-color').addEventListener('click', function (event) {
+			colorOperation = ColorOperation.COPY;
+			colorComponent = ColorComponents.ALL;
+		});
+
+		function rightClickColor(event) {
+			event.preventDefault();
+			event.longPress = true;
+			selectColor(event);
 		}
 
 		for (let i = 0; i < 256; i++) {
-			const label = optionsDoc.createElement('LABEL');
-			label.classList.add('btn');
-			const span = optionsDoc.createElement('SPAN');
-			span.classList.add('sr-only');
-			span.innerHTML = 'Colour ' + String(i + 1);
-			label.appendChild(span);
-			const button = optionsDoc.createElement('INPUT');
-			label.appendChild(button);
-			button.type = 'radio';
+			const button = optionsDoc.createElement('BUTTON');
+			button.type = 'button';
 			button.name = 'julia-swatch';
 			button.dataset.index = i;
+			button.classList.add('btn');
 			button.addEventListener('click', selectColor);
-			label.hidden = i >= me.numColors;
+			button.addEventListener('contextmenu', rightClickColor);
+			button.hidden = i >= me.numColors;
 			const color = palette[i];
-			label.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
-			paletteUI.appendChild(label);
+			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			paletteUI.appendChild(button);
 		}
 		paletteUI.children[0].classList.add('active');
-		paletteUI.children[0].children[1].checked = true;
 
 		let redrawTimeout;
 		function previewColor() {
-			const color = me.palette[selectedColorIndex];
-			const swatch = paletteUI.children[selectedColorIndex];
-			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			updateSwatch(colorSelectionStart);
 			if (redrawTimeout === undefined) {
 				redrawTimeout = setTimeout(setColor, 50);
 			}
 		}
 		function setColor() {
-			setBgPropertyElement(me, 'palette', selectedColorIndex);
+			setBgPropertyElement(me, 'palette', colorSelectionStart);
 			generateBackground(0);
 			redrawTimeout = undefined;
 		}
-		hueSlider.value = me.palette[0][0];
+		hueSlider.value = me.palette[0][ColorComponents.HUE];
 		hueSlider.addEventListener('input', function (event) {
-			me.palette[selectedColorIndex][0] = parseFloat(this.value) % 1;
+			me.palette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
 			previewColor();
 		});
 		hueSlider.addEventListener('pointerup', setColor);
 		hueSlider.addEventListener('keyup', setColor);
 
-		saturationSlider.value = me.palette[0][1];
+		saturationSlider.value = me.palette[0][ColorComponents.SATURATION];
 		saturationSlider.addEventListener('input', function (event) {
-			me.palette[selectedColorIndex][1] = parseFloat(this.value);
+			me.palette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
 			previewColor();
 		});
 		saturationSlider.addEventListener('pointerup', setColor);
 		saturationSlider.addEventListener('keyup', setColor);
 
-		lightnessSlider.value = me.palette[0][2];
+		lightnessSlider.value = me.palette[0][ColorComponents.LIGHTNESS];
 		lightnessSlider.addEventListener('input', function (event) {
-			me.palette[selectedColorIndex][2] = parseFloat(this.value);
+			me.palette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
 			previewColor();
 		});
 		lightnessSlider.addEventListener('pointerup', setColor);
 		lightnessSlider.addEventListener('keyup', setColor);
 
 		optionsDoc.getElementById('julia-num-colors').addEventListener('input', function (event) {
-			const value = parseInt(this.value);
-			if (value > 0 && value <= 256) {
+			let value = parseInt(this.value);
+			if (value > 0) {
+				if (value > 256) {
+					value = 256;
+				}
 				const buttons = paletteUI.children;
 				if (value > me.numColors) {
 					for (let i = me.numColors; i < value; i++) {

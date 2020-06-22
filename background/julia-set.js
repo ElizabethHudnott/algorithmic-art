@@ -324,7 +324,7 @@ function JuliaSet() {
 				colorMultipleFracInput.max = value - 1;
 				setColorMultiple();
 				generateBackground(0);
-				colorSelectionEnd = Math.min(colorSelectionEnd, numColors - 1);
+				colorSelectionEnd = Math.min(colorSelectionEnd, value - 1);
 			}
 		})
 

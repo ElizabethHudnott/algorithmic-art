@@ -192,7 +192,30 @@ function JuliaSet() {
 		}
 
 		function colorRangeOperation(operation, rangeStart, rangeEnd) {
+			const rangeLength = rangeEnd - rangeStart + 1;
 			switch (operation) {
+			case ColorOperation.SPREAD:
+				if (colorComponent === ColorComponents.ALL) {
+					for (let j = 0; j < 3; j++) {
+						const startValue = activePalette[rangeStart][j];
+						const endValue = activePalette[rangeEnd][j];
+						const spreadRange = endValue - startValue;
+						for (let i = rangeStart + 1; i < rangeEnd; i++) {
+							const step = i - rangeStart;
+							activePalette[i][j] = startValue + step * spreadRange / rangeLength;
+						}
+					}
+				} else {
+					const startValue = activePalette[rangeStart][colorComponent];
+					const endValue = activePalette[rangeEnd][colorComponent];
+					const spreadRange = endValue - startValue;
+					for (let i = rangeStart + 1; i < rangeEnd; i++) {
+						const step = i - rangeStart;
+						activePalette[i][colorComponent] = startValue + step * spreadRange / rangeLength;
+					}
+				}
+				break;
+
 			case ColorOperation.REVERSE:
 				while (rangeEnd - rangeStart > 0) {
 					if (colorComponent === ColorComponents.ALL) {
@@ -206,6 +229,26 @@ function JuliaSet() {
 					}
 					rangeStart++;
 					rangeEnd--;
+				}
+				break;
+
+			case ColorOperation.SHUFFLE:
+				const colors = activePalette.slice(rangeStart, rangeEnd + 1);
+				if (colorComponent === ColorComponents.ALL) {
+					for (let i = rangeStart; i < rangeEnd; i++) {
+						const index = Math.trunc(Math.random() * colors.length);
+						activePalette[i] = colors[index];
+						colors.splice(index, 1);
+					}
+					activePalette[rangeEnd] = colors[0];
+				} else {
+					for (let i = rangeStart; i <= rangeEnd; i++) {
+						const index = Math.trunc(Math.random() * colors.length);
+						const color = activePalette[i].slice();
+						color[colorComponent] = colors[i][colorComponent];
+						activePalette[i] = color;
+						colors.splice(index, 1);
+					}
 				}
 				break;
 

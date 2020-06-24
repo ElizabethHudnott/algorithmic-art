@@ -32,6 +32,13 @@ function JuliaSet() {
 		const hueSlider = optionsDoc.getElementById('julia-hue');
 		const saturationSlider = optionsDoc.getElementById('julia-saturation');
 		const lightnessSlider = optionsDoc.getElementById('julia-lightness');
+		const opacitySlider = optionsDoc.getElementById('julia-opacity');
+		const colorComponentInput = optionsDoc.getElementById('julia-color-component');
+		const colorHelpElement = optionsDoc.getElementById('julia-palette-help');
+
+		const colorHelpMsgNormal = 'Use the Shift key, a right mouse click, or tap and hold to copy, swap or randomize multiple colours.';
+		const colorHelpMsgSelectDest = 'Now select the destination color.';
+		colorHelpElement.innerHTML = colorHelpMsgNormal;
 
 		function setColorMultiple() {
 			let multiple = parseFloat(colorMultipleIntInput.value);
@@ -69,17 +76,17 @@ function JuliaSet() {
 		let activePalette = me.palette;
 		let paletteProperty = 'palette';
 		let colorOperation = ColorOperation.SELECT;
-		let colorComponent = ColorComponents.ALL;
 
 		function updateSwatch(i) {
 			const color = activePalette[i];
-			const swatch = paletteUI.children[i];
-			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+			const swatch = paletteUI.children[i].children[0];
+			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
 		}
 
 		function selectColor(event) {
 			const shift = event.shiftKey || event.longPress;
 			const sourceColor = activePalette[colorSelectionStart];
+			const colorComponent = parseInt(colorComponentInput.value);
 			const clickIndex = parseInt(event.target.dataset.index);
 
 			switch (colorOperation) {
@@ -155,6 +162,7 @@ function JuliaSet() {
 				break;
 
 			default:
+				// Spread, reverse or shuffle
 				let rangeStart, rangeEnd;
 				if (clickIndex < colorSelectionStart) {
 					rangeStart = clickIndex;
@@ -168,7 +176,7 @@ function JuliaSet() {
 			}
 
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
-				paletteUI.children[i].classList.remove('active');
+				paletteUI.children[i].children[0].classList.remove('active');
 			}
 			if (shift && colorOperation === ColorOperation.SELECT) {
 				if (clickIndex < colorSelectionStart) {
@@ -182,16 +190,19 @@ function JuliaSet() {
 				colorSelectionEnd = clickIndex;
 			}
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
-				paletteUI.children[i].classList.add('active');
+				paletteUI.children[i].children[0].classList.add('active');
 			}
 			const color = activePalette[clickIndex];
 			hueSlider.value = color[0];
 			saturationSlider.value = color[1];
 			lightnessSlider.value = color[2];
+			opacitySlider.value = color[3];
 			colorOperation = ColorOperation.SELECT;
+			colorHelpElement.innerHTML = colorHelpMsgNormal;
 		}
 
 		function colorRangeOperation(operation, rangeStart, rangeEnd) {
+			const colorComponent = parseInt(colorComponentInput.value);
 			const rangeLength = rangeEnd - rangeStart + 1;
 			switch (operation) {
 			case ColorOperation.SPREAD:
@@ -217,18 +228,19 @@ function JuliaSet() {
 				break;
 
 			case ColorOperation.REVERSE:
-				while (rangeEnd - rangeStart > 0) {
+				let start = rangeStart, end = rangeEnd;
+				while (end - start > 1) {
 					if (colorComponent === ColorComponents.ALL) {
-						const temp = activePalette[rangeStart];
-						activePalette[rangeStart] = activePalette[rangeEnd];
-						activePalette[rangeEnd] = temp;
+						const temp = activePalette[start];
+						activePalette[start] = activePalette[end];
+						activePalette[end] = temp;
 					} else {
-						const temp = activePalette[rangeStart][colorComponent];
-						activePalette[rangeStart][colorComponent] = activePalette[rangeEnd][colorComponent];
-						activePalette[rangeEnd][colorComponent] = temp;
+						const temp = activePalette[start][colorComponent];
+						activePalette[start][colorComponent] = activePalette[end][colorComponent];
+						activePalette[end][colorComponent] = temp;
 					}
-					rangeStart++;
-					rangeEnd--;
+					start++;
+					end--;
 				}
 				break;
 
@@ -277,12 +289,14 @@ function JuliaSet() {
 
 		function colorAction(event) {
 			colorOperation = parseInt(this.dataset.colorOp);
-			colorComponent = parseInt(this.dataset.colorComponent);
 			if (colorOperation === ColorOperation.RANDOMIZE ||
 				(colorOperation >= ColorOperation.SPREAD && colorSelectionStart !== colorSelectionEnd)
 			) {
 				colorRangeOperation(colorOperation, colorSelectionStart, colorSelectionEnd);
 				colorOperation = ColorOperation.SELECT;
+				colorHelpElement.innerHTML = colorHelpMsgNormal;
+			} else {
+				colorHelpElement.innerHTML = colorHelpMsgSelectDest;
 			}
 		}
 
@@ -297,19 +311,21 @@ function JuliaSet() {
 		}
 
 		for (let i = 0; i < 256; i++) {
+			const div = optionsDoc.createElement('DIV');
+			div.hidden = i >= me.numColors;
 			const button = optionsDoc.createElement('BUTTON');
+			div.appendChild(button);
 			button.type = 'button';
 			button.name = 'julia-swatch';
 			button.dataset.index = i;
 			button.classList.add('btn');
 			button.addEventListener('click', selectColor);
 			button.addEventListener('contextmenu', rightClickColor);
-			button.hidden = i >= me.numColors;
 			const color = palette[i];
-			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
-			paletteUI.appendChild(button);
+			paletteUI.appendChild(div);
+			updateSwatch(i);
 		}
-		paletteUI.children[0].classList.add('active');
+		paletteUI.children[0].children[0].classList.add('active');
 
 		let redrawTimeout;
 		function previewColor() {
@@ -347,20 +363,28 @@ function JuliaSet() {
 		lightnessSlider.addEventListener('pointerup', setColor);
 		lightnessSlider.addEventListener('keyup', setColor);
 
+		opacitySlider.value = activePalette[0][ColorComponents.OPACITY];
+		opacitySlider.addEventListener('input', function (event) {
+			activePalette[colorSelectionStart][ColorComponents.OPACITY] = parseFloat(this.value);
+			previewColor();
+		});
+		opacitySlider.addEventListener('pointerup', setColor);
+		opacitySlider.addEventListener('keyup', setColor);
+
 		optionsDoc.getElementById('julia-num-colors').addEventListener('input', function (event) {
 			let value = parseInt(this.value);
 			if (value > 0) {
 				if (value > 256) {
 					value = 256;
 				}
-				const buttons = paletteUI.children;
+				const divs = paletteUI.children;
 				if (value > me.numColors) {
 					for (let i = me.numColors; i < value; i++) {
-						buttons[i].hidden = false;
+						divs[i].hidden = false;
 					}
 				} else {
 					for (let i = value; i < me.numColors; i++) {
-						buttons[i].hidden = true;
+						divs[i].hidden = true;
 					}
 				}
 				setBgProperty(me, 'numColors', value);

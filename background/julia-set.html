@@ -431,33 +431,49 @@
 			</div>
 		</div>
 		<div class="form-row">
-			<div class="col-3 col-form-label mt-2">
-				All
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-opacity">
+				Opacity
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-opacity">
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="col-3">
+				<select id="julia-color-component" class="form-control form-control-sm mt-2">
+					<option value="4" selected>Colour</option>
+					<option value="0">Hue</option>
+					<option value="1">Saturation</option>
+					<option value="2">Lightness</option>
+					<option value="3">Opacity</option>
+				</select>
 			</div>
 			<div class="col-9">
 				<div class="btn-group" role="group" aria-label="Change colors">
-					<button type="button" class="btn btn-light" title="Copy color" data-color-op="1" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Copy" data-color-op="1">
 						<img src="../img/page_copy.png" alt="Copy">
 					</button>
-					<button type="button" class="btn btn-light" title="Swap colors" data-color-op="2" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Swap" data-color-op="2">
 						<img src="../img/arrow_refresh.png" alt="Swap">
 					</button>
-					<button type="button" class="btn btn-light" title="Create gradient" data-color-op="3" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Create gradient" data-color-op="3">
 						<img src="../img/color_gradient.png" alt="Spread">
 					</button>
-					<button type="button" class="btn btn-light" title="Reverse colour order" data-color-op="4" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Reverse order" data-color-op="4">
 						<img src="../img/arrow_left.png" alt="Reverse">
 					</button>
-					<button type="button" class="btn btn-light" title="Shuffle colours" data-color-op="5" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Shuffle" data-color-op="5">
 						<img src="../img/arrow_switch.png" alt="Shuffle">
 					</button>
-					<button type="button" class="btn btn-light" title="Randomize colour" data-color-op="6" data-color-component="4">
+					<button type="button" class="btn btn-light" title="Randomize" data-color-op="6">
 						<img src="../img/dice.png" alt="Randomize">
 					</button>
 				</div>
-				<small id="julia-palette-help" class="form-text text-muted">
-					Use the Shift key, a right mouse click, or tap and hold to copy, swap or randomize multiple colours.
-				</small>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="col-12">
+				<small id="julia-palette-help" class="form-text text-muted"></small>
 			</div>
 		</div>
 	</div>

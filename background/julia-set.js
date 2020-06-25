@@ -265,7 +265,7 @@ function JuliaSet() {
 					for (let i = rangeStart; i <= rangeEnd; i++) {
 						const index = Math.trunc(Math.random() * colors.length);
 						const color = activePalette[i].slice();
-						color[colorComponent] = colors[i][colorComponent];
+						color[colorComponent] = colors[index][colorComponent];
 						activePalette[i] = color;
 						colors.splice(index, 1);
 					}

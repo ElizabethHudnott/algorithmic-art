@@ -400,81 +400,93 @@
 				<div class="col-3 pl-4">
 				</div>
 			</div>
+		</fieldset>
+		<fieldset id="julia-palette-fields">
 			<div class="form-row form-group">
 				<div class="col-12">
 					<div class="palette btn-group btn-group-toggle" id="julia-palette" aria-describedby="julia-palette-help"></div>
 				</div>
 			</div>
-		</fieldset>
-		<div class="form-row">
-			<label class="col-3 col-form-label col-form-label-sm" for="julia-hue">
-				Hue
-			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="1" step="0.0005" class="form-control-range mt-1" id="julia-hue">
-			</div>
-		</div>
-		<div class="form-row">
-			<label class="col-3 col-form-label col-form-label-sm" for="julia-saturation">
-				Saturation
-			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-saturation">
-			</div>
-		</div>
-		<div class="form-row">
-			<label class="col-3 col-form-label col-form-label-sm" for="julia-lightness">
-				Lightness
-			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="1" step="0.002" class="form-control-range mt-1" id="julia-lightness">
-			</div>
-		</div>
-		<div class="form-row">
-			<label class="col-3 col-form-label col-form-label-sm" for="julia-opacity">
-				Opacity
-			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-opacity">
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="col-3">
-				<select id="julia-color-component" class="form-control form-control-sm mt-2">
-					<option value="4" selected>Colour</option>
-					<option value="0">Hue</option>
-					<option value="1">Saturation</option>
-					<option value="2">Lightness</option>
-					<option value="3">Opacity</option>
-				</select>
-			</div>
-			<div class="col-9">
-				<div class="btn-group" role="group" aria-label="Change colors">
-					<button type="button" class="btn btn-light" title="Copy" data-color-op="1">
-						<img src="../img/page_copy.png" alt="Copy">
-					</button>
-					<button type="button" class="btn btn-light" title="Swap" data-color-op="2">
-						<img src="../img/arrow_refresh.png" alt="Swap">
-					</button>
-					<button type="button" class="btn btn-light" title="Create gradient" data-color-op="3">
-						<img src="../img/color_gradient.png" alt="Spread">
-					</button>
-					<button type="button" class="btn btn-light" title="Reverse order" data-color-op="4">
-						<img src="../img/arrow_left.png" alt="Reverse">
-					</button>
-					<button type="button" class="btn btn-light" title="Shuffle" data-color-op="5">
-						<img src="../img/arrow_switch.png" alt="Shuffle">
-					</button>
-					<button type="button" class="btn btn-light" title="Randomize" data-color-op="6">
-						<img src="../img/dice.png" alt="Randomize">
-					</button>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="julia-hue">
+					Hue
+				</label>
+				<div class="col-9">
+					<input type="range" min="0" max="1" step="0.0005" class="form-control-range mt-1" id="julia-hue">
 				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="col-12">
-				<small id="julia-palette-help" class="form-text text-muted"></small>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="julia-saturation">
+					Saturation
+				</label>
+				<div class="col-9">
+					<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-saturation">
+				</div>
 			</div>
-		</div>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="julia-lightness">
+					Lightness
+				</label>
+				<div class="col-9">
+					<input type="range" min="0" max="1" step="0.002" class="form-control-range mt-1" id="julia-lightness">
+				</div>
+			</div>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="julia-opacity">
+					Opacity
+				</label>
+				<div class="col-9">
+					<input type="range" min="0" max="1" step="0.004" class="form-control-range mt-1" id="julia-opacity">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="col-3">
+					<select id="julia-color-component" class="form-control form-control-sm mt-2">
+						<option value="4" selected>Colour</option>
+						<option value="0">Hue</option>
+						<option value="1">Saturation</option>
+						<option value="2">Lightness</option>
+						<option value="3">Opacity</option>
+					</select>
+				</div>
+				<div class="col-9">
+					<div class="btn-toolbar" role="toolbar" aria-label="Change colors">
+						<div class="btn-group" role="group" aria-label="Work with colour ranges">
+							<button type="button" class="btn btn-light" title="Copy" data-color-op="1">
+								<img src="../img/page_copy.png" alt="Copy">
+							</button>
+							<button type="button" class="btn btn-light" title="Swap" data-color-op="2">
+								<img src="../img/arrow_refresh.png" alt="Swap">
+							</button>
+							<button type="button" class="btn btn-light" title="Create gradient" data-color-op="3">
+								<img src="../img/color_gradient.png" alt="Spread">
+							</button>
+							<button type="button" class="btn btn-light" title="Reverse order" data-color-op="4">
+								<img src="../img/arrow_left.png" alt="Reverse">
+							</button>
+						</div>
+						<div class="btn-group" role="group" aria-label="Generate new palettes">
+							<button type="button" class="btn btn-light" title="Select all" data-color-op="8">
+								<img src="../img/table_select_all.png" alt="Select All">
+							</button>
+							<button type="button" class="btn btn-light" title="Shuffle" data-color-op="5">
+								<img src="../img/arrow_switch.png" alt="Shuffle">
+							</button>
+							<button type="button" class="btn btn-light" title="Randomize" data-color-op="6">
+								<img src="../img/dice.png" alt="Randomize">
+							</button>
+							<button type="button" class="btn btn-light" title="Flip brightness" data-color-op="7">
+								<img src="../img/invert_color.png" alt="Invert">
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="col-12">
+					<small id="julia-palette-help" class="form-text text-muted"></small>
+				</div>
+			</div>
+		</fieldset>
 	</div>
 </div>

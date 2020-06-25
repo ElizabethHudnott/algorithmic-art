@@ -28,6 +28,7 @@ function JuliaSet() {
 
 		const colorMultipleIntInput = optionsDoc.getElementById('julia-color-multiple-int');
 		const colorMultipleFracInput = optionsDoc.getElementById('julia-color-multiple-frac');
+		const paletteFields = optionsDoc.getElementById('julia-palette-fields');
 		const paletteUI = optionsDoc.getElementById('julia-palette');
 		const hueSlider = optionsDoc.getElementById('julia-hue');
 		const saturationSlider = optionsDoc.getElementById('julia-saturation');
@@ -36,7 +37,7 @@ function JuliaSet() {
 		const colorComponentInput = optionsDoc.getElementById('julia-color-component');
 		const colorHelpElement = optionsDoc.getElementById('julia-palette-help');
 
-		const colorHelpMsgNormal = 'Use the Shift key, a right mouse click, or tap and hold to copy, swap or randomize multiple colours.';
+		const colorHelpMsgNormal = 'Use the Shift key, a right mouse click, or tap and hold to copy, swap, randomize or flip the brightness of multiple colours.';
 		const colorHelpMsgSelectDest = 'Now select the destination color.';
 		colorHelpElement.innerHTML = colorHelpMsgNormal;
 
@@ -65,6 +66,8 @@ function JuliaSet() {
 			'REVERSE': 4,
 			'SHUFFLE': 5,
 			'RANDOMIZE': 6,
+			'INVERT': 7,
+			'SELECT_ALL': 8,
 		});
 		const ColorComponents = Object.freeze({
 			'HUE': 0,
@@ -161,6 +164,11 @@ function JuliaSet() {
 				generateBackground(0);
 				break;
 
+			case ColorOperation.SELECT_ALL:
+				colorSelectionStart = 0;
+				colorSelectionEnd = me.numColors - 1;
+				break;
+
 			default:
 				// Spread, reverse or shuffle
 				let rangeStart, rangeEnd;
@@ -185,14 +193,14 @@ function JuliaSet() {
 				} else {
 					colorSelectionEnd = clickIndex;
 				}
-			} else {
+			} else if (colorOperation !== ColorOperation.SELECT_ALL) {
 				colorSelectionStart = clickIndex;
 				colorSelectionEnd = clickIndex;
 			}
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
 				paletteUI.children[i].children[0].classList.add('active');
 			}
-			const color = activePalette[clickIndex];
+			const color = activePalette[colorSelectionStart];
 			hueSlider.value = color[0];
 			saturationSlider.value = color[1];
 			lightnessSlider.value = color[2];
@@ -278,6 +286,48 @@ function JuliaSet() {
 				}
 				break;
 
+			case ColorOperation.INVERT:
+				for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
+					const color = activePalette[i];
+					let saturation = color[ColorComponents.SATURATION];
+					let lightness = color[ColorComponents.LIGHTNESS];
+					/* Convert HSL to HSV and back.
+					 * https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_HSV
+					 */
+					let brightness = lightness + saturation * Math.min(lightness, 1 - lightness);
+					if (brightness === 0) {
+						saturation = 0;
+					} else {
+						saturation = 2 * (1 - lightness / brightness);
+					}
+					if (saturation === 0) {
+						brightness = 1 - brightness;
+					} else if (brightness <= 0.5) {
+						brightness = brightness * 2;
+					} else {
+						brightness = brightness / 2;
+					}
+					lightness = brightness * (1 - saturation / 2);
+					if (lightness === 0 || lightness === 1) {
+						saturation = 0;
+					} else {
+						saturation = (brightness - lightness) / Math.min(lightness, 1 - lightness);
+					}
+					color[ColorComponents.SATURATION] = saturation;
+					color[ColorComponents.LIGHTNESS] = lightness;
+					const opacity = color[ColorComponents.OPACITY];
+					if (opacity < 0.5) {
+						color[ColorComponents.OPACITY] = 1 - opacity;
+					}
+					updateSwatch(i);
+					setBgPropertyElement(me, paletteProperty, i);
+				}
+				break;
+
+			case ColorOperation.SELECT_ALL:
+				selectColor(event);
+				return;
+
 			}
 
 			for (let i = rangeStart; i <= rangeEnd; i++) {
@@ -289,7 +339,7 @@ function JuliaSet() {
 
 		function colorAction(event) {
 			colorOperation = parseInt(this.dataset.colorOp);
-			if (colorOperation === ColorOperation.RANDOMIZE ||
+			if (colorOperation >= ColorOperation.RANDOMIZE ||
 				(colorOperation >= ColorOperation.SPREAD && colorSelectionStart !== colorSelectionEnd)
 			) {
 				colorRangeOperation(colorOperation, colorSelectionStart, colorSelectionEnd);
@@ -300,8 +350,16 @@ function JuliaSet() {
 			}
 		}
 
+		function multipartBlur(event) {
+			if (!paletteFields.contains(event.relatedTarget)) {
+				colorOperation = ColorOperation.SELECT;
+				colorHelpElement.innerHTML = colorHelpMsgNormal;
+			}
+		}
+
 		for (let element of optionsDoc.querySelectorAll('button[data-color-op]')) {
 			element.addEventListener('click', colorAction);
+			element.addEventListener('blur', multipartBlur);
 		}
 
 		function rightClickColor(event) {
@@ -331,7 +389,7 @@ function JuliaSet() {
 		function previewColor() {
 			updateSwatch(colorSelectionStart);
 			if (redrawTimeout === undefined) {
-				redrawTimeout = setTimeout(setColor, 50);
+				redrawTimeout = setTimeout(setColor, 100);
 			}
 		}
 		function setColor() {

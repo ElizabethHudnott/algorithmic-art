@@ -1,3 +1,11 @@
+float complexArgument(vec2 z) {
+	if (z.x == 0.0) {
+		return sign(z.y) * PI / 2.0;
+	} else {
+		return atan(z.y, z.x);
+	}
+}
+
 vec2 complexMultiply(vec2 z1, vec2 z2) {
 	return vec2(
 		z1.x * z2.x - z1.y * z2.y,
@@ -132,9 +140,56 @@ void main() {
 	float escapeRSquared = escapeValue * escapeValue;
 	int i = 0;
 
+	float maxTrapDistanceSq = 4.0 * escapeRSquared;
+	for (int i = 0; i < numTrapPoints; i++) {
+		float maxLength = length(trapPoints[i]) + escapeValue;
+		maxTrapDistanceSq = min(maxTrapDistanceSq, maxLength * maxLength);
+	}
+
+	mat4x2 trapLineDiffs = trapLineEnd - trapLineStart;
+	vec4 trapLineLengthSq, trapLineDeterminant;
+	for (int i = 0; i < numTrapLines; i++) {
+		trapLineDeterminant[i] = trapLineEnd[i].x * trapLineStart[i].y - trapLineEnd[i].y * trapLineStart[i].x;
+		trapLineLengthSq[i] = pow(trapLineDiffs[i].x, 2.0) + pow(trapLineDiffs[i].y, 2.0);
+	}
+	float trapDistanceSq = maxTrapDistanceSq;
+	float trapTheta = complexArgument(point);
+
 	while (i < maxIterations &&
 		(escapeType == 0 ? rSquared <= escapeRSquared : abs(point.y) <= escapeValue)
 	) {
+		float trapDistanceSoFar;
+		if (trapFunction == 0) {
+			// Apply min function
+			trapDistanceSoFar = maxTrapDistanceSq;
+			for (int j = 0; j < numTrapPoints; j++) {
+				vec2 trapPoint = trapPoints[j];
+				float newDistance = pow(trapPoint.x - point.x, 2.0) + pow(trapPoint.y - point.y, 2.0);
+				trapDistanceSoFar = min(trapDistanceSoFar, newDistance);
+			}
+			for (int j = 0; j < numTrapLines; j++) {
+				vec2 trapLineDiff = trapLineDiffs[j];
+				float lineValue = abs(trapLineDiff.y * point.x - trapLineDiff.x * point.y + trapLineDeterminant[j]);
+				trapDistanceSoFar = min(trapDistanceSoFar, (lineValue * lineValue) / trapLineLengthSq[j]);
+			}
+		} else {
+			// Apply max function
+			trapDistanceSoFar = 0.0;
+			for (int j = 0; j < numTrapPoints; j++) {
+				vec2 trapPoint = trapPoints[j];
+				float newDistance = pow(trapPoint.x - point.x, 2.0) + pow(trapPoint.y - point.y, 2.0);
+				trapDistanceSoFar = max(trapDistanceSoFar, newDistance);
+			}
+			for (int j = 0; j < numTrapLines; j++) {
+				vec2 trapLineDiff = trapLineDiffs[j];
+				float lineValue = abs(trapLineDiff.y * point.x - trapLineDiff.x * point.y + trapLineDeterminant[j]);
+				trapDistanceSoFar = max(trapDistanceSoFar, (lineValue * lineValue) / trapLineLengthSq[j]);
+			}
+		}
+		if (trapDistanceSoFar < trapDistanceSq) {
+			trapDistanceSq = trapDistanceSoFar;
+			trapTheta = point.x;
+		}
 
 		switch (preOperation) {
 		case 1:	// Conjugation
@@ -144,11 +199,8 @@ void main() {
 			point = vec2(abs(point.x), abs(point.y));
 			break;
 		}
-		if (point.x == 0.0) {
-			theta = sign(point.y) * PI / 2.0;
-		} else {
-			theta = atan(point.y, point.x);
-		}
+		theta = complexArgument(point);
+
 		vec2 numerator = vec2(0.0, 0.0);
 		if (numeratorCoefficients[0] != 0.0) {
 			numerator = numeratorCoefficients[0] * complexPower(rSquared, theta, numeratorExponents[0]);
@@ -203,6 +255,14 @@ void main() {
 		float colorNumber, maxColorNumber;
 		float numColorsF = float(numColors);
 
+		/*
+		colorNumber = trapTheta + PI;
+		maxColorNumber = 2.0 * PI;
+		*/
+		/*
+		colorNumber = sqrt(trapDistanceSq);
+		maxColorNumber = sqrt(maxTrapDistanceSq);
+		*/
 		colorNumber = float(maxIterations - 2 - i) + log(log2(rSquared) / 2.0);
 		maxColorNumber = float(maxIterations);
 

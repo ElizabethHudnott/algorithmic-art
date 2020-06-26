@@ -44,7 +44,7 @@ function showBackgroundOptions() {
 		precision highp float;
 		precision highp int;
 		out vec4 fragColor;
-		#define PI 3.141592654
+		#define PI ${Math.PI}
 		uniform float canvasWidth;
 		uniform float canvasHeight;
 		uniform float tween;
@@ -118,7 +118,7 @@ function showBackgroundOptions() {
 				typeName = (this.baseType === 'f' ? 'vec' : this.baseType + 'vec') + this.width;
 				break;
 			case GLTypeCategory.MATRIX:
-				typeName = 'mat' + this.width + 'x' + height;
+				typeName = 'mat' + this.height + 'x' + this.width;
 				break;
 			}
 			if (this.length !== undefined) {
@@ -142,7 +142,7 @@ function showBackgroundOptions() {
 				if (this.width === this.height) {
 					gl['uniformMatrix' + this.width + 'fv'](location, false, value);
 				} else {
-					gl['uniformMatrix' + this.width + 'x' + this.height + 'fv'](location, false, value);
+					gl['uniformMatrix' + this.height + 'x' + this.width + 'fv'](location, false, value);
 				}
 			} else {
 				if (baseType === 'i') {

@@ -35,9 +35,8 @@ function MySketch() {
 	this.myThingyMax = 10;
 }
 
-/** This method is optional. During animation the environment will assign values
- *  directly to the sketch's parameters' properties. If this causes any cached
- *	calculation results to become invalid then erase that data here.
+/** This method is optional. When the user switches to another sketch then this method
+ *	will be called to try to free up memory.
  */
 MySketch.prototype.purgeCache = function () {
 

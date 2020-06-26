@@ -734,6 +734,12 @@ function JuliaSet() {
 	this.colorOffset = 0;
 	this.wrapPalette = true;
 	this.interpolation = 1;
+	this.trapPoints = [[0, 0], [0, 0], [0, 0], [0, 0]];
+	this.numTrapPoints = 0;
+	this.trapLineStart = [[0, -1], [-1, 0], [0, 0], [0, 0]];
+	this.trapLineEnd = [[0, 1], [1, 0], [0, 0], [0, 0]];
+	this.numTrapLines = 0;
+	this.trapFunction = 0; // 0 = min, 1 = max
 }
 
 JuliaSet.prototype.animatable = {
@@ -743,7 +749,7 @@ JuliaSet.prototype.animatable = {
 		'inverse', 'muTranslation',
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeValue',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset',
-		'palette'
+		'palette', 'trapPoints', 'trapLineStart', 'trapLineEnd'
 	],
 	xy: [
 		['finalRealConstant', 'finalImConstant'],
@@ -751,7 +757,7 @@ JuliaSet.prototype.animatable = {
 	stepped: [
 		'numeratorFunction', 'denominatorFunction', 'extraTermFunction', 'finalFunction',
 		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
-		'numColors', 'wrapPalette'
+		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapFunction'
 	]
 };
 

@@ -718,16 +718,17 @@ function JuliaSet() {
 			for (let i = 1; i <= 4; i++) {
 				const xStr = pointTrapInputs.querySelector('#julia-ptrap' + i + '-x').value.trim();
 				const yStr = pointTrapInputs.querySelector('#julia-ptrap' + i + '-y').value.trim();
-				if (xStr !== '' && yStr !== '') {
-					const x = parseFloat(xStr);
-					const y = parseFloat(yStr);
-					if (!Number.isFinite(x) || !Number.isFinite(y)) {
-						// invalid value entered
-						return;
-					}
-					me.trapPoints[numTraps] = [x, y];
-					numTraps++;
+				if (xStr === '' || yStr === '') {
+					break;
 				}
+				const x = parseFloat(xStr);
+				const y = parseFloat(yStr);
+				if (!Number.isFinite(x) || !Number.isFinite(y)) {
+					// invalid value entered
+					return;
+				}
+				me.trapPoints[numTraps] = [x, y];
+				numTraps++;
 			}
 			setBgProperty(me, 'trapPoints');
 			setBgProperty(me, 'numTrapPoints', numTraps);
@@ -738,6 +739,45 @@ function JuliaSet() {
 			for (let i = 1; i <= 4; i++) {
 				const input = optionsDoc.getElementById('julia-ptrap' + i + '-' + coord);
 				input.addEventListener('input', updatePointTraps);
+			}
+		}
+
+		const lineTrapInputs = optionsDoc.getElementById('julia-line-traps');
+
+		function updateLineTraps() {
+			let numTraps = 0;
+			for (let i = 1; i <= 4; i++) {
+				const x1Str = lineTrapInputs.querySelector('#julia-ltrap' + i + '-x1').value.trim();
+				const y1Str = lineTrapInputs.querySelector('#julia-ltrap' + i + '-y1').value.trim();
+				const x2Str = lineTrapInputs.querySelector('#julia-ltrap' + i + '-x2').value.trim();
+				const y2Str = lineTrapInputs.querySelector('#julia-ltrap' + i + '-y2').value.trim();
+				if (x1Str === '' || y1Str === '' || x2Str === '' || y2Str === '') {
+					break;
+				}
+				const x1 = parseFloat(x1Str);
+				const y1 = parseFloat(y1Str);
+				const x2 = parseFloat(x2Str);
+				const y2 = parseFloat(y2Str);
+				if (!Number.isFinite(x1) || !Number.isFinite(y1) ||
+					!Number.isFinite(x2) || !Number.isFinite(y2)
+				) {
+					// invalid value entered
+					return;
+				}
+				me.trapLineStart[numTraps] = [x1, y1];
+				me.trapLineEnd[numTraps] = [x2, y2];
+				numTraps++;
+			}
+			setBgProperty(me, 'trapLineStart');
+			setBgProperty(me, 'trapLineEnd');
+			setBgProperty(me, 'numTrapLines', numTraps);
+			generateBackground(0);
+		}
+
+		for (let coord of ['x1', 'y1', 'x2', 'y2']) {
+			for (let i = 1; i <= 4; i++) {
+				const input = optionsDoc.getElementById('julia-ltrap' + i + '-' + coord);
+				input.addEventListener('input', updateLineTraps);
 			}
 		}
 

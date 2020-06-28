@@ -139,12 +139,15 @@ void main() {
 	float escapeRSquared = escapeValue * escapeValue;
 	int i = 0;
 
-	vec2 meanPoint = vec2(0.0, 0.0);
-	for (int i = 0; i < numTrapPoints; i++) {
-		meanPoint += trapPoints[i];
+	float maxTrapDistanceSq = escapeRSquared;
+	if (numTrapPoints > 0) {
+		vec2 meanPoint = vec2(0.0, 0.0);
+		for (int i = 0; i < numTrapPoints; i++) {
+			meanPoint += trapPoints[i];
+		}
+		maxTrapDistanceSq = length(meanPoint / float(numTrapPoints)) + escapeValue;
+		maxTrapDistanceSq = maxTrapDistanceSq * maxTrapDistanceSq;
 	}
-	float maxTrapDistanceSq = length(meanPoint / float(numTrapPoints)) + escapeValue;
-	maxTrapDistanceSq = maxTrapDistanceSq * maxTrapDistanceSq;
 
 	mat4x2 trapLineDiffs = trapLineEnd - trapLineStart;
 	vec4 trapLineLengthSq, trapLineDeterminant;

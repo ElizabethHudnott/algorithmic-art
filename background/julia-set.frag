@@ -76,10 +76,9 @@ void main() {
 	float theta, divisor;
 	vec2 finalConstant, point, functionOfZ;
 
-	theta = clamp(feedback.x, -0.5, 0.5) * PI;
 	float temp = x;
-	x = x * cos(theta) - y * sin(theta);
-	y = temp * sin(theta) + y * cos(theta);
+	x = x * cos(rotation) - y * sin(rotation);
+	y = temp * sin(rotation) + y * cos(rotation);
 
 	if (preOperation == 2) {
 		// Burning ship
@@ -140,11 +139,12 @@ void main() {
 	float escapeRSquared = escapeValue * escapeValue;
 	int i = 0;
 
-	float maxTrapDistanceSq = 4.0 * escapeRSquared;
+	vec2 meanPoint = vec2(0.0, 0.0);
 	for (int i = 0; i < numTrapPoints; i++) {
-		float maxLength = length(trapPoints[i]) + escapeValue;
-		maxTrapDistanceSq = min(maxTrapDistanceSq, maxLength * maxLength);
+		meanPoint += trapPoints[i];
 	}
+	float maxTrapDistanceSq = length(meanPoint / float(numTrapPoints)) + escapeValue;
+	maxTrapDistanceSq = maxTrapDistanceSq * maxTrapDistanceSq;
 
 	mat4x2 trapLineDiffs = trapLineEnd - trapLineStart;
 	vec4 trapLineLengthSq, trapLineDeterminant;
@@ -159,7 +159,7 @@ void main() {
 		(escapeType == 0 ? rSquared <= escapeRSquared : abs(point.y) <= escapeValue)
 	) {
 		float trapDistanceSoFar;
-		if (trapFunction == 0) {
+		if (trapDistanceFunc == 0) {
 			// Apply min function
 			trapDistanceSoFar = maxTrapDistanceSq;
 			for (int j = 0; j < numTrapPoints; j++) {
@@ -188,7 +188,7 @@ void main() {
 		}
 		if (trapDistanceSoFar < trapDistanceSq) {
 			trapDistanceSq = trapDistanceSoFar;
-			trapTheta = point.x;
+			trapTheta = theta;
 		}
 
 		switch (preOperation) {
@@ -255,16 +255,13 @@ void main() {
 		float colorNumber, maxColorNumber;
 		float numColorsF = float(numColors);
 
-		/*
-		colorNumber = trapTheta + PI;
-		maxColorNumber = 2.0 * PI;
-		*/
-		/*
-		colorNumber = sqrt(trapDistanceSq);
-		maxColorNumber = sqrt(maxTrapDistanceSq);
-		*/
-		colorNumber = float(maxIterations - 2 - i) + log(log2(rSquared) / 2.0);
-		maxColorNumber = float(maxIterations);
+		if (numTrapPoints > 0 || numTrapLines > 0) {
+			colorNumber = sqrt(trapDistanceSq);
+			maxColorNumber = sqrt(maxTrapDistanceSq);
+		} else {
+			colorNumber = float(maxIterations - 2 - i) + log(log(rSquared) / 2.0);
+			maxColorNumber = float(maxIterations);
+		}
 
 		colorNumber = numColorsF * colorMultiple * colorFunc(colorNumber) / colorFunc(maxColorNumber) + colorOffset - 1.0;
 

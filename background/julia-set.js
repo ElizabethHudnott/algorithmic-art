@@ -86,6 +86,14 @@ function JuliaSet() {
 			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
 		}
 
+		function updateColorSliders() {
+			const color = activePalette[colorSelectionStart];
+			hueSlider.value = color[0];
+			saturationSlider.value = color[1];
+			lightnessSlider.value = color[2];
+			opacitySlider.value = color[3];
+		}
+
 		function selectColor(event) {
 			const shift = event.shiftKey || event.longPress;
 			const sourceColor = activePalette[colorSelectionStart];
@@ -200,11 +208,7 @@ function JuliaSet() {
 			for (let i = colorSelectionStart; i <= colorSelectionEnd; i++) {
 				paletteUI.children[i].children[0].classList.add('active');
 			}
-			const color = activePalette[colorSelectionStart];
-			hueSlider.value = color[0];
-			saturationSlider.value = color[1];
-			lightnessSlider.value = color[2];
-			opacitySlider.value = color[3];
+			updateColorSliders();
 			colorOperation = ColorOperation.SELECT;
 			colorHelpElement.innerHTML = colorHelpMsgNormal;
 		}
@@ -335,6 +339,7 @@ function JuliaSet() {
 				setBgPropertyElement(me, paletteProperty, i);
 			}
 			generateBackground(0);
+			updateColorSliders();
 		}
 
 		function colorAction(event) {
@@ -676,6 +681,11 @@ function JuliaSet() {
 			}
 		});
 
+		optionsDoc.getElementById('julia-rotation').addEventListener('input', function (event) {
+			setBgProperty(me, 'rotation', parseFloat(this.value) * Math.PI);
+			generateBackground(0);
+		})
+
 		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
 			setNonNegativeProperty('colorPower', this.value);
 		});
@@ -695,6 +705,41 @@ function JuliaSet() {
 			setBgProperty(me, 'wrapPalette', this.checked);
 			generateBackground(0);
 		});
+
+		optionsDoc.getElementById('julia-trap-distance').addEventListener('input', function (event) {
+			setBgProperty(me, 'trapDistanceFunc', parseInt(this.value));
+			generateBackground(0);
+		});
+
+		const pointTrapInputs = optionsDoc.getElementById('julia-point-traps');
+
+		function updatePointTraps() {
+			let numTraps = 0;
+			for (let i = 1; i <= 4; i++) {
+				const xStr = pointTrapInputs.querySelector('#julia-ptrap' + i + '-x').value.trim();
+				const yStr = pointTrapInputs.querySelector('#julia-ptrap' + i + '-y').value.trim();
+				if (xStr !== '' && yStr !== '') {
+					const x = parseFloat(xStr);
+					const y = parseFloat(yStr);
+					if (!Number.isFinite(x) || !Number.isFinite(y)) {
+						// invalid value entered
+						return;
+					}
+					me.trapPoints[numTraps] = [x, y];
+					numTraps++;
+				}
+			}
+			setBgProperty(me, 'trapPoints');
+			setBgProperty(me, 'numTrapPoints', numTraps);
+			generateBackground(0);
+		}
+
+		for (let coord of ['x', 'y']) {
+			for (let i = 1; i <= 4; i++) {
+				const input = optionsDoc.getElementById('julia-ptrap' + i + '-' + coord);
+				input.addEventListener('input', updatePointTraps);
+			}
+		}
 
 		return optionsDoc;
 	});
@@ -724,6 +769,7 @@ function JuliaSet() {
 	this.xCentre = 0;
 	this.yRange = 2;
 	this.yCentre = 0;
+	this.rotation = 0;
 	this.maxIterations = 80;
 	this.escapeValue = 2;
 	this.escapeType = 0; // 0 = circular, 1 = use y-coordinate only
@@ -739,7 +785,7 @@ function JuliaSet() {
 	this.trapLineStart = [[0, -1], [-1, 0], [0, 0], [0, 0]];
 	this.trapLineEnd = [[0, 1], [1, 0], [0, 0], [0, 0]];
 	this.numTrapLines = 0;
-	this.trapFunction = 0; // 0 = min, 1 = max
+	this.trapDistanceFunc = 0; // 0 = min, 1 = max
 }
 
 JuliaSet.prototype.animatable = {
@@ -747,7 +793,7 @@ JuliaSet.prototype.animatable = {
 		'numeratorExponents', 'numeratorCoefficients', 'denominatorExponents', 'denominatorCoefficients',
 		'numeratorConstant', 'denominatorConstant', 'extraTermCoefficient', 'feedback', 'feedback2',
 		'inverse', 'muTranslation',
-		'xRange', 'xCentre', 'yRange', 'yCentre', 'escapeValue',
+		'xRange', 'xCentre', 'yRange', 'yCentre', 'rotation', 'escapeValue',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset',
 		'palette', 'trapPoints', 'trapLineStart', 'trapLineEnd'
 	],
@@ -757,7 +803,7 @@ JuliaSet.prototype.animatable = {
 	stepped: [
 		'numeratorFunction', 'denominatorFunction', 'extraTermFunction', 'finalFunction',
 		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
-		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapFunction'
+		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapDistanceFunc'
 	]
 };
 

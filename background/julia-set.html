@@ -11,7 +11,12 @@
 	</li>
 	<li class="nav-item">
 		<a class="nav-link" id="julia-colors-tab" data-toggle="tab" href="#julia-colors" role="tab" aria-controls="julia-colors" aria-selected="false">
-			Colour
+			Colours
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" id="julia-traps-tab" data-toggle="tab" href="#julia-traps" role="tab" aria-controls="julia-traps" aria-selected="false">
+			Traps
 		</a>
 	</li>
 </ul>
@@ -344,6 +349,14 @@
 				<input type="number" min="0.05" value="2" step="0.05" class="form-control form-control-sm" id="julia-range-y">
 			</div>
 		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-rotation">
+				Rotation
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="0.5" step="0.005" value="0" class="form-control-range mt-1" id="julia-rotation">
+			</div>
+		</div>
 	</div>
 
 	<div class="tab-pane" id="julia-colors" role="tabpanel" aria-labelledby="julia-colors-tab">
@@ -483,6 +496,99 @@
 			<div class="form-row">
 				<div class="col-12">
 					<small id="julia-palette-help" class="form-text text-muted"></small>
+				</div>
+			</div>
+		</fieldset>
+	</div>
+
+	<div class="tab-pane" id="julia-traps" role="tabpanel" aria-labelledby="julia-traps-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-trap-distance">
+				Trap Distance
+			</label>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="julia-trap-distance">
+					<option value="0" selected>Minimum</option>
+					<option value="1">Maximum</option>
+				</select>
+			</div>
+		</div>
+		<fieldset id="julia-point-traps">
+			<legend>Point Traps</legend>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm text-center" for="julia-ptrap1-x">
+					X
+				</label>
+				<label class="col-3 col-form-label col-form-label-sm text-center" for="julia-ptrap1-y">
+					Y
+				</label>
+			</div>
+			<div class="form-row mb-1">
+				<div class="col-6">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text">(</span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap1-x">
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">, </span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap1-y">
+						<div class="input-group-append">
+							<span class="input-group-text">)</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-row mb-1">
+				<div class="col-6">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text">(</span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap2-x">
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">, </span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap2-y">
+						<div class="input-group-append">
+							<span class="input-group-text">)</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-row mb-1">
+				<div class="col-6">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text">(</span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap3-x">
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">, </span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap3-y">
+						<div class="input-group-append">
+							<span class="input-group-text">)</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-row mb-1">
+				<div class="col-6">
+					<div class="input-group input-group-sm">
+						<div class="input-group-prepend">
+							<span class="input-group-text">(</span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap4-x">
+						<div class="input-group-append input-group-prepend">
+							<span class="input-group-text">, </span>
+						</div>
+						<input type="number" step="0.05" class="form-control" id="julia-ptrap4-y">
+						<div class="input-group-append">
+							<span class="input-group-text">)</span>
+						</div>
+					</div>
 				</div>
 			</div>
 		</fieldset>

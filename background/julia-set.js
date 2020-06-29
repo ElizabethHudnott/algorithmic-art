@@ -507,11 +507,13 @@ function JuliaSet() {
 			}
 		}
 
-		function setNonNegativeProperty(attributeName, text) {
+		function setNonNegativeProperty(attributeName, text, redraw) {
 			const value = parseFloat(text);
 			if (value >= 0) {
 				setBgProperty(me, attributeName, value);
-				generateBackground(0);
+				if (redraw) {
+					generateBackground(0);
+				}
 			}
 		}
 
@@ -642,11 +644,13 @@ function JuliaSet() {
 		});
 
 		optionsDoc.getElementById('julia-escape-value').addEventListener('input', function (event) {
-			setNonNegativeProperty('escapeValue', this.value);
+			setNonNegativeProperty('escapeValue', this.value, false);
+			setBgProperty(me, 'maxTrapDistance', me.escapeValue);
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('julia-iterations').addEventListener('input', function (event) {
-			setNonNegativeProperty('maxIterations', this.value);
+			setNonNegativeProperty('maxIterations', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
@@ -687,7 +691,7 @@ function JuliaSet() {
 		})
 
 		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
-			setNonNegativeProperty('colorPower', this.value);
+			setNonNegativeProperty('colorPower', this.value, true);
 		});
 
 		optionsDoc.getElementById('julia-color-offset').addEventListener('input', function (event) {
@@ -711,9 +715,33 @@ function JuliaSet() {
 			generateBackground(0);
 		});
 
+
 		const pointTrapInputs = optionsDoc.getElementById('julia-point-traps');
 
+		optionsDoc.getElementById('julia-gaussian').addEventListener('input', function (event) {
+			const gaussian = this.checked;
+			setBgProperty(me, 'gaussian', gaussian);
+			if (gaussian && me.numTrapPoints === 0) {
+				setBgPropertyElement(me, 'trapPoints', 0, [0.5, 0.5]);
+				setBgProperty(me, 'numTrapPoints', 1);
+				pointTrapInputs.querySelector('#julia-ptrap1-x').value = 0.5;
+				pointTrapInputs.querySelector('#julia-ptrap1-y').value = 0.5;
+			}
+			generateBackground(0);
+		});
+
+		const pTrapScaleXInput = optionsDoc.getElementById('julia-ptrap-scale-x');
+		const pTrapScaleYInput = optionsDoc.getElementById('julia-ptrap-scale-y');
+
 		function updatePointTraps() {
+			let scaleX = parseFloat(pTrapScaleXInput.value);
+			if (!Number.isFinite(scaleX)) {
+				scaleX = 1;
+			}
+			let scaleY = parseFloat(pTrapScaleYInput.value);
+			if (!Number.isFinite(scaleY)) {
+				scaleY = 1;
+			}
 			let numTraps = 0;
 			for (let i = 1; i <= 4; i++) {
 				const xStr = pointTrapInputs.querySelector('#julia-ptrap' + i + '-x').value.trim();
@@ -727,13 +755,27 @@ function JuliaSet() {
 					// invalid value entered
 					return;
 				}
-				me.trapPoints[numTraps] = [x, y];
+				me.trapPoints[numTraps] = [x * scaleX, y * scaleY];
 				numTraps++;
 			}
 			setBgProperty(me, 'trapPoints');
 			setBgProperty(me, 'numTrapPoints', numTraps);
 			generateBackground(0);
 		}
+
+		pTrapScaleXInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				updatePointTraps();
+			}
+		});
+
+		pTrapScaleYInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				updatePointTraps();
+			}
+		});
 
 		for (let coord of ['x', 'y']) {
 			for (let i = 1; i <= 4; i++) {
@@ -812,6 +854,7 @@ function JuliaSet() {
 	this.rotation = 0;
 	this.maxIterations = 80;
 	this.escapeValue = 2;
+	this.maxTrapDistance = this.escapeValue;
 	this.escapeType = 0; // 0 = circular, 1 = use y-coordinate only
 
 	this.innerColor = [0, 0, 0, 0];
@@ -826,6 +869,7 @@ function JuliaSet() {
 	this.trapLineEnd = [[0, 1], [1, 0], [0, 0], [0, 0]];
 	this.numTrapLines = 0;
 	this.trapDistanceFunc = 0; // 0 = min, 1 = max
+	this.gaussian = false;
 }
 
 JuliaSet.prototype.animatable = {
@@ -835,7 +879,7 @@ JuliaSet.prototype.animatable = {
 		'inverse', 'muTranslation',
 		'xRange', 'xCentre', 'yRange', 'yCentre', 'rotation', 'escapeValue',
 		'innerColor', 'interpolation', 'colorMultiple', 'colorPower', 'colorOffset',
-		'palette', 'trapPoints', 'trapLineStart', 'trapLineEnd'
+		'palette', 'trapPoints', 'trapLineStart', 'trapLineEnd', 'maxTrapDistance'
 	],
 	xy: [
 		['finalRealConstant', 'finalImConstant'],
@@ -843,7 +887,8 @@ JuliaSet.prototype.animatable = {
 	stepped: [
 		'numeratorFunction', 'denominatorFunction', 'extraTermFunction', 'finalFunction',
 		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
-		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapDistanceFunc'
+		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapDistanceFunc',
+		'gaussian'
 	]
 };
 

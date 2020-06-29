@@ -539,6 +539,13 @@
 						</div>
 					</div>
 				</div>
+				<div class="col-1"></div>
+				<div class="col-5 text-center">
+					<div class="form-check mt-1">
+						<input type="checkbox" class="form-check-input" id="julia-gaussian">
+						<label class="form-check-label small" for="julia-gaussian">Grid of points</label>
+					</div>
+				</div>
 			</div>
 			<div class="form-row mb-1">
 				<div class="col-6">
@@ -555,6 +562,16 @@
 							<span class="input-group-text">)</span>
 						</div>
 					</div>
+				</div>
+				<label class="col-1 pl-2 col-form-label col-form-label-sm" for="julia-ptrap-scale-x">
+					Scale
+				</label>
+				<div class="col-5 input-group input-group-sm">
+					<input type="number" min="0" step="0.1" value="1" class="form-control text-right" id="julia-ptrap-scale-x">
+					<div class="input-group-append input-group-prepend">
+						<span class="input-group-text">&times;</span>
+					</div>
+					<input type="number" min="0" step="0.1" value="1" class="form-control text-left" id="julia-ptrap-scale-y">
 				</div>
 			</div>
 			<div class="form-row mb-1">

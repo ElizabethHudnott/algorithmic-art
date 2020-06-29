@@ -137,17 +137,8 @@ void main() {
 	vec2 lastZ2 = vec2(0.0, 0.0);
 	float rSquared = point.x * point.x + point.y * point.y;
 	float escapeRSquared = escapeValue * escapeValue;
+	float maxTrapDistanceSq = maxTrapDistance * maxTrapDistance;
 	int i = 0;
-
-	float maxTrapDistanceSq = escapeRSquared;
-	if (numTrapPoints > 0) {
-		vec2 meanPoint = vec2(0.0, 0.0);
-		for (int i = 0; i < numTrapPoints; i++) {
-			meanPoint += trapPoints[i];
-		}
-		maxTrapDistanceSq = length(meanPoint / float(numTrapPoints)) + escapeValue;
-		maxTrapDistanceSq = maxTrapDistanceSq * maxTrapDistanceSq;
-	}
 
 	mat4x2 trapLineDiffs = trapLineEnd - trapLineStart;
 	vec4 trapLineLengthSq, trapLineDeterminant;
@@ -157,17 +148,44 @@ void main() {
 	}
 	float trapDistanceSq = maxTrapDistanceSq;
 	float trapTheta = complexArgument(point);
+	float trapGridX, trapGridY;
+	if (numTrapPoints == 1) {
+		trapGridX = 1.0;
+		trapGridY = 1.0;
+	} else {
+		trapGridX = 0.0;
+		trapGridY = 0.0;
+		for (int i = 0; i < numTrapPoints; i++) {
+			trapGridX = max(trapGridX, trapPoints[i].x);
+			trapGridY = max(trapGridY, trapPoints[i].y);
+		}
+		if (trapGridX == 0.0) {
+			trapGridX = 1.0;
+		}
+		if (trapGridY == 0.0) {
+			trapGridY = 1.0;
+		}
+	}
 
 	while (i < maxIterations &&
 		(escapeType == 0 ? rSquared <= escapeRSquared : abs(point.y) <= escapeValue)
 	) {
 		float trapDistanceSoFar;
+		vec2 trapInput;
+		if (gaussian) {
+			trapInput = vec2(
+				mod(point.x, trapGridX),
+				mod(point.y, trapGridY)
+			);
+		} else {
+			trapInput = point;
+		}
 		if (trapDistanceFunc == 0) {
 			// Apply min function
 			trapDistanceSoFar = maxTrapDistanceSq;
 			for (int j = 0; j < numTrapPoints; j++) {
 				vec2 trapPoint = trapPoints[j];
-				float newDistance = pow(trapPoint.x - point.x, 2.0) + pow(trapPoint.y - point.y, 2.0);
+				float newDistance = pow(trapPoint.x - trapInput.x, 2.0) + pow(trapPoint.y - trapInput.y, 2.0);
 				trapDistanceSoFar = min(trapDistanceSoFar, newDistance);
 			}
 			for (int j = 0; j < numTrapLines; j++) {
@@ -180,7 +198,7 @@ void main() {
 			trapDistanceSoFar = 0.0;
 			for (int j = 0; j < numTrapPoints; j++) {
 				vec2 trapPoint = trapPoints[j];
-				float newDistance = pow(trapPoint.x - point.x, 2.0) + pow(trapPoint.y - point.y, 2.0);
+				float newDistance = pow(trapPoint.x - trapInput.x, 2.0) + pow(trapPoint.y - trapInput.y, 2.0);
 				trapDistanceSoFar = max(trapDistanceSoFar, newDistance);
 			}
 			for (int j = 0; j < numTrapLines; j++) {

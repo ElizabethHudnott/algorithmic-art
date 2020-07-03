@@ -45,6 +45,7 @@ function showBackgroundOptions() {
 		precision highp int;
 		out vec4 fragColor;
 		#define PI ${Math.PI}
+		#define SQRT2 ${Math.SQRT2}
 		uniform float canvasWidth;
 		uniform float canvasHeight;
 		uniform float tween;

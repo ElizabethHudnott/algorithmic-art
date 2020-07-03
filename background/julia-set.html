@@ -33,7 +33,7 @@
 					<option value="1">Mandelbrot Set</option>
 				</select>
 			</div>
-			<label class="col-2 pl-2 col-form-label col-form-label-sm" for="julia-pre-operation">
+			<label class="col-2 pl-4 col-form-label col-form-label-sm" for="julia-pre-operation">
 				Before
 			</label>
 			<div class="col-4">
@@ -311,7 +311,7 @@
 					<div class="input-group-append input-group-prepend">
 						<span class="input-group-text">or</span>
 					</div>
-					<input type="number" min="0" step="10" value="80" class="form-control text-right" id="julia-iterations">
+					<input type="number" min="0" step="10" value="150" class="form-control text-right" id="julia-iterations">
 					<div class="input-group-append input-group-prepend">
 						<span class="input-group-text">iterations</span>
 					</div>
@@ -360,58 +360,83 @@
 	</div>
 
 	<div class="tab-pane" id="julia-colors" role="tabpanel" aria-labelledby="julia-colors-tab">
-		<fieldset>
-			<legend>Outer Colouring</legend>
-			<div class="form-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-color-multiple-int">
-					Formula
-				</label>
-				<div class="col-9">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text">(</span>
-						</div>
-						<input type="number" min="0" value="1" class="form-control text-right" id="julia-color-multiple-int">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">+ &delta;)&nbsp;&times;&nbsp;<var>n</var>^</span>
-						</div>
-						<input type="number" min="0" step="0.05" value="1" class="form-control" id="julia-color-power">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">+</span>
-						</div>
-						<input type="number" value="0" class="form-control" id="julia-color-offset">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-color-variable">
+				Variable
+			</label>
+			<div class="col-4">
+				<select class="form-control form-control-sm" id="julia-color-variable">
+					<option value="0" selected>Iteration Number</option>
+					<option value="1">|z|</option>
+					<option value="2">Re(z) + Im(z)</option>
+					<option value="3">Re(z)</option>
+					<option value="4">Im(z)</option>
+					<option value="5">arg(z)</option>
+				</select>
+			</div>
+			<label class="col-2 pl-3 col-form-label col-form-label-sm" for="julia-color-power-preset">
+				Function
+			</label>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="julia-color-power-preset">
+					<option value="0.33">Cube Root</option>
+					<option value="0.5">Sqrt</option>
+					<option value="1" selected>Linear</option>
+					<option value="2">Square</option>
+					<option value="3">Cube</option>
+					<option value="c">Custom</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-row">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-color-multiple-int">
+				Formula
+			</label>
+			<div class="col-9">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<span class="input-group-text">(</span>
 					</div>
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-color-multiple-frac">
-					<var>&delta;</var>
-				</label>
-				<div class="col-7">
-					<input type="range" min="0" max="6" value="0" class="form-control-range mt-1" id="julia-color-multiple-frac">
-				</div>
-				<div class="col-2">
-					<div class="form-check">
-						<input type="checkbox" checked class="form-check-input" id="julia-color-wrap">
-						<label class="form-check-label small" for="julia-color-wrap">Wrap</label>
+					<input type="number" value="1" class="form-control text-right" id="julia-color-multiple-int">
+					<div class="input-group-append input-group-prepend">
+						<span class="input-group-text">+ &delta;)&nbsp;&times;&nbsp;<var>n</var>^</span>
 					</div>
+					<input type="number" min="0" step="0.05" value="1" class="form-control" id="julia-color-power" disabled>
+					<div class="input-group-append input-group-prepend">
+						<span class="input-group-text">+</span>
+					</div>
+					<input type="number" value="0" class="form-control" id="julia-color-offset">
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="julia-num-colors">
-					Palette Entries
-				</label>
-				<div class="col-3">
-					<input type="number" min="1" max="256" value="7" class="form-control form-control-sm" id="julia-num-colors">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-color-interpolation">
-					Interpolation
-				</label>
-				<div class="col-3">
-					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="julia-color-interpolation">
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-color-multiple-frac">
+				<var>&delta;</var>
+			</label>
+			<div class="col-7">
+				<input type="range" min="0" max="6" value="0" class="form-control-range mt-1" id="julia-color-multiple-frac">
+			</div>
+			<div class="col-2">
+				<div class="form-check">
+					<input type="checkbox" checked class="form-check-input" id="julia-color-wrap">
+					<label class="form-check-label small" for="julia-color-wrap">Wrap</label>
 				</div>
 			</div>
-		</fieldset>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="julia-num-colors">
+				Palette Entries
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" max="256" value="7" class="form-control form-control-sm" id="julia-num-colors">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-color-interpolation">
+				Interpolation
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="julia-color-interpolation">
+			</div>
+		</div>
 		<fieldset id="julia-palette-fields">
 			<div class="form-row form-group">
 				<div class="col-12">
@@ -516,94 +541,106 @@
 		<fieldset id="julia-point-traps">
 			<legend>Point Traps</legend>
 			<div class="form-row">
-				<label class="col-3 col-form-label col-form-label-sm text-center" for="julia-ptrap1-x">
-					X
-				</label>
-				<label class="col-3 col-form-label col-form-label-sm text-center" for="julia-ptrap1-y">
-					Y
-				</label>
-			</div>
-			<div class="form-row mb-1">
 				<div class="col-6">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text">(</span>
+					<div class="form-row">
+						<label class="col-6 col-form-label col-form-label-sm text-center" for="julia-ptrap1-x">
+							X
+						</label>
+						<label class="col-6 col-form-label col-form-label-sm text-center" for="julia-ptrap1-y">
+							Y
+						</label>
+					</div>
+					<div class="form-row mb-1">
+						<div class="col-12">
+							<div class="input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">(</span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap1-x">
+								<div class="input-group-append input-group-prepend">
+									<span class="input-group-text">, </span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap1-y">
+								<div class="input-group-append">
+									<span class="input-group-text">)</span>
+								</div>
+							</div>
 						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap1-x">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">, </span>
+					</div>
+					<div class="form-row mb-1">
+						<div class="col-12">
+							<div class="input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">(</span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap2-x">
+								<div class="input-group-append input-group-prepend">
+									<span class="input-group-text">, </span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap2-y">
+								<div class="input-group-append">
+									<span class="input-group-text">)</span>
+								</div>
+							</div>
 						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap1-y">
-						<div class="input-group-append">
-							<span class="input-group-text">)</span>
+					</div>
+					<div class="form-row mb-1">
+						<div class="col-12">
+							<div class="input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">(</span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap3-x">
+								<div class="input-group-append input-group-prepend">
+									<span class="input-group-text">, </span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap3-y">
+								<div class="input-group-append">
+									<span class="input-group-text">)</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-row form-group">
+						<div class="col-12">
+							<div class="input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">(</span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap4-x">
+								<div class="input-group-append input-group-prepend">
+									<span class="input-group-text">, </span>
+								</div>
+								<input type="number" step="0.05" class="form-control" id="julia-ptrap4-y">
+								<div class="input-group-append">
+									<span class="input-group-text">)</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
-				<div class="col-1"></div>
-				<div class="col-5 text-center">
-					<div class="form-check mt-1">
-						<input type="checkbox" class="form-check-input" id="julia-gaussian">
-						<label class="form-check-label small" for="julia-gaussian">Grid of points</label>
-					</div>
-				</div>
-			</div>
-			<div class="form-row mb-1">
 				<div class="col-6">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text">(</span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap2-x">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">, </span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap2-y">
-						<div class="input-group-append">
-							<span class="input-group-text">)</span>
+					<div class="form-row">
+						<div class="col-12 col-form-label col-form-label-sm">&nbsp;</div>
+					</div>
+					<div class="form-row mb-1">
+						<div class="col-12 text-center">
+							<div class="form-check mt-1">
+								<input type="checkbox" class="form-check-input" id="julia-gaussian">
+								<label class="form-check-label small" for="julia-gaussian">Grid of points</label>
+							</div>
 						</div>
 					</div>
-				</div>
-				<label class="col-1 pl-2 col-form-label col-form-label-sm" for="julia-ptrap-scale-x">
-					Scale
-				</label>
-				<div class="col-5 input-group input-group-sm">
-					<input type="number" min="0" step="0.1" value="1" class="form-control text-right" id="julia-ptrap-scale-x">
-					<div class="input-group-append input-group-prepend">
-						<span class="input-group-text">&times;</span>
-					</div>
-					<input type="number" min="0" step="0.1" value="1" class="form-control text-left" id="julia-ptrap-scale-y">
-				</div>
-			</div>
-			<div class="form-row mb-1">
-				<div class="col-6">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text">(</span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap3-x">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">, </span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap3-y">
-						<div class="input-group-append">
-							<span class="input-group-text">)</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<div class="col-6">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text">(</span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap4-x">
-						<div class="input-group-append input-group-prepend">
-							<span class="input-group-text">, </span>
-						</div>
-						<input type="number" step="0.05" class="form-control" id="julia-ptrap4-y">
-						<div class="input-group-append">
-							<span class="input-group-text">)</span>
+					<div class="form-row">
+						<label class="col-2 col-form-label col-form-label-sm" for="julia-ptrap-scale-x">
+							Scale
+						</label>
+						<div class="col-10 input-group input-group-sm">
+							<input type="number" min="0" step="0.1" value="1" class="form-control text-right" id="julia-ptrap-scale-x">
+							<div class="input-group-append input-group-prepend">
+								<span class="input-group-text">&times;</span>
+							</div>
+							<input type="number" min="0" step="0.1" value="1" class="form-control text-left" id="julia-ptrap-scale-y">
 						</div>
 					</div>
 				</div>

@@ -19,6 +19,10 @@ legend {
 	font-size: 1.25rem;
 }
 
+option:disabled {
+	color: #bbb;
+}
+
 .dropdown-menu.bg-light .dropdown-item:focus, .dropdown-menu.bg-light .dropdown-item:hover {
 	background-color: #e9ecef;
 }

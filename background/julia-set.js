@@ -26,8 +26,10 @@ function JuliaSet() {
 		const c3RealInput = optionsDoc.getElementById('julia-c3-real');
 		const c3ImInput = optionsDoc.getElementById('julia-c3-im');
 
+		const colorVariableInput = optionsDoc.getElementById('julia-color-variable');
 		const colorMultipleIntInput = optionsDoc.getElementById('julia-color-multiple-int');
 		const colorMultipleFracInput = optionsDoc.getElementById('julia-color-multiple-frac');
+		const colorPowerInput = optionsDoc.getElementById('julia-color-power');
 		const paletteFields = optionsDoc.getElementById('julia-palette-fields');
 		const paletteUI = optionsDoc.getElementById('julia-palette');
 		const hueSlider = optionsDoc.getElementById('julia-hue');
@@ -47,11 +49,8 @@ function JuliaSet() {
 				multiple = Math.floor(me.colorMultiple);
 			}
 			multiple += parseInt(colorMultipleFracInput.value) / me.numColors;
-
-			if (multiple > 0) {
-				setBgProperty(me, 'colorMultiple', multiple);
-				generateBackground(0);
-			}
+			setBgProperty(me, 'colorMultiple', multiple);
+			generateBackground(0);
 		}
 		colorMultipleIntInput.addEventListener('input', setColorMultiple);
 		colorMultipleFracInput.addEventListener('input', setColorMultiple);
@@ -645,7 +644,7 @@ function JuliaSet() {
 
 		optionsDoc.getElementById('julia-escape-value').addEventListener('input', function (event) {
 			setNonNegativeProperty('escapeValue', this.value, false);
-			setBgProperty(me, 'maxTrapDistance', me.escapeValue);
+			me.calcMaxTrapDistance();
 			generateBackground(0);
 		});
 
@@ -690,7 +689,26 @@ function JuliaSet() {
 			generateBackground(0);
 		})
 
-		optionsDoc.getElementById('julia-color-power').addEventListener('input', function (event) {
+		colorVariableInput.addEventListener('input', function (event) {
+			setBgProperty(me, 'colorVariable', parseInt(this.value));
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('julia-color-power-preset').addEventListener('input', function (event) {
+			const valueStr = this.value;
+			if (valueStr === 'c') {
+				colorPowerInput.disabled = false;
+				return;
+			}
+
+			colorPowerInput.disabled = true;
+			const value = parseFloat(valueStr);
+			colorPowerInput.value = value;
+			setBgProperty(me, 'colorPower', value);
+			generateBackground(0);
+		});
+
+		colorPowerInput.addEventListener('input', function (event) {
 			setNonNegativeProperty('colorPower', this.value, true);
 		});
 
@@ -712,7 +730,9 @@ function JuliaSet() {
 
 		optionsDoc.getElementById('julia-trap-distance').addEventListener('input', function (event) {
 			setBgProperty(me, 'trapDistanceFunc', parseInt(this.value));
-			generateBackground(0);
+			if (me.numTrapPoints + me.numTrapLines > 1) {
+				generateBackground(0);
+			}
 		});
 
 
@@ -724,6 +744,7 @@ function JuliaSet() {
 			if (gaussian && me.numTrapPoints === 0) {
 				setBgPropertyElement(me, 'trapPoints', 0, [0.5, 0.5]);
 				setBgProperty(me, 'numTrapPoints', 1);
+				updateColorVariableOpts();
 				pointTrapInputs.querySelector('#julia-ptrap1-x').value = 0.5;
 				pointTrapInputs.querySelector('#julia-ptrap1-y').value = 0.5;
 			}
@@ -732,6 +753,24 @@ function JuliaSet() {
 
 		const pTrapScaleXInput = optionsDoc.getElementById('julia-ptrap-scale-x');
 		const pTrapScaleYInput = optionsDoc.getElementById('julia-ptrap-scale-y');
+
+		function updateColorVariableOpts() {
+			const hasTraps = me.numTrapPoints > 0 || me.numTrapLines > 0;
+			const colorVariable = parseInt(colorVariableInput.value);
+			if (colorVariable > 0 && colorVariable < 5) {
+				/* |z|
+				 * Re(z) + Im(z)
+				 * Re(z)
+				 * Im(z)
+				 */
+				 colorVariableInput.value = 0;
+				 setBgProperty(me, 'colorVariable', 0);
+			}
+			colorVariableInput.children[0].innerHTML = hasTraps ? 'Distance' : 'Iteration Number';
+			for (let i = 1; i < 5; i++) {
+				colorVariableInput.children[i].disabled = hasTraps;
+			}
+		}
 
 		function updatePointTraps() {
 			let scaleX = parseFloat(pTrapScaleXInput.value);
@@ -760,6 +799,8 @@ function JuliaSet() {
 			}
 			setBgProperty(me, 'trapPoints');
 			setBgProperty(me, 'numTrapPoints', numTraps);
+			updateColorVariableOpts();
+			me.calcMaxTrapDistance();
 			generateBackground(0);
 		}
 
@@ -813,6 +854,7 @@ function JuliaSet() {
 			setBgProperty(me, 'trapLineStart');
 			setBgProperty(me, 'trapLineEnd');
 			setBgProperty(me, 'numTrapLines', numTraps);
+			updateColorVariableOpts();
 			generateBackground(0);
 		}
 
@@ -852,12 +894,13 @@ function JuliaSet() {
 	this.yRange = 2;
 	this.yCentre = 0;
 	this.rotation = 0;
-	this.maxIterations = 80;
+	this.maxIterations = 150;
 	this.escapeValue = 2;
 	this.maxTrapDistance = this.escapeValue;
 	this.escapeType = 0; // 0 = circular, 1 = use y-coordinate only
 
 	this.innerColor = [0, 0, 0, 0];
+	this.colorVariable = 0; // Use the iteration count or distance to a trap
 	this.colorMultiple = 1;
 	this.colorPower = 1;
 	this.colorOffset = 0;
@@ -870,6 +913,144 @@ function JuliaSet() {
 	this.numTrapLines = 0;
 	this.trapDistanceFunc = 0; // 0 = min, 1 = max
 	this.gaussian = false;
+}
+
+JuliaSet.prototype.calcMaxTrapDistance = function () {
+	const numTrapPoints = this.numTrapPoints;
+	const r = this.escapeValue;
+	let trapDistance = 0;
+	if (numTrapPoints === 1 || this.trapDistanceFunc === 1) {
+		for (let i = 0; i < numTrapPoints; i++) {
+			const point = this.trapPoints[i];
+			const x = point[0];
+			const y = point[1];
+			trapDistance = Math.max(trapDistance, Math.sqrt(x * x + y * y) + r);
+		}
+	} else if (numTrapPoints > 0) {
+		trapDistance = 0;
+		for (let i = 0; i < numTrapPoints; i++) {
+			for (let j = 0; j < Math.ceil(numTrapPoints / 2); j++) {
+				if (i === j) {
+					continue;
+				}
+				const point1 = this.trapPoints[i];
+				const point2 = this.trapPoints[j];
+				const x1 = point1[0];
+				const y1 = point1[1];
+				const x2 = point2[0];
+				const y2 = point2[1];
+				let x3 = (x1 + x2) / 2;
+				let y3 = (y1 + y2) / 2;
+				const newDistance1 = computeDistance(x1, y1, x2, y2, x3, y3, true, r);
+				const newDistance2 = computeDistance(x1, y1, x2, y2, x1, y1, false, r);
+				trapDistance = Math.max(trapDistance, newDistance1, newDistance2);
+			}
+		}
+	} else {
+		trapDistance = r;
+	}
+	setBgProperty(this, 'maxTrapDistance', trapDistance);
+}
+
+function computeDistance(x1, y1, x2, y2, x3, y3, perpendicular, r) {
+	let dx, dy, m;
+	if (perpendicular) {
+		dy = y2 - y1;
+		if (dy === 0) {
+			return computeDistance(y1, x1, y2, x2, y3, x3, true, r);
+		}
+		m = (x1 - x2) / dy;
+	} else {
+		dx = x2 - x1;
+		if (dx === 0) {
+			return computeDistance(y1, x1, y2, x2, y3, x3, false, r);
+		}
+		m = (y2 - y1) / dx;
+	}
+	const k = y3 - m * x3;
+	const a = 1 + m * m;
+	const b = 2 * k * m;
+	const rSquared = r * r;
+	const c = k * k - rSquared;
+	const discriminant = b * b - 4 * a * c;
+	let distance = 0;
+	if (discriminant >= 0) {
+		const root = Math.sqrt(discriminant);
+		const xs1 = (-b + root) / (2 * a);
+		const xs2 = (-b - root) / (2 * a);
+		const ys1 = m * xs1 + k;
+		const ys2 = m * xs2 + k;
+		if (perpendicular) {
+			dx = xs1 - x1;
+			dy = ys1 - y1;
+			distance = Math.hypot(dx, dy);
+			dx = xs2 - x1;
+			dy = ys2 - y1;
+			distance = Math.max(distance, Math.hypot(dx, dy));
+		} else {
+			if (x1 <= x2) {
+				if (xs1 <= x1) {
+					// s2, s1, p1, p2
+					// Both points outside the circle
+					distance = Math.hypot(x1, y1) + r;
+				} else if (xs2 >= x2) {
+					// p1, p2, s2, s1
+					// Both points outside the circle
+					distance = Math.hypot(x2, y2) + r;
+				} else {
+					if (xs2 < x1) {
+						// s2, p1, p2
+						// Find distance from p1 to the circle (on the left)
+						dx = x1 - xs2;
+						dy = y1 - ys2;
+						distance = Math.hypot(dx, dy);
+					}
+					if (x2 < xs1) {
+						// p1, p2, s1
+						// Find distance from p2 to the circle (on the right)
+						dx = xs1 - x2;
+						dy = ys1 - y2;
+						distance = Math.max(distance, Math.hypot(dx, dy));
+					}
+				}
+			} else {
+				if (xs1 <= x2) {
+					// s2, s1, p2, p1
+					// Both points outside the circle
+					distance = Math.hypot(x2, y2) + r;
+				} else if (xs2 >= x1) {
+					// p2, p1, s2, s1
+					// Both points outside the circle
+					distance = Math.hypot(x1, y1) + r;
+				} else {
+					if (xs2 < x2) {
+						// s2, p2, p1
+						// Find distance from p2 to the circle (on the left)
+						dx = x2 - xs2;
+						dy = y2 - ys2;
+						distance = distance, Math.hypot(dx, dy);
+					}
+					if (x1 < xs1) {
+						// p2, p1, s1
+						// Find distance from p1 to the circle (on the right)
+						dx = xs1 - x1;
+						dy = ys1 - y1;
+						distance = Math.max(distance, Math.hypot(dx, dy));
+					}
+				}
+			}
+		}
+	} else {
+		// Unable to solve quadratic equation. Line between the points doesn't intersect the circle.
+		if (perpendicular) {
+			if (x1 * x1 + y1 * y1 < rSquared) {
+				distance = computeDistance(x1, y1, x2, y2, x1, y1, true, r);
+			} else if (x2 * x2 + y2 * y2 < rSquared) {
+				distance = computeDistance(x1, y1, x2, y2, x2, y2, true, r);
+			}
+		}
+	}
+	return distance;
 }
 
 JuliaSet.prototype.animatable = {
@@ -886,7 +1067,7 @@ JuliaSet.prototype.animatable = {
 	],
 	stepped: [
 		'numeratorFunction', 'denominatorFunction', 'extraTermFunction', 'finalFunction',
-		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation',
+		'maxIterations', 'escapeType', 'mandelbrot', 'preOperation', 'colorVariable',
 		'numColors', 'wrapPalette', 'numTrapPoints', 'numTrapLines', 'trapDistanceFunc',
 		'gaussian'
 	]

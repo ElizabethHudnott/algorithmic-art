@@ -59,13 +59,54 @@ int intMod(int n, int m) {
 	return result;
 }
 
-float colorFunc(float value) {
+float colorEquation(float value) {
 	if (colorPower == 0.0) {
 		// Single colour scenario
-		return 0.0;
+		return 1.0;
 	} else {
 		return pow(value, colorPower);
 	}
+}
+
+float colorFunc(int function, float custom, float maxCustom, vec2 escaped, vec2 z, float theta) {
+	float value, maxValue, result;
+	switch (function) {
+	case 0:
+		// Iteration count or distance to an orbit trap
+		value = custom;
+		maxValue = maxCustom;
+		break;
+	case 1:
+		// |z|
+		value = length(escaped);
+		maxValue = escapeValue;
+		break;
+	case 2:
+		// Re(z) + Im(z)
+		value = z.x + z.y + SQRT2 * escapeValue;
+		maxValue = 2.0 * SQRT2 * escapeValue;
+		break;
+	case 3:
+		// Re(z)
+		value = z.x + escapeValue;
+		maxValue = 2.0 * escapeValue;
+		break;
+	case 4:
+		// Im(z)
+		value = z.y + escapeValue;
+		maxValue = 2.0 * escapeValue;
+		break;
+	case 5:
+		// arg(z)
+		value = theta + PI;
+		maxValue = 2.0 * PI;
+		break;
+	}
+	result = colorEquation(value) / colorEquation(maxValue);
+	if (function == 0) {
+		result -= 1.0 / (colorMultiple * float(numColors));
+	}
+	return result;
 }
 
 void main() {
@@ -139,6 +180,17 @@ void main() {
 	float escapeRSquared = escapeValue * escapeValue;
 	float maxTrapDistanceSq = maxTrapDistance * maxTrapDistance;
 	int i = 0;
+
+	switch (preOperation) {
+	case 1:	// Conjugation
+		theta = complexArgument(vec2(point.x, -point.y));
+		break;
+	case 2:	// Burning Ship
+		theta = complexArgument(vec2(abs(point.x), abs(point.y)));
+		break;
+	default:
+		theta = complexArgument(point);
+	}
 
 	mat4x2 trapLineDiffs = trapLineEnd - trapLineStart;
 	vec4 trapLineLengthSq, trapLineDeterminant;
@@ -273,18 +325,18 @@ void main() {
 	if (i == maxIterations) {
 		fragColor = innerColor;
 	} else {
-		float colorNumber, maxColorNumber;
+		float colorNumber;
 		float numColorsF = float(numColors);
 
 		if (numTrapPoints > 0 || numTrapLines > 0) {
 			colorNumber = sqrt(trapDistanceSq);
-			maxColorNumber = sqrt(maxTrapDistanceSq);
+			colorNumber = colorFunc(colorVariable, colorNumber, maxTrapDistance, point, lastZ, trapTheta);
 		} else {
 			colorNumber = float(maxIterations - 2 - i) + log(log(rSquared) / 2.0);
-			maxColorNumber = float(maxIterations);
+			colorNumber = colorFunc(colorVariable, colorNumber, float(maxIterations), point, lastZ, theta);
 		}
 
-		colorNumber = numColorsF * colorMultiple * colorFunc(colorNumber) / colorFunc(maxColorNumber) + colorOffset - 1.0;
+		colorNumber = numColorsF * colorMultiple * colorNumber + colorOffset;
 
 		float maxColor = (colorMultiple > 1.0 ? trunc(colorMultiple) : colorMultiple) * numColorsF;
 		vec4 color1, color2;

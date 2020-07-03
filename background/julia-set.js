@@ -756,20 +756,7 @@ function JuliaSet() {
 
 		function updateColorVariableOpts() {
 			const hasTraps = me.numTrapPoints > 0 || me.numTrapLines > 0;
-			const colorVariable = parseInt(colorVariableInput.value);
-			if (colorVariable > 0 && colorVariable < 5) {
-				/* |z|
-				 * Re(z) + Im(z)
-				 * Re(z)
-				 * Im(z)
-				 */
-				 colorVariableInput.value = 0;
-				 setBgProperty(me, 'colorVariable', 0);
-			}
 			colorVariableInput.children[0].innerHTML = hasTraps ? 'Distance' : 'Iteration Number';
-			for (let i = 1; i < 5; i++) {
-				colorVariableInput.children[i].disabled = hasTraps;
-			}
 		}
 
 		function updatePointTraps() {
@@ -919,7 +906,7 @@ JuliaSet.prototype.calcMaxTrapDistance = function () {
 	const numTrapPoints = this.numTrapPoints;
 	const r = this.escapeValue;
 	let trapDistance = 0;
-	if (numTrapPoints === 1 || this.trapDistanceFunc === 1) {
+	if (numTrapPoints === 1 || (numTrapPoints > 1 && this.trapDistanceFunc === 1)) {
 		for (let i = 0; i < numTrapPoints; i++) {
 			const point = this.trapPoints[i];
 			const x = point[0];

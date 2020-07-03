@@ -68,7 +68,7 @@ float colorEquation(float value) {
 	}
 }
 
-float colorFunc(int function, float custom, float maxCustom, vec2 escaped, vec2 z, float theta) {
+float colorFunc(int function, float custom, float maxCustom, float maxDistance, vec2 escaped, vec2 lastZ, float theta) {
 	float value, maxValue, result;
 	switch (function) {
 	case 0:
@@ -79,22 +79,22 @@ float colorFunc(int function, float custom, float maxCustom, vec2 escaped, vec2 
 	case 1:
 		// |z|
 		value = length(escaped);
-		maxValue = escapeValue;
+		maxValue = maxDistance;
 		break;
 	case 2:
 		// Re(z) + Im(z)
-		value = z.x + z.y + SQRT2 * escapeValue;
-		maxValue = 2.0 * SQRT2 * escapeValue;
+		value = lastZ.x + lastZ.y + SQRT2 * maxDistance;
+		maxValue = 2.0 * SQRT2 * maxDistance;
 		break;
 	case 3:
 		// Re(z)
-		value = z.x + escapeValue;
-		maxValue = 2.0 * escapeValue;
+		value = lastZ.x + maxDistance;
+		maxValue = 2.0 * maxDistance;
 		break;
 	case 4:
 		// Im(z)
-		value = z.y + escapeValue;
-		maxValue = 2.0 * escapeValue;
+		value = lastZ.y + maxDistance;
+		maxValue = 2.0 * maxDistance;
 		break;
 	case 5:
 		// arg(z)
@@ -110,6 +110,26 @@ float colorFunc(int function, float custom, float maxCustom, vec2 escaped, vec2 
 }
 
 void main() {
+	vec2 trappedPoint;
+	switch (colorVariable) {
+	case 0:
+	case 1:
+		trappedPoint = vec2(maxTrapDistance, 0.0);
+		break;
+	case 2:
+		trappedPoint = vec2(maxTrapDistance * SQRT2, 0.0);
+		break;
+	case 3:
+		trappedPoint = vec2(maxTrapDistance, 0.0);
+		break;
+	case 4:
+		trappedPoint = vec2(0.0, maxTrapDistance);
+		break;
+	case 5:
+		trappedPoint = vec2(0.0, 0.0);
+		break;
+	}
+
 	float xMin = xCentre - xRange / 2.0;
 	float yMin = yCentre - yRange / 2.0;
 	float x = gl_FragCoord.x / canvasWidth * xRange + xMin;
@@ -261,6 +281,7 @@ void main() {
 		}
 		if (trapDistanceSoFar < trapDistanceSq) {
 			trapDistanceSq = trapDistanceSoFar;
+			trappedPoint = point;
 			trapTheta = theta;
 		}
 
@@ -330,10 +351,10 @@ void main() {
 
 		if (numTrapPoints > 0 || numTrapLines > 0) {
 			colorNumber = sqrt(trapDistanceSq);
-			colorNumber = colorFunc(colorVariable, colorNumber, maxTrapDistance, point, lastZ, trapTheta);
+			colorNumber = colorFunc(colorVariable, colorNumber, maxTrapDistance, maxTrapDistance, trappedPoint, trappedPoint, trapTheta);
 		} else {
 			colorNumber = float(maxIterations - 2 - i) + log(log(rSquared) / 2.0);
-			colorNumber = colorFunc(colorVariable, colorNumber, float(maxIterations), point, lastZ, theta);
+			colorNumber = colorFunc(colorVariable, colorNumber, float(maxIterations), escapeValue, point, lastZ, theta);
 		}
 
 		colorNumber = numColorsF * colorMultiple * colorNumber + colorOffset;

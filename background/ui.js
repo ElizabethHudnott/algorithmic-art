@@ -907,15 +907,21 @@ function showBackgroundOptions() {
 				modal.style.left = Math.max(Math.round(maxRight - rect.width), 0) + 'px';
 			}
 
+			const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
+			const childHeight = child.clientHeight;
+			const maxTop = Math.round(maxBottom - childHeight);
+
 			if (centre) {
 				const grandchild = modal.children[0].children[0];
-				const top = Math.max(Math.round((window.innerHeight - grandchild.clientHeight) / 2), 0);
+				let top = Math.min(
+					Math.round((window.innerHeight - grandchild.clientHeight) / 2),	// Try to centre
+					maxTop	// Don't go underneath toolbar
+				);
+				top = Math.max(top, 0);
 				modal.style.top = top + 'px';
 			} else {
-				const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
-				const childHeight = child.clientHeight;
 				if (rect.top +  childHeight > maxBottom) {
-					modal.style.top = Math.max(Math.round(maxBottom - childHeight), 0) + 'px';
+					modal.style.top = Math.max(maxTop, 0) + 'px';
 				}
 			}
 		}

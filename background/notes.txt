@@ -1,14 +1,13 @@
 Environment
 -----------
+Bug: WebGL canvas not resizing (needs different field of view)
 Bug: Clicking settings button should unminimize window.
 Bug: Moving position slider while playing is considered to have changes
 Add full screen toggle button?
 Save As button
-WebGL: use position relative to the vertices
 Bug: changing startFrame, endFrame or tweenData while rendering video
 Handle attempting to download non-existent files (e.g. wrong generator name)
 Link from home page
-Revise Patreon description
 Add credits
 Add URL to signature
 User created sketches

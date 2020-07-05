@@ -264,6 +264,53 @@ function rgbToLuma(r, g, b) {
 	return (r * 0.2126 + g * 0.7152 + b * 0.0722) / 255;
 }
 
+function hslaToRGBA(h, s, l, alpha) {
+	const a = s * Math.min(l, 1 - l);
+
+	function f(n) {
+		const k = (n + h / 30) % 12;
+		return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+	}
+
+	return [f(0), f(8), f(4), alpha];
+}
+
+function srgbToLAB(r, g, b, alpha) {
+	// First convert from sRGB to CIE XYZ
+	const gamma = 2.4;
+	r = r <= 0.04045 ? r / 12.92 : ((r + 0.055) / 1.055) ** gamma;
+	g = g <= 0.04045 ? g / 12.92 : ((g + 0.055) / 1.055) ** gamma;
+	b = b <= 0.04045 ? b / 12.92 : ((b + 0.055) / 1.055) ** gamma;
+	const x = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
+	const y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
+	const z = 0.0193339 * r + 0.1191920 * g + 0.9503041 * b;
+
+	// Now convert from XYZ to LAB
+	// These three values assume a D50 standard illuminant (approx 5000k color temperature)
+	const xn = 96.4212;
+	const yn = 100;
+	const zn = 82.5188;
+
+	const delta = 6 / 29;
+	const threeDeltaSquared = 108 / 841;
+	const deltaCubed = 216 / 24389;
+
+	function f(t) {
+		if (t > deltaCubed) {
+			return t ** (1/3);
+		} else {
+			return t / threeDeltaSquared + 4 / 29;
+		}
+	}
+
+	const fy = f(y / yn);
+	const l = 116 * fy - 16;
+	const a = 500 * (f(x / xn) - fy);
+	b = 200 * (fy - f(z / zn));
+
+	return [l, a ,b, alpha];
+}
+
 function parseFraction(text) {
 	const numerator = parseFloat(text);
 	let denominator = 1;

@@ -28,7 +28,24 @@ option:disabled {
 }
 
 .modal-header {
-	padding: 0.7rem;
+	padding: 0.5rem 3px 0.5rem 0.7rem;
+}
+
+.modal-content {
+	max-height: calc(100vh - 1.75rem);
+}
+
+.modal-body {
+	overflow-y: auto;
+}
+
+.modal-wide {
+	width: fit-content;
+	max-width: 90%;
+}
+
+.modal-wide .modal-content {
+	width: fit-content;
 }
 
 .progress-bar {
@@ -55,23 +72,6 @@ option:disabled {
 .floating {
 	opacity: 0.85;
 	position: absolute;
-}
-
-.modal-content {
-	max-height: calc(100vh - 1rem - 2px);
-}
-
-.modal-body {
-	overflow-y: auto;
-}
-
-.modal-wide {
-	width: fit-content;
-	max-width: 90%;
-}
-
-.modal-wide .modal-content {
-	width: fit-content;
 }
 
 .opaque {
@@ -148,6 +148,10 @@ option:disabled {
 #background-gen-modal-header {
 	touch-action: none;
 	user-select: none;
+}
+
+#background-gen-modal .modal-content {
+	max-height: calc(100vh - 46px);
 }
 
 #background-gen-modal-content {

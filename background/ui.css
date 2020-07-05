@@ -70,12 +70,28 @@ option:disabled {
 }
 
 .floating {
-	opacity: 0.85;
 	position: absolute;
 }
 
-.opaque {
-	opacity: 1;
+.btn-black {
+	background-color: #000000e0;
+	border-radius: 0;
+}
+
+.btn-black:hover {
+	background-color: white;
+}
+
+.btn-group>.btn-black.dropdown-toggle {
+	margin-left: 0;
+}
+
+.btn-black.dropdown-toggle::after {
+	color: white;
+}
+
+.btn-black.dropdown-toggle:hover::after {
+	color: black;
 }
 
 .top-2 {

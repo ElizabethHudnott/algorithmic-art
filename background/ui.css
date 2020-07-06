@@ -105,8 +105,34 @@ option:disabled {
 	color: black;
 }
 
+.nav-tabs {
+	background-color: var(--light);
+	padding-top: 1px;
+}
+
 .nav-tabs .nav-link {
-    border-color: #e9ecef #e9ecef #dee2e6;
+    border-color: #ddd;
+	border-top-left-radius: 0.7rem;
+	border-top-right-radius: 0.7rem;
+	color: var(--dark);
+	margin: 1px;
+}
+
+.nav-tabs .nav-link:hover {
+	background-color: #fdfdfd;
+	border-color: #ddd;
+	color: black;
+}
+
+.nav-tabs .nav-link:focus {
+	border-color: #80bdff;
+	box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+	outline: none;
+}
+
+.nav-tabs .nav-link.active {
+	color: black;
+	font-weight: 600;
 }
 
 .top-2 {

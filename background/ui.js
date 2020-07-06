@@ -1633,7 +1633,9 @@ function showBackgroundOptions() {
 	authorForm.addEventListener('focusout', function (event) {
 		if (!this.contains(event.relatedTarget)) {
 			authorForm.hidden = true;
-			authorInput.value = userDisplayName;
+			if (userDisplayName !== undefined) {
+				authorInput.value = userDisplayName;
+			}
 		}
 	});
 

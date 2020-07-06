@@ -36,7 +36,7 @@
 </div>
 
 <canvas id="background-canvas"></canvas>
-<form class="position-absolute bg-light p-2" hidden style="left: 0; bottom: 0; width: 300px" id="author-form">
+<form class="position-absolute floating bg-black p-2" hidden style="left: 0; bottom: 0; width: 300px" id="author-form">
 	<div class="form-row">
 		<label class="col-2 col-form-label col-form-label-sm" for="author">
 			Name
@@ -52,7 +52,7 @@
 	</div>
 </form>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" style="bottom: 0; right: 0px; z-index: 1" id="background-gen-toolbar">
+<div class="btn-toolbar position-absolute floating" role="toolbar" aria-label="Toolbar" style="bottom: 0; right: 0px" id="background-gen-toolbar">
 	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>
@@ -98,7 +98,7 @@
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-right bg-black" style="width: 500px" id="anim-controls">
+ 		<div class="dropdown-menu drop-align-right bg-black" style="width: min(100%, 500px)" id="anim-controls">
  			<form class="px-2">
  				<div class="form-row">
  					<div class="col-7">
@@ -189,7 +189,7 @@
 <div class="modal fade p-0" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false" style="z-index: 0">
 	<div class="modal-dialog m-0" role="document">
 		<div class="modal-content">
-			<div class="modal-header" id="background-gen-modal-header" title="Double click to collapse">
+			<div class="modal-header d-none d-lg-flex" id="background-gen-modal-header" title="Double click to collapse">
 				<h6 class="modal-title" id="background-gen-modal-label"></h6>
 				<button type="button" class="close" data-dismiss="modal" title="Close">
 					<span aria-hidden="true">&times;</span>

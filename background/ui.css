@@ -66,15 +66,25 @@ option:disabled {
 .drop-align-right {
 	left: unset !important;
 	right: 0 !important;
-	transform: translate(0%, calc(-100% - 5px)) !important;
+	transform: translate(0%, -100%) !important;
 }
 
 .floating {
 	position: absolute;
 }
 
+.bg-black {
+	background-color: #282828;
+	color: white;
+}
+
+.bg-black .form-control {
+	background-color: transparent;
+	color: white;
+}
+
 .btn-black {
-	background-color: #000000e0;
+	background-color: #000000d0;
 	border-radius: 0;
 }
 
@@ -82,16 +92,21 @@ option:disabled {
 	background-color: white;
 }
 
-.btn-group>.btn-black.dropdown-toggle {
+.btn-group>.btn-black.dropdown-toggle-split {
 	margin-left: 0;
-}
-
-.btn-black.dropdown-toggle::after {
 	color: white;
 }
 
-.btn-black.dropdown-toggle:hover::after {
+.btn-group>.btn-black.dropdown-toggle-split[aria-expanded=true] {
+	background-color: navy;
+}
+
+.btn-black.dropdown-toggle[aria-expanded=false]:hover {
 	color: black;
+}
+
+.nav-tabs .nav-link {
+    border-color: #e9ecef #e9ecef #dee2e6;
 }
 
 .top-2 {

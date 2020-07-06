@@ -1645,10 +1645,6 @@ function showBackgroundOptions() {
 		switchGenerator(currentSketch.url, true);
 	});
 
-	document.getElementById('btn-background-gen-options').addEventListener('click', function (event) {
-		$(modal).modal('show');
-	});
-
 	rotationSlider.addEventListener('input', function (event) {
 		bgGeneratorRotation = TWO_PI * parseFloat(this.value);
 		progressiveBackgroundGen(0);

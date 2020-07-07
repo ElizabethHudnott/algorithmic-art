@@ -257,15 +257,24 @@ option:disabled {
 	}
 
 	#background-gen-modal .modal-content {
+		max-height: calc(100vh);
+	}
+
+}
+
+@media (min-width: 992px) {
+
+	#background-gen-modal .modal-content {
 		max-height: calc(100vh - 46px);
 	}
 
 }
 
 #background-gen-toolbar {
-	margin-bottom: 0;
+	bottom: 0;
 	right: 0;
-	top: 0;
+	margin-bottom: 0;
+	position: absolute;
 }
 
 #background-gen-toolbar .btn-group {
@@ -273,7 +282,7 @@ option:disabled {
 }
 
 .drop-align-right {
-	transform: translate(0%, 46px) !important;
+	transform: translate(0%, -100%) !important;
 }
 
 @media (min-width: 1200px) {
@@ -285,19 +294,6 @@ option:disabled {
 	.drop-align-right {
 		left: unset !important;
 		right: 0 !important;
-	}
-
-}
-
-@media (min-width: 1200px) {
-
-	#background-gen-toolbar {
-		bottom: 0;
-		top: unset;
-	}
-
-	.drop-align-right {
-		transform: translate(0%, -100%) !important;
 	}
 
 }

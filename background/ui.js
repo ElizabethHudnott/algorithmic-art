@@ -899,7 +899,6 @@ function showBackgroundOptions() {
 	modal.style.left = Math.max(Math.round(window.innerWidth - 500 - modalMargin), 0) + 'px';
 
 	function repositionModal(centre) {
-
 		if (modal.classList.contains('show')) {
 			const child = modal.children[0];
 			const rect = child.getBoundingClientRect();
@@ -910,7 +909,7 @@ function showBackgroundOptions() {
 				modal.style.left = Math.max(Math.round(maxRight - rect.width), 0) + 'px';
 			}
 			if (smallScreen) {
-				modal.style.top = '46px';
+				modal.style.top = '0px';
 				return;
 			}
 
@@ -925,17 +924,6 @@ function showBackgroundOptions() {
 				if (rect.top +  childHeight > maxBottom) {
 					modal.style.top = Math.max(Math.round(maxBottom - childHeight), 0) + 'px';
 				}
-			}
-		}
-	}
-
-	const lowPriorityBtns = document.getElementById('background-gen-toolbar').querySelectorAll('.priority-low');
-	const hamburgerArea = document.getElementById('hamburger-area');
-
-	function repositionButtons() {
-		if (window.innerWidth < 1200) {
-			for (let button of lowPriorityBtns) {
-				hamburgerArea.appendChild(button);
 			}
 		}
 	}
@@ -1122,7 +1110,6 @@ function showBackgroundOptions() {
 	}
 
 	async function init() {
-		repositionButtons();
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
@@ -2255,7 +2242,6 @@ function showBackgroundOptions() {
 	let resizeTimer;
 	function resizeWindow() {
 		repositionModal(false);
-		repositionButtons();
 		drawingContext.resize(window.innerWidth, window.innerHeight);
 		progressiveBackgroundGen(0);
 	}

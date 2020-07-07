@@ -36,7 +36,7 @@
 </div>
 
 <canvas id="background-canvas"></canvas>
-<form class="position-absolute floating bg-black p-2" hidden style="left: 0; bottom: 0; width: 300px" id="author-form">
+<form class="position-absolute bg-black p-2" hidden style="left: 0; bottom: 0; width: 300px; z-index: 2" id="author-form">
 	<div class="form-row">
 		<label class="col-2 col-form-label col-form-label-sm" for="author">
 			Name
@@ -52,7 +52,7 @@
 	</div>
 </form>
 
-<div class="btn-toolbar floating" role="toolbar" aria-label="Toolbar" id="background-gen-toolbar">
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="background-gen-toolbar" style="z-index: 1">
 	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 	</div>

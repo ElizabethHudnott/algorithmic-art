@@ -84,10 +84,6 @@ option:disabled {
 	width: fit-content;
 }
 
-.floating {
-	z-index: 1;
-}
-
 .bg-black {
 	background-color: #282828;
 	color: white;
@@ -105,10 +101,6 @@ option:disabled {
 
 .btn-black:hover {
 	background-color: white;
-}
-
-.btn-black:hover .hover-invert {
-	filter: invert(1);
 }
 
 .btn-group>.btn-black.dropdown-toggle-split {
@@ -130,7 +122,10 @@ option:disabled {
 
 .nav-tabs {
 	background-color: var(--light);
-	padding-top: 1px;
+	border-bottom: 0;
+	border-top-left-radius: 0.7rem;
+	border-top-right-radius: 0.7rem;
+	padding-top: 0.25rem;
 }
 
 .nav-tabs .nav-link {
@@ -249,7 +244,7 @@ option:disabled {
 @media (min-width: 576px) {
 
 	#background-gen-modal {
-		width: fit-content;
+		width: min(50vw, 500px);
 	}
 
 	#background-gen-modal .modal-dialog {

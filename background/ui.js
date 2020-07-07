@@ -1135,9 +1135,6 @@ function showBackgroundOptions() {
 				firstDocID = null;
 			}
 		}
-		if (!firstDocID) {
-			switchGenerator(firstGenURL, false);
-		}
 
 		const sketchFile = await downloadFile('sketches.json', 'json');
 		for (let sketch of sketchFile.sketches) {
@@ -1145,6 +1142,10 @@ function showBackgroundOptions() {
 			if (sketch.url === firstGenURL) {
 				currentSketch = sketch;
 			}
+		}
+
+		if (!firstDocID) {
+			switchGenerator(firstGenURL, false);
 		}
 
 		if (store === undefined || store.getItem('no-welcome') !== 'true') {

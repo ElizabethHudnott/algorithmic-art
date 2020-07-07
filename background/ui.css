@@ -23,6 +23,10 @@ option:disabled {
 	color: #bbb;
 }
 
+.dropdown-menu {
+	margin-top: 0;
+}
+
 .dropdown-menu.bg-light .dropdown-item:focus, .dropdown-menu.bg-light .dropdown-item:hover {
 	background-color: #e9ecef;
 }
@@ -40,19 +44,29 @@ option:disabled {
 	padding: 0.5rem;
 }
 
-@media (min-width: 576px) {
+@media (min-width: 1200px) {
 	.modal-body {
 		padding: 1rem;
 	}
 }
 
-.modal-wide {
-	width: fit-content;
-	max-width: 90%;
+@media (min-width: 576px) {
+	.modal-wide {
+		width: fit-content;
+		max-width: calc(100% - 2rem);
+	}
+
+	.modal-wide .modal-content {
+		width: fit-content;
+	}
 }
 
-.modal-wide .modal-content {
-	width: fit-content;
+@media (min-wide: 1200px) {
+
+	.modal-wide {
+		max-width: 90%;
+	}
+
 }
 
 .progress-bar {
@@ -68,12 +82,6 @@ option:disabled {
 	left: 50%;
 	transform: translateX(-50%);
 	width: fit-content;
-}
-
-.drop-align-right {
-	left: unset !important;
-	right: 0 !important;
-	transform: translate(0%, -100%) !important;
 }
 
 .floating {
@@ -99,13 +107,21 @@ option:disabled {
 	background-color: white;
 }
 
+.btn-black:hover .hover-invert {
+	filter: invert(1);
+}
+
 .btn-group>.btn-black.dropdown-toggle-split {
 	margin-left: 0;
+}
+
+.btn-black.dropdown-toggle {
 	color: white;
 }
 
-.btn-group>.btn-black.dropdown-toggle-split[aria-expanded=true] {
-	background-color: navy;
+.btn-black.dropdown-toggle-split[aria-expanded=true] {
+	background-color: #ffff80;
+	color: black;
 }
 
 .btn-black.dropdown-toggle[aria-expanded=false]:hover {
@@ -213,19 +229,13 @@ option:disabled {
 	height: fit-content;
 }
 
-@media (min-width: 576px) {
-	#background-gen-modal {
-		width: fit-content;
-	}
-}
-
 #background-gen-modal-header {
 	touch-action: none;
 	user-select: none;
 }
 
 #background-gen-modal .modal-content {
-	max-height: calc(100vh - 46px);
+	max-height: calc(50vh - 46px);
 }
 
 #background-gen-modal-content {
@@ -234,6 +244,62 @@ option:disabled {
 
 #background-gen-modal-content .modal-body {
 	overflow-y: unset;
+}
+
+@media (min-width: 576px) {
+
+	#background-gen-modal {
+		width: fit-content;
+	}
+
+	#background-gen-modal .modal-dialog {
+		max-width: min(50vw, 500px);
+	}
+
+	#background-gen-modal .modal-content {
+		max-height: calc(100vh - 46px);
+	}
+
+}
+
+#background-gen-toolbar {
+	margin-bottom: 0;
+	right: 0;
+	top: 0;
+}
+
+#background-gen-toolbar .btn-group {
+	position: static;
+}
+
+.drop-align-right {
+	transform: translate(0%, 46px) !important;
+}
+
+@media (min-width: 1200px) {
+
+	#background-gen-toolbar .btn-group {
+		position: relative;
+	}
+
+	.drop-align-right {
+		left: unset !important;
+		right: 0 !important;
+	}
+
+}
+
+@media (min-width: 1200px) {
+
+	#background-gen-toolbar {
+		bottom: 0;
+		top: unset;
+	}
+
+	.drop-align-right {
+		transform: translate(0%, -100%) !important;
+	}
+
 }
 
 #help-modal p {

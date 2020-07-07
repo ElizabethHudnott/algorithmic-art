@@ -78,7 +78,7 @@ function SierpinskiCarpet() {
 					me.colors[10] = color;
 					me.patternOpacities[0] = alpha;
 				}
-				progressiveBackgroundGen(me, preview);
+				generateBackground(preview);
 			};
 		}
 

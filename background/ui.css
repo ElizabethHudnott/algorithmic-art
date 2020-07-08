@@ -61,14 +61,6 @@ option:disabled {
 	}
 }
 
-@media (min-wide: 1200px) {
-
-	.modal-wide {
-		max-width: 90%;
-	}
-
-}
-
 .progress-bar {
 	overflow: visible;
 }

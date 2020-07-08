@@ -913,7 +913,7 @@ function showBackgroundOptions() {
 				return;
 			}
 
-			const maxBottom = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight;
+			const maxBottom = window.innerHeight - document.getElementById('toolbar').clientHeight;
 
 			if (centre) {
 				const grandchild = modal.children[0].children[0];
@@ -1630,6 +1630,10 @@ function showBackgroundOptions() {
 	canvas.addEventListener('pointermove', checkMouseZone);
 	canvas.addEventListener('click', checkMouseZone);
 
+	document.getElementById('btn-author-submit').addEventListener('click', function (event) {
+		mouseZone = '';
+	});
+
 	authorForm.addEventListener('submit', function (event) {
 		event.preventDefault();
 		userDisplayName = authorInput.value;
@@ -1916,7 +1920,7 @@ function showBackgroundOptions() {
 
 
 	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
-	 	const toolbar = document.getElementById('background-gen-toolbar');
+	 	const toolbar = document.getElementById('toolbar');
 		const target = document.activeElement;
 		return target.dataset.toggle === 'dropdown' && toolbar.contains(target);
 	});
@@ -2256,7 +2260,7 @@ function showBackgroundOptions() {
 
 	modalHeader.addEventListener('pointerdown', function (event) {
 		const target = event.target;
-		if (target === this || target.tagName === 'H5') {
+		if (target === this || target.tagName === 'H6') {
 			modalDrag = [event.offsetX, event.offsetY];
 		}
 	});
@@ -2278,7 +2282,7 @@ function showBackgroundOptions() {
 			left = Math.min(left, maxLeft);
 
 			let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
-			const maxTop = window.innerHeight - document.getElementById('background-gen-toolbar').clientHeight - modalHeader.clientHeight;
+			const maxTop = window.innerHeight - document.getElementById('toolbar').clientHeight - modalHeader.clientHeight;
 			top = Math.min(top, maxTop);
 			modal.style.left = left + 'px';
 			modal.style.top = top + 'px';

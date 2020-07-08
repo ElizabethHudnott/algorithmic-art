@@ -97,10 +97,12 @@ option:disabled {
 .btn-black {
 	background-color: #000000d0;
 	border-radius: 0;
+	color: white;
 }
 
 .btn-black:hover {
 	background-color: white;
+	color: black;
 }
 
 .btn-group>.btn-black.dropdown-toggle-split {
@@ -252,27 +254,19 @@ option:disabled {
 	}
 
 	#background-gen-modal .modal-content {
-		max-height: calc(100vh);
-	}
-
-}
-
-@media (min-width: 992px) {
-
-	#background-gen-modal .modal-content {
 		max-height: calc(100vh - 46px);
 	}
 
 }
 
-#background-gen-toolbar {
+#toolbar {
 	bottom: 0;
 	right: 0;
 	margin-bottom: 0;
 	position: absolute;
 }
 
-#background-gen-toolbar .btn-group {
+#toolbar .btn-group {
 	position: static;
 }
 
@@ -282,7 +276,7 @@ option:disabled {
 
 @media (min-width: 1200px) {
 
-	#background-gen-toolbar .btn-group {
+	#toolbar .btn-group {
 		position: relative;
 	}
 

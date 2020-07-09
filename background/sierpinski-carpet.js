@@ -2,6 +2,7 @@ function SierpinskiCarpet() {
 	const me = this;
 	this.title = 'Sierpinski Carpet';
 	this.hasRandomness = false;
+	this.helpFile = 'help/sierpinski-carpet.html';
 
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 

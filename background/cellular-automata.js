@@ -5,6 +5,7 @@ function compareNumbers(a, b) {
 function CellAutomaton() {
 	const me = this;
 	this.title = 'Cellular Automata';
+	this.helpFile = 'help/cellular-automata.html';
 	this.hasRandomness = true;
 
 	this.optionsDocument = downloadFile('cellular-automata.html', 'document').then(function (optionsDoc) {

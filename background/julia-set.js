@@ -3,6 +3,7 @@ function JuliaSet() {
 	this.title = 'Julia Set';
 	this.hasRandomness = false;
 	this.isShader = true;
+	this.helpFile = 'help/julia-set.html';
 
 	const palette = new Array(256);
 	this.palette = palette;

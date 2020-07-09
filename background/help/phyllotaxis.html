@@ -1,0 +1,31 @@
+<div id="intro">
+	<p>
+		<span class="sketch-title">Phyllotaxis</span> shows what happens when you keep adding one more item a little bit further down the line. The line in question spirals out from the centre of the image towards the sides but in a phyllotaxis simulation we don't usually draw the line itself. Instead we draw some figures (for example some circles) placed at fixed points spaced out along that invisible line. Curiously our minds tend to join up the dots to create the impression of a <em>different spiral pattern</em> that's distinct from the one the code is actually calculating! Many plants have their seeds, petals or leaves arranged in these spiral patterns. The conventional introductory example encourages us think about the seeds on the head of a sunflower. The formulas for calculating the position of the <var>n</var>th "petal" are, using polar coordinates:
+	</p>
+	<ul class="list-unstyled">
+		<li>
+			<var>r</var> = <var>c</var> &times; <var>n</var><sup><var>k</var></sup>
+		</li>
+		<li>
+			<var>&phi;</var> = <var>n</var><var>&alpha;</var>
+		</li>
+	</ul>
+	<p>
+		<var>r</var> is the straight line distance from the centre of the image to the <var>n</var>th petal. Each successive petal has a bigger value for <var>r</var> than the previous one, which is why the points are organized into a spiral rather than a circle.
+	</p>
+	<p>
+		<var>&phi;</var> is the angle between a straight line running horizontally through the centre of the image and the aforementioned line between the centre point and the petal.
+	</p>
+	<p>
+		<var>&alpha;</var> is a number that remains constant throughout the computation of the whole image. The default value is approximately 137.5&deg;, so when the third petal is plotted we've already turned through more than 360&deg;.
+	</p>
+	<p>
+		<var>c</var> is a constant scaling factor that just generally spaces the petals out more.
+	</p>
+	<p>
+		<var>k</var> is another constant and is conventionally set to 0.5, but we can generate a variety of tighter or looser spirals by substituting different values.
+	</p>
+	<p>
+		This sketch was inspired by Daniel Shiffman's <a href="https://thecodingtrain.com/CodingChallenges/030-phyllotaxis.html" target="_blank">Coding Challenge #30</a>, which he developed from the book <a href="http://algorithmicbotany.org/papers/#abop" target="_blank">The Algorithmic Beauty of Plants</a> by Prusinkiewicz &amp; Lindenmayer.
+	</p>
+</div>

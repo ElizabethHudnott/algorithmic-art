@@ -37,6 +37,8 @@ Progressive Web App
 Existing Sketches
 -----------------
 Phyllotaxis
+	Randomize option (within a range) for H/S/L/A
+	Option to draw the spiral line
 	Add note to spread
 	Primes
 	Fill background with spokes?

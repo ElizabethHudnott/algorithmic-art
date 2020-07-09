@@ -5,7 +5,7 @@ function TenPrint() {
 	const me = this;
 	this.title = '10 PRINT';
 	this.hasRandomness = true;
-	this.credits = 'Inspired by Daniel Shiffman\'s <a href="https://thecodingtrain.com/CodingChallenges/076-10print.html" target="_blank">Coding Challenge #76</a>, which he developed from the book <a href="https://10print.org" target="_blank">10 PRINT</a> by Montfort et al.';
+	this.helpFile = 'help/ten-print.html';
 
 	this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {
 		optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {

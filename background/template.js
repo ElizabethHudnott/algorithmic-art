@@ -6,7 +6,7 @@ function MySketch() {
 	const me = this;
 	this.title = 'My Sketch';
 	this.hasRandomness = true;
-	this.credits = 'Acknowledgements go here.'; // Optional
+	this.helpFile = 'my-sketch-help.html'; // Optional
 
 	this.optionsDocument = downloadFile('my-sketch.html', 'document').then(function (optionsDoc) {
 		/* Here we download the HTML file containing the controls for adjusting the

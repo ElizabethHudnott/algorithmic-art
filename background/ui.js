@@ -996,6 +996,19 @@ function showBackgroundOptions() {
 		bgGenerator = gen;
 		const prevGenURL = generatorURL;
 		generatorURL = url;
+
+		const helpArea = document.getElementById('help-sketch');
+		helpArea.innerHTML = '';
+		if (gen.helpFile) {
+			downloadFile(gen.helpFile, 'document').then(function (helpDoc) {
+				const intro = helpDoc.getElementById('intro');
+				if (intro !== null) {
+					intro.id = '';
+					helpArea.appendChild(intro);
+				}
+			});
+		}
+
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 		currentFrame = currentFrameData();
@@ -1058,9 +1071,6 @@ function showBackgroundOptions() {
 			}
 		}
 		generateButton.parentElement.hidden = !gen.hasRandomness;
-
-		const credits = gen.credits ? '<hr>' + gen.credits : '';
-		document.getElementById('background-gen-credits').innerHTML = credits;
 
 		if (pushToHistory) {
 			const name = url.slice(0, -3);	// trim .js

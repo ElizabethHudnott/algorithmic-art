@@ -78,6 +78,8 @@ function SierpinskiCarpet() {
 				} else if (index === 9) {
 					me.colors[10] = color;
 					me.patternOpacities[0] = alpha;
+				} else {
+					me.colors[index + 13] = color;
 				}
 				generateBackground(preview);
 			};
@@ -251,8 +253,11 @@ function SierpinskiCarpet() {
 	this.topLeftCornerX = 0.5;
 	this.topLeftCornerY = 0.02;
 
-	const colors = new Array(13);
-	colors.fill('#ffffff80');
+	const colors = new Array(22);
+	for (let i = 0; i < 9; i++) {
+		colors[i] = '#ffffff80';
+		colors[i + 13] = '#ffffff';
+	}
 	colors[4] = '#000000';		// centre
 	colors[9] = '#000066';		// second centre color
 	colors[10] = colors[9]		// second centre color with emphasis
@@ -275,6 +280,9 @@ function SierpinskiCarpet() {
 	 * 10	Second centre color (emphasis)
 	 * 11	Centre (emphasis)
 	 * 12	Centre (depth zero background)
+	 * 13	Top left emphasized
+	 * ...
+	 * 21	Bottom right emphasized
 	*/
 	this.colors = colors;
 }
@@ -380,7 +388,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const roundedY = Math.round(y);
 			let roundedWidth = Math.round(width + x - roundedX);
 			let roundedHeight = Math.round(height + y - roundedY);
-			context.fillStyle = colors[relationship];
+			context.fillStyle = colors[relationship + (depth === 1 ? 13 : 0)];
 			context.globalCompositeOperation = this.compositionOp;
 			context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 

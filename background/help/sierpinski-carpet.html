@@ -1,5 +1,47 @@
 <div id="intro">
 	<p>
-		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, cutting a smaller shape out of it using a cookie cutter, rinse and repeat.
+		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, removing a smaller shape from it using a cookie cutter, rinse and repeat. It starts by dividing up a large rectangle that covers the entire drawing area into nine smaller rectangular areas arranged in a 3&times;3 grid. The middle rectangle is painted in a colour (black by default). Then every one of the other eight smaller rectangles get painted in a second colour (white by default) and then the entire process is repeated inside each of the eight smaller rectangles, treating each one like the large rectangle we started with. You can see each step of the process by finding the depth control on the Geometry tab in the parameters window and reducing the depth down to one. The result is a single black rectangle. When you increase the depth to two then eight smaller black rectangles appear.
+	</p>
+
+	<p>
+		The process so far is:
+	</p>
+	<ol>
+		<li>
+			Paint the middle portion black.
+		</li>
+		<li>
+			Paint each of the remaining eight portions white.
+		</li>
+		<li>
+			Paint a small black rectangle inside the middle portion of each of those eight portions.
+		</li>
+	</ol>
+
+	<p>
+		So far we have:
+	</p>
+	<ul>
+		<li>
+			One background colour (white)
+		</li>
+		<li>
+			One filling colour (black)
+		</li>
+		<li>
+			No translucency. No whiteness shows through the black.
+		</li>
+		<li>
+			No blending effects like paint programs like Photoshop have. The black areas completely replace the white underneath.
+		</li>
+		<li>
+			The centre "filling" is just a black rectangle, but we could draw something more elaborate there.
+		</li>
+		<li>
+			The nine sections are all the same size.
+		</li>
+	</ul>
+	<p>
+		All of these things can be changed however.
 	</p>
 </div>

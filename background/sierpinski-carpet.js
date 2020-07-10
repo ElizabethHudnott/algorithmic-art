@@ -25,6 +25,11 @@ function SierpinskiCarpet() {
 			generateBackground(0);
 		});
 
+		optionsDoc.getElementById('carpet-transparent-background').addEventListener('input', function (event) {
+			me.transparentBackground = this.checked;
+			generateBackground(0);
+		});
+
 		function setFilling(event) {
 			const filling = this.value;
 			me.filling = filling;
@@ -263,6 +268,7 @@ function SierpinskiCarpet() {
 	colors[10] = colors[9]		// second centre color with emphasis
 	colors[11] = colors[4];		// centre with emphasis
 	colors[12] = '#ffffff00';	// depth zero (transparent)
+	this.transparentBackground = true;
 	this.patternOpacities = [1, 1];
 	this.bipartite = false;
 
@@ -296,7 +302,7 @@ SierpinskiCarpet.prototype.animatable = {
 	],
 	stepped: [
 		'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
-		'patternedCentre', 'centreEmphasis', 'bipartite'
+		'patternedCentre', 'centreEmphasis', 'transparentBackground', 'bipartite'
 	]
 };
 
@@ -388,7 +394,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const roundedY = Math.round(y);
 			let roundedWidth = Math.round(width + x - roundedX);
 			let roundedHeight = Math.round(height + y - roundedY);
-			context.fillStyle = colors[relationship + (depth === 1 ? 13 : 0)];
+			context.fillStyle = colors[relationship + (depth === 1 && !this.transparentBackground ? 13 : 0)];
 			context.globalCompositeOperation = this.compositionOp;
 			context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 

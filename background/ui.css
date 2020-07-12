@@ -23,6 +23,10 @@ option:disabled {
 	color: #bbb;
 }
 
+.custom-file-label {
+	overflow: hidden;
+}
+
 .dropdown-menu {
 	margin-top: 0;
 }
@@ -64,6 +68,12 @@ option:disabled {
 .popover {
 	border-radius: 0.75rem;
 	box-shadow: 2px 2px 15px 6px rgba(0,0,0,0.65);
+	max-height: 100vh;
+}
+
+.popover-body {
+	max-height: 100vh;
+	overflow-y: auto;
 }
 
 .progress-bar {

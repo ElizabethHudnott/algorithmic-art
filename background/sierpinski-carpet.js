@@ -38,8 +38,7 @@ function SierpinskiCarpet() {
 		function setFilling(event) {
 			const filling = this.value;
 			me.filling = filling;
-			const patternOptsSelector = '#carpet-pattern-opts, #carpet-pattern-location';
-			$(patternOptsSelector).collapse(filling !== 'b' ? 'show' : 'hide');
+			$('#carpet-pattern-opts').collapse(filling !== 'b' ? 'show' : 'hide');
 			$(concentricOpts).collapse(filling === 'c' ? 'show' : 'hide');
 			if (filling === 'i' && bgGeneratorImage.src === '') {
 				document.getElementById('background-gen-image-upload').click();

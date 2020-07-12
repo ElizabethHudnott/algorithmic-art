@@ -1,6 +1,6 @@
 <div id="intro">
 	<p>
-		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, removing a smaller shape from it using a cookie cutter, rinse and repeat. It starts by dividing up a large rectangle that covers the entire drawing area into nine smaller rectangular areas arranged in a 3&times;3 grid. The middle rectangle is painted in a colour (black by default). Then every one of the other eight smaller rectangles get painted in a second colour (white by default) and then the entire process is repeated inside each of the eight smaller rectangles, treating each one like the large rectangle we started with. You can see each step of the process by finding the depth control on the Geometry tab in the parameters window and reducing the depth down to one. The result is a single black rectangle. When you increase the depth to two then eight smaller black rectangles appear.
+		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, removing a smaller shape from it using a cookie cutter, rinse and repeat. It starts by dividing up a large rectangle that covers the entire drawing area into nine smaller rectangular areas arranged in a 3&times;3 grid. The middle rectangle is painted in a colour (black by default). Then every one of the other eight smaller rectangles get painted in a second colour (white by default) and then the entire process is repeated inside each of the eight smaller rectangles, treating each one like the large rectangle we started with. You can see each step of the process by locating the depth control on the Geometry tab in the parameters window and reducing the depth down to one. The result is a single black rectangle. When you increase the depth to two then eight smaller black rectangles appear.
 	</p>
 
 	<p>
@@ -23,19 +23,19 @@
 	</p>
 	<ul>
 		<li>
-			One background colour (white)
+			One background colour (white).
 		</li>
 		<li>
-			One filling colour (black)
+			One filling colour (black).
 		</li>
 		<li>
 			No opacity (translucency). No whiteness shows through the black.
 		</li>
 		<li>
-			No blending effects like paint programs like Photoshop have. The black areas completely replace the white underneath.
+			No blending effects like paint programs like Photoshop have.
 		</li>
 		<li>
-			The centre "filling" is just a black rectangle, but we could draw something more elaborate there.
+			The centre "filling" is just a black rectangle. We could draw something more elaborate instead.
 		</li>
 		<li>
 			The nine sections are all the same size.
@@ -43,6 +43,30 @@
 	</ul>
 	<p>
 		All of these things can be changed however.
+	</p>
+</div>
+
+<div id="carpet-fill-block">
+	This option paints a plain rectangle (black by default) in the spaces marked out by the virtual cookie cutter.
+</div>
+
+<div id="carpet-fill-image">
+	This option paints copies of an image of your choice instead of black rectangles in the spaces marked out by the virtual cookie cutter.
+</div>
+
+<div id="carpet-fill-concentric">
+	This option paints spirangles (spirals made from straight lines) instead of black rectangles in the spaces marked out by the virtual cookie cutter.
+</div>
+
+<div id="carpet-patterned-centre">
+	<p>
+		Generally speaking, if this box is <em>not ticked</em> then the filling won't be drawn at level 1. The centre of the artwork will be left unpainted (transparent).
+	</p>
+	<p>
+		However, this option behaves differently when two different kinds of filling are active simultaneously. When such a mode is enabled and this box is <em>not ticked</em> then the centre (level 1) will be drawn as a block even when a different primary filling type has been chosen. Additionally, when bipartite colouring is used this option also has a second effect. When this option <em>is ticked</em> the centre will be coloured using the special second centre colour (blue by default) and when unticked the regular centre colour will be used (black by default). Bipartite means organized into two different kinds, blue rectangles and black rectangles in this case.
+	</p>
+	<p>
+		To summarize, this option controls whether or not the central portion is decorated (ticked) or not decorated (not ticked).
 	</p>
 </div>
 

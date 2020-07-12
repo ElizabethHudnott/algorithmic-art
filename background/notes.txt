@@ -1,4 +1,7 @@
 Carpet: problem updating
+Carpet: Add 'negative' (fractional) stretch
+Carpet: reset buttons for lopsidedness, middle width and stretch
+Carpet: bipartite with images: colour background
 
 Environment
 -----------
@@ -16,7 +19,8 @@ User created sketches
 	documentation: template download link, GitHub, util functions
 	online editor
 Responsiveness issues
-	toolbar too wide, modal too high
+	toolbar too wide
+	turning iPad from landscape to portrait loses modal partially off to the right
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider
 Ability to animate image parameters

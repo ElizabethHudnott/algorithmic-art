@@ -572,6 +572,7 @@ function showBackgroundOptions() {
 	let generatorURL, startFrame, endFrame, tweenData, animController;
 	let helpDoc, helpContextItem;
 	let helpContext = false;
+	let helpContextIntermediate = false; // True after mouse down but before mouse click.
 
 	window.inHelpContext = function () {
 		return helpContext;
@@ -1650,6 +1651,13 @@ function showBackgroundOptions() {
 	});
 
 	document.body.addEventListener('click', function (event) {
+		if (helpContextIntermediate) {
+			event.preventDefault();
+			helpContextIntermediate = false;
+		}
+	});
+
+	document.body.addEventListener('mousedown', function (event) {
 		let target = event.target;
 		if (target.tagName === 'LABEL' && target.control !== null) {
 			target = target.control;
@@ -1669,37 +1677,73 @@ function showBackgroundOptions() {
 			popoverTitle = target.labels[0].innerText;
 		}
 
-
 		if (helpContext) {
-			const id = target.id;
-			helpContextItem = $(target);
+			document.body.classList.remove('context-help');
+			helpContext = false;
+			const rootElement = document.body.parentElement;
+			do {
+				if (target.tagName === 'A') {
+					return;
+				}
+				let id = target.id;
+				if (id) {
+					if (helpDoc !== undefined) {
+						popoverContent = helpDoc.getElementById(id);
+					}
+					if (popoverContent !== null) {
+						popoverContent = popoverContent.cloneNode(true);
+						popoverContent.removeAttribute('id');
+						break;
+					}
+				}
+				target = target.parentElement;
+			} while (target !== rootElement);
 
-			if (id) {
-				if (helpDoc !== undefined) {
-					popoverContent = helpDoc.getElementById(id);
-				}
-				if (popoverContent !== null) {
-					popoverContent = popoverContent.cloneNode(true);
-					popoverContent.removeAttribute('id');
-				}
-			}
+			event.preventDefault();
 			if (!popoverContent) {
 				popoverTitle = 'No Help Available';
 				popoverContent = 'Sorry, no help is available for this item.';
+			} else {
+				if (target.type === 'radio') {
+					const groupNameWords = target.name.split('-');
+					for (let i = 0; i < groupNameWords.length; i++) {
+						const word = groupNameWords[i];
+						groupNameWords[i] = word[0].toUpperCase() + word.slice(1);
+					}
+					popoverTitle = popoverTitle + ' ' + groupNameWords.join(' ');
+				}
 			}
 
+			target = event.target;
+			const targetTitle = target.title;
+			if (popoverTitle === '' && targetTitle) {
+				popoverTitle = targetTitle;
+			}
+			const popoverHeader = document.createElement('DIV');
+			const titleSpan = document.createElement('SPAN');
+			titleSpan.classList.add('d-inline-block', 'mt-1');
+			titleSpan.innerHTML = popoverTitle;
+			popoverHeader.appendChild(titleSpan);
+			const closeButton = document.createElement('BUTTON');
+			closeButton.classList.add('close');
+			closeButton.innerHTML = '&times;';
+			popoverHeader.appendChild(closeButton);
+
+			target.removeAttribute('title');
+			helpContextItem = $(target);
 			helpContextItem.popover({
 				animation: false,
 				content: popoverContent,
 				html: true,
+				offset: '[0, 20]',
 				placement: 'auto',
-				title: popoverTitle,
+				title: popoverHeader,
 				trigger: 'manual',
 				boundary: 'viewport'
 			});
 			helpContextItem.popover('show');
-			document.body.classList.remove('context-help');
-			helpContext = false;
+			target.title = targetTitle;
+			helpContextIntermediate = true;
 		}
 	});
 

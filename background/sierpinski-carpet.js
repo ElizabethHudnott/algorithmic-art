@@ -160,7 +160,7 @@ function SierpinskiCarpet() {
 
 		optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
-			if (value >= 1) {
+			if (value >= 0) {
 				me.maxDepth = value - 1;
 				generateBackground(0);
 			}
@@ -264,10 +264,7 @@ function SierpinskiCarpet() {
 	this.topLeftCornerY = 0.02;
 
 	const colors = new Array(22);
-	for (let i = 0; i < 9; i++) {
-		colors[i] = '#ffffff80';
-		colors[i + 13] = '#ffffff';
-	}
+	colors.fill('#ffffff');
 	colors[4] = '#000000';		// centre
 	colors[9] = '#000066';		// second centre color
 	colors[10] = colors[9]		// second centre color with emphasis

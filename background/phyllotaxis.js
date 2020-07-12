@@ -403,7 +403,7 @@ function Phyllotaxis() {
 	this.centerMidColor = '#008800';
 
 	this.points = undefined;
-	this.radiusPreset = 'max';
+	this.radiusPreset = 'min';
 	this.radius = 1;
 	this.aspectRatio = 1;
 	this.clipping = -1;

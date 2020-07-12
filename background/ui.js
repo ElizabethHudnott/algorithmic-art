@@ -570,6 +570,13 @@ function showBackgroundOptions() {
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
 	let generatorURL, startFrame, endFrame, tweenData, animController;
+	let helpDoc, helpContextItem;
+	let helpContext = false;
+
+	window.inHelpContext = function () {
+		return helpContext;
+	};
+
 	/* The current frame according to the interpolation, not necessarily what's displayed
 	 * on screen because there can be unsaved changes. */
 	let currentFrame;
@@ -999,9 +1006,11 @@ function showBackgroundOptions() {
 
 		const helpArea = document.getElementById('help-sketch');
 		helpArea.innerHTML = '';
+		helpDoc = undefined;
 		if (gen.helpFile) {
-			downloadFile(gen.helpFile, 'document').then(function (helpDoc) {
-				const intro = helpDoc.getElementById('intro');
+			downloadFile(gen.helpFile, 'document').then(function (doc) {
+				helpDoc = doc;
+				const intro = doc.getElementById('intro');
 				if (intro !== null) {
 					intro.id = '';
 					helpArea.appendChild(intro);
@@ -1622,6 +1631,77 @@ function showBackgroundOptions() {
 			}
 		});
 	}
+
+	document.getElementById('btn-what-is-this').addEventListener('click', function (event) {
+		if (helpContextItem !== undefined) {
+			helpContextItem.popover('dispose');
+		}
+
+		document.body.classList.add('context-help');
+		helpContext = true;
+		helpContextItem = $(this);
+		helpContextItem.popover({
+			animation: false,
+			content: 'Now click on the item you\'d like help with.',
+			placement: 'left',
+			trigger: 'manual',
+		});
+		helpContextItem.popover('show');
+	});
+
+	document.body.addEventListener('click', function (event) {
+		let target = event.target;
+		if (target.tagName === 'LABEL' && target.control !== null) {
+			target = target.control;
+		}
+
+		if (helpContextItem !== undefined) {
+			if (helpContextItem.get(0).contains(target)) {
+				return;
+			}
+			helpContextItem.popover('dispose');
+			helpContextItem = undefined;
+		}
+
+		let popoverTitle = '';
+		let popoverContent;
+		if ('labels' in target && target.labels.length > 0) {
+			popoverTitle = target.labels[0].innerText;
+		}
+
+
+		if (helpContext) {
+			const id = target.id;
+			helpContextItem = $(target);
+
+			if (id) {
+				if (helpDoc !== undefined) {
+					popoverContent = helpDoc.getElementById(id);
+				}
+				if (popoverContent !== null) {
+					popoverContent = popoverContent.cloneNode(true);
+					popoverContent.removeAttribute('id');
+				}
+			}
+			if (!popoverContent) {
+				popoverTitle = 'No Help Available';
+				popoverContent = 'Sorry, no help is available for this item.';
+			}
+
+			helpContextItem.popover({
+				animation: false,
+				content: popoverContent,
+				html: true,
+				placement: 'auto',
+				title: popoverTitle,
+				trigger: 'manual',
+				boundary: 'viewport'
+			});
+			helpContextItem.popover('show');
+			document.body.classList.remove('context-help');
+			helpContext = false;
+		}
+	});
 
 	let mouseZone;
 	function checkMouseZone(event) {

@@ -1,3 +1,5 @@
+Carpet: problem updating
+
 Environment
 -----------
 Bug: WebGL canvas not resizing (needs different field of view)

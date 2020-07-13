@@ -60,13 +60,13 @@
 				<div class="col-2">
 					<div class="form-check">
 						<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-middle" value="2">
-						<label class="form-check-label small" for="carpet-pattern-loc-middle">Middle</label>
+						<label class="form-check-label small" for="carpet-pattern-loc-middle">Middles</label>
 					</div>
 				</div>
 				<div class="col-2">
 					<div class="form-check">
 						<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-both" value="3" checked>
-						<label class="form-check-label small" for="carpet-pattern-loc-both">Both</label>
+						<label class="form-check-label small" for="carpet-pattern-loc-both">Everywhere</label>
 					</div>
 				</div>
 			</div>
@@ -84,7 +84,7 @@
 			<div class="form-row form-group">
 				<div class="col-1"></div>
 				<label class="col-3 col-form-label col-form-label-sm" for="carpet-concentric-density">
-					Band Density
+					Number of Bands
 				</label>
 				<div class="col-2">
 					<input type="number" class="form-control form-control-sm" min="2" step="any" value="7" id="carpet-concentric-density">
@@ -94,7 +94,7 @@
 			<div class="form-row form-group">
 				<div class="col-1"></div>
 				<label class="col-3 col-form-label col-form-label-sm" for="carpet-relative-spacing">
-					Band Width
+					Band Widths
 				</label>
 				<div class="col-6">
 					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" id="carpet-relative-spacing">
@@ -103,23 +103,23 @@
 
 			<div class="form-row">
 				<div class="col-1"></div>
-				<label class="col-3 col-form-label col-form-label-sm" for="carpet-tlx-corner">
+				<div class="col-3 col-form-label col-form-label-sm">
 					Corners
-				</label>
-				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.5" id="carpet-tlx-corner">
 				</div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="0.04" step="any" value="0.02" id="carpet-tly-corner">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.5" id="carpet-tlx-corner" aria-label="Top-Left Corner X-Position">
+				</div>
+				<div class="col-3">
+					<input type="range" class="form-control-range mt-2" min="0" max="0.04" step="any" value="0.02" id="carpet-tly-corner" aria-label="Top-Left Corner Y-Position">
 				</div>
 			</div>
 			<div class="form-row form-group">
 				<div class="col-4"></div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.35" id="carpet-ll-corner">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.35" id="carpet-ll-corner" aria-label="Bottom-Left Corner Position">
 				</div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.75" id="carpet-lr-corner">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.75" id="carpet-lr-corner" aria-label="Bottom Corner Positions">
 				</div>
 			</div>
 		</div>
@@ -252,7 +252,7 @@
 			<div class="col-5">
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox" id="carpet-transparent-background" checked>
-					<label class="form-check-label small" for="carpet-transparent-background">Transparent background</label>
+					<label class="form-check-label small" for="carpet-transparent-background">Translucent background</label>
 				</div>
 			</div>
 		</div>

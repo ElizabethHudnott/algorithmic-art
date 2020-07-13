@@ -60,16 +60,44 @@
 
 <div id="carpet-patterned-centre">
 	<p>
-		Generally speaking, if this box is <em>not ticked</em> then the filling won't be drawn at level 1. The centre of the artwork will be left unpainted (transparent).
+		Generally speaking, if this box is <em>not ticked</em> then the filling won't be drawn at level&nbsp;1. The centre of the artwork will be left unpainted (transparent).
 	</p>
 	<p>
-		However, this option behaves differently when two different kinds of filling are active simultaneously. When such a mode is enabled and this box is <em>not ticked</em> then the centre (level 1) will be drawn as a block even when a different primary filling type has been chosen. Additionally, when bipartite colouring is used this option also has a second effect. When this option <em>is ticked</em> the centre will be coloured using the special second centre colour (blue by default) and when unticked the regular centre colour will be used (black by default). Bipartite means organized into two different kinds, blue rectangles and black rectangles in this case.
+		However, this option behaves differently when two different kinds of filling are active simultaneously. When such a mode is enabled and this box is <em>not ticked</em> then the centre (level&nbsp;1) will be drawn as a block even when a different primary filling type has been chosen. Additionally, when bipartite colouring is used this option also has a second effect. When this option <em>is ticked</em> the centre will be coloured using the special second centre colour (blue by default) and when unticked the regular centre colour will be used (black by default). Bipartite means being organized into two different kinds, blue rectangles and black rectangles in this case.
 	</p>
 	<p>
 		To summarize, this option controls whether or not the central portion is decorated (ticked) or not decorated (not ticked).
 	</p>
 </div>
 
+<div id="carpet-pattern-loc-corner">
+	Selecting this option will apply the chosen pattern to the four corner locations out of the nine total locations which exist at level&nbsp;1 (and 4&times;8 corner locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four locations positioned halfway between two corners will be drawn with a simple block filling.
+</div>
+
+<div id="carpet-pattern-loc-middle">
+	Selecting this option will apply the chosen pattern to the four locations which are positioned halfway between two corner locations, that is four locations out of the nine total locations which exist at level&nbsp;1 (and 4&times;8 mid-point locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four corner locations will be drawn with a simple block filling.
+</div>
+
+<div id="carpet-pattern-loc-both">
+	When this option is selected the chosen pattern will be applied as the filling in every possible location. From the nine locations that exist in each grid, no location will consistently have a simple rectangular block filling. However, the filling for the centre of the whole image (level&nbsp;0) can be controlled separately using the "Patterned centre" tick box. The pattern depth control also has an impact.
+</div>
+
+<div id="carpet-pattern-depth">
+	This controls how many levels of detail have the chosen pattern applied to them. If there are more levels of detail drawn in total than the number of levels with a pattern then the finest levels of detail will be drawn using a simple rectangular block filling. The total number of levels of detail can be changed using a control located under the Geometry tab.
+</div>
+
+<div id="carpet-concentric-density">
+	This is roughly equal to the maximum number of rectangles (or rather rectangle approximations) contained within a collection of concentric rectangle approximations in a location filled with the pattern.
+</div>
+
+<div id="carpet-relative-spacing">
+	This makes the coloured bands thicker and the transparent bands simultaneously thinner, or the coloured bands thinner and the transparent bands thicker.
+</div>
+
+<div id="carpet-tlx-corner">
+	This controls how far the top-left corner of a coloured band sticks out towards the centre of the shape.
+</div>
+
 <div id="carpet-depth">
-	The level of detail to draw the image in. At level 1 only a single rectangle is drawn. At level 2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
+	The level&nbsp;of detail to draw the image in. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
 </div>

@@ -1673,9 +1673,6 @@ function showBackgroundOptions() {
 
 		let popoverTitle = '';
 		let popoverContent;
-		if ('labels' in target && target.labels.length > 0) {
-			popoverTitle = target.labels[0].innerText;
-		}
 
 		if (helpContext) {
 			document.body.classList.remove('context-help');
@@ -1684,6 +1681,11 @@ function showBackgroundOptions() {
 			do {
 				if (target.tagName === 'A') {
 					return;
+				}
+				if ('labels' in target && target.labels.length > 0) {
+					popoverTitle = target.labels[0].innerText;
+				} else if (target.hasAttribute('aria-label')) {
+					popoverTitle = target.getAttribute('aria-label');
 				}
 				let id = target.id;
 				if (id) {

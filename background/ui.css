@@ -315,3 +315,22 @@ option:disabled {
 	}
 
 }
+
+.patreon {
+	background-color: rgb(232, 91, 70);
+	border: 1px solid rgb(232, 91, 70);
+	border-radius: 9999px;
+	color: white;
+	display: block;
+	font-family: America, sans-serif;
+	font-size: 0.875rem;
+	font-weight: 500;
+	padding: 0.46875rem 1rem;
+	user-select: none;
+}
+
+.patreon:hover {
+	background-color: rgb(231, 81, 59);
+	color: white;
+	text-decoration: none;
+}

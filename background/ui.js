@@ -1011,7 +1011,7 @@ function showBackgroundOptions() {
 		if (gen.helpFile) {
 			downloadFile(gen.helpFile, 'document').then(function (doc) {
 				helpDoc = doc;
-				const intro = doc.getElementById('intro');
+				const intro = doc.getElementById('about');
 				if (intro !== null) {
 					intro.id = '';
 					helpArea.appendChild(intro);

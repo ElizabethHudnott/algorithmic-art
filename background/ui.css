@@ -1,8 +1,3 @@
-body {
-	margin: 0;
-	overflow: hidden;
-}
-
 button[disabled], input[type=color][disabled] {
 	cursor: auto;
 }

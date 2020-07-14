@@ -30,22 +30,47 @@ option:disabled {
 	background-color: #e9ecef;
 }
 
+.modal-backdrop.show {
+	opacity: 0.45;
+}
+
 .modal-header {
-	padding: 0.5rem 3px 0.5rem 0.7rem;
+	border-bottom-width: 0;
+	color: black;
+	padding: 0.35rem 3px 0.35rem 0.7rem;
+}
+
+.modal-header .close {
+	background-color: rgb(232, 91, 70);
+	color: white;
+	opacity: 0.45;
+	padding: 0 0.7rem;
+	margin: -0.35rem 0.7rem 0 auto;
+}
+
+.close>* {
+	vertical-align: text-top;
 }
 
 .modal-content {
+	background-color: hsla(210, 50%, 85%, 0.8);
+	backdrop-filter: blur(4px);
+	border-color: rgba(255, 255, 255, 0.8);
+	border-radius: 0.5rem;
 	max-height: calc(100vh - 1.75rem - 46px);
 }
 
 .modal-body {
+	background-color: hsl(210, 100%, 99%);
+	border-radius: 0.1rem;
 	overflow-y: auto;
+	margin: 0rem;
 	padding: 0.5rem;
 }
 
 @media (min-width: 1200px) {
 	.modal-body {
-		padding: 1rem;
+		margin: 0.05rem 0.7rem 0.7rem;
 	}
 }
 
@@ -125,7 +150,7 @@ option:disabled {
 }
 
 .nav-tabs {
-	background-color: var(--light);
+	background-color: hsl(270, 17%, 97%);
 	border-bottom: 0;
 	border-top-left-radius: 0.7rem;
 	border-top-right-radius: 0.7rem;
@@ -325,7 +350,7 @@ option:disabled {
 	font-family: America, sans-serif;
 	font-size: 0.875rem;
 	font-weight: 500;
-	padding: 0.46875rem 1rem;
+	padding: 5px 1rem;
 	user-select: none;
 }
 

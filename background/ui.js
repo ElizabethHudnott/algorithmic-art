@@ -904,7 +904,7 @@ function showBackgroundOptions() {
 	}
 
 	const modalMargin = 0;
-	modal.style.left = Math.max(Math.round(window.innerWidth - 500 - modalMargin), 0) + 'px';
+	modal.style.left = Math.max(Math.round(window.innerWidth - 504 - modalMargin), 0) + 'px';
 
 	function repositionModal(centre) {
 		if (modal.classList.contains('show')) {

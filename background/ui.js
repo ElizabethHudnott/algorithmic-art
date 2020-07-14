@@ -904,7 +904,7 @@ function showBackgroundOptions() {
 	}
 
 	const modalMargin = 0;
-	modal.style.left = Math.max(Math.round(window.innerWidth - 504 - modalMargin), 0) + 'px';
+	modal.style.left = Math.max(Math.round(window.innerWidth - 506 - modalMargin), 0) + 'px';
 
 	function repositionModal(centre) {
 		if (modal.classList.contains('show')) {
@@ -1013,7 +1013,7 @@ function showBackgroundOptions() {
 				helpDoc = doc;
 				const intro = doc.getElementById('about');
 				if (intro !== null) {
-					intro.id = '';
+					intro.removeAttribute('id');
 					helpArea.appendChild(intro);
 				}
 			});

@@ -30,6 +30,19 @@ option:disabled {
 	background-color: #e9ecef;
 }
 
+.form-control {
+	border-style: inset;
+	border-width: 2px;
+}
+
+.input-group-sm>.form-control:not(textarea) {
+  height: calc(1.5em + .5rem + 4px);
+}
+
+.input-group-text {
+	border-width: 2px;
+}
+
 .modal-backdrop.show {
 	opacity: 0.45;
 }
@@ -39,14 +52,26 @@ option:disabled {
 	box-shadow: #000000cc 0px 6px 20px 0px;
 }
 
+.modal-content {
+	background-color: hsla(210, 50%, 85%, 0.8);
+	backdrop-filter: blur(4px);
+	border-color: #e8e8e8cc;
+	border-radius: 0.5rem;
+	color: black;
+	max-height: calc(100vh - 1.75rem - 46px);
+}
+
 .modal-header {
 	border-bottom-width: 0;
-	color: black;
 	padding: 0.35rem 3px 0.35rem 0.7rem;
 }
 
+.close:hover {
+	color: white;
+}
+
 .modal-header .close {
-	background-color: rgb(232, 91, 70);
+	background-color: var(--danger);
 	border-radius: 0 0 0.3rem 0.3rem;
 	color: white;
 	opacity: 0.45;
@@ -56,14 +81,6 @@ option:disabled {
 
 .close>* {
 	vertical-align: text-top;
-}
-
-.modal-content {
-	background-color: hsla(210, 50%, 85%, 0.8);
-	backdrop-filter: blur(4px);
-	border-color: #e8e8e8cc;
-	border-radius: 0.5rem;
-	max-height: calc(100vh - 1.75rem - 46px);
 }
 
 .modal-body {
@@ -162,13 +179,12 @@ option:disabled {
 
 .nav-tabs {
 	background-color: hsl(270, 17%, 97%);
-	border-bottom: 0;
-	border-top-left-radius: 0.7rem;
-	border-top-right-radius: 0.7rem;
+	border-bottom-width: 0;
 	padding-top: 0.25rem;
 }
 
 .nav-tabs .nav-link {
+	background-color: hsl(270, 17%, 97%);
     border-color: #ddd;
 	border-top-left-radius: 0.7rem;
 	border-top-right-radius: 0.7rem;
@@ -182,6 +198,11 @@ option:disabled {
 	color: black;
 }
 
+.nav-tabs .nav-link.active:hover {
+	background-color: #fff;
+	border-bottom-color: transparent;
+}
+
 .nav-tabs .nav-link:focus {
 	border-color: #80bdff;
 	box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
@@ -191,6 +212,10 @@ option:disabled {
 .nav-tabs .nav-link.active {
 	color: black;
 	font-weight: 600;
+}
+
+.nav-link.active {
+	cursor: default;
 }
 
 .top-2 {
@@ -308,20 +333,29 @@ option:disabled {
 	overflow-y: unset;
 }
 
+#background-gen-modal-content.collapsing {
+	overflow-y: hidden;
+}
+
 @media (min-width: 576px) {
 
 	#background-gen-modal {
-		width: min(50vw, 504px);
+		width: min(50vw, 506px);
 	}
 
 	#background-gen-modal .modal-dialog {
-		max-width: min(50vw, 504px);
+		max-width: 100%;
 	}
 
 	#background-gen-modal .modal-content {
 		max-height: calc(100vh - 46px);
 	}
 
+}
+
+#background-gen-options>.nav-tabs {
+	margin-left: -0.5rem;
+	margin-right: -0.5rem;
 }
 
 #toolbar {

@@ -173,6 +173,12 @@ function SierpinskiCarpet() {
 		lopsidedXInput.addEventListener('pointerup', fullRedraw);
 		lopsidedXInput.addEventListener('keyup', fullRedraw);
 
+		optionsDoc.getElementById('carpet-lopsided-x-reset').addEventListener('click', function (event) {
+			lopsidedXInput.value = 0;
+			me.lopsidednessX = 0;
+			generateBackground(0);
+		});
+
 		const lopsidedYInput = optionsDoc.getElementById('carpet-lopsided-y');
 		lopsidedYInput.addEventListener('input', function (event) {
 			me.lopsidednessY = parseFloat(this.value);
@@ -181,6 +187,12 @@ function SierpinskiCarpet() {
 		lopsidedYInput.addEventListener('pointerup', fullRedraw);
 		lopsidedYInput.addEventListener('keyup', fullRedraw);
 
+		optionsDoc.getElementById('carpet-lopsided-y-reset').addEventListener('click', function (event) {
+			lopsidedYInput.value = 0;
+			me.lopsidednessY = 0;
+			generateBackground(0);
+		});
+
 		const middleWidthInput = optionsDoc.getElementById('carpet-middle-width');
 		middleWidthInput.addEventListener('input', function (event) {
 			me.middleWidth = parseFloat(this.value);
@@ -188,6 +200,12 @@ function SierpinskiCarpet() {
 		});
 		middleWidthInput.addEventListener('pointerup', fullRedraw);
 		middleWidthInput.addEventListener('keyup', fullRedraw);
+
+		optionsDoc.getElementById('carpet-width-reset').addEventListener('click', function (event) {
+			middleWidthInput.value = 1;
+			me.middleWidth = 1;
+			generateBackground(0);
+		});
 
 		const sizeInput = optionsDoc.getElementById('carpet-size');
 		sizeInput.addEventListener('input', function (event) {
@@ -205,18 +223,24 @@ function SierpinskiCarpet() {
 		stretchInput.addEventListener('pointerup', fullRedraw);
 		stretchInput.addEventListener('keyup', fullRedraw);
 
+		optionsDoc.getElementById('carpet-stretch-reset').addEventListener('click', function (event) {
+			stretchInput.value = 0;
+			me.stretch = 0;
+			generateBackground(0);
+		});
+
 		optionsDoc.getElementById('carpet-left').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value >= 0 && value <= 1) {
-				me.left = value;
+			if (value >= 0 && value <= 100) {
+				me.left = value / 100;
 				generateBackground(0);
 			}
 		});
 
 		optionsDoc.getElementById('carpet-top').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value >= 0 && value <= 1) {
-				me.top = value;
+			if (value >= 0 && value <= 100) {
+				me.top = value / 100;
 				generateBackground(0);
 			}
 		});
@@ -319,28 +343,40 @@ function Tile(x, y, width, height, relationship) {
 
 SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let beginTime = performance.now();
-	const lopsidednessX = this.lopsidednessX + 1;
-	const lopsidednessY = this.lopsidednessY + 1;
-	const middleWidth = this.middleWidth / 3;
-	const colors = this.colors;
-	const filling = this.filling;
-
-	const drawSize = this.size;
 	const stretch = this.stretch;
+	if (stretch === -1) {
+		return;
+	}
+	const middleWidth = this.middleWidth / 3;
+	const drawSize = this.size;
+
 	let drawWidth, drawHeight;
 	if (canvasWidth >= canvasHeight) {
-		drawWidth = drawSize * ((1 - stretch) * canvasHeight + stretch * canvasWidth);
+		if (stretch > 0) {
+			drawWidth = drawSize * ((1 - stretch) * canvasHeight + stretch * canvasWidth);
+		} else {
+			drawWidth = drawSize * (stretch + 1) * canvasHeight;
+		}
 		drawHeight = drawSize * canvasHeight;
 		const idealWidth = drawWidth * (2 / 3 + middleWidth);
 		drawWidth = Math.min(Math.max(idealWidth, drawWidth), canvasWidth);
 	} else {
 		drawWidth = drawSize * canvasWidth;
-		drawHeight = drawSize * ((1 - stretch) * canvasWidth + stretch * canvasHeight);
+		if (stretch > 0) {
+			drawHeight = drawSize * ((1 - stretch) * canvasWidth + stretch * canvasHeight);
+		} else {
+			drawHeight = drawSize * (stretch + 1) * canvasWidth;
+		}
 		const idealHeight = drawHeight * (2 / 3 + 1 / middleWidth);
 		drawHeight = Math.min(Math.max(idealHeight, drawHeight), canvasHeight);
 	}
 	drawWidth = Math.round(drawWidth);
 	drawHeight = Math.round(drawHeight);
+
+	const lopsidednessX = this.lopsidednessX + 1;
+	const lopsidednessY = this.lopsidednessY + 1;
+	const colors = this.colors;
+	const filling = this.filling;
 
 	const left = Math.round(this.left * (canvasWidth - drawWidth));
 	const top = Math.round(this.top * (canvasHeight - drawHeight));

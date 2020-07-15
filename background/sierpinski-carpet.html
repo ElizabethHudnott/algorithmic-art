@@ -107,19 +107,19 @@
 					Corners
 				</div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.5" id="carpet-tlx-corner" aria-label="Top-Left Corner X-Position">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.5" id="carpet-tlx-corner" title="Top-Left Corner X-Position">
 				</div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="0.04" step="any" value="0.02" id="carpet-tly-corner" aria-label="Top-Left Corner Y-Position">
+					<input type="range" class="form-control-range mt-2" min="0" max="0.04" step="any" value="0.02" id="carpet-tly-corner" title="Top-Left Corner Y-Position">
 				</div>
 			</div>
 			<div class="form-row form-group">
 				<div class="col-4"></div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.35" id="carpet-ll-corner" aria-label="Bottom-Left Corner Position">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.35" id="carpet-ll-corner" title="Bottom-Left Corner Position">
 				</div>
 				<div class="col-3">
-					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.75" id="carpet-lr-corner" aria-label="Bottom Corner Positions">
+					<input type="range" class="form-control-range mt-2" min="0" max="1" step="any" value="0.75" id="carpet-lr-corner" title="Bottom Corner Positions">
 				</div>
 			</div>
 		</div>
@@ -187,7 +187,7 @@
 				<input type="color" value="#000066">
 			</div>
 			<div class="col-2">
-				<input type="range" min="0" max="1" step="0.004" value="1" class="carpet-opacity form-control-range mt-1">
+				<input type="range" min="0" max="1" step="0.004" value="1" class="carpet-opacity form-control-range mt-2">
 			</div>
 		</div>
 
@@ -266,41 +266,63 @@
 			<div class="col-3">
 				<input id="carpet-depth" class="form-control form-control-sm" type="number" min="0" value="5">
 			</div>
+			<label class="col-2 pl-4 col-form-label col-form-label-sm" for="carpet-size">
+				Size
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.0008" value="1" class="form-control-range mt-2" id="carpet-size">
+			</div>
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsided-x">
-				Lopsidedness <span class="sr-only">Crossways</span>
+				X-Lopsidedness
 			</label>
-			<div class="col-4">
-				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-1" id="carpet-lopsided-x">
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsided-x">
 			</div>
-			<label class="col-1 pl-4 col-form-label col-form-label-sm" for="carpet-lopsided-y">
-				<span class="sr-only">Vertical Lopsidedness</span>
+			<div class="col-2">
+				<button type="button" class="btn btn-light" id="carpet-lopsided-x-reset" title="Reset lopsidedness">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsided-y">
+				Y-Lopsidedness
 			</label>
-			<div class="col-4">
-				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-1" id="carpet-lopsided-y">
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsided-y">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light" id="carpet-lopsided-y-reset" title="Reset lopsidedness">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
 			</div>
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-middle-width">
 				Middle Width
 			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="3" step="0.002" value="1" class="form-control-range mt-1" id="carpet-middle-width">
+			<div class="col-7">
+				<input type="range" min="0" max="3" step="0.002" value="1" class="form-control-range mt-2" id="carpet-middle-width">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light" id="carpet-width-reset" title="Reset width">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="carpet-size">
-				Size
-			</label>
-			<div class="col-3">
-				<input type="range" min="0" max="1" step="0.0008" value="1" class="form-control-range mt-1" id="carpet-size">
-			</div>
-			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="carpet-stretch">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-stretch">
 				Stretch
 			</label>
-			<div class="col-3">
-				<input type="range" min="0" max="1" step="0.0005" value="0" class="form-control-range mt-1" id="carpet-stretch">
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.0005" value="0" class="form-control-range mt-2" id="carpet-stretch">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light" id="carpet-stretch-reset" title="Reset stretch">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -308,25 +330,35 @@
 				Left
 			</label>
 			<div class="col-3">
-				<input type="number" min="0" max="1" step="0.05" value="0" class="form-control form-control-sm" id="carpet-left">
+				<div class="input-group input-group-sm">
+					<input type="number" min="0" max="100" step="5" value="0" class="form-control text-right" id="carpet-left">
+					<div class="input-group-append">
+						<span class="input-group-text">%</span>
+					</div>
+				</div>
 			</div>
-			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="carpet-top">
+			<label class="col-2 pl-4 col-form-label col-form-label-sm" for="carpet-top">
 				Top
 			</label>
 			<div class="col-3">
-				<input type="number" min="0" max="1" step="0.05" value="0" class="form-control form-control-sm" id="carpet-top">
+				<div class="input-group input-group-sm">
+				<input type="number" min="0" max="100" step="5" value="0" class="form-control text-right" id="carpet-top">
+					<div class="input-group-append">
+						<span class="input-group-text">%</span>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 mt-1 col-form-label col-form-label-sm" for="carpet-rotation">
 				Rotation
 			</label>
-			<div class="col-8">
+			<div class="col-7">
 				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-rotation">
 			</div>
-			<div class="col-1">
+			<div class="col-2">
 				<button type="button" class="btn btn-light" id="carpet-rotation-reset" title="Reset rotation">
-					<img src="../img/cross.png" alt="Remove">
+					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>
 		</div>

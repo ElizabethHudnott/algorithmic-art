@@ -1684,8 +1684,8 @@ function showBackgroundOptions() {
 				}
 				if ('labels' in target && target.labels.length > 0) {
 					popoverTitle = target.labels[0].innerText;
-				} else if (target.hasAttribute('aria-label')) {
-					popoverTitle = target.getAttribute('aria-label');
+				} else if (target.title) {
+					popoverTitle = target.title;
 				}
 				let id = target.id;
 				if (id) {
@@ -1718,9 +1718,6 @@ function showBackgroundOptions() {
 
 			target = event.target;
 			const targetTitle = target.title;
-			if (popoverTitle === '' && targetTitle) {
-				popoverTitle = targetTitle;
-			}
 			const popoverHeader = document.createElement('DIV');
 			const titleSpan = document.createElement('SPAN');
 			titleSpan.classList.add('d-inline-block', 'mt-1');

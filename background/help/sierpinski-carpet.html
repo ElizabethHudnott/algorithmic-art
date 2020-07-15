@@ -62,17 +62,6 @@
 	<p>
 		The centre of the image is decorated or distinguished in some way when this box is ticked and is plainer or less decorated when the box is not ticked. The precise manner in which it's decorated depends on how some other options are set. It depends on whether the primary filling is applied to the corners, mid-sections or both and whether or not bipartite colouring mode is enabled or not.
 	</p>
-	<!--
-	<p>
-		Generally speaking, if this box is <em>not ticked</em> then the filling won't be drawn at level&nbsp;1. The centre of the artwork will be left unpainted (transparent).
-	</p>
-	<p>
-		However, this option behaves differently when two different kinds of filling are active simultaneously. When such a mode is enabled and this box is <em>not ticked</em> then the centre (level&nbsp;1) will be drawn as a block even when a different primary filling type has been chosen. Additionally, when bipartite colouring is used this option also has a second effect. When this option <em>is ticked</em> the centre will be coloured using the special second centre colour (blue by default) and when unticked the regular centre colour will be used (black by default). Bipartite means being organized into two different kinds, blue rectangles and black rectangles in this case.
-	</p>
-	<p>
-		To summarize, this option controls whether or not the central portion is decorated (ticked) or not decorated (not ticked).
-	</p>
-	-->
 </div>
 
 <div id="carpet-pattern-loc-corner">
@@ -111,6 +100,54 @@
 	This controls the position of the bottom-left corner of each band as well as the angles of the left edge and the bottom edge. Move the slider further to the left to push the corner outward or move the slider to the right to move the corner closer to the centre.
 </div>
 
+<div id="carpet-lr-corner">
+	This controls the thickness of the bottom part of each coloured band.
+</div>
+
+<div id="carpet-bipartite">
+	Bipartite colouring means organization into two different kinds of pieces with two different colours. When this option is ticked the centre locations (1 at level&nbsp;1, 8&times;1 at level&nbsp;2, etc.) will be coloured using two different colours (black and blue by default).
+</div>
+
+<div id="carpet-emphasis">
+	This controls how many levels of detail are drawn opaquely without any translucency effect applied to the filling. The opacity slider for the central portion will be ignored initially and translucency will only be applied at the finer levels of detail. This option will have no effect if the centre opacity slider is positioned fully to the right, which is the default position.
+</div>
+
 <div id="carpet-depth">
-	The level&nbsp;of detail to draw the image in. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
+	This is number of levels of detail to draw. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
+</div>
+
+<div id="carpet-lopsided-x">
+	Moving this slider to the right makes the left column bigger and right column smaller. Conversely, moving the slider towards the left makes the left column narrower and the right column wider. To make both columns wider or both columns narrower use the Stretch slider instead.
+</div>
+
+<div id="carpet-lopsided-y">
+	Moving this slider to the right makes the top row bigger and bottom row smaller. Conversely, moving the slider to the left makes the top row shorter and the bottom row taller.
+</div>
+
+<div id="carpet-middle-width">
+	This slider makes the middle column wider or narrower.
+</div>
+
+<div id="carpet-size">
+	This slider reduces the overall size of the image. This is useful for creating animations.
+</div>
+
+<div id="carpet-stretch">
+	This slider makes the overall image wider or narrower. The rectangular sections become more elongated or more square.
+</div>
+
+<div id="carpet-left">
+	If there's empty space in the horizontal direction (i.e. if the Stretch parameter is below maximum) then this controls the distribution of empty space between the left side of the screen and the right side.
+</div>
+
+<div id="carpet-top">
+	If there's empty space in the vertical direction (i.e. if the Size parameter is below maximum) then this controls the distribution of empty space between the top and bottom.
+</div>
+
+<div id="carpet-rotation">
+	Rotates the image about it's centre. Use the button on the right to return to the initial setting with the sides of the image aligned with the sides of the screen.
+</div>
+
+<div id="carpet-rotation-reset">
+	Resets the rotation control to it's initial position.
 </div>

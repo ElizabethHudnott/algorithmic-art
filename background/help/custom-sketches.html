@@ -89,7 +89,7 @@
 
 			<h2>Random Numbers</h2>
 			<p>
-				To ensure animations run smoothly you should use the <code>random()</code> function instead of <code>Math.random()</code>. This ensures the <var>n</var>th random number requested by <code>generate()</code> when rendering the middle frame of the animation is calculated as being the average of the <var>n</var>th random number used in the start frame and the <var>n</var>th random number used in the end frame. The <code>random()</code> function has the additional advantage that the user can record the numbers used to seed this random number generator and use them to reproduce the same sequence of random numbers (and therefore exactly the same image) in a future creative session.
+				To ensure animations run smoothly you should use the <code>random.next()</code> function instead of <code>Math.random()</code>. This ensures the <var>n</var>th random number requested by <code>generate()</code> when rendering the middle frame of the animation is calculated as being the average of the <var>n</var>th random number used in the start frame and the <var>n</var>th random number used in the end frame. The <code>random.next()</code> function has the additional advantage that the user can record the numbers used to seed this random number generator and use them to reproduce the same sequence of random numbers (and therefore exactly the same image) in a future creative session.
 			</p>
 
 			<h2>Intrinsic Time</h2>

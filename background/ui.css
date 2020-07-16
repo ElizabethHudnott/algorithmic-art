@@ -183,13 +183,19 @@ option:disabled {
 	padding-top: 0.25rem;
 }
 
+.nav-tabs .nav-item {
+	margin-left: 1px;
+}
+
 .nav-tabs .nav-link {
 	background-color: hsl(270, 17%, 97%);
     border-color: #ddd;
 	border-top-left-radius: 0.7rem;
 	border-top-right-radius: 0.7rem;
+	box-shadow: 0 -1px 2px 0 rgba(0, 0, 0, 0.4);
 	color: var(--dark);
 	margin: 1px;
+	padding: 0.45rem 1rem;
 }
 
 .nav-tabs .nav-link:hover {
@@ -210,6 +216,7 @@ option:disabled {
 }
 
 .nav-tabs .nav-link.active {
+	box-shadow: 0 -1px 2px 0 rgba(0, 0, 0, 0.5);
 	color: black;
 	font-weight: 600;
 }
@@ -356,6 +363,7 @@ option:disabled {
 #background-gen-options>.nav-tabs {
 	margin-left: -0.5rem;
 	margin-right: -0.5rem;
+	padding-left: 1px;
 }
 
 #toolbar {

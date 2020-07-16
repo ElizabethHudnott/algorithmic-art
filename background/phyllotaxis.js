@@ -2,7 +2,7 @@ function Phyllotaxis() {
 	const me = this;
 	this.title = 'Phyllotaxis';
 	this.helpFile = 'help/phyllotaxis.html';
-	this.hasRandomness = false;
+	this.hasRandomness = true;
 
 	this.optionsDocument = downloadFile('phyllotaxis.html', 'document').then(function (optionsDoc) {
 		const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
@@ -681,8 +681,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		case 'a':
 			hue = this.angularColor(r, degrees, i, 0, hueRange, this.hueMin);
 			break;
-		case 'r':
+		case 'rad':
 			hue = this.hueMin + hueRange * radialValue;
+			break;
+		case 'rnd':
+			hue = this.hueMin + hueRange * random.next();
 			break;
 		}
 
@@ -690,8 +693,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		case 'a':
 			saturation = this.angularColor(r, degrees, i, 1, saturationRange, this.saturationMin);
 			break;
-		case 'r':
+		case 'rad':
 			saturation = this.saturationMin + saturationRange * radialValue;
+			break;
+		case 'rnd':
+			saturation = this.saturationMin + saturationRange * random.next();
 			break;
 		}
 
@@ -699,8 +705,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		case 'a':
 			lightness = this.angularColor(r, degrees, i, 2, lightnessRange, this.lightnessMin);
 			break;
-		case 'r':
+		case 'rad':
 			lightness = this.lightnessMin + lightnessRange * radialValue;
+			break;
+		case 'rnd':
+			lightness = this.lightnessMin + lightnessRange * random.next();
 			break;
 		}
 
@@ -708,8 +717,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		case 'a':
 			opacity = this.angularColor(r, degrees, i, 3, opacityRange, this.opacityMin);
 			break;
-		case 'r':
+		case 'rad':
 			opacity = this.opacityMin + opacityRange * radialValue;
+			break;
+		case 'rnd':
+			opacity = this.opacityMin + opacityRange * random.next();
 			break;
 		}
 

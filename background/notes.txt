@@ -43,14 +43,11 @@ Progressive Web App
 Existing Sketches
 -----------------
 Phyllotaxis
-	Randomize option (within a range) for H/S/L/A
 	Option to draw the spiral line
-	Add note to spread
 	Primes
 	Fill background with spokes?
 	Ways to choose an angle: Continued fractions?
 	Mirrored angular colour transitions
-	Fade hue through black or white
 	Improve performance with images (prerender filters, pre-resize if no growth)
 	Alternative petal shapes:
 		Curves

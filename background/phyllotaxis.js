@@ -1,3 +1,10 @@
+const AngularHueMode = Object.freeze({
+	RED: 0,
+	WHITE: 1,
+	GRAY: 2,
+	BLACK: 3,
+});
+
 function Phyllotaxis() {
 	const me = this;
 	this.title = 'Phyllotaxis';
@@ -220,11 +227,43 @@ function Phyllotaxis() {
 		hueMaxInput.addEventListener('pointerup', fullRecolor);
 		hueMaxInput.addEventListener('keyup', fullRecolor);
 
+
+		const hueModSplitInput = optionsDoc.getElementById('phyllotaxis-hue-mod-split');
+		const hueModeIntensityInput = optionsDoc.getElementById('phyllotaxis-hue-mode-intensity');
+
 		optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
-			me.hueMode = this.value;
-			$('#phyllotaxis-hue-max').collapse(this.value === 'c' ? 'hide' : 'show');
+			const mode = this.value[0];
+			$('#phyllotaxis-hue-max').collapse(mode === 'c' ? 'hide' : 'show');
+			me.hueMode = mode;
+			let showAdvanced = false;
+			if (mode === 'a') {
+				const angularMode = parseInt(this.value[1]);
+				if (angularMode > 0) {
+					const modeNames = ['Red', 'Pale', 'Grey', 'Dark'];
+					hueModSplitInput.labels[0].children[0].innerHTML = modeNames[angularMode];
+					hueModeIntensityInput.labels[0].children[0].innerHTML = modeNames[angularMode];
+					showAdvanced = true;
+				}
+				me.angularHueMode = angularMode;
+			}
+			$(hueModSplitInput.parentElement.parentElement).collapse(showAdvanced ? 'show' : 'hide');
 			generateBackground(2);
 		});
+
+
+		hueModSplitInput.addEventListener('input', function (event) {
+			me.hueModSplit = parseFloat(this.value);
+			generateBackground(3);
+		});
+		hueModSplitInput.addEventListener('pointerup', fullRecolor);
+		hueModSplitInput.addEventListener('keyup', fullRecolor);
+
+		hueModeIntensityInput.addEventListener('input', function (event) {
+			me.hueModeIntensity = parseFloat(this.value);
+			generateBackground(3);
+		});
+		hueModeIntensityInput.addEventListener('pointerup', fullRecolor);
+		hueModeIntensityInput.addEventListener('keyup', fullRecolor);
 
 		const saturationMinInput = optionsDoc.getElementById('phyllotaxis-saturation-min');
 		saturationMinInput.addEventListener('input', function (event) {
@@ -428,6 +467,9 @@ function Phyllotaxis() {
 	this.angleMode.fill('t');
 	this.colorMod = new Array(4);
 	this.colorMod.fill(256);
+	this.angularHueMode = AngularHueMode.RED;
+	this.hueModeIntensity = 0.9;
+	this.hueModSplit = 0.25;
 
 	this.hueMin = 30;
 	this.hueMax = 360;
@@ -466,6 +508,7 @@ Phyllotaxis.prototype.animatable = {
 		'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
+		'angularHueMode', 'hueModeIntensity', 'hueModSplit',
 		'lighting', 'contrast', 'shadowColor', 'shadowAngle', 'shadowBlur',
 		'shadowOffset', 'spotOffset', 'strokeStyle', 'centerInnerRadius',
 		'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
@@ -501,7 +544,31 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 		break;
 	}
 	const mod = this.colorMod[property];
-	return (value % mod) * range / mod + min;
+	value = value % mod;
+	if (property !== 0) {
+		return [min + value / mod * range, 0];
+	}
+	const hueMode = this.angularHueMode;
+	let splitPortion = this.hueModSplit;
+	if (hueMode < AngularHueMode.WHITE) {
+		splitPortion *= hueMode;
+	}
+	let split1 = mod * (1 - splitPortion);
+	if (value < split1) {
+		return [min + value / split1 * range, 0];
+	} else {
+		const fadeLength = (mod - split1) / 2;
+		const split2 = split1 + fadeLength;
+		let hue, modifcation;
+		if (value < split2) {
+			hue = min + range;
+			modifcation = (value - split1) / fadeLength;
+		} else {
+			hue = min;
+			modifcation = (mod - value) / fadeLength;
+		}
+		return [hue, modifcation * this.hueModeIntensity];
+	}
 };
 
 /**
@@ -592,11 +659,12 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	const strokeStyle = this.strokeStyle;
 	const fillRadius = petalShape === 'r' ? Math.SQRT2 : 1;
 
-	let hue = this.hueMin;
-	let saturation = this.saturationMin;
-	let lightness = this.lightnessMin;
-	let opacity = this.opacityMin;
 	const hueRange = this.hueMax - this.hueMin;
+	const hueMode = this.angularHueMode;
+	let hueModeFraction = hueMode % 1;
+	if (hueModeFraction === 0 && hueMode > 0) {
+		hueModeFraction = 1;
+	}
 	const saturationRange = this.saturationMax - this.saturationMin;
 	const lightnessRange = this.lightnessMax - this.lightnessMin;
 	const opacityRange = this.opacityMax - this.opacityMin;
@@ -676,10 +744,15 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 
 		const degrees = Math.abs(theta) / Math.PI * 180;
 		const radialValue = (r * r) / lastRSquared;
+		let hue = this.hueMin;
+		let saturation = this.saturationMin;
+		let lightness = this.lightnessMin;
+		let opacity = this.opacityMin;
+		let colorModification = 0;
 
 		switch (this.hueMode) {
 		case 'a':
-			hue = this.angularColor(r, degrees, i, 0, hueRange, this.hueMin);
+			[hue, colorModification] = this.angularColor(r, degrees, i, 0, hueRange, this.hueMin);
 			break;
 		case 'rad':
 			hue = this.hueMin + hueRange * radialValue;
@@ -691,7 +764,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 
 		switch (this.saturationMode) {
 		case 'a':
-			saturation = this.angularColor(r, degrees, i, 1, saturationRange, this.saturationMin);
+			saturation = this.angularColor(r, degrees, i, 1, saturationRange, this.saturationMin)[0];
 			break;
 		case 'rad':
 			saturation = this.saturationMin + saturationRange * radialValue;
@@ -703,7 +776,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 
 		switch (this.lightnessMode) {
 		case 'a':
-			lightness = this.angularColor(r, degrees, i, 2, lightnessRange, this.lightnessMin);
+			lightness = this.angularColor(r, degrees, i, 2, lightnessRange, this.lightnessMin)[0];
 			break;
 		case 'rad':
 			lightness = this.lightnessMin + lightnessRange * radialValue;
@@ -715,7 +788,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 
 		switch (this.opacityMode) {
 		case 'a':
-			opacity = this.angularColor(r, degrees, i, 3, opacityRange, this.opacityMin);
+			opacity = this.angularColor(r, degrees, i, 3, opacityRange, this.opacityMin)[0];
 			break;
 		case 'rad':
 			opacity = this.opacityMin + opacityRange * radialValue;
@@ -723,6 +796,36 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		case 'rnd':
 			opacity = this.opacityMin + opacityRange * random.next();
 			break;
+		}
+
+		if (this.hueMode === 'a') {
+			if (hueMode <= AngularHueMode.WHITE) {
+
+				lightness =
+					(colorModification + (1 - colorModification) * lightness) * hueModeFraction +
+					lightness * (1 - hueModeFraction);
+
+			} else if (hueMode <= AngularHueMode.GRAY) {
+
+				saturation =
+					saturation * (1 - colorModification) * hueModeFraction +
+					saturation * (1 - hueModeFraction);
+
+				lightness =
+					lightness * hueModeFraction +
+					(colorModification + (1 - colorModification) * lightness) * (1 - hueModeFraction);
+
+			} else {	// Black
+
+				saturation =
+					saturation * hueModeFraction +
+					saturation * (1 - colorModification) * (1 - hueModeFraction);
+
+				lightness =
+					lightness * (1 - colorModification) * hueModeFraction +
+					lightness * (1 - hueModeFraction);
+
+			}
 		}
 
 		const petalRotation = theta + HALF_PI + this.petalRotation;

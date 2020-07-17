@@ -287,7 +287,7 @@ function SierpinskiCarpet() {
 	this.topLeftCornerY = 0.02;
 
 	const colors = new Array(22);
-	colors.fill('#ffffff');
+	colors.fill('#ffffff80');
 	colors[4] = '#000000';		// centre
 	colors[9] = '#000066';		// second centre color
 	colors[10] = colors[9]		// second centre color with emphasis

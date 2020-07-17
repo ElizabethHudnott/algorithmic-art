@@ -233,11 +233,29 @@
 			</div>
 			<div class="col-3">
 				<select class="form-control form-control-sm" id="phyllotaxis-hue-mode">
-					<option value="a">Angular</option>
+					<option value="a0">Angular</option>
+					<option value="a1">Pale Angular</option>
+					<option value="a2">Grey Angular</option>
+					<option value="a3">Dark Angular</option>
 					<option value="rad">Radial</option>
 					<option value="c" selected>Fixed</option>
 					<option value="rnd">Random</option>
 				</select>
+			</div>
+		</div>
+
+		<div class="form-row form-group collapse">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-hue-mod-split">
+				<span></span> Length
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.001" value="" class="form-control-range mt-2" id="phyllotaxis-hue-mod-split">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-hue-mode-intensity">
+				<span></span> Intensity
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.004" value="0.9" class="form-control-range mt-2" id="phyllotaxis-hue-mode-intensity">
 			</div>
 		</div>
 

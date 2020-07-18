@@ -232,12 +232,12 @@ function Phyllotaxis() {
 		const hueModeIntensityInput = optionsDoc.getElementById('phyllotaxis-hue-mode-intensity');
 
 		optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
-			const mode = this.value[0];
+			const mode = this.value;
 			$('#phyllotaxis-hue-max').collapse(mode === 'c' ? 'hide' : 'show');
-			me.hueMode = mode;
 			let showAdvanced = false;
 			if (mode === 'a') {
-				const angularMode = parseInt(this.value[1]);
+				me.hueMode = mode[0];
+				const angularMode = parseInt(mode[1]);
 				if (angularMode > 0) {
 					const modeNames = ['Red', 'Pale', 'Grey', 'Dark'];
 					hueModSplitInput.labels[0].children[0].innerHTML = modeNames[angularMode];
@@ -245,6 +245,8 @@ function Phyllotaxis() {
 					showAdvanced = true;
 				}
 				me.angularHueMode = angularMode;
+			} else {
+				me.hueMode = mode;
 			}
 			$(hueModSplitInput.parentElement.parentElement).collapse(showAdvanced ? 'show' : 'hide');
 			generateBackground(2);

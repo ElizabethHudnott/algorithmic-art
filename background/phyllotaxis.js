@@ -235,7 +235,7 @@ function Phyllotaxis() {
 			const mode = this.value;
 			$('#phyllotaxis-hue-max').collapse(mode === 'c' ? 'hide' : 'show');
 			let showAdvanced = false;
-			if (mode === 'a') {
+			if (mode[0] === 'a') {
 				me.hueMode = mode[0];
 				const angularMode = parseInt(mode[1]);
 				if (angularMode > 0) {

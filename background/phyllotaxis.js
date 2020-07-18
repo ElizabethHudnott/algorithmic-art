@@ -52,6 +52,64 @@ function Phyllotaxis() {
 			}
 		});
 
+		const initialNumeratorsInput = optionsDoc.getElementById('phyllotaxis-initial-numerators');
+		const initialDenominatorsInput = optionsDoc.getElementById('phyllotaxis-initial-denominators');
+		const periodicNumeratorsInput = optionsDoc.getElementById('phyllotaxis-periodic-numerators');
+		const periodicDenominatorsInput = optionsDoc.getElementById('phyllotaxis-periodic-denominators');
+
+		function updateFraction() {
+			const regExp = /,\s*/
+			if (initialNumeratorsInput.value.trim() === '') {
+				me.initialNumerators = [];
+			} else {
+				me.initialNumerators = initialNumeratorsInput.value.split(regExp).map(parseFloat);
+			}
+			if (initialDenominatorsInput.value.trim() === '') {
+				me.initialDenominators = [];
+			} else {
+				me.initialDenominators = initialDenominatorsInput.value.split(regExp).map(parseFloat);
+			}
+			if (periodicNumeratorsInput.value.trim() === '') {
+				me.periodicNumerators = [];
+			} else {
+				me.periodicNumerators = periodicNumeratorsInput.value.split(regExp).map(parseFloat);
+			}
+			if (periodicDenominatorsInput.value.trim() === '') {
+				me.periodicDenominators = [];
+			} else {
+				me.periodicDenominators = periodicDenominatorsInput.value.split(regExp).map(parseFloat);
+			}
+			me.normalizeFractions();
+			generateBackground(0);
+		}
+
+		function fractionSubmit(event) {
+			event.preventDefault();
+			updateFraction();
+		}
+
+		function fractionFocusout(event) {
+			if (!this.contains(event.relatedTarget)) {
+				updateFraction();
+			}
+		}
+
+		const initialNumeratorsForm = optionsDoc.getElementById('phyllotaxis-initial-numerators-form');
+		initialNumeratorsForm.addEventListener('submit', fractionSubmit);
+		initialNumeratorsForm.addEventListener('focusout', fractionFocusout);
+
+		const initialDenominatorsForm = optionsDoc.getElementById('phyllotaxis-initial-denominators-form');
+		initialDenominatorsForm.addEventListener('submit', fractionSubmit);
+		initialDenominatorsForm.addEventListener('focusout', fractionFocusout);
+
+		const periodicNumeratorsForm = optionsDoc.getElementById('phyllotaxis-periodic-numerators-form');
+		periodicNumeratorsForm.addEventListener('submit', fractionSubmit);
+		periodicNumeratorsForm.addEventListener('focusout', fractionFocusout);
+
+		const periodicDenominatorsForm = optionsDoc.getElementById('phyllotaxis-periodic-denominators-form');
+		periodicDenominatorsForm.addEventListener('submit', fractionSubmit);
+		periodicDenominatorsForm.addEventListener('focusout', fractionFocusout);
+
 		optionsDoc.getElementById('phyllotaxis-clipping').addEventListener('input', function (event) {
 			me.clipping = this.checked ? 1 : -1;
 			generateBackground(0);
@@ -61,14 +119,6 @@ function Phyllotaxis() {
 			me.direction = parseInt(this.value);
 			generateBackground(0);
 		});
-
-		const angleSlider = optionsDoc.getElementById('phyllotaxis-angle-range');
-		angleSlider.addEventListener('input', function (event) {
-			me.angle = parseFloat(this.value) * TWO_PI;
-			generateBackground(1);
-		});
-		angleSlider.addEventListener('pointerup', fullRedraw);
-		angleSlider.addEventListener('keyup', fullRedraw);
 
 		optionsDoc.getElementById('phyllotaxis-spread').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -235,7 +285,7 @@ function Phyllotaxis() {
 			const mode = this.value;
 			$('#phyllotaxis-hue-max').collapse(mode === 'c' ? 'hide' : 'show');
 			let showAdvanced = false;
-			if (mode === 'a') {
+			if (mode[0] === 'a') {
 				me.hueMode = mode[0];
 				const angularMode = parseInt(mode[1]);
 				if (angularMode > 0) {
@@ -451,7 +501,10 @@ function Phyllotaxis() {
 	this.direction = 1;
 
 	this.exponent = 0.5;
-	this.angle = TWO_PI * 0.382;
+	this.initialNumerators = [];
+	this.initialDenominators = [];
+	this.periodicNumerators = [1];
+	this.periodicDenominators = [1];
 	this.spread = 1;
 	this.scale = 20;
 	this.start = 1;
@@ -506,7 +559,7 @@ Phyllotaxis.prototype.purgeCache = function () {
 
 Phyllotaxis.prototype.animatable = {
 	continuous: [
-		'radius', 'aspectRatio', 'clipping', 'exponent', 'angle', 'spread', 'scale',
+		'radius', 'aspectRatio', 'clipping', 'exponent', 'spread', 'scale',
 		'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
@@ -516,6 +569,7 @@ Phyllotaxis.prototype.animatable = {
 		'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
 	],
 	stepped: [
+		'initialNumerators', 'initialDenominators', 'periodicNumerators', 'periodicDenominators',
 		'direction', 'skip', 'stacking', 'petalShape', 'angleMode',
 		'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 	],
@@ -523,6 +577,85 @@ Phyllotaxis.prototype.animatable = {
 		['maxPetals', 'start']	// start moves towards maxPetals
 	]
 };
+
+
+function continuedFraction(numerators, denominators) {
+	let value = 0;
+	for (let i = denominators.length - 1; i >= 0; i--) {
+		value = numerators[i] / (denominators[i] + value);
+	}
+	return value;
+}
+
+function periodicContinuedFraction(initialNumerators, initialDenominators, periodicNumerators, periodicDenominators) {
+	const maxError = 1e-15;
+	let value;
+	let newValue = continuedFraction(initialNumerators, initialDenominators);
+	const period = periodicDenominators.length;
+	const numerators = initialNumerators.slice();
+	const denominators = initialDenominators.slice();
+	let i = 0;
+	let j = 0;
+	do {
+		value = newValue;
+		const newNumerator = periodicNumerators[i];
+		if (newNumerator === 0) {
+			break;
+		}
+		numerators.push(newNumerator);
+		denominators.push(periodicDenominators[i]);
+		j++
+		i = j % period;
+		newValue = continuedFraction(numerators, denominators);
+	} while (!Number.isNaN(newValue) && Math.abs(newValue - value) >= maxError && j < 5000);
+	return newValue;
+}
+
+Phyllotaxis.prototype.normalizeFractions = function () {
+	const numInitialNum = this.initialNumerators.length;
+	const numInitialDenom = this.initialDenominators.length;
+	if (numInitialDenom >= numInitialNum) {
+		for (let i = numInitialNum; i < numInitialDenom; i++) {
+			this.initialNumerators.push(1);
+		}
+	} else {
+		this.initialNumerators.splice(numInitialDenom);
+	}
+	let i = 0;
+	while (i < this.initialNumerators.length) {
+		if (
+			!Number.isFinite(this.initialNumerators[i]) ||
+			!Number.isFinite(this.initialDenominators[i])
+		) {
+			this.initialNumerators.splice(i, 1);
+			this.initialDenominators.splice(i, 1);
+		} else {
+			i++;
+		}
+	}
+
+	const numNumerators = this.periodicNumerators.length;
+	const numDenominators = this.periodicDenominators.length;
+	if (numDenominators >= numNumerators) {
+		for (let i = numNumerators; i < numDenominators; i++) {
+			this.periodicNumerators.push(1);
+		}
+	} else {
+		this.periodicNumerators.splice(numDenominators);
+	}
+	i = 0;
+	while (i < this.periodicNumerators.length) {
+		if (
+			!Number.isFinite(this.periodicNumerators[i]) ||
+			!Number.isFinite(this.periodicDenominators[i])
+		) {
+			this.periodicNumerators.splice(i, 1);
+			this.periodicDenominators.splice(i, 1);
+		} else {
+			i++;
+		}
+	}
+}
 
 class Petal {
 	constructor(r, theta, petalSize) {
@@ -595,7 +728,14 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	const petalDistortion = aspectRatio >= 1 ? petalStretch : 1 / petalStretch;
 
 	if (preview < 2 || this.points === undefined) {
-		const angle = this.angle;
+		let angleFraction = periodicContinuedFraction(
+			this.initialNumerators, this.initialDenominators,
+			this.periodicNumerators, this.periodicDenominators
+		);
+		if (!Number.isFinite(angleFraction)) {
+			angleFraction = 0;
+		}
+		const angle = angleFraction * TWO_PI;
 		const exponent = this.exponent;
 		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 		const petalSize = this.petalSize;

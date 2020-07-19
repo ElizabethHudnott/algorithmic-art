@@ -110,6 +110,14 @@ function Phyllotaxis() {
 		periodicDenominatorsForm.addEventListener('submit', fractionSubmit);
 		periodicDenominatorsForm.addEventListener('focusout', fractionFocusout);
 
+		optionsDoc.getElementById('phyllotaxis-angle-offset').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				me.angleOffset = value / 100;
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('phyllotaxis-clipping').addEventListener('input', function (event) {
 			me.clipping = this.checked ? 1 : -1;
 			generateBackground(0);
@@ -259,6 +267,16 @@ function Phyllotaxis() {
 				}
 				generateBackground(2);
 			}
+		});
+
+		optionsDoc.getElementById('phyllotaxis-continuous-mod').addEventListener('input', function (event) {
+			const field = colorFieldSelect.value;
+			if (field === 'all') {
+				me.continuousMod.fill(this.checked);
+			} else {
+				me.colorMod[parseInt(field)] = this.checked;
+			}
+			generateBackground(2);
 		});
 
 		const hueMinInput = optionsDoc.getElementById('phyllotaxis-hue-min');
@@ -505,6 +523,7 @@ function Phyllotaxis() {
 	this.initialDenominators = [];
 	this.periodicNumerators = [1];
 	this.periodicDenominators = [1];
+	this.angleOffset = 0;
 	this.spread = 1;
 	this.scale = 20;
 	this.start = 1;
@@ -522,6 +541,8 @@ function Phyllotaxis() {
 	this.angleMode.fill('t');
 	this.colorMod = new Array(4);
 	this.colorMod.fill(256);
+	this.continuousMod = new Array(4);
+	this.continuousMod.fill(true);
 	this.angularHueMode = AngularHueMode.RED;
 	this.hueModeIntensity = 0.9;
 	this.hueModSplit = 0.25;
@@ -559,7 +580,7 @@ Phyllotaxis.prototype.purgeCache = function () {
 
 Phyllotaxis.prototype.animatable = {
 	continuous: [
-		'radius', 'aspectRatio', 'clipping', 'exponent', 'spread', 'scale',
+		'angleOffset', 'radius', 'aspectRatio', 'clipping', 'exponent', 'spread', 'scale',
 		'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
@@ -570,7 +591,7 @@ Phyllotaxis.prototype.animatable = {
 	],
 	stepped: [
 		'initialNumerators', 'initialDenominators', 'periodicNumerators', 'periodicDenominators',
-		'direction', 'skip', 'stacking', 'petalShape', 'angleMode',
+		'direction', 'skip', 'stacking', 'petalShape', 'angleMode', 'continuousMod',
 		'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 	],
 	pairedStepped: [
@@ -593,6 +614,9 @@ function periodicContinuedFraction(initialNumerators, initialDenominators, perio
 	let newValue = continuedFraction(initialNumerators, initialDenominators);
 	const period = periodicDenominators.length;
 	const numerators = initialNumerators.slice();
+	if (period == 0) {
+		return newValue;
+	}
 	const denominators = initialDenominators.slice();
 	let i = 0;
 	let j = 0;
@@ -678,8 +702,13 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 		value = degrees - r;
 		break;
 	}
-	const mod = this.colorMod[property];
+	let mod = this.colorMod[property];
 	value = value % mod;
+	const continuous = this.continuousMod[property];
+	if (!continuous) {
+		value = Math.trunc(value);
+		mod--;
+	}
 	if (property !== 0) {
 		return [min + value / mod * range, 0];
 	}
@@ -689,7 +718,7 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 		splitPortion *= hueMode;
 	}
 	let split1 = mod * (1 - splitPortion);
-	if (value < split1) {
+	if (value <= split1) {
 		return [min + value / split1 * range, 0];
 	} else {
 		const fadeLength = (mod - split1) / 2;
@@ -732,9 +761,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			this.initialNumerators, this.initialDenominators,
 			this.periodicNumerators, this.periodicDenominators
 		);
-		if (!Number.isFinite(angleFraction)) {
-			angleFraction = 0;
-		}
+		angleFraction += this.angleOffset;
 		const angle = angleFraction * TWO_PI;
 		const exponent = this.exponent;
 		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));

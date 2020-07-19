@@ -893,7 +893,11 @@ function showBackgroundOptions() {
 		let generator = backgroundGenerators.get(url);
 		if (generator === undefined) {
 			return downloadFile(url, 'text').then(function (sourceCode) {
-				const constructor = Function("'use strict';" + sourceCode)();
+				const constructor = Function(
+					"'use strict';" +
+					sourceCode + '\n' +
+					'//# sourceURL=' + url
+				)();
 				const generator = new constructor();
 				backgroundGenerators.set(url, generator);
 				return generator;

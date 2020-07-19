@@ -690,8 +690,9 @@ class Petal {
 }
 
 Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, min) {
+	const angleMode = this.angleMode[property];
 	let value;
-	switch (this.angleMode[property]) {
+	switch (angleMode) {
 	case 't': 	// Theta
 		value = degrees;
 		break;
@@ -703,36 +704,57 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 		break;
 	}
 	let mod = this.colorMod[property];
-	value = value % mod;
-	const continuous = this.continuousMod[property];
-	if (!continuous) {
-		value = Math.trunc(value);
-		mod--;
-	}
-	if (property !== 0) {
-		return [min + value / mod * range, 0];
-	}
-	const hueMode = this.angularHueMode;
-	let splitPortion = this.hueModSplit;
-	if (hueMode < AngularHueMode.WHITE) {
-		splitPortion *= hueMode;
-	}
-	let split1 = mod * (1 - splitPortion);
-	if (value <= split1) {
-		return [min + value / split1 * range, 0];
-	} else {
-		const fadeLength = (mod - split1) / 2;
-		const split2 = split1 + fadeLength;
-		let hue, modifcation;
-		if (value < split2) {
-			hue = min + range;
-			modifcation = (value - split1) / fadeLength;
-		} else {
-			hue = min;
-			modifcation = (mod - value) / fadeLength;
+	const stepped = angleMode === 'n' || !this.continuousMod[property];
+	let extraColors = 0;
+	if (property === 0) {
+		extraColors = this.hueModSplit * mod;
+		const hueMode = this.angularHueMode;
+		if (hueMode < AngularHueMode.WHITE) {
+			extraColors *= hueMode;
 		}
-		return [hue, modifcation * this.hueModeIntensity];
+		if (extraColors > 509) {
+			extraColors = 509;
+		} else if (stepped) {
+			extraColors = Math.round(extraColors);
+		}
 	}
+	if (angleMode !== 'n') {
+		mod = mod - extraColors;
+	}
+	let split1 = mod;
+	value = value % (mod + extraColors);
+	let length1 = extraColors / 2;
+	let length2 = length1;
+	let split2;
+	if (stepped) {
+		value = Math.trunc(value);
+		if (split1 <= 1 && value < mod) {
+			return [min, 0];
+		}
+		split1--;
+		if (extraColors % 2 === 1) {
+			length1 -= 0.5;
+			length2 += 0.5;
+		}
+		split2 = split1 + length1;
+		length1++;
+		length2++;
+	} else {
+		split2 = split1 + length1;
+	}
+	if (value < mod) {
+		return [min + value / split1 * range, 0];
+	}
+
+	let output, modification;
+	if (value <= split2) {
+		output = min + range;
+		modification = (value - split1) / length1;
+	} else {
+		output = min;
+		modification = 1 - (value - split2) / length2;
+	}
+	return [output, modification * this.hueModeIntensity];
 };
 
 /**

@@ -68,6 +68,13 @@
 						<button type="button" class="dropdown-item" value="MagX">
 							<var>|x| = f(y)</var>
 						</button>
+						<div class="dropdown-divider"></div>
+						<button type="button" class="dropdown-item" value="Heart">
+							Heart
+						</button>
+						<button type="button" class="dropdown-item" value="Rose">
+							Rose
+						</button>
 					</div>
 				</div>
 			</div>
@@ -83,7 +90,7 @@
 			</div>
 		</div>
 		<div id="calc-path-controls">
-			<form class="form-row form-group" id="calc-equation-x-form">
+			<form class="form-row form-group" id="calc-equation-x-form" hidden>
 				<label class="col-3 col-form-label col-form-label-sm" for="calc-equation-x">
 					Equations
 				</label>
@@ -92,7 +99,7 @@
 						<div class="input-group-prepend">
 							<span class="input-group-text" id="calc-equation-x-lhs">x =</span>
 						</div>
-						<input type="text" value="16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
+						<input type="text" class="form-control form-control-sm" id="calc-equation-x" aria-describedby="calc-equation-x-lhs" spellcheck="false" autocomplete="off">
 						<div class="input-group-append">
 							<button type="submit" class="btn btn-secondary" tabindex="-1">
 								Set
@@ -108,7 +115,7 @@
 						<div class="input-group-prepend">
 							<span class="input-group-text" id="calc-equation-y-lhs">y =</span>
 						</div>
-						<input type="text" value="(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
+						<input type="text" value="x" class="form-control" id="calc-equation-y" aria-describedby="calc-equation-y-lhs" spellcheck="false" autocomplete="off">
 						<div class="input-group-append">
 							<button type="submit" class="btn btn-secondary" tabindex="-1">
 								Set

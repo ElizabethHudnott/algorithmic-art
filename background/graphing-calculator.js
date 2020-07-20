@@ -1015,10 +1015,7 @@ function GraphingCalculator() {
 
 	this.addShape(0);
 	this.addSubpath(0, 0);
-	this.addParametricEquation(0, 0, 0);
-	const equation = this.equations[0][0][0];
-	equation.parseXFormula('16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)');
-	equation.parseYFormula('(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)');
+	this.addRectangularEquation(0, 0, 0);
 	this.tween = 0;
 }
 
@@ -1156,6 +1153,19 @@ GraphingCalculator.prototype.addMagXEquation = function (shapeNum, subpathNum, i
 	this.equations[shapeNum][subpathNum].splice(index, 0, new MagXEquation(r));
 	this.setLinearRange(shapeNum, subpathNum, index);
 };
+
+GraphingCalculator.prototype.addHeartEquation = function (shapeNum, subpathNum, index) {
+	this.addParametricEquation(shapeNum, subpathNum, index);
+	const equation = this.equations[shapeNum][subpathNum][index];
+	equation.parseXFormula('16 * sin(t)^3 * (sin(4PI * time)/4 + 0.75)');
+	equation.parseYFormula('(13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) * (sin(4PI * time)/4 + 0.75)');
+}
+
+GraphingCalculator.prototype.addRoseEquation = function (shapeNum, subpathNum, index) {
+	this.addPolarEquation(shapeNum, subpathNum, index);
+	const equation = this.equations[shapeNum][subpathNum][index];
+	equation.parseRFormula('20cos(7/1 * t) + 5');
+}
 
 GraphingCalculator.prototype.removeEquation = function (shapeNum, pathNum, pieceNum) {
 	this.equations[shapeNum][pathNum].splice(pieceNum, 1);

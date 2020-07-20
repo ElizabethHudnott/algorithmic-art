@@ -696,13 +696,17 @@ function showBackgroundOptions() {
 				const continuous = animatable.continuous;
 				if (continuous !== undefined) {
 					for (let property of continuous) {
-						frame.continuous.set(property, values[property]);
+						if (property in values) {
+							frame.continuous.set(property, values[property]);
+						}
 					}
 				}
 				const stepped = animatable.stepped;
 				if (stepped !== undefined) {
 					for (let property of stepped) {
-						frame.stepped.set(property, values[property]);
+						if (property in values) {
+							frame.stepped.set(property, values[property]);
+						}
 					}
 				}
 				const maps = ['pairedContinuous', 'xy', 'pairedStepped'];
@@ -711,8 +715,12 @@ function showBackgroundOptions() {
 					if (list !== undefined) {
 						const map = frame[mapName];
 						for (let [property1, property2] of list) {
-							map.set(property1, values[property1]);
-							map.set(property2, values[property2]);
+							if (property1 in values) {
+								map.set(property1, values[property1]);
+							}
+							if (property2 in values) {
+								map.set(property2, values[property2]);
+							}
 						}
 					}
 				}

@@ -5,8 +5,13 @@
 		</a>
 	</li>
 	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="carpet-structure-tab" data-toggle="tab" href="#carpet-structure" role="tab" aria-controls="carpet-structure" aria-selected="false">
+			Structure
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
 		<a class="nav-link" id="carpet-geometry-tab" data-toggle="tab" href="#carpet-geometry" role="tab" aria-controls="carpet-geometry" aria-selected="false">
-			Geometry
+			Stretching
 		</a>
 	</li>
 </ul>
@@ -258,7 +263,7 @@
 		</div>
 	</div>
 
-	<div class="tab-pane" id="carpet-geometry" role="tabpanel" aria-labelledby="carpet-geometry-tab">
+	<div class="tab-pane" id="carpet-structure" role="tabpanel" aria-labelledby="carpet-structure-tab">
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-depth">
 				Depth
@@ -266,11 +271,24 @@
 			<div class="col-3">
 				<input id="carpet-depth" class="form-control form-control-sm" type="number" min="0" value="5">
 			</div>
-			<label class="col-2 pl-4 col-form-label col-form-label-sm" for="carpet-size">
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-overlap">
+				Overlap
+			</label>
+			<div class="col-7">
+				<input type="range" min="0" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-overlap">
+			</div>
+		</div>
+	</div>
+
+	<div class="tab-pane" id="carpet-geometry" role="tabpanel" aria-labelledby="carpet-geometry-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-size">
 				Size
 			</label>
-			<div class="col-3">
-				<input type="range" min="0" max="1" step="0.0008" value="1" class="form-control-range mt-2" id="carpet-size">
+			<div class="col-7">
+				<input type="range" min="0" max="1" step="0.001" value="1" class="form-control-range mt-2" id="carpet-size">
 			</div>
 		</div>
 		<div class="form-row form-group">

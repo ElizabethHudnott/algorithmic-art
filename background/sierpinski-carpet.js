@@ -165,6 +165,14 @@ function SierpinskiCarpet() {
 			}
 		});
 
+		const overlapInput = optionsDoc.getElementById('carpet-overlap');
+		overlapInput.addEventListener('input', function (event) {
+			me.overlap = parseFloat(this.value);
+			generateBackground(1);
+		});
+		overlapInput.addEventListener('pointerup', fullRedraw);
+		overlapInput.addEventListener('keyup', fullRedraw);
+
 		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsided-x');
 		lopsidedXInput.addEventListener('input', function (event) {
 			me.lopsidednessX = parseFloat(this.value);
@@ -267,6 +275,7 @@ function SierpinskiCarpet() {
 	this.lopsidednessX = 0;
 	this.lopsidednessY = 0;
 	this.middleWidth = 1;
+	this.overlap = 0;
 	this.left = 0;
 	this.top = 0;
 	this.rotation = 0;
@@ -315,16 +324,17 @@ function SierpinskiCarpet() {
 	 * 13	Top left emphasized
 	 * ...
 	 * 21	Bottom right emphasized
+	 * (Only 0-3, 5-8 & 12 appear in the queue)
 	*/
 	this.colors = colors;
 }
 
 SierpinskiCarpet.prototype.animatable = {
 	continuous: [
-		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'left',
-		'top', 'rotation', 'fgSpacingFraction', 'concentricDensity', 'lowerLeftCorner',
-		'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY', 'colors',
-		'patternOpacities'
+		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'overlap',
+		'left', 'top', 'rotation', 'fgSpacingFraction', 'concentricDensity',
+		'lowerLeftCorner', 'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY',
+		'colors', 'patternOpacities'
 	],
 	stepped: [
 		'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
@@ -333,12 +343,100 @@ SierpinskiCarpet.prototype.animatable = {
 	]
 };
 
-function Tile(x, y, width, height, relationship) {
-	this.x = x;
-	this.y = y;
-	this.width = width;
-	this.height = height;
-	this.relationship = relationship;
+class Tile {
+	constructor(x, y, width, height, lx, ly, parent, relationship) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.lx = lx;
+		this.ly = ly;
+		this.parent = parent;
+		this.relationship = relationship;
+
+		const x1 = Math.trunc(x);
+		const x2 = Math.ceil(x + width);
+		const y1 = Math.trunc(y);
+		const y2 = Math.ceil(y + height);
+		const path = new Path2D();
+		this.clipPath = path;
+
+		switch (this.relationship) {
+		case 0: 	// Top left
+			path.moveTo(x1, y1);
+			path.lineTo(x2, y1);
+			path.lineTo(x2, ly);
+			path.lineTo(lx, ly);
+			path.lineTo(lx, y2);
+			path.lineTo(x1, y2);
+			break;
+
+		case 1: 	// Top centre
+			path.moveTo(x1, y1);
+			path.lineTo(x2, y1);
+			path.lineTo(x2, ly);
+			path.lineTo(x1, ly);
+			break;
+
+		case 2: 	// Top right
+			path.moveTo(x1, y1);
+			path.lineTo(x2, y1);
+			path.lineTo(x2, y2);
+			path.lineTo(lx, y2);
+			path.lineTo(lx, ly);
+			path.lineTo(x1, ly);
+			break;
+
+		case 3: 	// Centre left
+			path.moveTo(x1, y1);
+			path.lineTo(lx, y1);
+			path.lineTo(lx, y2);
+			path.lineTo(x1, y2);
+			break;
+
+		case 5: 	// Centre right
+			path.moveTo(lx, y1);
+			path.lineTo(x2, y1);
+			path.lineTo(x2, y2);
+			path.lineTo(lx, y2);
+			break;
+
+		case 6: 	// Bottom left
+		case 12: 	// Centre at depth 0
+			path.moveTo(x1, y1);
+			path.lineTo(lx, y1);
+			path.lineTo(lx, ly);
+			path.lineTo(x2, ly);
+			path.lineTo(x2, y2);
+			path.lineTo(x1, y2);
+			break;
+
+		case 7: 	// Bottom centre
+			path.moveTo(x1, ly);
+			path.lineTo(x2, ly);
+			path.lineTo(x2, y2);
+			path.lineTo(x1, y2);
+			break;
+
+		case 8:
+			path.moveTo(lx, y1);
+			path.lineTo(x2, y1);
+			path.lineTo(x2, y2);
+			path.lineTo(x1, y2);
+			path.lineTo(x1, ly);
+			path.lineTo(lx, ly);
+			break;
+		}
+	}
+
+	clip(context) {
+		context.restore();
+		context.save();
+		if (this.parent !== null) {
+			this.parent.clip(context);
+		}
+		context.clip(this.clipPath);
+	}
 }
 
 SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
@@ -375,6 +473,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 	const lopsidednessX = this.lopsidednessX + 1;
 	const lopsidednessY = this.lopsidednessY + 1;
+	const overlap = this.overlap;
 	const colors = this.colors;
 	const filling = this.filling;
 
@@ -383,8 +482,9 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	context.translate(left + drawWidth / 2, top + drawHeight / 2);
 	context.rotate(this.rotation);
 	context.translate(-drawWidth / 2, -drawHeight / 2);
+	context.save();
 
-	let queue = [new Tile(0, 0, drawWidth, drawHeight, 12)];
+	let queue = [new Tile(0, 0, drawWidth, drawHeight, 0, 0, null, 12)];
 	let nextQueue = [];
 	let numProcessed = 0;
 
@@ -414,6 +514,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const x = tile.x;
 			const y = tile.y;
 			const relationship = tile.relationship;
+			tile.clip(context);
 			let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
 			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
 			let patternedCentre;
@@ -429,8 +530,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				patternLocation = patternedCentre;
 			}
 
-			const roundedX = Math.round(x);
-			const roundedY = Math.round(y);
+			let roundedX = Math.round(x);
+			let roundedY = Math.round(y);
 			let roundedWidth = Math.round(width + x - roundedX);
 			let roundedHeight = Math.round(height + y - roundedY);
 			context.fillStyle = colors[relationship + (depth === 1 && !this.transparentBackground ? 13 : 0)];
@@ -442,21 +543,44 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const width1 = width;
 			height = height / 3;
 			const height1 = height;
-			const width0 = remainingWidth / 2 * lopsidednessX;
+			const width0 = Math.round(remainingWidth / 2 * lopsidednessX);
 			const height0 = height * lopsidednessY;
 			const x1 = x + width0;
 			const y1 = y + height0;
 
-			if (width >= 1 || height >= 1) {
-				if (width < 1) {
-					width = 1;
-				} else if (height < 1) {
-					height = 1;
+			if (middleWidth > 0) {
+				if (width >= 1 || height >= 1) {
+					if (width < 1) {
+						width = 1;
+					} else if (height < 1) {
+						height = 1;
+					}
 				}
-				const roundedX1 = Math.round(x1);
-				const roundedY1 = Math.round(y1);
-				roundedWidth = Math.max(Math.round(width + x1 - roundedX1), 1);
-				roundedHeight = Math.max(Math.round(height + y1 - roundedY1), 1);
+			}
+			const x2 = x1 + width;
+			const y2 = y1 + height;
+			const width2 = remainingWidth - width0;
+			const height2 = 2 * height - height0;
+
+			const leftOverlap = width0 * (1 - middleWidth) / 2 * (2 - lopsidednessX) * overlap;
+			const rightOverlap = width2 * (1 - middleWidth) / 2 * lopsidednessX * overlap;
+			const topOverlap = height0 / 3 * (2 - lopsidednessY) * overlap;
+			const bottomOverlap = height2 / 3 * lopsidednessY * overlap;
+			const centreX = x1 - leftOverlap;
+			const centreY = y1 - topOverlap;
+			let centreWidth = width + leftOverlap + rightOverlap;
+			let centreHeight = height + topOverlap + bottomOverlap;
+			roundedX = Math.round(centreX);
+			roundedY = Math.round(centreY);
+
+			if (centreWidth >= 1 || centreHeight >= 1) {
+				if (centreWidth < 1) {
+					centreWidth = 1;
+				} else if (centreHeight < 1) {
+					centreHeight = 1;
+				}
+				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
+				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
 				if (emphasize) {
 					context.globalCompositeOperation = 'source-over';
 					context.fillStyle = colors[10 + bipartiteColoring];
@@ -468,7 +592,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				}
 				if (drawPattern && patternLocation) {
 					if (filling === 'c') {
-						this.concentricSquares(context, roundedX1, roundedY1,
+						this.concentricSquares(context, roundedX, roundedY,
 							roundedWidth, roundedHeight, fgSpacing, bgSpacing,
 							lowerLeftCorner, lowerRightCorner, topLeftCornerX
 						);
@@ -476,26 +600,37 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 						if (!emphasize) {
 							context.globalAlpha = this.patternOpacities[bipartiteColoring];
 						}
-						context.drawImage(bgGeneratorImage, roundedX1, roundedY1, roundedWidth, roundedHeight);
+						context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
 						context.globalAlpha = 1;
 					}
 				} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
-					context.fillRect(roundedX1, roundedY1, roundedWidth, roundedHeight);
+					context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 				}
+			} else {
+				roundedWidth = 0;
+				roundedHeight = 0;
 			}
 
-			const x2 = x1 + width;
-			const y2 = y1 + height;
-			const width2 = remainingWidth - width0;
-			const height2 = 2 * height - height0;
-			nextQueue.push(new Tile(x, y, width0, height0, 0));
-			nextQueue.push(new Tile(x1, y, width, height0, 1));
-			nextQueue.push(new Tile(x2, y, width2, height0, 2));
-			nextQueue.push(new Tile(x, y1, width0, height, 3));
-			nextQueue.push(new Tile(x2, y1, width2, height, 5));
-			nextQueue.push(new Tile(x, y2, width0, height2, 6));
-			nextQueue.push(new Tile(x1, y2, width, height2, 7));
-			nextQueue.push(new Tile(x2, y2, width2, height2, 8));
+			const overlapX2 = roundedX + roundedWidth;
+			const overlapY2 = roundedY + roundedHeight;
+			// Top left
+			nextQueue.push(new Tile(x, y, width0, height0, roundedX, roundedY, tile, 0));
+			if (middleWidth > 0) {
+				// Top middle
+				nextQueue.push(new Tile(x1, y, width, height0, undefined, roundedY, tile, 1));
+				// Bottom middle
+				nextQueue.push(new Tile(x1, y2, width, height2, undefined, overlapY2, tile, 7));
+			}
+			// Top right
+			nextQueue.push(new Tile(x2, y, width2, height0, overlapX2, roundedY, tile, 2));
+			// Middle left
+			nextQueue.push(new Tile(x, y1, width0, height, roundedX, undefined, tile, 3));
+			// Middle right
+			nextQueue.push(new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5));
+			// Bottom left
+			nextQueue.push(new Tile(x, y2, width0, height2, roundedX, overlapY2, tile, 6));
+			// Bottom right
+			nextQueue.push(new Tile(x2, y2, width2, height2, overlapX2, overlapY2, tile, 8));
 
 			numProcessed++;
 			if ((numProcessed % 500) === 499 && performance.now() >= beginTime + 20) {

@@ -97,6 +97,11 @@
 				If your constructor contains the line <code>this.tween&nbsp;=&nbsp;0;</code> then the environment interprets this as meaning the sketch has an intrinsic sense of time. That is to say, it is capable of rendering more than one image from the same set of parameter values. The environment will set <code>tween</code> to a number between zero and one before it calls <code>generate()</code>, where zero represents the start frame and one represents the end frame. When a sketch uses the <code>tween</code> property a user can use animation features right away without the need to explicitly mark distinct start and end frames, although they can still do that if they wish.
 			</p>
 
+			<h2>Data Attributes</h2>
+			<p>
+				You can use a <code>&lt;button&gt;</code> with a <code>data-reset</code> attribute to reset a control and its corresponding JavaScript property to an initial value (which is determined by inspecting the <code>value</code> attribute). For example, <code>&lt;button type="button" data-reset="carpet-stretch"&gt;</code> will reset the <code>&lt;input&gt;</code> element with <code>carpet-stretch</code> as its ID and it will also reset the JavaScript property named <code>stretch</code>.
+			</p>
+
 			<h2>Utility Functions</h2>
 			<p>
 				TODO: Write documentation here.

@@ -173,7 +173,7 @@ function SierpinskiCarpet() {
 		overlapInput.addEventListener('pointerup', fullRedraw);
 		overlapInput.addEventListener('keyup', fullRedraw);
 
-		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsided-x');
+		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsidedness-x');
 		lopsidedXInput.addEventListener('input', function (event) {
 			me.lopsidednessX = parseFloat(this.value);
 			generateBackground(1);
@@ -181,25 +181,13 @@ function SierpinskiCarpet() {
 		lopsidedXInput.addEventListener('pointerup', fullRedraw);
 		lopsidedXInput.addEventListener('keyup', fullRedraw);
 
-		optionsDoc.getElementById('carpet-lopsided-x-reset').addEventListener('click', function (event) {
-			lopsidedXInput.value = 0;
-			me.lopsidednessX = 0;
-			generateBackground(0);
-		});
-
-		const lopsidedYInput = optionsDoc.getElementById('carpet-lopsided-y');
+		const lopsidedYInput = optionsDoc.getElementById('carpet-lopsidedness-y');
 		lopsidedYInput.addEventListener('input', function (event) {
 			me.lopsidednessY = parseFloat(this.value);
 			generateBackground(1);
 		});
 		lopsidedYInput.addEventListener('pointerup', fullRedraw);
 		lopsidedYInput.addEventListener('keyup', fullRedraw);
-
-		optionsDoc.getElementById('carpet-lopsided-y-reset').addEventListener('click', function (event) {
-			lopsidedYInput.value = 0;
-			me.lopsidednessY = 0;
-			generateBackground(0);
-		});
 
 		const middleWidthInput = optionsDoc.getElementById('carpet-middle-width');
 		middleWidthInput.addEventListener('input', function (event) {
@@ -209,11 +197,13 @@ function SierpinskiCarpet() {
 		middleWidthInput.addEventListener('pointerup', fullRedraw);
 		middleWidthInput.addEventListener('keyup', fullRedraw);
 
-		optionsDoc.getElementById('carpet-width-reset').addEventListener('click', function (event) {
-			middleWidthInput.value = 1;
-			me.middleWidth = 1;
-			generateBackground(0);
+		const middleHeightInput = optionsDoc.getElementById('carpet-middle-height');
+		middleHeightInput.addEventListener('input', function (event) {
+			me.middleHeight = parseFloat(this.value);
+			generateBackground(1);
 		});
+		middleHeightInput.addEventListener('pointerup', fullRedraw);
+		middleHeightInput.addEventListener('keyup', fullRedraw);
 
 		const sizeInput = optionsDoc.getElementById('carpet-size');
 		sizeInput.addEventListener('input', function (event) {
@@ -230,12 +220,6 @@ function SierpinskiCarpet() {
 		});
 		stretchInput.addEventListener('pointerup', fullRedraw);
 		stretchInput.addEventListener('keyup', fullRedraw);
-
-		optionsDoc.getElementById('carpet-stretch-reset').addEventListener('click', function (event) {
-			stretchInput.value = 0;
-			me.stretch = 0;
-			generateBackground(0);
-		});
 
 		optionsDoc.getElementById('carpet-left').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -261,12 +245,6 @@ function SierpinskiCarpet() {
 		rotationInput.addEventListener('pointerup', fullRedraw);
 		rotationInput.addEventListener('keyup', fullRedraw);
 
-		optionsDoc.getElementById('carpet-rotation-reset').addEventListener('click', function (event) {
-			rotationInput.value = '0';
-			me.rotation = 0;
-			generateBackground(0);
-		});
-
 		return optionsDoc;
 	});
 
@@ -275,6 +253,7 @@ function SierpinskiCarpet() {
 	this.lopsidednessX = 0;
 	this.lopsidednessY = 0;
 	this.middleWidth = 1;
+	this.middleHeight = 1;
 	this.overlap = 0;
 	this.left = 0;
 	this.top = 0;
@@ -331,8 +310,8 @@ function SierpinskiCarpet() {
 
 SierpinskiCarpet.prototype.animatable = {
 	continuous: [
-		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'overlap',
-		'left', 'top', 'rotation', 'fgSpacingFraction', 'concentricDensity',
+		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'middleHeight',
+		'overlap', 'left', 'top', 'rotation', 'fgSpacingFraction', 'concentricDensity',
 		'lowerLeftCorner', 'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY',
 		'colors', 'patternOpacities'
 	],
@@ -354,10 +333,10 @@ class Tile {
 		this.parent = parent;
 		this.relationship = relationship;
 
-		const x1 = Math.trunc(x);
-		const x2 = Math.ceil(x + width);
-		const y1 = Math.trunc(y);
-		const y2 = Math.ceil(y + height);
+		const x1 = Math.round(x);
+		const x2 = Math.round(x + width);
+		const y1 = Math.round(y);
+		const y2 = Math.round(y + height);
 		const path = new Path2D();
 		this.clipPath = path;
 
@@ -446,6 +425,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		return;
 	}
 	const middleWidth = this.middleWidth / 3;
+	const middleHeight = this.middleHeight / 3;
 	const drawSize = this.size;
 
 	let drawWidth, drawHeight;
@@ -465,7 +445,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		} else {
 			drawHeight = drawSize * (stretch + 1) * canvasWidth;
 		}
-		const idealHeight = drawHeight * (2 / 3 + 1 / middleWidth);
+		const idealHeight = drawHeight * (2 / 3 + 1 / middleHeight);
 		drawHeight = Math.min(Math.max(idealHeight, drawHeight), canvasHeight);
 	}
 	drawWidth = Math.round(drawWidth);
@@ -493,7 +473,10 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		maxDepth = 3;
 	}
 
-	const spacingNumerator = Math.min(drawWidth * middleWidth, drawHeight / 3) / this.concentricDensity;
+	const spacingNumerator = Math.min(
+		drawWidth * (middleWidth + overlap),
+		drawHeight * (middleHeight + overlap),
+	) / this.concentricDensity;
 
 	for (let depth = 0; depth <= maxDepth; depth++) {
 		const emphasize = depth <= this.centreEmphasis;
@@ -541,14 +524,15 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const remainingWidth = width * (1 - middleWidth);
 			width = width * middleWidth;
 			const width1 = width;
-			height = height / 3;
+			const remainingHeight = height * (1 - middleHeight);
+			height = height * middleHeight;
 			const height1 = height;
 			const width0 = Math.round(remainingWidth / 2 * lopsidednessX);
-			const height0 = height * lopsidednessY;
+			const height0 = Math.round(remainingHeight / 2 * lopsidednessY);
 			const x1 = x + width0;
 			const y1 = y + height0;
 
-			if (middleWidth > 0) {
+			if (middleWidth > 0 && middleHeight > 0) {
 				if (width >= 1 || height >= 1) {
 					if (width < 1) {
 						width = 1;
@@ -560,12 +544,12 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const x2 = x1 + width;
 			const y2 = y1 + height;
 			const width2 = remainingWidth - width0;
-			const height2 = 2 * height - height0;
+			const height2 = remainingHeight - height0;
 
 			const leftOverlap = width0 * (1 - middleWidth) / 2 * (2 - lopsidednessX) * overlap;
 			const rightOverlap = width2 * (1 - middleWidth) / 2 * lopsidednessX * overlap;
-			const topOverlap = height0 / 3 * (2 - lopsidednessY) * overlap;
-			const bottomOverlap = height2 / 3 * lopsidednessY * overlap;
+			const topOverlap = height0 * (1 - middleHeight) / 2 * (2 - lopsidednessY) * overlap;
+			const bottomOverlap = height2 * (1 - middleHeight) / 2 * lopsidednessY * overlap;
 			const centreX = x1 - leftOverlap;
 			const centreY = y1 - topOverlap;
 			let centreWidth = width + leftOverlap + rightOverlap;
@@ -623,10 +607,12 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			}
 			// Top right
 			nextQueue.push(new Tile(x2, y, width2, height0, overlapX2, roundedY, tile, 2));
-			// Middle left
-			nextQueue.push(new Tile(x, y1, width0, height, roundedX, undefined, tile, 3));
-			// Middle right
-			nextQueue.push(new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5));
+			if (middleHeight > 0) {
+				// Middle left
+				nextQueue.push(new Tile(x, y1, width0, height, roundedX, undefined, tile, 3));
+				// Middle right
+				nextQueue.push(new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5));
+			}
 			// Bottom left
 			nextQueue.push(new Tile(x, y2, width0, height2, roundedX, overlapY2, tile, 6));
 			// Bottom right
@@ -634,14 +620,17 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 			numProcessed++;
 			if ((numProcessed % 500) === 499 && performance.now() >= beginTime + 20) {
+				context.restore();
 				yield;
 				beginTime = performance.now();
+				context.save();
 			}
 
 		}
 		queue = nextQueue;
 		nextQueue = [];
 	}
+	context.restore();
 };
 
 SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, width, height, fgSpacing, bgSpacing, lowerLeftCorner, lowerRightCorner, topLeftCornerX) {

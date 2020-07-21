@@ -357,6 +357,18 @@ function adjustLineDash(lineDash, lineWidth) {
 	}
 }
 
+function idToProperty(id, hasPrefix) {
+	const words = id.split('-');
+	if (hasPrefix) {
+		words.splice(0, 1);
+	}
+	 for (let i = 1; i < words.length; i++) {
+	 	const word = words[i];
+	 	words[i] = word[0].toUpperCase() + word.slice(1);
+	 }
+	 return words.join('');
+}
+
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;
 

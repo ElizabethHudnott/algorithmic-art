@@ -292,27 +292,27 @@
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsided-x">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsidedness-x">
 				X-Lopsidedness
 			</label>
 			<div class="col-7">
-				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsided-x">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsidedness-x">
 			</div>
 			<div class="col-2">
-				<button type="button" class="btn btn-light" id="carpet-lopsided-x-reset" title="Reset lopsidedness">
+				<button type="button" class="btn btn-light" data-reset="carpet-lopsidedness-x" title="Reset lopsidedness">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsided-y">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsidedness-y">
 				Y-Lopsidedness
 			</label>
 			<div class="col-7">
-				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsided-y">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsidedness-y">
 			</div>
 			<div class="col-2">
-				<button type="button" class="btn btn-light" id="carpet-lopsided-y-reset" title="Reset lopsidedness">
+				<button type="button" class="btn btn-light" data-reset="carpet-lopsidedness-y" title="Reset lopsidedness">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>
@@ -322,10 +322,23 @@
 				Middle Width
 			</label>
 			<div class="col-7">
-				<input type="range" min="0" max="3" step="0.002" value="1" class="form-control-range mt-2" id="carpet-middle-width">
+				<input type="range" min="0" max="3" step="0.005" value="1" class="form-control-range mt-2" id="carpet-middle-width">
 			</div>
 			<div class="col-2">
-				<button type="button" class="btn btn-light" id="carpet-width-reset" title="Reset width">
+				<button type="button" class="btn btn-light" data-reset="carpet-middle-width" title="Reset width">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="carpet-middle-height">
+				Middle Height
+			</label>
+			<div class="col-7">
+				<input type="range" min="0" max="3" step="0.005" value="1" class="form-control-range mt-2" id="carpet-middle-height">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light" data-reset="carpet-middle-height" title="Reset height">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>
@@ -338,7 +351,7 @@
 				<input type="range" min="-1" max="1" step="0.0005" value="0" class="form-control-range mt-2" id="carpet-stretch">
 			</div>
 			<div class="col-2">
-				<button type="button" class="btn btn-light" id="carpet-stretch-reset" title="Reset stretch">
+				<button type="button" class="btn btn-light" data-reset="carpet-stretch" title="Reset stretch">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>
@@ -375,7 +388,7 @@
 				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-rotation">
 			</div>
 			<div class="col-2">
-				<button type="button" class="btn btn-light" id="carpet-rotation-reset" title="Reset rotation">
+				<button type="button" class="btn btn-light" data-reset="carpet-rotation" title="Reset rotation">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
 			</div>

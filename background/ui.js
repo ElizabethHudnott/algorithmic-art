@@ -948,6 +948,21 @@ function showBackgroundOptions() {
 		}
 	}
 
+	function resetControl(event) {
+		const id = this.dataset.reset;
+		const control = document.getElementById(id);
+		const value = control.getAttribute('value');
+		const property = idToProperty(id, true);
+		control.value = value;
+		const controlType = control.type;
+		if (controlType === 'range' || controlType === 'number') {
+			bgGenerator[property] = parseFloat(value);
+		} else {
+			bgGenerator[property] = value;
+		}
+		progressiveBackgroundGen(0);
+	}
+
 	function openSketch() {
 		document.getElementById('btn-open-sketch').click();
 	}
@@ -1087,6 +1102,9 @@ function showBackgroundOptions() {
 			if (optionsDocPromise !== undefined) {
 				optionsDocPromise.then(function (optionsDoc) {
 					const dom = optionsDoc.body;
+					for (let resetButton of dom.querySelectorAll('button[data-reset]')) {
+						resetButton.addEventListener('click', resetControl);
+					}
 					attachOptionsDOM(dom);
 					backgroundGenOptionsDOM.set(url, dom);
 				});

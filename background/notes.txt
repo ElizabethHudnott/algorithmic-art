@@ -1,7 +1,6 @@
 Carpet: problem updating
-Carpet: Add 'negative' (fractional) stretch
-Carpet: reset buttons for lopsidedness, middle width and stretch
 Carpet: bipartite with images: colour background
+Carpet: bipartite is not bipartite when middle width and middle height are both 0
 
 Environment
 -----------

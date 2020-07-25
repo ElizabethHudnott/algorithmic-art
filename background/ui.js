@@ -533,7 +533,7 @@ function showBackgroundOptions() {
 							});
 						}
 					} else {
-						setTimeout(drawSection, 0);
+						requestAnimationFrame(drawSection);
 					}
 				}
 			}

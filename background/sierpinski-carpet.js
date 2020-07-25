@@ -174,17 +174,28 @@ function SierpinskiCarpet() {
 		overlapInput.addEventListener('pointerup', fullRedraw);
 		overlapInput.addEventListener('keyup', fullRedraw);
 
-		function changeLayout(i) {
+		function updateCheckboxArray(i) {
 			return function (event) {
-				me.recursive[i] = this.checked;
+				const property = this.dataset.property;
+				me[property][i] = this.checked;
 				generateBackground(0);
 			};
 		}
 
-		const recursiveInputs = optionsDoc.getElementById('carpet-recursive').getElementsByTagName('INPUT');
+		const recursiveInputs = optionsDoc.getElementById('carpet-recursive').querySelectorAll('input[data-property=recursive]');
 		for (let i = 0; i < recursiveInputs.length; i++) {
-			recursiveInputs[i].addEventListener('input', changeLayout(i));
+			recursiveInputs[i].addEventListener('input', updateCheckboxArray(i));
 		}
+
+		const cutoutInputs = optionsDoc.getElementById('carpet-cutouts').querySelectorAll('input[data-property=cutouts]');
+		for (let i = 0; i < cutoutInputs.length; i++) {
+			cutoutInputs[i].addEventListener('input', updateCheckboxArray(i >= 4 ? i + 1 : i));
+		}
+
+		optionsDoc.getElementById('carpet-cutout-depth-0').addEventListener('input', function (event) {
+			me.cutoutDepth0 = this.checked;
+			generateBackground(0);
+		});
 
 		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsidedness-x');
 		lopsidedXInput.addEventListener('input', function (event) {
@@ -275,6 +286,10 @@ function SierpinskiCarpet() {
 	this.recursive = recursive;
 	recursive.fill(true);
 	recursive[4] = false;
+	const cutouts = new Array(9);
+	this.cutouts = cutouts;
+	cutouts.fill(true);
+	this.cutoutDepth0 = true;
 
 	this.maxDepth = 4;
 	this.patternDepth = 3;
@@ -333,7 +348,8 @@ SierpinskiCarpet.prototype.animatable = {
 		'colors', 'patternOpacities'
 	],
 	stepped: [
-		'recursive', 'maxDepth', 'patternDepth', 'compositionOp', 'filling', 'patternLocations',
+		'recursive', 'cutouts', 'maxDepth',
+		'patternDepth', 'compositionOp', 'filling', 'patternLocations',
 		'patternedCentre', 'centreEmphasis', 'blendFilling', 'transparentBackground',
 		'bipartite'
 	]
@@ -455,16 +471,17 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	}
 	const permutations = new Array(9);
 	permutations[0] = [6, 3, 0, 7, 4, 1, 8, 5, 2];
-	permutations[1] = [8, 6, 7, 5, 4, 3, 1, 2, 0];
+	permutations[1] = [8, 6, 7, 5, 4, 3, 0, 2, 1];
 	permutations[2] = [8, 7, 6, 5, 4, 3, 2, 1, 0];
-	permutations[3] = [7, 3, 0, 6, 4, 2, 8, 5, 1];
+	permutations[3] = [7, 3, 1, 6, 4, 2, 8, 5, 0];
 	permutations[4] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-	permutations[5] = [1, 5, 8, 2, 4, 6, 0, 3, 7];
+	permutations[5] = [0, 5, 8, 2, 4, 6, 1, 3, 7];
 	permutations[6] = permutations[4];
-	permutations[7] = [0, 2, 1, 3, 4, 5, 7, 6, 8];
+	permutations[7] = [1, 2, 0, 3, 4, 5, 7, 6, 8];
 	permutations[8] = [2, 5, 8, 1, 4, 7, 0, 3, 6];
 	permutations[12] = permutations[4];
-
+	const recursive = this.recursive;
+	const cutouts = this.cutouts;
 	const middleWidth = this.middleWidth / 3;
 	const middleHeight = this.middleHeight / 3;
 	const drawSize = this.size;
@@ -505,7 +522,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	context.translate(-drawWidth / 2, -drawHeight / 2);
 	context.save();
 
-	const recursive = this.recursive;
 	let queue = [new Tile(0, 0, drawWidth, drawHeight, 0, 0, null, 12)];
 	let nextQueue = [];
 	let numProcessed = 0;
@@ -539,6 +555,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const x = tile.x;
 			const y = tile.y;
 			const relationship = tile.relationship;
+			const permutation = permutations[relationship];
 			tile.clip(context);
 			let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
 			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
@@ -607,38 +624,89 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				}
 				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
 				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
-				const lShaped = !recursive[2];
-				let lx, ly;
-				if (relationship % 3 === 0) {
-					// Left column
-					if (lShaped) {
-						lx = Math.round(centreX + centreWidth - rightOverlap);
+
+				if (overlap < 1 && (depth > 0 || this.cutoutDepth0)) {
+					const centreX2 = roundedX + roundedWidth;
+					const centreY2 = roundedY + roundedHeight;
+					const lx1 = roundedX + Math.round(leftOverlap);
+					const lx2 = centreX2 - Math.round(rightOverlap);
+					const ly1 = roundedY + Math.round(topOverlap);
+					const ly2 = centreY2 - Math.round(bottomOverlap);
+
+					context.beginPath();
+					// Top left
+					if (recursive[permutation[0]] || !cutouts[0]) {
+						context.moveTo(roundedX, ly1);
+						context.lineTo(roundedX, roundedY);
+						context.lineTo(lx1, roundedY);
 					} else {
-						lx = roundedX + roundedWidth;
+						context.moveTo(lx1, ly1);
 					}
-				} else {
-					if (lShaped) {
-						lx = Math.round(centreX + leftOverlap);
+
+					// Top centre
+					if (recursive[permutation[1]] || !cutouts[1]) {
+						context.lineTo(lx1, roundedY);
+						context.lineTo(lx2, roundedY);
 					} else {
-						lx = roundedX;
+						context.lineTo(lx1, ly1);
+						context.lineTo(lx2, ly1);
 					}
+
+					// Top right
+					if (recursive[permutation[2]] || !cutouts[2]) {
+						context.lineTo(lx2, roundedY);
+						context.lineTo(centreX2, roundedY);
+						context.lineTo(centreX2, ly1);
+					} else {
+						context.lineTo(lx2, ly1);
+					}
+
+					// Centre right
+					if (recursive[permutation[5]] || !cutouts[5]) {
+						context.lineTo(centreX2, ly1);
+						context.lineTo(centreX2, ly2);
+					} else {
+						context.lineTo(lx2, ly1);
+						context.lineTo(lx2, ly2);
+					}
+
+					// Bottom right
+					if (recursive[permutation[8]] || !cutouts[8]) {
+						context.lineTo(centreX2, ly2);
+						context.lineTo(centreX2, centreY2);
+						context.lineTo(lx2, centreY2);
+					} else {
+						context.lineTo(lx2, ly2);
+					}
+
+					// Bottom centre
+					if (recursive[permutation[7]] || !cutouts[7]) {
+						context.lineTo(lx2, centreY2);
+						context.lineTo(lx1, centreY2);
+					} else {
+						context.lineTo(lx2, ly2);
+						context.lineTo(lx1, ly2);
+					}
+
+					// Bottom left
+					if (recursive[permutation[6]] || !cutouts[6]) {
+						context.lineTo(lx1, centreY2);
+						context.lineTo(roundedX, centreY2);
+						context.lineTo(roundedX, ly2);
+					} else {
+						context.lineTo(lx1, ly2);
+					}
+
+					// Centre Left
+					if (recursive[permutation[3]] || !cutouts[3]) {
+						context.lineTo(roundedX, ly2);
+						context.lineTo(roundedX, ly1);
+					} else {
+						context.lineTo(lx1, ly2);
+						context.lineTo(lx1, ly1);
+					}
+					context.clip();
 				}
-				if (relationship / 3 < 1) {
-					// Top row
-					if (lShaped) {
-						ly = Math.round(centreY + centreHeight - bottomOverlap);
-					} else {
-						ly = roundedY + roundedHeight;
-					}
-				} else {
-					if (lShaped) {
-						ly = Math.round(centreY + topOverlap);
-					} else {
-						ly = roundedY;
-					}
-				}
-				const centreTile = new Tile(roundedX, roundedY, roundedWidth, roundedHeight, lx, ly, tile, 4);
-				centreTile.clip(context);
 
 				if (emphasize) {
 					context.globalCompositeOperation = 'source-over';
@@ -681,37 +749,37 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const bottomMiddleTile = new Tile(x1, y2, width, height2, undefined, overlapY2, tile, 7);
 			const bottomRightTile = new Tile(x2, y2, width2, height2, overlapX2, overlapY2, tile, 8);
 
-			if (recursive[permutations[relationship][0]]) {
+			if (recursive[permutation[0]]) {
 				nextQueue.push(topLeftTile);
 			}
 			if (middleWidth > 0) {
-				if (recursive[permutations[relationship][1]]) {
+				if (recursive[permutation[1]]) {
 					nextQueue.push(topMiddleTile);
 				}
-				if (recursive[permutations[relationship][7]]) {
+				if (recursive[permutation[7]]) {
 					nextQueue.push(bottomMiddleTile);
 				}
 			}
-			if (recursive[permutations[relationship][2]]) {
+			if (recursive[permutation[2]]) {
 				nextQueue.push(topRightTile);
 			}
 			if (middleHeight > 0) {
-				if (recursive[permutations[relationship][3]]) {
+				if (recursive[permutation[3]]) {
 					nextQueue.push(middleLeftTile);
 				}
-				if (recursive[permutations[relationship][5]]) {
+				if (recursive[permutation[5]]) {
 					nextQueue.push(middleRightTile);
 				}
 			}
-			if (recursive[permutations[relationship][6]]) {
+			if (recursive[permutation[6]]) {
 				nextQueue.push(bottomLeftTile);
 			}
-			if (recursive[permutations[relationship][8]]) {
+			if (recursive[permutation[8]]) {
 				nextQueue.push(bottomRightTile);
 			}
 
 			numProcessed++;
-			if ((numProcessed % 500) === 499 && performance.now() >= beginTime + 20) {
+			if ((numProcessed % 300) === 299 && performance.now() >= beginTime + 20) {
 				context.restore();
 				yield;
 				beginTime = performance.now();

@@ -192,9 +192,12 @@ function SierpinskiCarpet() {
 			cutoutInputs[i].addEventListener('input', updateCheckboxArray(i >= 4 ? i + 1 : i));
 		}
 
-		optionsDoc.getElementById('carpet-cutout-depth-0').addEventListener('input', function (event) {
-			me.cutoutDepth0 = this.checked;
-			generateBackground(0);
+		optionsDoc.getElementById('carpet-cutout-depth').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 1) {
+				me.cutoutDepth = value;
+				generateBackground(0);
+			}
 		});
 
 		const lopsidedXInput = optionsDoc.getElementById('carpet-lopsidedness-x');
@@ -289,7 +292,7 @@ function SierpinskiCarpet() {
 	const cutouts = new Array(9);
 	this.cutouts = cutouts;
 	cutouts.fill(true);
-	this.cutoutDepth0 = true;
+	this.cutoutDepth = 1;
 
 	this.maxDepth = 4;
 	this.patternDepth = 3;
@@ -348,7 +351,7 @@ SierpinskiCarpet.prototype.animatable = {
 		'colors', 'patternOpacities'
 	],
 	stepped: [
-		'recursive', 'cutouts', 'maxDepth',
+		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth',
 		'patternDepth', 'compositionOp', 'filling', 'patternLocations',
 		'patternedCentre', 'centreEmphasis', 'blendFilling', 'transparentBackground',
 		'bipartite'
@@ -482,6 +485,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	permutations[12] = permutations[4];
 	const recursive = this.recursive;
 	const cutouts = this.cutouts;
+	const cutoutDepth = this.cutoutDepth - 1;
 	const middleWidth = this.middleWidth / 3;
 	const middleHeight = this.middleHeight / 3;
 	const drawSize = this.size;
@@ -537,6 +541,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	) / this.concentricDensity;
 
 	for (let depth = 0; depth <= maxDepth; depth++) {
+		const useCutouts = (overlap < 1 || depth === 0) && depth >= cutoutDepth;
 		const emphasize = depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
@@ -625,7 +630,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
 				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
 
-				if (overlap < 1 && (depth > 0 || this.cutoutDepth0)) {
+				if (useCutouts) {
 					const centreX2 = roundedX + roundedWidth;
 					const centreY2 = roundedY + roundedHeight;
 					const lx1 = roundedX + Math.round(leftOverlap);

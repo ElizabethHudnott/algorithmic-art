@@ -198,7 +198,7 @@ function changePenPosition(rotor, offsetX, offsetY) {
 }
 
 function isAnimating() {
-	return animController && animController.status === 'running';
+	return animController && animController.status === AnimationController.Status.RUNNING;
 }
 
 function setAnimSpeed(newSpeed) {
@@ -386,7 +386,7 @@ function drawSpirograph(description) {
 
 	const promise = new Promise(function (resolve, reject) {
 		function animate(time) {
-			if (newAnimController.status === 'aborted' || animSpeed === 0) {
+			if (newAnimController.status === AnimationController.Status.ABORTED || animSpeed === 0) {
 				return;
 			}
 			let beginTime = newAnimController.beginTime;
@@ -1822,7 +1822,7 @@ setInitialRotation();
 parseAndTrimLineDash();
 drawSpirographAction();
 animController.promise = animController.promise.then(function (event) {
-	if (animController.status === 'finished') {
+	if (animController.status === AnimationController.Status.FINISHED) {
 		eraseTools();
 		gearsVisible = false;
 		const button = document.getElementById('btn-toggle-gears');

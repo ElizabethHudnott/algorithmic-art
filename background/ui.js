@@ -93,6 +93,19 @@ function showBackgroundOptions() {
 			this.width = width;
 			this.height = height;
 			this.length = length;
+
+			const setterBaseType = baseType === 'b' ? 'f' : baseType;
+			if (category === GLTypeCategory.SCALAR && length === undefined) {
+				this.setterName = 'uniform1' + setterBaseType;
+			} else if (category === GLTypeCategory.MATRIX) {
+				if (width === height) {
+					this.setterName = 'uniformMatrix' + width + 'fv';
+				} else {
+					this.setterName = 'uniformMatrix' + height + 'x' + width + 'fv';
+				}
+			} else {
+				this.setterName = 'uniform' + width + setterBaseType + 'v'
+			}
 		}
 
 		toString() {
@@ -128,28 +141,26 @@ function showBackgroundOptions() {
 			return typeName;
 		}
 
+		/**
+		 * @param {boolean} isArrayElement	true if we're setting a single element inside an array.
+		 */
 		assignValue(gl, location, value, isArrayElement) {
-			let baseType = this.baseType;
-			if (baseType === 'b') {
-				baseType = 'f';
+			const category = this.category;
+			const isArray = this.length !== undefined;
+			if (isArray && !isArrayElement) {
+				value = [].concat(...value); // Flatten
 			}
-			if (!isArrayElement && this.length !== undefined) {
-				value = value.flat();
-			}
-			if (this.category === GLTypeCategory.SCALAR && this.length === undefined) {
-				gl['uniform1' + baseType](location, value);
-			} else if (this.category === GLTypeCategory.MATRIX) {
-				value = new Float32Array(value.flat());
-				if (this.width === this.height) {
-					gl['uniformMatrix' + this.width + 'fv'](location, false, value);
-				} else {
-					gl['uniformMatrix' + this.height + 'x' + this.width + 'fv'](location, false, value);
-				}
+			if (category === GLTypeCategory.MATRIX) {
+				value = new Float32Array([].concat(...value));
+				gl[this.setterName](location, false, value);
 			} else {
-				if (baseType === 'i') {
+				if (
+					this.baseType === 'i' &&
+					(category === GLTypeCategory.VECTOR || isArray)
+				) {
 					value = new Int32Array(value);
 				}
-				gl['uniform' + this.width + baseType + 'v'](location, value);
+				gl[this.setterName](location, value);
 			}
 		}
 
@@ -441,8 +452,10 @@ function showBackgroundOptions() {
 		setProperties(generator) {
 			const gl = this.gl;
 			const program = this.program;
-			for (let [property, type] of this.types.entries()) {
+			const types = this.types;
+			for (let property of types.keys()) {
 				const location = gl.getUniformLocation(program, property);
+				const type = types.get(property);
 				type.assignValue(gl, location, generator[property], false);
 			}
 		}
@@ -606,6 +619,7 @@ function showBackgroundOptions() {
 	imageUpload.removeAttribute('hidden');
 
 	const animPositionSlider = document.getElementById('anim-position');
+	let animControlsOpen = false;
 	const videoResolutionInput = document.getElementById('video-resolution');
 
 	class FrameData {
@@ -674,8 +688,9 @@ function showBackgroundOptions() {
 				'continuous', 'stepped', 'pairedContinuous', 'xy', 'pairedStepped'
 			];
 			for (let category of categories) {
-				for (let [key, value] of this[category].entries()) {
-					properties[key] = value;
+				const map = this[category];
+				for (let key of map.keys()) {
+					properties[key] = map.get(key);
 				}
 			}
 			const data = {};
@@ -1145,6 +1160,7 @@ function showBackgroundOptions() {
 					endFrame = startFrame;
 				}
 				tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+				setWillChange();
 				renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, 0, loopAnim, false, 0);
 				displaySeed();
 				animPositionSlider.value = 0;
@@ -1226,7 +1242,9 @@ function showBackgroundOptions() {
 	}
 
 	function interpolateValue(startValue, endValue, tween, loop) {
-		if (Array.isArray(startValue)) {
+		if (startValue === endValue) {
+			return startValue;
+		} else if (Array.isArray(startValue)) {
 			const numStartComponents = startValue.length;
 			const numEndComponents = endValue.length;
 			const numComponents = Math.min(numStartComponents, numEndComponents);
@@ -1391,6 +1409,8 @@ function showBackgroundOptions() {
 	class TweenData {
 
 		constructor(generator, startFrame, endFrame) {
+			this.backgroundColorVaries = startFrame.backgroundColor !== endFrame.backgroundColor;
+
 			// Map x property name to the calculated value.
 			this.radii = new Map();
 			this.startTheta = new Map();
@@ -1431,6 +1451,10 @@ function showBackgroundOptions() {
 			return [x, y];
 		}
 
+	}
+
+	function setWillChange() {
+		backgroundElement.style.willChange = tweenData.backgroundColorVaries ? 'background-color' : 'auto';
 	}
 
 	class InterpolatedRandom {
@@ -1486,11 +1510,13 @@ function showBackgroundOptions() {
 
 	function renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview) {
 		const tweenPrime = calcTween(tween, loop);
-		for (let [property, startValue] of startFrame.continuous.entries()) {
+		for (let property of startFrame.continuous.keys()) {
+			const startValue = startFrame.continuous.get(property);
 			const endValue = endFrame.continuous.get(property);
 			generator[property] = interpolateValue(startValue, endValue, tweenPrime, false);
 		}
-		for (let [property, startValue] of startFrame.stepped.entries()) {
+		for (let property of startFrame.stepped.keys()) {
+			const startValue = startFrame.stepped.get(property);
 			const endValue = endFrame.stepped.get(property);
 			generator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
@@ -1504,7 +1530,8 @@ function showBackgroundOptions() {
 						generator[propertyY] = y;
 					}
 				} else {
-					for (let [property, startValue] of startFrame.xy.entries()) {
+					for (let property of startFrame.xy.keys()) {
+						const startValue = startFrame.xy.get(property);
 						const endValue = endFrame.xy.get(property);
 						generator[property] = interpolateValue(startValue, endValue, tween, false);
 					}
@@ -1524,12 +1551,18 @@ function showBackgroundOptions() {
 		const loopedRotation = loop && (startRotation + TWO_PI) % TWO_PI !== (endRotation + TWO_PI) % TWO_PI;
 		endRotation += Math.sign(endRotation) * TWO_PI * fullRotations;
 		const rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
-		const backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tweenPrime, false);
 		interpolateRandom(startFrame.random, endFrame.random, tweenPrime);
+
+		let backgroundColor;
+		if (tweenData.backgroundColorVaries) {
+			backgroundColor = interpolateValue(startFrame.backgroundColor, endFrame.backgroundColor, tweenPrime, false);
+			backgroundElement.style.backgroundColor = backgroundColor;
+		} else {
+			backgroundColor = startFrame.backgroundColor;
+		}
 
 		const context = contextualInfo.twoD;
 		context.restore();
-		backgroundElement.style.backgroundColor = backgroundColor;
 		context.clearRect(0, 0, width, height);
 		context.save();
 		rotateCanvas(context, width, height, rotation);
@@ -1562,22 +1595,28 @@ function showBackgroundOptions() {
 			const indicator = document.getElementById('recording-indicator');
 			let framesRendered = 0;
 
-			function render() {
-				const time = performance.now();
+			function render(time) {
+				if (capturer !== undefined) {
+					time = performance.now();
+				}
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
 					beginTime = time;
 					newAnimController.setup(render, reject, beginTime);
 				}
 
-				const tween = Math.min(startTween + (time - beginTime) / length, 1);
-				if (newAnimController.status === 'aborted') {
+				if (newAnimController.status === AnimationController.Status.ABORTED) {
 					return;
+				}
+				let tween = startTween + (time - beginTime) / length;
+				const lastFrame = tween >= 1;
+				if (lastFrame) {
+					tween = 1;
 				}
 				renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, 0);
 				newAnimController.progress = tween;
 
-				if (capturer) {
+				if (capturer !== undefined) {
 					capturer.capture(contextualInfo.twoD.canvas);
 					let percent = (tween - startTween) / (1 - startTween) * 100;
 					progressBar.style.width = percent + '%';
@@ -1587,17 +1626,19 @@ function showBackgroundOptions() {
 					framesRendered++;
 					const iconFile = framesRendered % 2 === 0 ? 'record.png' : 'draw_ellipse.png';
 					indicator.src = '../img/' + iconFile;
-				} else {
+				} else if (animControlsOpen) {
 					animPositionSlider.value = tween;
 				}
-				if (tween < 1) {
-					requestAnimationFrame(render);
-				} else {
+				if (lastFrame) {
 					newAnimController.finish(resolve);
+				} else {
+					requestAnimationFrame(render);
 				}
 			};
 			newAnimController.progress = 0;
-			newAnimController.start = render;
+			newAnimController.start = function () {
+				render(performance.now());
+			}
 		});
 		newAnimController.promise = promise;
 		return newAnimController;
@@ -1873,6 +1914,7 @@ function showBackgroundOptions() {
 					if (startFrame === endFrame) {
 						endFrame = currentFrameData();
 						tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+						setWillChange();
 					}
 					endFrame.random = endGenerator;
 					const tween = calcTween(parseFloat(animPositionSlider.value), loopAnim);
@@ -1918,6 +1960,7 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+		setWillChange();
 		displaySeed();
 		animPositionSlider.value = 0;
 		updateAnimPositionReadout(0);
@@ -1933,6 +1976,7 @@ function showBackgroundOptions() {
 		random = random.startGenerator;
 		startFrame = currentFrameData();
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+		setWillChange();
 		displaySeed();
 		animAction();
 	});
@@ -1942,6 +1986,7 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		endFrame = currentFrame;
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+		setWillChange();
 		displaySeed();
 		animPositionSlider.value = 1;
 		updateAnimPositionReadout(1);
@@ -1957,6 +2002,7 @@ function showBackgroundOptions() {
 		random = random.endGenerator;
 		endFrame = currentFrameData();
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+		setWillChange();
 		displaySeed();
 		animAction();
 	});
@@ -2019,7 +2065,9 @@ function showBackgroundOptions() {
 		const playStopButton = document.getElementById('btn-play');
 		playStopButton.children[0].src = '../img/control_play_blue.png';
 		playStopButton.title = 'Play animation';
-		updateAnimPositionReadout(animController.progress);
+		const tween = animController.progress;
+		animPositionSlider.value = tween;
+		updateAnimPositionReadout(tween);
 		syncToPosition();
 	}
 
@@ -2045,7 +2093,7 @@ function showBackgroundOptions() {
 	}
 
 	document.getElementById('btn-play').addEventListener('click', function (event) {
-		if (animController && animController.status === 'running') {
+		if (animController && animController.status === AnimationController.Status.RUNNING) {
 			// Stop
 			animController.abort();
 			return;
@@ -2058,6 +2106,7 @@ function showBackgroundOptions() {
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
 			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+			setWillChange();
 			separateFrames = true;
 			unsavedChanges = false;
 		}
@@ -2082,10 +2131,15 @@ function showBackgroundOptions() {
 	});
 
 
+	$('#play-btn-group').on('show.bs.dropdown', function(event) {
+		animControlsOpen = true;
+	});
+
 	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
 	 	const toolbar = document.getElementById('toolbar');
 		const target = document.activeElement;
-		return target.dataset.toggle === 'dropdown' && toolbar.contains(target);
+		animControlsOpen = target.dataset.toggle !== 'dropdown' || !toolbar.contains(target);
+		return !animControlsOpen;
 	});
 
 	 let seeking = false;
@@ -2099,6 +2153,7 @@ function showBackgroundOptions() {
 				currentFrame = currentFrameData();
 				endFrame = currentFrame;
 				tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+				setWillChange();
 				separateFrames = true;
 				unsavedChanges = false;
 			}
@@ -2214,6 +2269,7 @@ function showBackgroundOptions() {
 			currentFrame = currentFrameData();
 			endFrame = currentFrame;
 			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+			setWillChange();
 			unsavedChanges = false;
 		}
 		if (unsavedChanges) {

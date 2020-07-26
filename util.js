@@ -1,20 +1,26 @@
 'use strict';
 
 class AnimationController {
+	static Status = Object.freeze({
+		RUNNING: 1,
+		FINISHED: 0,
+		ABORTED: -1,
+	});
+
 	constructor(properties) {
 		for (let property in properties) {
 			this[property] = properties[property];
 		}
 		this.beginTime = undefined;
-		this.status = 'running';
+		this.status = AnimationController.Status.RUNNING;
 		this.progress = 0;
 	}
 
 	setAbort(reject) {
 		const me = this;
 		this.abort = function () {
-			if (me.status === 'running') {
-				me.status = 'aborted';
+			if (me.status === AnimationController.Status.RUNNING) {
+				me.status = AnimationController.Status.ABORTED;
 				reject.call(me);
 			}
 		}
@@ -23,7 +29,7 @@ class AnimationController {
 	setContinue(work) {
 		const me = this;
 		this.continue = function () {
-			if (me.status === 'running') {
+			if (me.status === AnimationController.Status.RUNNING) {
 				requestAnimationFrame(work);
 			}
 		}
@@ -36,7 +42,7 @@ class AnimationController {
 	}
 
 	finish(resolve) {
-		this.status = 'finished';
+		this.status = AnimationController.Status.FINISHED;
 		resolve();
 	}
 

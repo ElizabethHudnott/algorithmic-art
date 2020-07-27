@@ -76,17 +76,18 @@ function JuliaSet() {
 			'OPACITY': 3,
 			'ALL': 4,
 		});
-		let activePalette = me.palette;
 		let paletteProperty = 'palette';
 		let colorOperation = ColorOperation.SELECT;
 
 		function updateSwatch(i) {
+			const activePalette = me[paletteProperty];
 			const color = activePalette[i];
 			const swatch = paletteUI.children[i].children[0];
 			swatch.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
 		}
 
 		function updateColorSliders() {
+			const activePalette = me[paletteProperty];
 			const color = activePalette[colorSelectionStart];
 			hueSlider.value = color[0];
 			saturationSlider.value = color[1];
@@ -96,6 +97,7 @@ function JuliaSet() {
 
 		function selectColor(event) {
 			const shift = event.shiftKey || event.longPress;
+			const activePalette = me[paletteProperty];
 			const sourceColor = activePalette[colorSelectionStart];
 			const colorComponent = parseInt(colorComponentInput.value);
 			const clickIndex = parseInt(event.target.dataset.index);
@@ -214,6 +216,7 @@ function JuliaSet() {
 		}
 
 		function colorRangeOperation(operation, rangeStart, rangeEnd) {
+			const activePalette = me[paletteProperty];
 			const colorComponent = parseInt(colorComponentInput.value);
 			const rangeLength = rangeEnd - rangeStart + 1;
 			switch (operation) {
@@ -402,37 +405,40 @@ function JuliaSet() {
 			generateBackground(0);
 			redrawTimeout = undefined;
 		}
-		hueSlider.value = activePalette[0][ColorComponents.HUE];
-		hueSlider.addEventListener('input', function (event) {
-			activePalette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
-			previewColor();
-		});
-		hueSlider.addEventListener('pointerup', setColor);
-		hueSlider.addEventListener('keyup', setColor);
+		{
+			const activePalette = me[paletteProperty];
+			hueSlider.value = activePalette[0][ColorComponents.HUE];
+			hueSlider.addEventListener('input', function (event) {
+				activePalette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
+				previewColor();
+			});
+			hueSlider.addEventListener('pointerup', setColor);
+			hueSlider.addEventListener('keyup', setColor);
 
-		saturationSlider.value = activePalette[0][ColorComponents.SATURATION];
-		saturationSlider.addEventListener('input', function (event) {
-			activePalette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
-			previewColor();
-		});
-		saturationSlider.addEventListener('pointerup', setColor);
-		saturationSlider.addEventListener('keyup', setColor);
+			saturationSlider.value = activePalette[0][ColorComponents.SATURATION];
+			saturationSlider.addEventListener('input', function (event) {
+				activePalette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
+				previewColor();
+			});
+			saturationSlider.addEventListener('pointerup', setColor);
+			saturationSlider.addEventListener('keyup', setColor);
 
-		lightnessSlider.value = activePalette[0][ColorComponents.LIGHTNESS];
-		lightnessSlider.addEventListener('input', function (event) {
-			activePalette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
-			previewColor();
-		});
-		lightnessSlider.addEventListener('pointerup', setColor);
-		lightnessSlider.addEventListener('keyup', setColor);
+			lightnessSlider.value = activePalette[0][ColorComponents.LIGHTNESS];
+			lightnessSlider.addEventListener('input', function (event) {
+				activePalette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
+				previewColor();
+			});
+			lightnessSlider.addEventListener('pointerup', setColor);
+			lightnessSlider.addEventListener('keyup', setColor);
 
-		opacitySlider.value = activePalette[0][ColorComponents.OPACITY];
-		opacitySlider.addEventListener('input', function (event) {
-			activePalette[colorSelectionStart][ColorComponents.OPACITY] = parseFloat(this.value);
-			previewColor();
-		});
-		opacitySlider.addEventListener('pointerup', setColor);
-		opacitySlider.addEventListener('keyup', setColor);
+			opacitySlider.value = activePalette[0][ColorComponents.OPACITY];
+			opacitySlider.addEventListener('input', function (event) {
+				activePalette[colorSelectionStart][ColorComponents.OPACITY] = parseFloat(this.value);
+				previewColor();
+			});
+			opacitySlider.addEventListener('pointerup', setColor);
+			opacitySlider.addEventListener('keyup', setColor);
+		}
 
 		optionsDoc.getElementById('julia-num-colors').addEventListener('input', function (event) {
 			let value = parseInt(this.value);

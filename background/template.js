@@ -68,7 +68,8 @@ MySketch.prototype.animatable = {
 	pairedStepped: [
 	],
 	/* (x, y) pairs are described in the same way as other pairs but instead we interpret
-	 * the start and end values as two points on a plane and perform a circular motion.
+	 * the start and end values as two points on a plane and move around the plane in a
+	 * sort of s-shape-cum-figure-of-eight.
 	 */
 	xy: [
 	]

@@ -102,16 +102,21 @@
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-right bg-black" style="width: min(100%, 500px)" id="anim-controls">
+ 		<div class="dropdown-menu drop-align-right bg-black" style="width: min(100%, 552px)" id="anim-controls">
  			<form class="px-2">
  				<div class="form-row">
- 					<div class="col-6">
+ 					<div class="col-5">
 	 					<label for="anim-position">Position</label>
  					</div>
- 					<div class="col-1">
+ 					<div class="col-1 text-right">
  						<output id="anim-position-readout">10s</output>
  					</div>
- 					<div class="col-3">
+ 					<div class="col-1 text-right">
+ 						<button type="button" class="btn btn-sm p-0" title="Rewind animation" id="btn-rewind">
+ 							<img src="../img/control_rewind_blue.png" width="24" alt="Rewind">
+ 						</button>
+ 					</div>
+ 					<div class="col-3 pl-3">
 	 					<label for="anim-length">Length</label>
  					</div>
  				</div>
@@ -119,15 +124,15 @@
 	 				<div class="col-7">
 	 					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="anim-position">
 	 				</div>
-	 				<div class="col-3">
+	 				<div class="col-3 pl-3 pr-0">
 	 					<div class="input-group input-group-sm">
-	 						<input type="number" min="1" value="10" class="form-control" id="anim-length" aria-describedby="anim-length-units">
+	 						<input type="number" min="1" value="10" class="form-control text-right" id="anim-length" aria-describedby="anim-length-units">
 	 						<div class="input-group-append">
 	 							<span class="input-group-text bg-dark text-white" id="anim-length-units">s</span>
 	 						</div>
 	 					</div>
 	 				</div>
-	 				<div class="col-2">
+	 				<div class="col-2 text-center">
 	 					<button type="button" class="btn btn-sm btn-dark" id="btn-anim-opts" title="Advanced animation options">More&hellip;</button>
 	 				</div>
  				</div>

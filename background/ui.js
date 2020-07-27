@@ -1414,8 +1414,10 @@ function showBackgroundOptions() {
 			// Map x property name to the calculated value.
 			this.radii = new Map();
 			this.startTheta = new Map();
-			this.centreX = new Map();
-			this.centreY = new Map();
+			this.centreX1 = new Map();
+			this.centreY1 = new Map();
+			this.centreX2 = new Map();
+			this.centreY2 = new Map();
 
 			if (generator.animatable === undefined || generator.animatable.xy === undefined) {
 				return;
@@ -1429,25 +1431,38 @@ function showBackgroundOptions() {
 				const startY = startXY.get(keyY);
 				const endX = endXY.get(keyX);
 				const endY = endXY.get(keyY);
-				const centreX = (startX + endX) / 2;
-				const centreY = (startY + endY) / 2;
-				const distX = startX - centreX;
-				const distY = startY - centreY;
-				const r = Math.hypot(distX, distY);
+				const centreX1 = (startX + 3 * endX) / 4;
+				const centreY1 = (startY + 3 * endY) / 4;
+				const centreX2 = (3 * startX + endX) / 4;
+				const centreY2 = (3 * startY + endY) / 4;
+				const distX = endX - startX;
+				const distY = endY - startY;
+				const r = Math.hypot(distX, distY) / 4;
 				const theta = Math.atan2(distY, distX);
 				this.radii.set(keyX, r);
 				this.startTheta.set(keyX, theta);
-				this.centreX.set(keyX, centreX);
-				this.centreY.set(keyX, centreY);
+				this.centreX1.set(keyX, centreX1);
+				this.centreY1.set(keyX, centreY1);
+				this.centreX2.set(keyX, centreX2);
+				this.centreY2.set(keyX, centreY2);
 			}
 		}
 
 		interpolateXY(keyX, tween) {
 			const r = this.radii.get(keyX);
 			const startTheta = this.startTheta.get(keyX);
-			const theta = tween * TWO_PI + startTheta;
-			const x = r * Math.cos(theta) + this.centreX.get(keyX);
-			const y = r * Math.sin(theta) + this.centreY.get(keyX);
+			let centreX, centreY, theta;
+			if (tween < 0.75) {
+				centreX = this.centreX1.get(keyX);
+				centreY = this.centreY1.get(keyX);
+				theta = 4 * (tween - 0.5) * Math.PI + startTheta;
+			} else {
+				centreX = this.centreX2.get(keyX);
+				centreY = this.centreY2.get(keyX);
+				theta = -4 * (tween - 0.75) * Math.PI + startTheta;
+			}
+			const x = r * Math.cos(theta) + centreX;
+			const y = r * Math.sin(theta) + centreY;
 			return [x, y];
 		}
 
@@ -1524,10 +1539,18 @@ function showBackgroundOptions() {
 			const xy = generator.animatable.xy;
 			if (xy !== undefined && startFrame !== endFrame) {
 				if (loop) {
-					for (let [propertyX, propertyY] of xy) {
-						const [x, y] = tweenData.interpolateXY(propertyX, tween);
-						generator[propertyX] = x;
-						generator[propertyY] = y;
+					if (tween <= 0.5) {
+						for (let property of startFrame.xy.keys()) {
+							const startValue = startFrame.xy.get(property);
+							const endValue = endFrame.xy.get(property);
+							generator[property] = interpolateValue(startValue, endValue, tween, true);
+						}
+					} else {
+						for (let [propertyX, propertyY] of xy) {
+							const [x, y] = tweenData.interpolateXY(propertyX, tween);
+							generator[propertyX] = x;
+							generator[propertyY] = y;
+						}
 					}
 				} else {
 					for (let property of startFrame.xy.keys()) {
@@ -1594,6 +1617,11 @@ function showBackgroundOptions() {
 		const promise = new Promise(function (resolve, reject) {
 			const indicator = document.getElementById('recording-indicator');
 			let framesRendered = 0;
+			let uiUpdateInterval = 1 / animPositionSlider.clientWidth;
+			if (!Number.isFinite(uiUpdateInterval)) {
+				uiUpdateInterval = 0.0005;
+			}
+			let lastUIUpdate;
 
 			function render(time) {
 				if (capturer !== undefined) {
@@ -1602,6 +1630,7 @@ function showBackgroundOptions() {
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
 					beginTime = time;
+					lastUIUpdate = startTween;
 					newAnimController.setup(render, reject, beginTime);
 				}
 
@@ -1626,8 +1655,9 @@ function showBackgroundOptions() {
 					framesRendered++;
 					const iconFile = framesRendered % 2 === 0 ? 'record.png' : 'draw_ellipse.png';
 					indicator.src = '../img/' + iconFile;
-				} else if (animControlsOpen) {
+				} else if (animControlsOpen && tween - lastUIUpdate >= uiUpdateInterval) {
 					animPositionSlider.value = tween;
+					lastUIUpdate = tween;
 				}
 				if (lastFrame) {
 					newAnimController.finish(resolve);
@@ -2200,6 +2230,11 @@ function showBackgroundOptions() {
 
 	animPositionSlider.addEventListener('pointerup', syncAndDraw);
 	animPositionSlider.addEventListener('keyup', syncAndDraw);
+
+	document.getElementById('btn-rewind').addEventListener('click', function (event) {
+		animPositionSlider.value = 0;
+		renderAndSync();
+	});
 
 	document.getElementById('anim-length').addEventListener('input', function (event) {
 		const length = parseFloat(this.value);

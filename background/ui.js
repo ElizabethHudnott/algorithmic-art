@@ -1617,9 +1617,9 @@ function showBackgroundOptions() {
 		const promise = new Promise(function (resolve, reject) {
 			const indicator = document.getElementById('recording-indicator');
 			let framesRendered = 0;
-			let uiUpdateInterval = 1 / animPositionSlider.clientWidth;
+			let uiUpdateInterval = 2 / animPositionSlider.clientWidth;
 			if (!Number.isFinite(uiUpdateInterval)) {
-				uiUpdateInterval = 0.0005;
+				uiUpdateInterval = 0.0065;
 			}
 			let lastUIUpdate;
 

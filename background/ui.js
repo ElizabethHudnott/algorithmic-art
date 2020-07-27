@@ -2232,6 +2232,17 @@ function showBackgroundOptions() {
 	animPositionSlider.addEventListener('keyup', syncAndDraw);
 
 	document.getElementById('btn-rewind').addEventListener('click', function (event) {
+		if (startFrame === endFrame) {
+			if ('tween' in bgGenerator) {
+				random = random.endGenerator;
+				currentFrame = currentFrameData();
+				endFrame = currentFrame;
+				tweenData = new TweenData(bgGenerator, startFrame, endFrame);
+				setWillChange();
+			} else {
+				return;
+			}
+		}
 		animPositionSlider.value = 0;
 		renderAndSync();
 	});

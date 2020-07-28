@@ -35,8 +35,6 @@ Ability to incorporate video data
 Radial blur
 Background: color, picture, video or layered sketches
 Animation easing
-	XY properties should pass through the endFrame point at the halfway point in the animation
-WebGL shader sketches
 Progressive Web App
 
 Existing Sketches

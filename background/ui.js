@@ -3,6 +3,7 @@
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
+let backgroundImage;
 
 if (!window.debug) {
 	window.debug = {};
@@ -567,6 +568,9 @@ function showBackgroundOptions() {
 		context.restore();
 		context.clearRect(0, 0, width, height);
 		context.save();
+		if (backgroundImage !== undefined) {
+			context.drawImage(backgroundImage, 0, 0, width, height);
+		}
 		rotateCanvas(context, width, height, bgGeneratorRotation);
 		progressiveBackgroundDraw(bgGenerator, drawingContext, width, height, preview);
 	}
@@ -623,13 +627,17 @@ function showBackgroundOptions() {
 	const videoResolutionInput = document.getElementById('video-resolution');
 
 	class FrameData {
-		constructor(generator, rotation, backgroundElement) {
+		constructor(generator, rotation, backgroundElement, backgroundImage) {
 			this.continuous = new Map();
 			this.stepped = new Map();
 			this.pairedContinuous = new Map();
 			this.xy = new Map();
 			this.pairedStepped = new Map();
 			if (arguments.length === 0) {
+				this.rotation = 0;
+				this.backgroundColor = '#ffffff';
+				this.backgroundImage = undefined;
+				this.random = random;
 				return;
 			}
 
@@ -679,6 +687,7 @@ function showBackgroundOptions() {
 			}
 			this.rotation = rotation;
 			this.backgroundColor = backgroundElement.style.backgroundColor;
+			this.backgroundImage = backgroundImage;
 			this.random = random;
 		}
 
@@ -697,6 +706,9 @@ function showBackgroundOptions() {
 			data.properties = properties;
 			data.rotation = this.rotation;
 			data.backgroundColor = this.backgroundColor;
+			if (this.backgroundImage !== undefined) {
+				data.backgroundImageURL = this.backgroundImage.src;
+			}
 			if (hasRandomness) {
 				data.seed = this.random.seed;
 			}
@@ -742,10 +754,13 @@ function showBackgroundOptions() {
 			}
 			frame.rotation = data.rotation;
 			frame.backgroundColor = data.backgroundColor;
+			if ('backgroundImageURL' in data) {
+				const image = new Image();
+				image.src = data.backgroundImageURL;
+				frame.backgroundImage = image;
+			}
 			if ('random' in data) {
 				frame.random = data.random;
-			} else {
-				frame.random = random;
 			}
 			return frame;
 		}
@@ -753,7 +768,8 @@ function showBackgroundOptions() {
 		isCurrentFrame() {
 			if (
 				this.rotation !== bgGeneratorRotation ||
-				this.backgroundColor !== backgroundElement.style.backgroundColor
+				this.backgroundColor !== backgroundElement.style.backgroundColor ||
+				this.backgroundImage?.src !== backgroundImage?.src
 			) {
 				return false;
 			}
@@ -893,7 +909,7 @@ function showBackgroundOptions() {
 	}
 
 	function currentFrameData() {
-		return new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement);
+		return new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement, backgroundImage);
 	}
 
 	function hideAlert(jquery) {
@@ -1030,49 +1046,111 @@ function showBackgroundOptions() {
 		history.replaceState(null, '', envURL.toString());
 	}
 
+	function findBrokenHelp() {
+		for (let helpElement of helpDoc.body.children) {
+			const id = helpElement.id;
+			const element = document.getElementById(id);
+			if (element === null) {
+				console.warn('Help exists for ' + id + ' but no such element is present.');
+			}
+		}
+	}
+
+	function findMissingHelp() {
+		const container = document.getElementById('background-gen-options');
+		const ancestorIDs = new Map();
+		for (let element of container.querySelectorAll('input, button')) {
+			let id = element.id;
+			if (id === 'background-gen-image-upload') {
+					continue;
+			}
+			const tagName = element.tagName.toLowerCase();
+			const type = tagName === 'input' ? element.type : tagName;
+			let ancestor = element;
+			while (id === '' && ancestor !== container) {
+				ancestor = ancestor.parentElement;
+				id = ancestor.id;
+			}
+			let foundHelp = false;
+			if (helpDoc !== undefined) {
+				let helpAncestor = ancestor;
+				let helpID = id;
+				while (
+					((foundHelp = helpDoc.getElementById(helpID) !== null) === false) &&
+					helpAncestor !== container
+				) {
+					helpAncestor = helpAncestor.parentElement;
+					helpID = helpAncestor.id;
+				}
+			}
+			if (!foundHelp) {
+				if (ancestor === element) {
+					console.log(id);
+				} else {
+					if (id === '') {
+						id = 'the container';
+					}
+					let counts = ancestorIDs.get(id);
+					if (counts === undefined) {
+						counts = new Map();
+						ancestorIDs.set(id, counts);
+					}
+					let count = counts.get(type);
+					if (count === undefined) {
+						count = 0;
+					}
+					count++;
+					counts.set(type, count);
+				}
+			}
+		}
+		for (let [parentID, counts] of ancestorIDs.entries()) {
+			for (let [type, count] of counts.entries()) {
+				console.log(count + ' children of ' + parentID + ' with type ' + type);
+			}
+		}
+	}
+	window.findMissingHelp = findMissingHelp;
+
 	async function switchGenerator(url, pushToHistory) {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
-		const enableSave = (new URL(url, document.location)).hostname === document.location.hostname;
-		const saveBtn = document.getElementById('btn-save-form');
-		saveBtn.hidden = !enableSave;
 
+		// Transfer previous DOM back into the sketch it came from.
+		const container = document.getElementById('background-gen-options');
+		const oldDOM = backgroundGenOptionsDOM.get(generatorURL);
+		if (oldDOM !== undefined) {
+			const elements = container.children;
+			while (elements.length > 0) {
+				const oldElement = container.removeChild(elements[0]);
+				oldDOM.appendChild(oldElement);
+			}
+		}
+
+		// Switch generator
 		const gen = await generatorFactory(url)
-		document.title = gen.title;
+		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
 		if (bgGenerator && bgGenerator.purgeCache) {
 			bgGenerator.purgeCache();
 		}
 		bgGenerator = gen;
-		const prevGenURL = generatorURL;
 		generatorURL = url;
 
-		const helpArea = document.getElementById('help-sketch');
-		helpArea.innerHTML = '';
-		helpDoc = undefined;
-		if (gen.helpFile) {
-			downloadFile(gen.helpFile, 'document').then(function (doc) {
-				helpDoc = doc;
-				const intro = doc.getElementById('about');
-				if (intro !== null) {
-					intro.removeAttribute('id');
-					helpArea.appendChild(intro);
-				}
-			});
-		}
-
+		// Initialize sketch
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = startFrame;
-		if ('tween' in gen) {
+		// Hide the save button for experimental sketches
+		const enableSave = (new URL(url, document.location)).hostname === document.location.hostname;
+		const saveBtn = document.getElementById('btn-save-form');
+		saveBtn.hidden = !enableSave;
+		// Render sketch
+		const hasTween = 'tween' in gen;
+		if (hasTween) {
 			gen.tween = parseFloat(animPositionSlider.value);
-			document.getElementById('btn-both-frames').hidden = false;
-			document.getElementById('btn-both-frames2').hidden = false;
-		} else {
-			document.getElementById('btn-both-frames').hidden = true;
-			document.getElementById('btn-both-frames2').hidden = true;
 		}
 		if (gen.isShader && !gen.shaderSource) {
 			const fragFileContent = await downloadFile(url.slice(0, -3) + '.frag', 'text');
@@ -1082,10 +1160,20 @@ function showBackgroundOptions() {
 		}
 		progressiveBackgroundGen(0);
 
-		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
-
-		function attachOptionsDOM(dom) {
-			const container = document.getElementById('background-gen-options');
+		// Create new options dialog
+		// Try to get from cache first.
+		let dom = backgroundGenOptionsDOM.get(url);
+		if (dom === undefined) {
+			const optionsDoc = await gen.optionsDocument;
+			if (optionsDoc !== undefined) {
+				dom = optionsDoc.body;
+				for (let resetButton of dom.querySelectorAll('button[data-reset]')) {
+					resetButton.addEventListener('click', resetControl);
+				}
+				backgroundGenOptionsDOM.set(url, dom);
+			}
+		}
+		if (dom !== undefined) {
 			const elements = dom.children;
 			while (elements.length > 0) {
 				container.appendChild(elements[0]);
@@ -1095,42 +1183,31 @@ function showBackgroundOptions() {
 				imageCtrlLocation.appendChild(imageUpload);
 			}
 			repositionModal(true);
+
 		}
 
-		// Switch out previous DOM
-		const container = document.getElementById('background-gen-options');
-		const oldDOM = backgroundGenOptionsDOM.get(prevGenURL);
-		if (oldDOM !== undefined) {
-			const elements = container.children;
-			while (elements.length > 0) {
-				const oldElement = container.removeChild(elements[0]);
-				oldDOM.appendChild(oldElement);
-			}
-		}
-
-		// Try to get from cache first.
-		const dom = backgroundGenOptionsDOM.get(url);
-		if (dom !== undefined) {
-			attachOptionsDOM(dom);
-		} else {
-			const optionsDocPromise = gen.optionsDocument;
-			if (optionsDocPromise !== undefined) {
-				optionsDocPromise.then(function (optionsDoc) {
-					const dom = optionsDoc.body;
-					for (let resetButton of dom.querySelectorAll('button[data-reset]')) {
-						resetButton.addEventListener('click', resetControl);
-					}
-					attachOptionsDOM(dom);
-					backgroundGenOptionsDOM.set(url, dom);
-				});
-			}
-		}
+		// Adapt the environment's UI accordingly
 		generateButton.parentElement.hidden = !gen.hasRandomness;
-
+		document.getElementById('btn-both-frames').hidden = hasTween;
+		document.getElementById('btn-both-frames2').hidden = hasTween;
 		if (pushToHistory) {
 			const name = url.slice(0, -3);	// trim .js
 			urlParameters.set('gen', name);
 			updateURL();
+		}
+		document.title = gen.title;
+
+		// Load help file
+		const helpArea = document.getElementById('help-sketch');
+		helpArea.innerHTML = '';
+		helpDoc = undefined;
+		if (gen.helpFile) {
+			helpDoc = await downloadFile(gen.helpFile, 'document');
+			const intro = helpDoc.getElementById('about');
+			if (intro !== null) {
+				helpArea.appendChild(intro);
+			}
+			findBrokenHelp();
 		}
 	}
 
@@ -1406,10 +1483,41 @@ function showBackgroundOptions() {
 		}
 	}
 
+	function interpolateBackgroundImage(startImage, endImage, context, tween, loop) {
+		const hasStartImage = startImage !== undefined;
+		const hasEndImage = endImage !== undefined;
+		const canvas = context.canvas;
+		const dWidth = canvas.width;
+		const dHeight = canvas.height;
+		if (loop) {
+			tween = 1 - 2 * (tween - 0.5);
+		}
+		if (tween <= 1/3) {
+			if (hasStartImage) {
+				context.drawImage(startImage, 0, 0, dWidth, dHeight);
+			}
+		} else if (tween < 2/3) {
+			if (hasEndImage) {
+				context.drawImage(endImage, 0, 0, dWidth, dHeight);
+			}
+			if (hasStartImage) {
+				context.globalAlpha = (2/3 - tween) * 3;
+				context.drawImage(startImage, 0, 0, dWidth, dHeight);
+				context.globalAlpha = 1;
+			}
+		} else {
+			if (hasEndImage) {
+				context.drawImage(endImage, 0, 0, dWidth, dHeight);
+			}
+		}
+	}
+
 	class TweenData {
 
 		constructor(generator, startFrame, endFrame) {
-			this.backgroundColorVaries = startFrame.backgroundColor !== endFrame.backgroundColor;
+			this.backgroundColorVaries =
+				startFrame.backgroundColor !== endFrame.backgroundColor &&
+				(startFrame.backgroundImage !== undefined || endFrame.backgroundImage !== undefined);
 
 			// Map x property name to the calculated value.
 			this.radii = new Map();
@@ -1588,6 +1696,7 @@ function showBackgroundOptions() {
 		context.restore();
 		context.clearRect(0, 0, width, height);
 		context.save();
+		interpolateBackgroundImage(startFrame.backgroundImage, endFrame.backgroundImage, context, tween, loop);
 		rotateCanvas(context, width, height, rotation);
 		if (generator.isShader) {
 			contextualInfo.setProperties(generator);
@@ -1942,6 +2051,7 @@ function showBackgroundOptions() {
 				} else {
 					const endGenerator = new RandomNumberGenerator(match[2]);
 					if (startFrame === endFrame) {
+						// Create start and end frames that differ only because they use different random numbers.
 						endFrame = currentFrameData();
 						tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 						setWillChange();

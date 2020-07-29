@@ -25,6 +25,14 @@ function SierpinskiCarpet() {
 			generateBackground(0);
 		});
 
+		optionsDoc.getElementById('carpet-blend-depth').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0) {
+				me.blendDepth = value;
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('carpet-blend-filling').addEventListener('input', function (event) {
 			me.blendFilling = this.checked;
 			generateBackground(0);
@@ -296,11 +304,15 @@ function SierpinskiCarpet() {
 
 	this.maxDepth = 4;
 	this.patternDepth = 3;
-	this.compositionOp = 'source-over';
 	this.filling = 'b';
 	this.patternLocations = 3;
 	this.patternedCentre = true;
 	this.centreEmphasis = 0;
+
+	this.compositionOp = 'source-over';
+	this.blendDepth = 4;
+	this.blendFilling = true;
+	this.transparentBackground = true;
 
 	this.fgSpacingFraction = 0.5;
 	this.concentricDensity = 7;
@@ -316,8 +328,6 @@ function SierpinskiCarpet() {
 	colors[10] = colors[9]		// second centre color with emphasis
 	colors[11] = colors[4];		// centre with emphasis
 	colors[12] = '#ffffff00';	// depth zero (transparent)
-	this.blendFilling = false;
-	this.transparentBackground = true;
 	this.patternOpacities = [1, 1];
 	this.bipartite = false;
 
@@ -352,7 +362,7 @@ SierpinskiCarpet.prototype.animatable = {
 	],
 	stepped: [
 		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth',
-		'patternDepth', 'compositionOp', 'filling', 'patternLocations',
+		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
 		'patternedCentre', 'centreEmphasis', 'blendFilling', 'transparentBackground',
 		'bipartite'
 	]
@@ -577,13 +587,16 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				patternLocation = patternedCentre;
 			}
 
-			let roundedX = Math.round(x);
-			let roundedY = Math.round(y);
-			let roundedWidth = Math.round(width + x - roundedX);
-			let roundedHeight = Math.round(height + y - roundedY);
-			context.fillStyle = colors[relationship + (depth === 1 && !this.transparentBackground ? 13 : 0)];
+			let roundedX, roundedY, roundedWidth, roundedHeight;
 			context.globalCompositeOperation = this.compositionOp;
-			context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+			if (depth <= this.blendDepth) {
+				roundedX = Math.round(x);
+				roundedY = Math.round(y);
+				roundedWidth = Math.round(width + x - roundedX);
+				roundedHeight = Math.round(height + y - roundedY);
+				context.fillStyle = colors[relationship + (depth === 1 && !this.transparentBackground ? 13 : 0)];
+				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+			}
 
 			const remainingWidth = width * (1 - middleWidth);
 			width = width * middleWidth;
@@ -719,7 +732,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				} else {
 					context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
 				}
-				if (depth > 0 && !this.blendFilling) {
+				if (!this.blendFilling) {
 					context.globalCompositeOperation = 'source-over';
 				}
 				if (drawPattern && patternLocation) {

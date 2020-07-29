@@ -193,7 +193,7 @@
 					<input type="color" value="#000066">
 				</div>
 				<div class="col-2">
-					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2">
+					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1">
 				</div>
 			</div>
 		</fieldset>
@@ -210,36 +210,42 @@
 
 		<div class="form-row">
 			<div class="col-1"></div>
-			<label class="col-3 col-form-label col-form-label-sm" for="carpet-composition-op">
-				Blend Mode
-			</label>
-			<div class="col-5">
-				<select id="carpet-composition-op" class="form-control form-control-sm" aria-describedby="carpet-composition-bug">
-					<option value="source-over">Source Over</option>
-					<option value="destination-over">Destination Over</option>
-					<option value="lighter">Lighter (+)</option>
-					<option value="lighten">Lightest (max)</option>
-					<option value="darken">Darkest (min)</option>
-					<option value="xor">XOR</option>
-					<option value="multiply">Multiply</option>
-					<option value="screen">Screen</option>
-					<option value="overlay">Overlay</option>
-					<option value="color-dodge">Colour Dodge</option>
-					<option value="color-burn">Colour Burn</option>
-					<option value="hard-light">Hard Light</option>
-					<option value="soft-light">Soft Light</option>
-					<option value="difference">Difference</option>
-					<option value="exclusion">Exclusion</option>
-					<option value="hue">Hue</option>
-					<option value="saturation">Saturation</option>
-					<option value="color">Hue &amp; Saturation</option>
-					<option value="luminosity">Luminosity</option>
-				</select>
-			</div>
-			<div class="col-1">
-				<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank" class="align-middle" title="More information">
+			<div class="col-3">
+				<label class="col-form-label col-form-label-sm" for="carpet-composition-op">
+					Blend Mode
+				</label>
+				<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank" title="More information">
 					<img src="../img/help.png" alt="Help">
 				</a>
+			</div>
+			<div class="col-7">
+				<div class="input-group input-group-sm">
+					<select id="carpet-composition-op" class="form-control" aria-describedby="carpet-composition-bug" style="width: unset">
+						<option value="source-over">Source Over</option>
+						<option value="destination-over">Destination Over</option>
+						<option value="lighter">Lighter (+)</option>
+						<option value="lighten">Lightest (max)</option>
+						<option value="darken">Darkest (min)</option>
+						<option value="xor">XOR</option>
+						<option value="multiply">Multiply</option>
+						<option value="screen">Screen</option>
+						<option value="overlay">Overlay</option>
+						<option value="color-dodge">Colour Dodge</option>
+						<option value="color-burn">Colour Burn</option>
+						<option value="hard-light">Hard Light</option>
+						<option value="soft-light">Soft Light</option>
+						<option value="difference">Difference</option>
+						<option value="exclusion">Exclusion</option>
+						<option value="hue">Hue</option>
+						<option value="saturation">Saturation</option>
+						<option value="color">Hue &amp; Saturation</option>
+						<option value="luminosity">Luminosity</option>
+					</select>
+					<input type="number" min="1" value="4" class="form-control" id="carpet-blend-depth">
+					<div class="input-group-append">
+						<span class="input-group-text">levels</span>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="form-row mb-1">
@@ -252,8 +258,8 @@
 			<div class="col-4"></div>
 			<div class="col-3">
 				<div class="form-check">
-					<input class="form-check-input" type="checkbox" id="carpet-blend-filling">
-					<label class="form-check-label small" for="carpet-blend-filling">Apply to filling</label>
+					<input class="form-check-input" type="checkbox" checked id="carpet-blend-filling">
+					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
 				</div>
 			</div>
 			<div class="col-5">

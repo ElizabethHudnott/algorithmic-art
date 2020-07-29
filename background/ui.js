@@ -539,6 +539,7 @@ function showBackgroundOptions() {
 				if (backgroundRedraw === redraw) {
 					done = redraw.next().done;
 					if (done) {
+						backgroundRedraw = undefined;
 						if (document.fonts.check(signatureFont)) {
 							drawSignature(contextualInfo);
 						} else {
@@ -1113,12 +1114,17 @@ function showBackgroundOptions() {
 	window.findMissingHelp = findMissingHelp;
 
 	async function switchGenerator(url, pushToHistory) {
+		// Hide stuff while it changes
+		const container = document.getElementById('background-gen-options');
+		const titleBar = document.getElementById('background-gen-modal-label');
+		container.hidden = true;
+		titleBar.innerHTML = 'Loading&hellip;';
+
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
 
 		// Transfer previous DOM back into the sketch it came from.
-		const container = document.getElementById('background-gen-options');
 		const oldDOM = backgroundGenOptionsDOM.get(generatorURL);
 		if (oldDOM !== undefined) {
 			const elements = container.children;
@@ -1130,7 +1136,6 @@ function showBackgroundOptions() {
 
 		// Switch generator
 		const gen = await generatorFactory(url)
-		document.getElementById('background-gen-modal-label').innerHTML = gen.title + ' Options';
 		if (bgGenerator && bgGenerator.purgeCache) {
 			bgGenerator.purgeCache();
 		}
@@ -1182,8 +1187,6 @@ function showBackgroundOptions() {
 			if (imageCtrlLocation !== null) {
 				imageCtrlLocation.appendChild(imageUpload);
 			}
-			repositionModal(true);
-
 		}
 
 		// Adapt the environment's UI accordingly
@@ -1197,10 +1200,13 @@ function showBackgroundOptions() {
 		}
 		document.title = gen.title;
 
-		// Load help file
+		// Load help file & display new sketch options
 		const helpArea = document.getElementById('help-sketch');
 		helpArea.innerHTML = '';
 		helpDoc = undefined;
+		titleBar.innerHTML = gen.title + ' Options';
+		container.hidden = false;
+		repositionModal(true);
 		if (gen.helpFile) {
 			helpDoc = await downloadFile(gen.helpFile, 'document');
 			const intro = helpDoc.getElementById('about');
@@ -2631,37 +2637,38 @@ function showBackgroundOptions() {
 		resizeTimer = setTimeout(resizeWindow, 100);
 	});
 
+
 	let modalDrag;
+
+	function dragWindow(event) {
+		if (event.buttons !== 1) {
+			window.removeEventListener('pointermove', dragWindow);
+			return;
+		}
+
+		const child = modal.children[0];
+		let left = Math.round(event.clientX - modalDrag[0]);
+		const maxLeft = window.innerWidth - 32;
+		left = Math.min(left, maxLeft);
+
+		let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
+		const maxTop = window.innerHeight - document.getElementById('toolbar').clientHeight - modalHeader.clientHeight;
+		top = Math.min(top, maxTop);
+		modal.style.left = left + 'px';
+		modal.style.top = top + 'px';
+	}
+
 
 	modalHeader.addEventListener('pointerdown', function (event) {
 		const target = event.target;
 		if (target === this || target.tagName === 'H6') {
+			window.addEventListener('pointermove', dragWindow);
 			modalDrag = [event.offsetX, event.offsetY];
 		}
 	});
 
 	modalHeader.addEventListener('pointerup', function (event) {
-		modalDrag = undefined;
-	});
-
-	window.addEventListener('pointermove', function (event) {
-		if (modalDrag !== undefined) {
-			if (event.buttons !== 1) {
-				modalDrag = undefined;
-				return;
-			}
-
-			const child = modal.children[0];
-			let left = Math.round(event.clientX - modalDrag[0]);
-			const maxLeft = window.innerWidth - 32;
-			left = Math.min(left, maxLeft);
-
-			let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
-			const maxTop = window.innerHeight - document.getElementById('toolbar').clientHeight - modalHeader.clientHeight;
-			top = Math.min(top, maxTop);
-			modal.style.left = left + 'px';
-			modal.style.top = top + 'px';
-		}
+		window.removeEventListener('pointermove', dragWindow);
 	});
 
 	$(modal).on('show.bs.modal', function (event) {

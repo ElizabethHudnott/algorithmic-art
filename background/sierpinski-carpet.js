@@ -32,7 +32,12 @@ function SierpinskiCarpet() {
 		optionsDoc.getElementById('carpet-blend-depth').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0) {
+				const oldValue = me.blendDepth;
+				const totalDepth = me.maxDepth;
 				me.blendDepth = value;
+				if (oldValue >= totalDepth && value >= totalDepth) {
+					return;
+				}
 				generateBackground(0);
 			}
 		});
@@ -173,7 +178,7 @@ function SierpinskiCarpet() {
 		optionsDoc.getElementById('carpet-depth').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0) {
-				me.maxDepth = value - 1;
+				me.maxDepth = value;
 				generateBackground(0);
 			}
 		});
@@ -306,7 +311,7 @@ function SierpinskiCarpet() {
 	cutouts.fill(true);
 	this.cutoutDepth = 1;
 
-	this.maxDepth = 4;
+	this.maxDepth = 5;
 	this.patternDepth = 3;
 	this.filling = 'b';
 	this.patternLocations = 3;
@@ -535,6 +540,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	const lopsidednessY = this.lopsidednessY + 1;
 	const overlap = this.overlap;
 	const colors = this.colors;
+	const blendDepth = this.blendDepth - 1;
 	const filling = this.filling;
 
 	const left = Math.round(this.left * (canvasWidth - drawWidth));
@@ -548,7 +554,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	let nextQueue = [];
 	let numProcessed = 0;
 
-	let maxDepth = this.maxDepth;
+	let maxDepth = this.maxDepth - 1;
 	if (preview > 0 && maxDepth > 3) {
 		maxDepth = 3;
 	}
@@ -607,7 +613,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 			let roundedX, roundedY, roundedWidth, roundedHeight;
 			context.globalCompositeOperation = this.compositionOp;
-			if (depth <= this.blendDepth) {
+			if (depth <= blendDepth) {
 				roundedX = Math.round(x);
 				roundedY = Math.round(y);
 				roundedWidth = Math.round(width + x - roundedX);

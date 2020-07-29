@@ -6,6 +6,10 @@ function SierpinskiCarpet() {
 
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
+		const colorControlArea = optionsDoc.getElementById('carpet-colors');
+		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
+		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
+
 		function fullRedraw() {
 			generateBackground(0);
 		}
@@ -38,10 +42,14 @@ function SierpinskiCarpet() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('carpet-transparent-background').addEventListener('input', function (event) {
-			me.transparentBackground = this.checked;
+		function setOpacityEnable(event) {
+			me.opacityEnable = parseInt(this.value);
 			generateBackground(0);
-		});
+		}
+
+		for (let item of optionsDoc.querySelectorAll('input[name=carpet-opacity-enable]')) {
+			item.addEventListener('input', setOpacityEnable);
+		};
 
 		function setFilling(event) {
 			const filling = this.value;
@@ -79,10 +87,6 @@ function SierpinskiCarpet() {
 				generateBackground(0);
 			}
 		});
-
-		const colorControlArea = optionsDoc.getElementById('carpet-colors');
-		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
-		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
 
 		function changeColor(index, preview) {
 			return function (event) {
@@ -312,7 +316,7 @@ function SierpinskiCarpet() {
 	this.compositionOp = 'source-over';
 	this.blendDepth = 4;
 	this.blendFilling = true;
-	this.transparentBackground = true;
+	this.opacityEnable = 2;
 
 	this.fgSpacingFraction = 0.5;
 	this.concentricDensity = 7;
@@ -321,13 +325,17 @@ function SierpinskiCarpet() {
 	this.topLeftCornerX = 0.5;
 	this.topLeftCornerY = 0.02;
 
-	const colors = new Array(22);
-	colors.fill('#ffffff80');
+	const colors = new Array(25);
+	colors.fill('#ffffff80', 0, 9);
 	colors[4] = '#000000';		// centre
 	colors[9] = '#000066';		// second centre color
 	colors[10] = colors[9]		// second centre color with emphasis
 	colors[11] = colors[4];		// centre with emphasis
 	colors[12] = '#ffffff00';	// depth zero (transparent)
+	for (let i = 0; i < 12; i++) {
+		const [r, g, b] = hexToRGBA(colors[i]);
+		colors[i + 13] = rgba(r, g, b, 1);
+	}
 	this.patternOpacities = [1, 1];
 	this.bipartite = false;
 
@@ -363,7 +371,7 @@ SierpinskiCarpet.prototype.animatable = {
 	stepped: [
 		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
-		'patternedCentre', 'centreEmphasis', 'blendFilling', 'transparentBackground',
+		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable',
 		'bipartite'
 	]
 };
@@ -545,12 +553,22 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		maxDepth = 3;
 	}
 
+	let applyOpacity = true;
+
 	const spacingNumerator = Math.min(
 		drawWidth * (1/3 + overlap / 6),
 		drawHeight * (1/3 + overlap / 6),
 	) / this.concentricDensity;
 
 	for (let depth = 0; depth <= maxDepth; depth++) {
+		switch (depth) {
+		case 1:
+			applyOpacity = this.opacityEnable === 2;
+			break;
+		case 2:
+			applyOpacity = applyOpacity || this.opacityEnable === 1;
+			break;
+		}
 		const useCutouts = (overlap < 1 || depth === 0) && depth >= cutoutDepth;
 		const emphasize = depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
@@ -594,7 +612,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				roundedY = Math.round(y);
 				roundedWidth = Math.round(width + x - roundedX);
 				roundedHeight = Math.round(height + y - roundedY);
-				context.fillStyle = colors[relationship + (depth === 1 && !this.transparentBackground ? 13 : 0)];
+				context.fillStyle = colors[relationship + (applyOpacity ? 0 : 13)];
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 			}
 

@@ -242,7 +242,7 @@ function hexToRGBA(color) {
 	const g = parseInt(color.slice(3, 5), 16);
 	const b = parseInt(color.slice(5, 7), 16);
 	const alphaStr = color.slice(7,9);
-	const a = alphaStr === '' ? 255 : 0;
+	const a = alphaStr === '' ? 1 : parseInt(alphaStr) / 255;
 	return [r, g, b, a];
 }
 

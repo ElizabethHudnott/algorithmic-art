@@ -254,7 +254,7 @@
 				<small id="carpet-composition-bug" class="form-text text-muted">Many modes cause poor performance in Firefox.</small>
 			</div>
 		</div>
-		<div class="form-row mb-3">
+		<div class="form-row">
 			<div class="col-4"></div>
 			<div class="col-3">
 				<div class="form-check">
@@ -262,10 +262,27 @@
 					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
 				</div>
 			</div>
-			<div class="col-5">
-				<div class="form-check">
-					<input class="form-check-input" type="checkbox" id="carpet-transparent-background" checked>
-					<label class="form-check-label small" for="carpet-transparent-background">Translucent background</label>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-4 col-form-label col-form-label-sm text-right pr-3">
+				Background Opacity
+			</div>
+			<div class="col-2">
+				<div class="form-check mt-1">
+					<input type="radio" name="carpet-opacity-enable" value="2" checked class="form-check-input" id="carpet-opacity-on">
+					<label class="form-check-label small" for="carpet-opacity-on">On</label>
+				</div>
+			</div>
+			<div class="col-3">
+				<div class="form-check mt-1">
+					<input type="radio" name="carpet-opacity-enable" value="1" class="form-check-input" id="carpet-opacity-partial">
+					<label class="form-check-label small" for="carpet-opacity-partial">From depth 3</label>
+				</div>
+			</div>
+			<div class="col-2">
+				<div class="form-check mt-1">
+					<input type="radio" name="carpet-opacity-enable" value="0" class="form-check-input" id="carpet-opacity-off">
+					<label class="form-check-label small" for="carpet-opacity-off">Off</label>
 				</div>
 			</div>
 		</div>

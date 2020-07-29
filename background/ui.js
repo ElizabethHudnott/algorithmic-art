@@ -1188,8 +1188,8 @@ function showBackgroundOptions() {
 
 		// Adapt the environment's UI accordingly
 		generateButton.parentElement.hidden = !gen.hasRandomness;
-		document.getElementById('btn-both-frames').hidden = hasTween;
-		document.getElementById('btn-both-frames2').hidden = hasTween;
+		document.getElementById('btn-both-frames').hidden = !hasTween;
+		document.getElementById('btn-both-frames2').hidden = !hasTween;
 		if (pushToHistory) {
 			const name = url.slice(0, -3);	// trim .js
 			urlParameters.set('gen', name);

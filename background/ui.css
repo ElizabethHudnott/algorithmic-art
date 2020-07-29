@@ -35,6 +35,10 @@ option:disabled {
 	border-width: 2px;
 }
 
+.form-check-input {
+	margin-top: 0.4rem;
+}
+
 .input-group-sm>.form-control:not(textarea) {
   height: calc(1.5em + .5rem + 4px);
 }

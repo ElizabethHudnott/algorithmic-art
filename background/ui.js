@@ -274,28 +274,11 @@ function showBackgroundOptions() {
 		constructor(canvas, width, height, scale) {
 			const twoD = canvas.getContext('2d');
 			this.twoD = twoD;
-			const glCanvas = document.createElement('CANVAS');
-			const gl = glCanvas.getContext('webgl2', {premultipliedAlpha : false});
-			this.gl = gl;
+			this.gl = undefined;
 			this.scale = scale;
 			this.resize(width, height);
-			const positionBuffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-			const points = [
-				-1,  1,
-				 1,  1,
-				-1, -1,
-				 1, -1,
-			];
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
-			gl.enable(gl.DEPTH_TEST);
-			const modelViewMatrix = mat4.create();
-			mat4.translate(
-				modelViewMatrix,	// destination matrix
-				modelViewMatrix,	// matrix to translate
-				[0, 0, -1]			// amount to translate
-			);
-			this.modelViewMatrix = modelViewMatrix;
+			this.modelViewMatrix = undefined;
+			this.projectionMatrix = undefined;
 			this.uniformLocations = undefined;
 			this.program = undefined;
 			this.types = new Map();
@@ -312,29 +295,32 @@ function showBackgroundOptions() {
 				twoD.save();
 			}
 			twoD.save();
+
 			const gl = this.gl;
-			const glCanvas = gl.canvas;
-			glCanvas.width = width / scale;
-			glCanvas.height = height / scale;
-			gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+			if (gl !== undefined) {
+				const glCanvas = gl.canvas;
+				glCanvas.width = width / scale;
+				glCanvas.height = height / scale;
+				gl.viewport(0, 0, glCanvas.width, glCanvas.height);
 
-			const fieldOfView = Math.PI / 4;
-			const aspect = width / height;
-			const zNear = 0.1;
-			const zFar = 100;
-			const projectionMatrix = mat4.create();
-			mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-			this.projectionMatrix = projectionMatrix;
+				const fieldOfView = Math.PI / 4;
+				const aspect = width / height;
+				const zNear = 0.1;
+				const zFar = 100;
+				const projectionMatrix = mat4.create();
+				mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+				this.projectionMatrix = projectionMatrix;
 
-			const uniformLocations = this.uniformLocations;
-			if (uniformLocations) {
-				gl.uniformMatrix4fv(
-					uniformLocations.projectionMatrix,
-					false,
-					projectionMatrix
-				);
-				gl.uniform1f(uniformLocations.width, glCanvas.width);
-				gl.uniform1f(uniformLocations.height, glCanvas.height);
+				const uniformLocations = this.uniformLocations;
+				if (uniformLocations !== undefined) {
+					gl.uniformMatrix4fv(
+						uniformLocations.projectionMatrix,
+						false,
+						projectionMatrix
+					);
+					gl.uniform1f(uniformLocations.width, glCanvas.width);
+					gl.uniform1f(uniformLocations.height, glCanvas.height);
+				}
 			}
         }
 
@@ -342,7 +328,32 @@ function showBackgroundOptions() {
 			if (generator.shaderSource === undefined) {
 				return;
 			}
-			const gl = this.gl;
+			let gl = this.gl;
+			if (this.gl === undefined) {
+				const glCanvas = document.createElement('CANVAS');
+				gl = glCanvas.getContext('webgl2', {premultipliedAlpha : false});
+				this.gl = gl;
+				const positionBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+				const points = [
+					-1,  1,
+					 1,  1,
+					-1, -1,
+					 1, -1,
+				];
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
+				gl.enable(gl.DEPTH_TEST);
+				const modelViewMatrix = mat4.create();
+				mat4.translate(
+					modelViewMatrix,	// destination matrix
+					modelViewMatrix,	// matrix to translate
+					[0, 0, -1]			// amount to translate
+				);
+				this.modelViewMatrix = modelViewMatrix;
+				const twoDCanvas = this.twoD.canvas;
+				this.resize(twoDCanvas.width, twoDCanvas.height);
+			}
+
 			const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 			const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, generator.shaderSource);
 			const program = gl.createProgram();
@@ -1163,7 +1174,10 @@ function showBackgroundOptions() {
 			gen.tween = parseFloat(animPositionSlider.value);
 		}
 		if (gen.isShader && !gen.shaderSource) {
-			const fragFileContent = await downloadFile(url.slice(0, -3) + '.frag', 'text');
+			const fragFileContent = (await Promise.all([
+				requireScript('../lib/gl-matrix.min.js'),
+				downloadFile(url.slice(0, -3) + '.frag', 'text')
+			]))[1];
 			gen.shaderSource = fragmentShaderHeader + shaderDeclarations(gen) + fragFileContent;
 			drawingContext.initializeShader(bgGenerator);
 			drawingContext.setProperties(bgGenerator);

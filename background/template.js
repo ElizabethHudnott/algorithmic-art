@@ -2,7 +2,7 @@
  * potential future revisions, including the possibility of incompatible changes.
  */
 
-function MySketch() {
+export default function MySketch() {
 	const me = this;
 	this.title = 'My Sketch';
 	this.hasRandomness = true;
@@ -98,5 +98,3 @@ MySketch.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 		}
 	}
 }
-
-return MySketch;

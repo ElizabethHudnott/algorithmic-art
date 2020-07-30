@@ -932,12 +932,12 @@ function showBackgroundOptions() {
 	function generatorFactory(url) {
 		let generator = backgroundGenerators.get(url);
 		if (generator === undefined) {
-			return downloadFile(url, 'text').then(function (sourceCode) {
-				const constructor = Function(
-					"'use strict';" +
-					sourceCode + '\n' +
-					'//# sourceURL=' + url
-				)();
+			let resolvedURL = url;
+			if (!/^http(s)?:/.test(url)) {
+				resolvedURL = document.location.pathname + url;
+			}
+			return import(resolvedURL).then(function (module) {
+				const constructor = module.default;
 				const generator = new constructor();
 				backgroundGenerators.set(url, generator);
 				return generator;
@@ -1124,16 +1124,6 @@ function showBackgroundOptions() {
 			currentSketch = undefined;
 		}
 
-		// Transfer previous DOM back into the sketch it came from.
-		const oldDOM = backgroundGenOptionsDOM.get(generatorURL);
-		if (oldDOM !== undefined) {
-			const elements = container.children;
-			while (elements.length > 0) {
-				const oldElement = container.removeChild(elements[0]);
-				oldDOM.appendChild(oldElement);
-			}
-		}
-
 		// Switch generator
 		const gen = await generatorFactory(url)
 		if (bgGenerator && bgGenerator.purgeCache) {
@@ -1166,23 +1156,21 @@ function showBackgroundOptions() {
 		progressiveBackgroundGen(0);
 
 		// Create new options dialog
+		container.innerHTML = '';
 		// Try to get from cache first.
-		let dom = backgroundGenOptionsDOM.get(url);
-		if (dom === undefined) {
+		let elements = backgroundGenOptionsDOM.get(url);
+		if (elements === undefined) {
 			const optionsDoc = await gen.optionsDocument;
 			if (optionsDoc !== undefined) {
-				dom = optionsDoc.body;
-				for (let resetButton of dom.querySelectorAll('button[data-reset]')) {
+				for (let resetButton of optionsDoc.querySelectorAll('button[data-reset]')) {
 					resetButton.addEventListener('click', resetControl);
 				}
-				backgroundGenOptionsDOM.set(url, dom);
+				elements = Array.from(optionsDoc.body.children);
+				backgroundGenOptionsDOM.set(url, elements);
 			}
 		}
-		if (dom !== undefined) {
-			const elements = dom.children;
-			while (elements.length > 0) {
-				container.appendChild(elements[0]);
-			}
+		if (elements !== undefined) {
+			container.append(...elements);
 			const imageCtrlLocation = container.querySelector('[data-attach=image]');
 			if (imageCtrlLocation !== null) {
 				imageCtrlLocation.appendChild(imageUpload);
@@ -1712,7 +1700,6 @@ function showBackgroundOptions() {
 			// Draw everything in one go when capturing video
 			random.reset();
 			const redraw = generator.generate(context, width, height, 0);
-			backgroundRedraw = redraw;
 			let done;
 			do {
 				done = redraw.next().done;

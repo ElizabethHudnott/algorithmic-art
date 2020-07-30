@@ -5,7 +5,7 @@ const AngularHueMode = Object.freeze({
 	BLACK: 3,
 });
 
-function Phyllotaxis() {
+export default function Phyllotaxis() {
 	const me = this;
 	this.title = 'Phyllotaxis';
 	this.helpFile = 'help/phyllotaxis.html';
@@ -1087,5 +1087,3 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		context.restore();
 	}
 };
-
-return Phyllotaxis;

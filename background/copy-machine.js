@@ -22,7 +22,7 @@ class TextRendering {
 	}
 }
 
-function CopyMachine() {
+export default function CopyMachine() {
 	const me = this;
 	this.title = 'Copy Machine';
 	this.hasRandomness = true;
@@ -83,5 +83,3 @@ CopyMachine.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	context.translate(canvasWidth / 2, canvasHeight / 2);
 	this.draw(context, 0, 0);
 }
-
-return CopyMachine;

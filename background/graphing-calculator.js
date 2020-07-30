@@ -380,7 +380,7 @@ class PolarEquation {
 	}
 }
 
-function GraphingCalculator() {
+export default function GraphingCalculator() {
 	const me = this;
 	this.title = 'Graphing Calculator';
 	this.hasRandomness = true;
@@ -1395,5 +1395,3 @@ GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasH
 	}
 	context.stroke();
 };
-
-return GraphingCalculator;

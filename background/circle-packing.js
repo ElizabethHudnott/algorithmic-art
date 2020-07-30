@@ -57,7 +57,7 @@ class PolygonRendering {
 	}
 }
 
-function CirclePacking() {
+export default function CirclePacking() {
 	const me = this;
 	this.title = 'Circle Packing';
 	this.hasRandomness = true;
@@ -433,5 +433,3 @@ CirclePacking.prototype.removeOverlaps = function (shapes, width, height) {
 	}
 	return fullSize;
 }
-
-return CirclePacking;

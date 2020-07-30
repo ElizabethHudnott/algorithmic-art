@@ -1,4 +1,4 @@
-function WebGLDemo() {
+export default function WebGLDemo() {
 	const me = this;
 	this.title = 'WebGL Demo Sketch';
 	this.hasRandomness = false;
@@ -22,5 +22,3 @@ WebGLDemo.prototype.animatable = {
 		'red'
 	],
 }
-
-return WebGLDemo;

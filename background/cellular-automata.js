@@ -2,7 +2,7 @@ function compareNumbers(a, b) {
   return a - b;
 }
 
-function CellAutomaton() {
+export default function CellAutomaton() {
 	const me = this;
 	this.title = 'Cellular Automata';
 	this.helpFile = 'help/cellular-automata.html';
@@ -787,5 +787,3 @@ CellAutomaton.prototype.generate = function* (context, canvasWidth, canvasHeight
 		}
 	}
 }
-
-return CellAutomaton;

@@ -1,4 +1,4 @@
-function SierpinskiCarpet() {
+export default function SierpinskiCarpet() {
 	const me = this;
 	this.title = 'Sierpinski Carpet';
 	this.hasRandomness = false;
@@ -885,5 +885,3 @@ SierpinskiCarpet.prototype.concentricSquares = function (context, x, y, width, h
 	context.lineTo(leftX, bottomY);
 	context.fill();
 };
-
-return SierpinskiCarpet;

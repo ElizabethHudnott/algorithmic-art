@@ -1,7 +1,7 @@
 /**Inspired by Daniel Shiffman's Coding Challenge #76 (https://thecodingtrain.com/CodingChallenges/076-10print.html)
  * which he developed from the book 10 PRINT (https://10print.org/).
  */
-function TenPrint() {
+export default function TenPrint() {
 	const me = this;
 	this.title = '10 PRINT';
 	this.hasRandomness = true;
@@ -174,5 +174,3 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 		}
 	}
 }
-
-return TenPrint;

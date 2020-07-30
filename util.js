@@ -48,22 +48,26 @@ class AnimationController {
 
 }
 
+const loadedScripts = new Map();
+
 function requireScript(src) {
-	src = new URL(src, document.location);
-	for (let script of document.scripts) {
-		if (script.src === src) {
-			return Promise.resolve(true);
-		}
+	const url = (new URL(src, document.location)).toString();
+	let promise = loadedScripts.get(url);
+	if (promise !== undefined) {
+		return promise;
 	}
-	return new Promise(function (resolve, reject) {
+
+	promise = new Promise(function (resolve, reject) {
 		const script = document.createElement('script');
 		script.async = true;
-		script.src = src;
+		script.src = url;
 		script.addEventListener('load', resolve);
-		script.addEventListener('error', () => reject('injectScript: Error loading ' + src));
-		script.addEventListener('abort', () => reject('injectScript: Aborted loading ' + src));
+		script.addEventListener('error', () => reject('injectScript: Error loading ' + url));
+		script.addEventListener('abort', () => reject('injectScript: Aborted loading ' + url));
 		document.head.appendChild(script);
 	});
+	loadedScripts.set(url, promise);
+	return promise;
 }
 
 function downloadFile(url, type) {

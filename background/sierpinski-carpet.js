@@ -480,8 +480,14 @@ class Tile {
 	}
 
 	clip(context) {
-		if (this.parent !== null) {
-			this.parent.clip(context);
+		const ancestors = [];
+		let parent = this.parent;
+		while (parent !== null) {
+			ancestors.push(parent);
+			parent = parent.parent;
+		}
+		for (let i = ancestors.length - 1; i >= 0; i--) {
+			context.clip(ancestors[i].clipPath);
 		}
 		context.clip(this.clipPath);
 	}
@@ -573,7 +579,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			applyOpacity = applyOpacity || this.opacityEnable === 1;
 			break;
 		}
-		const useCutouts = (overlap < 1 || depth === 0) && depth >= cutoutDepth;
+		const useCutouts = overlap > 0 && (overlap < 1 || depth === 0) && depth >= cutoutDepth;
 		const emphasize = depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
@@ -593,9 +599,11 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const y = tile.y;
 			const relationship = tile.relationship;
 			const permutation = permutations[relationship];
-			context.restore();
-			context.save();
-			tile.clip(context);
+			if (overlap > 0) {
+				context.restore();
+				context.save();
+				tile.clip(context);
+			}
 			let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
 			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
 			let patternedCentre;
@@ -782,41 +790,41 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 			const overlapX2 = roundedX + roundedWidth;
 			const overlapY2 = roundedY + roundedHeight;
-			const topLeftTile = new Tile(x, y, width0, height0, roundedX, roundedY, tile, 0);
-			const topMiddleTile = new Tile(x1, y, width, height0, undefined, roundedY, tile, 1);
-			const topRightTile = new Tile(x2, y, width2, height0, overlapX2, roundedY, tile, 2);
-			const middleLeftTile = new Tile(x, y1, width0, height, roundedX, undefined, tile, 3);
-			const middleRightTile = new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5);
-			const bottomLeftTile = new Tile(x, y2, width0, height2, roundedX, overlapY2, tile, 6);
-			const bottomMiddleTile = new Tile(x1, y2, width, height2, undefined, overlapY2, tile, 7);
-			const bottomRightTile = new Tile(x2, y2, width2, height2, overlapX2, overlapY2, tile, 8);
 
 			if (recursive[permutation[0]]) {
+				const topLeftTile = new Tile(x, y, width0, height0, roundedX, roundedY, tile, 0);
 				nextQueue.push(topLeftTile);
 			}
 			if (middleWidth > 0) {
 				if (recursive[permutation[1]]) {
+					const topMiddleTile = new Tile(x1, y, width, height0, undefined, roundedY, tile, 1);
 					nextQueue.push(topMiddleTile);
 				}
 				if (recursive[permutation[7]]) {
+					const bottomMiddleTile = new Tile(x1, y2, width, height2, undefined, overlapY2, tile, 7);
 					nextQueue.push(bottomMiddleTile);
 				}
 			}
 			if (recursive[permutation[2]]) {
+				const topRightTile = new Tile(x2, y, width2, height0, overlapX2, roundedY, tile, 2);
 				nextQueue.push(topRightTile);
 			}
 			if (middleHeight > 0) {
 				if (recursive[permutation[3]]) {
+					const middleLeftTile = new Tile(x, y1, width0, height, roundedX, undefined, tile, 3);
 					nextQueue.push(middleLeftTile);
 				}
 				if (recursive[permutation[5]]) {
+					const middleRightTile = new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5);
 					nextQueue.push(middleRightTile);
 				}
 			}
 			if (recursive[permutation[6]]) {
+				const bottomLeftTile = new Tile(x, y2, width0, height2, roundedX, overlapY2, tile, 6);
 				nextQueue.push(bottomLeftTile);
 			}
 			if (recursive[permutation[8]]) {
+				const bottomRightTile = new Tile(x2, y2, width2, height2, overlapX2, overlapY2, tile, 8);
 				nextQueue.push(bottomRightTile);
 			}
 

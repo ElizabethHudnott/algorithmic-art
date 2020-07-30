@@ -473,51 +473,69 @@ function showBackgroundOptions() {
 	}
 
 	const drawingContext = new DrawingContext(canvas, window.innerWidth, window.innerHeight, 1);
-
+	const signatureBox = document.getElementById('author-hitbox');
+	let signatureChanged = true;
+	let signatureWidth, signatureHeight, userDisplayName, signatureText;
 	const signatureFont = 'italic 20px "Pacifico", cursive';
 
-	function drawSignature(contextualInfo) {
-		let text = '';
+	function calcSignature() {
+		signatureText = '';
 		let sketchAuthor;
 		if (currentSketch) {
 			sketchAuthor = currentSketch.author;
 		}
 		if (sketchAuthor) {
-			text = sketchAuthor;
+			signatureText = sketchAuthor;
 			if (userDisplayName) {
-				text += ' & ';
+				signatureText += ' & ';
 			}
 		}
 		if (userDisplayName) {
-			text += userDisplayName;
+			signatureText += userDisplayName;
 		}
-		if (text == '') {
-			// For mouse zoning
+		if (signatureText === '') {
 			signatureWidth = 100;
 			signatureHeight = 30;
 		} else {
-			const context = contextualInfo.twoD;
-			const scale = contextualInfo.scale;
+			const context = drawingContext.twoD;
 			context.restore();
 			context.save();
-			context.shadowColor = 'transparent';
-			const fontSize = Math.ceil(20 / scale);
-			context.font = signatureFont.replace('20', fontSize);
+			context.font = signatureFont;
 			context.textAlign = 'left';
 			context.textBaseline = 'bottom';
-			const metrics = context.measureText(text);
-			const paddingX = Math.ceil(3 / scale);
-			const paddingY = Math.ceil(4 / scale);
-			signatureWidth = 2 * paddingX + Math.ceil(metrics.actualBoundingBoxRight);
-			signatureHeight = paddingY + Math.ceil(metrics.actualBoundingBoxAscent);
-			const canvasHeight = context.canvas.height / scale;
-			context.clearRect(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight);
-			const backgroundColor = backgroundElement.style.backgroundColor;
-			const [colorSystem, colorComponents] = parseColor(backgroundColor);
-			const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
-			context.fillStyle = luma >= 0.5 ? 'black' : 'white';
-			context.fillText(text, paddingX, canvasHeight);
+			const metrics = context.measureText(signatureText);
+			signatureWidth = 2 * 3 + Math.ceil(metrics.actualBoundingBoxRight);
+			signatureHeight = 2 * 4 + Math.ceil(metrics.actualBoundingBoxAscent);
 		}
+		signatureBox.style.width = signatureWidth + 'px';
+		signatureBox.style.height = signatureHeight + 'px';
+		signatureChanged = false;
+	}
+
+	function drawSignature(contextualInfo) {
+		const context = contextualInfo.twoD;
+		const scale = contextualInfo.scale;
+		if (signatureChanged) {
+			calcSignature();
+		} else {
+			context.restore();
+			context.save();
+			context.textAlign = 'left';
+			context.textBaseline = 'bottom';
+		}
+		const fontSize = Math.ceil(20 / scale);
+		context.font = signatureFont.replace('20', fontSize);
+		const scaledWidth = signatureWidth / scale;
+		const scaledHeight = signatureHeight / scale;
+		const paddingX = Math.round(3 / scale);
+		const paddingY = Math.round(4 / scale);
+		const canvasHeight = context.canvas.height / scale;
+		context.clearRect(0, canvasHeight - scaledHeight, scaledWidth, scaledHeight);
+		const backgroundColor = backgroundElement.style.backgroundColor;
+		const [colorSystem, colorComponents] = parseColor(backgroundColor);
+		const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
+		context.fillStyle = luma >= 0.5 ? 'black' : 'white';
+		context.fillText(signatureText, paddingX, canvasHeight - paddingY);
 	}
 
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview) {
@@ -926,9 +944,6 @@ function showBackgroundOptions() {
 		elem.timeout = setTimeout(hideAlert, 6000, jquery);
 	}
 
-	let signatureWidth, signatureHeight;
-	let userDisplayName = undefined;
-
 	function generatorFactory(url) {
 		let generator = backgroundGenerators.get(url);
 		if (generator === undefined) {
@@ -1153,6 +1168,7 @@ function showBackgroundOptions() {
 			drawingContext.initializeShader(bgGenerator);
 			drawingContext.setProperties(bgGenerator);
 		}
+		signatureChanged = true;
 		progressiveBackgroundGen(0);
 
 		// Create new options dialog
@@ -1965,31 +1981,16 @@ function showBackgroundOptions() {
 		}
 	});
 
-	let mouseZone;
-	function checkMouseZone(event) {
-		const x = event.clientX;
-		const y = event.clientY;
-		if (x < signatureWidth && y > canvas.height - signatureHeight) {
-			if (mouseZone !== 'signature') {
-				authorForm.hidden = false;
-				authorInput.focus();
-				mouseZone = 'signature';
-			}
-		} else if (mouseZone !== '') {
-			mouseZone = '';
-		}
-	}
-	canvas.addEventListener('pointermove', checkMouseZone);
-	canvas.addEventListener('click', checkMouseZone);
-
-	document.getElementById('btn-author-submit').addEventListener('click', function (event) {
-		mouseZone = '';
+	signatureBox.addEventListener('mouseenter', function (event) {
+		authorForm.hidden = false;
+		authorInput.focus();
 	});
 
 	authorForm.addEventListener('submit', function (event) {
 		event.preventDefault();
-		userDisplayName = authorInput.value;
 		this.hidden = true;
+		userDisplayName = authorInput.value;
+		signatureChanged = true;
 		progressiveBackgroundGen(0);
 	});
 
@@ -2426,6 +2427,7 @@ function showBackgroundOptions() {
 			$('#video-modal').modal('show');
 			return;
 		}
+		requireScript('../lib/CCapture.all.min.js');
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);

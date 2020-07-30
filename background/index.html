@@ -36,21 +36,23 @@
 </div>
 
 <canvas id="background-canvas"></canvas>
-<form class="position-absolute bg-black p-2" hidden style="left: 0; bottom: 0; width: 300px; z-index: 2" id="author-form">
-	<div class="form-row">
-		<label class="col-2 col-form-label col-form-label-sm" for="author">
-			Name
-		</label>
-		<div class="col-8">
-			<input type="text" class="form-control form-control-sm" id="author" placeholder="your name">
+<div id="author-hitbox" class="position-absolute" style="left: 0; bottom: 0; background-color: transparent">
+	<form class="position-absolute bg-black p-2" hidden style="bottom: 0; width: 300px; z-index: 2" id="author-form">
+		<div class="form-row">
+			<label class="col-2 col-form-label col-form-label-sm" for="author">
+				Name
+			</label>
+			<div class="col-8">
+				<input type="text" class="form-control form-control-sm" id="author" placeholder="your name">
+			</div>
+			<div class="col-2">
+				<button type="submit" class="btn btn-primary btn-sm" id="btn-author-submit">
+					OK
+				</button>
+			</div>
 		</div>
-		<div class="col-2">
-			<button type="submit" class="btn btn-primary btn-sm" id="btn-author-submit">
-				OK
-			</button>
-		</div>
-	</div>
-</form>
+	</form>
+</div>
 
 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 1">
 	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">

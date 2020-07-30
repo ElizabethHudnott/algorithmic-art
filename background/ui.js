@@ -1246,22 +1246,30 @@ function showBackgroundOptions() {
 		}
 	}
 
+	// After resizing, generate a new background to fit the new window size.
+	let resizeTimer;
+	function resizeWindow() {
+		repositionModal(false);
+		drawingContext.resize(window.innerWidth, window.innerHeight);
+		progressiveBackgroundGen(0);
+	}
+
 	async function init() {
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
-		if (firstGenURL) {
-			firstGenURL += '.js';
-			nextStep = function () {
-				$(modal).modal('show');
-			}
-		} else {
+		if (firstGenURL === null) {
 			firstGenURL = 'ten-print.js';
 			nextStep = function () {
 				$('#sketches-modal').modal('show');
 			};
+		} else {
+			firstGenURL += '.js';
+			nextStep = function () {
+				$(modal).modal('show');
+			}
 		}
-		if (firstDocID) {
+		if (firstDocID !== null) {
 			const sketchURL = await loadDocument(firstDocID);
 			if (sketchURL !== undefined) {
 				firstGenURL = sketchURL;
@@ -1285,6 +1293,11 @@ function showBackgroundOptions() {
 			switchGenerator(firstGenURL, false);
 		}
 
+		window.addEventListener('resize', function (event) {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(resizeWindow, 100);
+		});
+
 		if (store === undefined || store.getItem('no-welcome') !== 'true') {
 			const helpModal = $('#help-modal');
 			function nextStepOnce(event) {
@@ -1297,6 +1310,8 @@ function showBackgroundOptions() {
 			document.getElementById('show-welcome').checked = false;
 			nextStep();
 		}
+		document.getElementById('sketches-modal').classList.add('fade');
+		document.getElementById('help-modal').classList.add('fade');
 	}
 	init();
 
@@ -1776,20 +1791,21 @@ function showBackgroundOptions() {
 		return newAnimController;
 	}
 
-	function captureVideo(contextualInfo, width, height, startTween, length, properties) {
+	async function captureVideo(contextualInfo, width, height, startTween, length, properties) {
+		const renderButton = document.getElementById('btn-render-video');
+		renderButton.disabled = true;
 		progressBar.style.width = '0';
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
 		const progressRow = document.getElementById('video-progress-row');
 		progressRow.hidden = false;
 
-		const stopButton = document.getElementById('btn-stop-video-render');
-		const renderButton = document.getElementById('btn-render-video');
-		renderButton.disabled = true;
-		stopButton.disabled = false;
-
+		await requireScript('../lib/CCapture.all.min.js');
 		const capturer = new CCapture(properties);
 		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
+		const stopButton = document.getElementById('btn-stop-video-render');
+		stopButton.disabled = false;
+
 		function reset() {
 			stopButton.disabled = true;
 			capturer.stop();
@@ -2431,7 +2447,7 @@ function showBackgroundOptions() {
 		}
 	});
 
-	document.getElementById('btn-render-video').addEventListener('click', function (event) {
+	document.getElementById('btn-render-video').addEventListener('click', async function (event) {
 		let errorMsg = '';
 		if (startFrame === endFrame && !('tween' in bgGenerator)) {
 			errorMsg += '<p>The start and end frames are the same. Nothing to render.</p><p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button></p>';
@@ -2610,20 +2626,6 @@ function showBackgroundOptions() {
 			}
 		}
 	});
-
-	// After resizing, generate a new background to fit the new window size.
-	let resizeTimer;
-	function resizeWindow() {
-		repositionModal(false);
-		drawingContext.resize(window.innerWidth, window.innerHeight);
-		progressiveBackgroundGen(0);
-	}
-
-	window.addEventListener('resize', function (event) {
-		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(resizeWindow, 100);
-	});
-
 
 	let modalDrag;
 

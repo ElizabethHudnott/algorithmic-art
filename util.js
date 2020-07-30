@@ -48,6 +48,24 @@ class AnimationController {
 
 }
 
+function requireScript(src) {
+	src = new URL(src, document.location);
+	for (let script of document.scripts) {
+		if (script.src === src) {
+			return Promise.resolve(true);
+		}
+	}
+	return new Promise(function (resolve, reject) {
+		const script = document.createElement('script');
+		script.async = true;
+		script.src = src;
+		script.addEventListener('load', resolve);
+		script.addEventListener('error', () => reject('injectScript: Error loading ' + src));
+		script.addEventListener('abort', () => reject('injectScript: Aborted loading ' + src));
+		document.head.appendChild(script);
+	});
+}
+
 function downloadFile(url, type) {
 	return new Promise(function (resolve, reject) {
 		const request = new XMLHttpRequest();

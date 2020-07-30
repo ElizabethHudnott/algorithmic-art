@@ -480,8 +480,6 @@ class Tile {
 	}
 
 	clip(context) {
-		context.restore();
-		context.save();
 		if (this.parent !== null) {
 			this.parent.clip(context);
 		}
@@ -595,6 +593,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const y = tile.y;
 			const relationship = tile.relationship;
 			const permutation = permutations[relationship];
+			context.restore();
+			context.save();
 			tile.clip(context);
 			let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
 			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;

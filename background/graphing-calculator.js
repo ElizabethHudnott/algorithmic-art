@@ -1,3 +1,5 @@
+import parse from '../real-expression-parser.js';
+
 class RectangularEquation {
 	constructor(text) {
 		this.parseYFormula(text);
@@ -5,7 +7,7 @@ class RectangularEquation {
 
 	parseYFormula(input) {
 		const inputStr = String(input);
-		this.yFormula = realParser.parse(inputStr);
+		this.yFormula = parse(inputStr);
 		this.yFormulaText = inputStr;
 	}
 
@@ -90,7 +92,7 @@ class MagXEquation {
 
 	parseMagXFormula(input) {
 		const inputStr = String(input);
-		this.magXFormula = realParser.parse(inputStr);
+		this.magXFormula = parse(inputStr);
 		this.magXFormulaText = inputStr;
 	}
 
@@ -204,13 +206,13 @@ class ParametricEquation {
 
 	parseXFormula(input) {
 		const inputStr = String(input);
-		this.xFormula = realParser.parse(inputStr);
+		this.xFormula = parse(inputStr);
 		this.xFormulaText = inputStr;
 	}
 
 	parseYFormula(input) {
 		const inputStr = String(input);
-		this.yFormula = realParser.parse(inputStr);
+		this.yFormula = parse(inputStr);
 		this.yFormulaText = inputStr;
 	}
 
@@ -297,7 +299,7 @@ class PolarEquation {
 
 	parseRFormula(input) {
 		const inputStr = String(input);
-		this.rFormula = realParser.parse(inputStr);
+		this.rFormula = parse(inputStr);
 		this.rFormulaText = inputStr;
 	}
 

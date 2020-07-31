@@ -644,7 +644,7 @@ function showBackgroundOptions() {
 	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const rotationSlider = document.getElementById('background-rotation');
-	const generateButton = document.getElementById('btn-generate-background');
+	const toolbar = document.getElementById('toolbar');
 	const seedForm = document.getElementById('random-seed-form');
 	const seedInput = document.getElementById('random-seed');
 	const progressBar = document.getElementById('video-progress');
@@ -991,7 +991,7 @@ function showBackgroundOptions() {
 				return;
 			}
 
-			const maxBottom = window.innerHeight - document.getElementById('toolbar').clientHeight;
+			const maxBottom = window.innerHeight - toolbar.clientHeight;
 
 			if (centre) {
 				const grandchild = modal.children[0].children[0];
@@ -1029,6 +1029,16 @@ function showBackgroundOptions() {
 		document.getElementById('btn-open-sketch').disabled = false;
 	}
 
+	function loadThumbnails() {
+		for (let img of sketchCards.getElementsByTagName('IMG')) {
+			const input = img.parentElement.parentElement.children[0];
+			img.src = input._sketch.thumbnail;
+		}
+		$('#sketches-modal').off('show.bs.modal', loadThumbnails);
+	}
+
+	$('#sketches-modal').on('show.bs.modal', loadThumbnails);
+
 	function addSketch(sketch) {
 		const label = document.createElement('LABEL');
 		label.classList.add('btn' , 'p-1', 'm-1');
@@ -1043,7 +1053,6 @@ function showBackgroundOptions() {
 		let thumbnail;
 		if (sketch.thumbnail) {
 			thumbnail = document.createElement('IMG');
-			thumbnail.src = sketch.thumbnail;
 			thumbnail.alt = sketch.title;
 		} else {
 			thumbnail = document.createElement('DIV');
@@ -1208,7 +1217,7 @@ function showBackgroundOptions() {
 		}
 
 		// Adapt the environment's UI accordingly
-		generateButton.parentElement.hidden = !gen.hasRandomness;
+		document.getElementById('btn-generate-background').parentElement.hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
 		if (pushToHistory) {
@@ -1288,8 +1297,10 @@ function showBackgroundOptions() {
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
+		let showSketchesModal = false;
 		if (firstGenURL === null) {
 			firstGenURL = 'ten-print.js';
+			showSketchesModal = true;
 			nextStep = function () {
 				$('#sketches-modal').modal('show');
 			};
@@ -1302,6 +1313,7 @@ function showBackgroundOptions() {
 		if (firstDocID !== null) {
 			const sketchURL = await loadDocument(firstDocID);
 			if (sketchURL !== undefined) {
+				toolbar.hidden = false;
 				firstGenURL = sketchURL;
 				nextStep = function () {
 					$(modal).modal('show');
@@ -1310,23 +1322,6 @@ function showBackgroundOptions() {
 				firstDocID = null;
 			}
 		}
-
-		const sketchFile = await downloadFile('sketches.json', 'json');
-		for (let sketch of sketchFile.sketches) {
-			addSketch(sketch);
-			if (sketch.url === firstGenURL) {
-				currentSketch = sketch;
-			}
-		}
-
-		if (!firstDocID) {
-			switchGenerator(firstGenURL, false);
-		}
-
-		window.addEventListener('resize', function (event) {
-			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(resizeWindow, 100);
-		});
 
 		if (store === undefined || store.getItem('no-welcome') !== 'true') {
 			const helpModal = $('#help-modal');
@@ -1342,6 +1337,28 @@ function showBackgroundOptions() {
 		}
 		document.getElementById('sketches-modal').classList.add('fade');
 		document.getElementById('help-modal').classList.add('fade');
+
+		const sketchFile = await downloadFile('sketches.json', 'json');
+		for (let sketch of sketchFile.sketches) {
+			addSketch(sketch);
+			if (sketch.url === firstGenURL) {
+				currentSketch = sketch;
+			}
+		}
+		if (showSketchesModal) {
+			loadThumbnails();
+		}
+
+		if (!firstDocID) {
+			switchGenerator(firstGenURL, false).then(function () {
+				toolbar.hidden = false;
+			});
+		}
+
+		window.addEventListener('resize', function (event) {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(resizeWindow, 100);
+		});
 	}
 	init();
 
@@ -2043,7 +2060,7 @@ function showBackgroundOptions() {
 	});
 
 	// Generate new background button.
-	generateButton.addEventListener('click', function (event) {
+	document.getElementById('btn-generate-background').addEventListener('click', function (event) {
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 		progressiveBackgroundGen(0);
@@ -2115,7 +2132,7 @@ function showBackgroundOptions() {
 
 	$('#generate-btn-group').on('hide.bs.dropdown', function(event) {
 		const target = document.activeElement;
-		return target !== generateButton && !seedForm.contains(target);
+		return target !== document.getElementById('btn-generate-background') && !seedForm.contains(target);
 	});
 
 	// Animation controls
@@ -2300,7 +2317,6 @@ function showBackgroundOptions() {
 	});
 
 	 $('#play-btn-group').on('hide.bs.dropdown', function(event) {
-	 	const toolbar = document.getElementById('toolbar');
 		const target = document.activeElement;
 		animControlsOpen = target.dataset.toggle !== 'dropdown' || !toolbar.contains(target);
 		return !animControlsOpen;
@@ -2657,7 +2673,7 @@ function showBackgroundOptions() {
 		left = Math.min(left, maxLeft);
 
 		let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
-		const maxTop = window.innerHeight - document.getElementById('toolbar').clientHeight - modalHeader.clientHeight;
+		const maxTop = window.innerHeight - toolbar.clientHeight - modalHeader.clientHeight;
 		top = Math.min(top, maxTop);
 		modal.style.left = left + 'px';
 		modal.style.top = top + 'px';

@@ -3,8 +3,6 @@
 <head>
 	<title>Creative Coding with Elizabeth</title>
 	<link rel="icon" href="../img/spirograph.png">
-	<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-	<link href="https://c5.patreon.com/external/fonts/gt-america.css" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 	<link rel="stylesheet" href="ui.css">
@@ -14,8 +12,11 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous" defer></script>
 
 	<script src="../util.js" defer></script>
-	<script src="../real-expression-parser.js" defer></script>
 	<script src="ui.js" defer></script>
+
+	<link rel="preload" as="style" href="../fonts/pacifico.css" onload="this.onload=null;this.rel='stylesheet'">
+	<link rel="preload" as="style" href="../fonts/america.css" onload="this.onload=null;this.rel='stylesheet'">
+
 	<meta name="viewport" content="initial-scale=1, minimum-scale=1">
 </head>
 <body style="background-color: #ffffff" class="overflow-hidden m-0">
@@ -53,23 +54,23 @@
 	</form>
 </div>
 
-<div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 1">
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 1" hidden>
 	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" class="patreon" title="Become a patron">
-			<img src="../img/patreon.svg" width="16" alt="Patreon">
+			<img src="../img/patreon.svg" width="16" height="15" alt="Patreon">
 			<span class="d-none d-lg-inline ml-2">Become a patron</span>
 		</a>
 	</div>
 
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch" style="border-top-left-radius: 0.25rem">
-		<img src="../img/module.png" alt="Sketch">
+		<img src="../img/module.png" width="32" height="32" alt="Sketch">
 	</button>
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#background-gen-modal" title="Change parameters">
-		<img src="../img/gear_in.png" alt="Parameters">
+		<img width="32" height="32" src="../img/gear_in.png" alt="Parameters">
 	</button>
 	<div class="btn-group" id="generate-btn-group">
 		<button type="button" class="btn btn-black" id="btn-generate-background" title="Build new background">
-			<img src="../img/brick.png" alt="Build">
+			<img width="32" height="32" src="../img/brick.png" alt="Build">
 		</button>
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Randomization options">
 			<span class="sr-only">Toggle randomization options</span>
@@ -87,17 +88,17 @@
 		</div>
 	</div>
 	<button type="button" class="btn btn-black" id="btn-start-frame" title="Set start frame">
-		<img src="../img/timeline_marker_start.png" alt="Start Frame">
+		<img width="32" height="32" src="../img/timeline_marker_start.png" alt="Start Frame">
 	</button>
 	<button type="button" class="btn btn-black" id="btn-end-frame" title="Set end frame">
-		<img src="../img/timeline_marker_end.png" alt="End Frame">
+		<img width="32" height="32" src="../img/timeline_marker_end.png" alt="End Frame">
 	</button>
 	<button type="button" class="btn btn-black" id="btn-both-frames" title="Set start &amp; end frames">
-		<img src="../img/timeline_marker_both.png" alt="Both Frames">
+		<img width="32" height="32" src="../img/timeline_marker_both.png" alt="Both Frames">
 	</button>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
 		<button type="button" class="btn btn-black" id="btn-play" title="Play animation">
-			<img src="../img/control_play_blue.png" alt="Play">
+			<img width="32" height="32" src="../img/control_play_blue.png" alt="Play">
 		</button>
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
@@ -113,7 +114,7 @@
  					</div>
  					<div class="col-1 text-right">
  						<button type="button" class="btn btn-sm p-0" title="Rewind animation" id="btn-rewind">
- 							<img src="../img/control_rewind_blue.png" width="24" alt="Rewind">
+ 							<img src="../img/control_rewind_blue.png" width="24" height="24" alt="Rewind">
  						</button>
  					</div>
  					<div class="col-3 pl-3">
@@ -140,14 +141,14 @@
  		</div>
   	</div>
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
-		<img src="../img/picture_save.png" alt="Download">
+		<img width="32" height="32" src="../img/picture_save.png" alt="Download">
 	</button>
 	<button type="button" class="btn btn-black" id="btn-video-opts" title="Create video">
-		<img src="../img/film.png" alt="Video">
+		<img width="32" height="32" src="../img/film.png" alt="Video">
 	</button>
 	<div class="btn-group" id="save-dropdown" hidden>
 		<button type="button" class="btn btn-black" id="btn-save-form" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Save parameters">
-			<img src="../img/diskette.png" alt="Save">
+			<img width="32" height="32" src="../img/diskette.png" alt="Save">
 		</button>
 		<div class="dropdown-menu drop-align-right bg-black" aria-labelledby="btn-save-form" style="width: 375px">
 			<form class="px-2" id="save-form">
@@ -170,10 +171,10 @@
 		</div>
 	</div>
 	<button type="button" class="btn btn-black" id="btn-what-is-this" title="&quot;What's This?&quot; Help">
-		<img src="../img/what-is-this.svg" alt="What's This?">
+		<img width="32" height="32" src="../img/what-is-this.svg" alt="What's This?">
 	</button>
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#help-modal" title="Help">
-		<img src="../img/help_32.png" alt="Help">
+		<img width="32" height="32" src="../img/help_32.png" alt="Help">
 	</button>
 </div>
 
@@ -222,7 +223,7 @@
 						</div>
 						<div class="col-3">
 							<button type="button" class="btn btn-light" id="background-rotation-reset" title="Reset rotation">
-								<img src="../img/cross.png" alt="Reset">
+								<img width="16" height="16" src="../img/cross.png" alt="Reset">
 							</button>
 							<div class="btn btn-light px-0 bg-center h-100" title="Change background colour" style="background-image: url(../img/color_wheel.png)">
 								<input id="paper-color" type="color" value="#ffffff" class="h-100 p-0 m-0" style="opacity: 0">
@@ -560,9 +561,9 @@
 
 						<p>Creative coding, also known as generative art or algorithmic art, is the use of computer programming to make art. I've created a collection of sketches, each of which produces a simple figure as a starting point for creation. Your task is to adjust the parameters to create something visually appealing. The finished piece will combine my programming, your choice of parameter settings, and in some cases pseudorandom aspects generated by the computer. Most activities are initiated using buttons located in the bottom-right corner of the window. Click on <span class="btn btn-sm btn-black d-inline-block"><img src="../img/help.png" alt="Help"></span> at any time to open this window again. Under About this Sketch at the top of this window you can read some introductory information about the currently selected sketch. Use the "What's this?" button <span class="btn btn-sm btn-black d-inline-block"><img src="../img/what-is-this.svg" alt="What's This?" width="16"></span> to get help with a particular item.</p>
 
-						<p>Using the toolbar, click on <span class="btn btn-sm btn-black d-inline-block"><img src="../img/module.png" alt="Sketch" width="16"></span> to choose a sketch to experiment with. Click the cog icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/gear_in.png" alt="Parameters" width="16"></span> to open or close the sketch input parameters window. You might need to scroll down to see some parameters. Some sketches also have a build icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/brick.png" alt="Build" width="16"></span>, which creates a new picture using a different set of random numbers. When you've created a picture you like then you can think about animating your production if you wish. Click to either set the start frame <span class="btn btn-sm btn-black"><img src="../img/timeline_marker_start.png" alt="Start Frame" width="16"></span> or set the end frame <span class="btn btn-sm btn-black d-inline-block"><img src="../img/timeline_marker_end.png" alt="End Frame" width="16"></span> to make the current picture become either the starting point or the finishing point of the animation. After you have one frame set up then change the parameters to design a second picture to appear at the other end of the animation. Once you have your two frames marked then you're ready to play back your animation using the play icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/control_play_blue.png" alt="Play" width="16"></span>. You can make your animation longer or shorter by clicking on the arrow next to the play icon. With a subsequent click on the <span class="btn btn-sm btn-dark d-inline-block">More&hellip;</span> button you can access more advanced animation options.</p>
+						<p>Using the toolbar, click on <span class="btn btn-sm btn-black d-inline-block"><img src="../img/module.png" alt="Sketch" width="16" height="16"></span> to choose a sketch to experiment with. Click the cog icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/gear_in.png" alt="Parameters" width="16" height="16"></span> to open or close the sketch input parameters window. You might need to scroll down to see some parameters. Some sketches also have a build icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/brick.png" alt="Build" width="16" height="16"></span>, which creates a new picture using a different set of random numbers. When you've created a picture you like then you can think about animating your production if you wish. Click to either set the start frame <span class="btn btn-sm btn-black"><img src="../img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> or set the end frame <span class="btn btn-sm btn-black d-inline-block"><img src="../img/timeline_marker_end.png" alt="End Frame" width="16" height="16"></span> to make the current picture become either the starting point or the finishing point of the animation. After you have one frame set up then change the parameters to design a second picture to appear at the other end of the animation. Once you have your two frames marked then you're ready to play back your animation using the play icon <span class="btn btn-sm btn-black d-inline-block"><img src="../img/control_play_blue.png" alt="Play" width="16" height="16"></span>. You can make your animation longer or shorter by clicking on the arrow next to the play icon. With a subsequent click on the <span class="btn btn-sm btn-dark d-inline-block">More&hellip;</span> button you can access more advanced animation options.</p>
 
-						<p>To save your animation as a video file click on <span class="btn btn-sm btn-black d-inline-block"><img src="../img/film.png" alt="Video" width="16"></span>, or click <span class="btn btn-sm btn-black d-inline-block"><img src="../img/picture_save.png" alt="Download" width="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner.</p>
+						<p>To save your animation as a video file click on <span class="btn btn-sm btn-black d-inline-block"><img src="../img/film.png" alt="Video" width="16" height="16"></span>, or click <span class="btn btn-sm btn-black d-inline-block"><img src="../img/picture_save.png" alt="Download" width="16" height="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner.</p>
 
 						<p>This site has been primarily tested in Google Chrome. If you find anything broken (in any browser) then you can report it on <a href="https://github.com/elizabethhudnott/algorithmic-art/issues"> GitHub</a>. If you like this kind of thing then I suggest checking out my <a href="../index.html">Spirograph program</a> too. If you want to and are able to then please consider supporting my work via <a href="https://www.patreon.com/bePatron?u=23440273">Patreon</a> or by sharing a link on social media.</p>
 

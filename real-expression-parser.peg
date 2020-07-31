@@ -1,5 +1,10 @@
 /*	Real Number Formulae Grammar
 	============================
+N.B. Remember to adapt the output to export the the parse method.
+
+const parse = parser.parse;
+export default parse;
+
 	Accepts expressions using:
 
 	 	Floating point numbers

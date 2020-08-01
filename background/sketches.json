@@ -3,49 +3,49 @@
 		{
 			"title": "10 PRINT",
 			"url": "ten-print.js",
-			"thumbnail": "thumbnail/ten-print.png",
+			"thumbnail": "thumbnail/ten-print.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["BASIC", "lines"]
 		},
 		{
 			"title": "Cellular Automata",
 			"url": "cellular-automata.js",
-			"thumbnail": "thumbnail/cellular-automata.png",
+			"thumbnail": "thumbnail/cellular-automata.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["automata", "cells"]
 		},
 		{
 			"title": "Circle Packing",
 			"url": "circle-packing.js",
-			"thumbnail": "thumbnail/circle-packing.png",
+			"thumbnail": "thumbnail/circle-packing.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["circles"]
 		},
 		{
 			"title": "Graphing Calculator",
 			"url": "graphing-calculator.js",
-			"thumbnail": "thumbnail/graphing-calculator.png",
+			"thumbnail": "thumbnail/graphing-calculator.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["mathematics"]
 		},
 		{
 			"title": "Julia Set",
 			"url": "julia-set.js",
-			"thumbnail": "thumbnail/julia-set.png",
+			"thumbnail": "thumbnail/julia-set.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["fractals"]
 		},
 		{
 			"title": "Phyllotaxis",
 			"url": "phyllotaxis.js",
-			"thumbnail": "thumbnail/phyllotaxis.png",
+			"thumbnail": "thumbnail/phyllotaxis.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["plants", "nature", "golden ratio", "spirals"]
 		},
 		{
 			"title": "Sierpinski Carpet",
 			"url": "sierpinski-carpet.js",
-			"thumbnail": "thumbnail/sierpinski-carpet.png",
+			"thumbnail": "thumbnail/sierpinski-carpet.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["fractals", "recursion", "squares"]
 		}

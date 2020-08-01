@@ -1191,6 +1191,7 @@ function showBackgroundOptions() {
 			drawingContext.initializeShader(bgGenerator);
 			drawingContext.setProperties(bgGenerator);
 		}
+		window.addEventListener('resize', resizeListener);
 		signatureChanged = true;
 		progressiveBackgroundGen(0);
 
@@ -1220,6 +1221,7 @@ function showBackgroundOptions() {
 		document.getElementById('btn-generate-background').parentElement.hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
+		toolbar.hidden = false;
 		if (pushToHistory) {
 			const name = url.slice(0, -3);	// trim .js
 			urlParameters.set('gen', name);
@@ -1293,18 +1295,17 @@ function showBackgroundOptions() {
 		progressiveBackgroundGen(0);
 	}
 
+	function resizeListener(event) {
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(resizeWindow, 100);
+	}
+
 	async function init() {
+		const sketchesModal = document.getElementById('sketches-modal');
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
-		let showSketchesModal = false;
-		if (firstGenURL === null) {
-			firstGenURL = 'ten-print.js';
-			showSketchesModal = true;
-			nextStep = function () {
-				$('#sketches-modal').modal('show');
-			};
-		} else {
+		if (firstGenURL !== null) {
 			firstGenURL += '.js';
 			nextStep = function () {
 				$(modal).modal('show');
@@ -1313,7 +1314,6 @@ function showBackgroundOptions() {
 		if (firstDocID !== null) {
 			const sketchURL = await loadDocument(firstDocID);
 			if (sketchURL !== undefined) {
-				toolbar.hidden = false;
 				firstGenURL = sketchURL;
 				nextStep = function () {
 					$(modal).modal('show');
@@ -1321,6 +1321,12 @@ function showBackgroundOptions() {
 			} else {
 				firstDocID = null;
 			}
+		}
+		if (firstGenURL === null) {
+			sketchesModal.querySelector('.btn-secondary[data-dismiss=modal]').hidden = true;
+			nextStep = function () {
+				$(sketchesModal).modal('show');
+			};
 		}
 
 		if (store === undefined || store.getItem('no-welcome') !== 'true') {
@@ -1335,8 +1341,8 @@ function showBackgroundOptions() {
 			document.getElementById('show-welcome').checked = false;
 			nextStep();
 		}
-		document.getElementById('sketches-modal').classList.add('fade');
 		document.getElementById('help-modal').classList.add('fade');
+		sketchesModal.classList.add('fade');
 
 		const sketchFile = await downloadFile('sketches.json', 'json');
 		for (let sketch of sketchFile.sketches) {
@@ -1345,20 +1351,14 @@ function showBackgroundOptions() {
 				currentSketch = sketch;
 			}
 		}
-		if (showSketchesModal) {
-			loadThumbnails();
-		}
 
 		if (!firstDocID) {
-			switchGenerator(firstGenURL, false).then(function () {
-				toolbar.hidden = false;
-			});
+			if (firstGenURL) {
+				switchGenerator(firstGenURL, false);
+			} else {
+				loadThumbnails();
+			}
 		}
-
-		window.addEventListener('resize', function (event) {
-			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(resizeWindow, 100);
-		});
 	}
 	init();
 
@@ -2040,6 +2040,7 @@ function showBackgroundOptions() {
 		$(modal).modal('show');
 		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
 		switchGenerator(currentSketch.url, true);
+		this.parentElement.querySelector('[data-dismiss=modal]').hidden = false;
 	});
 
 	rotationSlider.addEventListener('input', function (event) {

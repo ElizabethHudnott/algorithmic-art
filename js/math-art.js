@@ -1182,6 +1182,7 @@ function showBackgroundOptions() {
 		const hasTween = 'tween' in gen;
 		if (hasTween) {
 			gen.tween = parseFloat(animPositionSlider.value);
+			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		}
 		if (gen.isShader && !gen.shaderSource) {
 			const fragFileContent = (await Promise.all([

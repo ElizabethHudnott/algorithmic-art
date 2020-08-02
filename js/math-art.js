@@ -1,5 +1,6 @@
 'use strict';
 filePath = 'sketch/';
+const urlParameters = new URLSearchParams(document.location.search);
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
@@ -617,7 +618,6 @@ function showBackgroundOptions() {
 	};
 
 	const backgroundGenerators = new Map();
-	const urlParameters = new URLSearchParams(document.location.search);
 	let currentSketch;
 	const backgroundGenOptionsDOM = new Map();
 	let generatorURL, startFrame, endFrame, tweenData, animController;
@@ -2200,6 +2200,7 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = currentFrame;
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		seedInput.value = random.seed;
 		showAlert(successAlert, 'Both frames set.', document.body);
 	});
@@ -2214,6 +2215,7 @@ function showBackgroundOptions() {
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = currentFrame;
+		tweenData = new TweenData(bgGenerator, startFrame, endFrame);
 		seedInput.value = random.seed;
 		animAction();
 	});

@@ -3,12 +3,12 @@
 	--success: hsl(134, 61%, 33%);
 }
 
-a:not(.nav-tabs .nav-link) {
+a {
 	color: hsl(225, 100%, 27%);
 	font-family: America, sans-serif;
 }
 
-a:not(.nav-tabs .nav-link):hover {
+a:hover, .nav-tabs .nav-link:hover {
 	color: hsl(225, 100%, 50%);
 	text-decoration: none;
 	text-shadow: 0 0 15px #00000066;
@@ -217,7 +217,7 @@ button.btn-black:hover {
 	margin-left: 1px;
 }
 
-.nav-tabs .nav-link {
+.nav-tabs a.nav-link {
 	background-color: hsl(270, 17%, 97%);
     border-color: #ddd;
 	border-top-left-radius: 0.7rem;
@@ -231,7 +231,6 @@ button.btn-black:hover {
 .nav-tabs .nav-link:hover {
 	background-color: #fdfdfd;
 	border-color: #ddd;
-	color: black;
 }
 
 .nav-tabs .nav-link.active:hover {

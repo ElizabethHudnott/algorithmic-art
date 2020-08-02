@@ -386,6 +386,57 @@ export default function GraphingCalculator() {
 	const me = this;
 	this.title = 'Graphing Calculator';
 	this.hasRandomness = true;
+	this.equations = [];	// 2D array. Multiple shapes, multiple subpaths, multiple piecewise sections
+	this.min = [];			// Per shape, per subpath, per piece
+	this.max = [];			// Per shape, per subpath, per piece
+	this.step = [];			// Per shape, per subpath, per piece
+	this.rangeUnits = [];	// Per shape, per subpath, per piece
+	this.minPathRepeat = [];	// Per shape, per subpath
+	this.maxPathRepeat = [];	// Per shape, per subpath, range is min <= n < max
+
+	this.rotation = [];		// Per shape
+	this.translateX = [];	// Per shape & per subpath
+	this.translateY = [];	// Per shape & per subpath
+	this.scale = [];		// Per shape & per subpath
+	this.stretch = [];		// Per shape & per subpath
+	this.shearX = [];		// Per shape & per subpath
+	this.shearY = [];		// Per shape & per subpath
+	this.shearDirection = []; // Per shape & per subpath
+	this.closePath = [];	// Per shape, per subpath
+	this.lineWidth = [];	// Per shape
+	this.lineJoin = [];		// Per shape
+	this.dash = [];			// Per shape
+	this.strokeColor = [];	// Per shape
+	this.fillColor = [];	// Per shape
+	this.fillRule = [];		// Per shape
+	this.clip = [];			// Per shape
+
+	this.minorAxisMin = -25;
+	this.minorAxisMax = 25;
+	this.majorAxisTranslation = 0;
+	this.majorAxisMajorGridlines = 5;
+	this.minorAxisMajorGridlines = 5;
+	this.majorAxisMinorGridlines = 1;
+	this.minorAxisMinorGridlines = 1;
+	this.axisIntensity = 0.1;
+	this.majorGridlineIntensity = 0.65;
+	this.minorGridlineIntensity = 0.4;	// Relative to major grid lines
+	this.gridlineColor = '#008000';
+
+	this.addShape(0);
+	this.addSubpath(0, 0);
+	switch (urlParameters.get('preset')) {
+	case 'heart':
+		this.addHeartEquation(0, 0, 0);
+		break;
+	case 'rose':
+		this.addRoseEquation(0, 0, 0);
+		break;
+	default:
+		this.addRectangularEquation(0, 0, 0);
+	}
+	this.tween = 0;
+
 	this.optionsDocument = downloadFile('graphing-calculator.html', 'document').then(function (optionsDoc) {
 		const shapeSelection = optionsDoc.getElementById('calc-shape-selection');
 		const subpathSelection = optionsDoc.getElementById('calc-subpath-selection');
@@ -514,6 +565,7 @@ export default function GraphingCalculator() {
 			stepInput.value = me.step[shapeNum][pathNum][pieceNum] / units;
 			errorBox.innerHTML = '';
 		}
+		displayPiece();
 
 		pathInput.addEventListener('input', function (event) {
 			pathNum = parseInt(this.value);
@@ -978,47 +1030,6 @@ export default function GraphingCalculator() {
 		return optionsDoc;
 	});
 
-	this.equations = [];	// 2D array. Multiple shapes, multiple subpaths, multiple piecewise sections
-	this.min = [];			// Per shape, per subpath, per piece
-	this.max = [];			// Per shape, per subpath, per piece
-	this.step = [];			// Per shape, per subpath, per piece
-	this.rangeUnits = [];	// Per shape, per subpath, per piece
-	this.minPathRepeat = [];	// Per shape, per subpath
-	this.maxPathRepeat = [];	// Per shape, per subpath, range is min <= n < max
-
-	this.rotation = [];		// Per shape
-	this.translateX = [];	// Per shape & per subpath
-	this.translateY = [];	// Per shape & per subpath
-	this.scale = [];		// Per shape & per subpath
-	this.stretch = [];		// Per shape & per subpath
-	this.shearX = [];		// Per shape & per subpath
-	this.shearY = [];		// Per shape & per subpath
-	this.shearDirection = []; // Per shape & per subpath
-	this.closePath = [];	// Per shape, per subpath
-	this.lineWidth = [];	// Per shape
-	this.lineJoin = [];		// Per shape
-	this.dash = [];			// Per shape
-	this.strokeColor = [];	// Per shape
-	this.fillColor = [];	// Per shape
-	this.fillRule = [];		// Per shape
-	this.clip = [];			// Per shape
-
-	this.minorAxisMin = -25;
-	this.minorAxisMax = 25;
-	this.majorAxisTranslation = 0;
-	this.majorAxisMajorGridlines = 5;
-	this.minorAxisMajorGridlines = 5;
-	this.majorAxisMinorGridlines = 1;
-	this.minorAxisMinorGridlines = 1;
-	this.axisIntensity = 0.1;
-	this.majorGridlineIntensity = 0.65;
-	this.minorGridlineIntensity = 0.4;	// Relative to major grid lines
-	this.gridlineColor = '#008000';
-
-	this.addShape(0);
-	this.addSubpath(0, 0);
-	this.addRectangularEquation(0, 0, 0);
-	this.tween = 0;
 }
 
 GraphingCalculator.prototype.animatable = {

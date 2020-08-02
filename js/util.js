@@ -70,10 +70,13 @@ function requireScript(src) {
 	return promise;
 }
 
+let filePath = new URL('.', document.location);
+
 function downloadFile(url, type) {
+	const resolvedURL = /^((http(s)?:)|\/)/.test(url) ? url : filePath + url;
 	return new Promise(function (resolve, reject) {
 		const request = new XMLHttpRequest();
-		request.open("GET", url);
+		request.open("GET", resolvedURL);
 		request.responseType = type;
 		request.timeout = 60000;
 		request.addEventListener('load', function() {

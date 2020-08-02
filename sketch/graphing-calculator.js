@@ -1,4 +1,4 @@
-import parse from '../real-expression-parser.js';
+import parse from '../parser/real-expression.js';
 
 class RectangularEquation {
 	constructor(text) {

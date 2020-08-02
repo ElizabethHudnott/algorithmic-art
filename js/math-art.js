@@ -1,5 +1,5 @@
 'use strict';
-
+filePath = 'sketch/';
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
@@ -486,7 +486,8 @@ function showBackgroundOptions() {
 	const drawingContext = new DrawingContext(canvas, window.innerWidth, window.innerHeight, 1);
 	const signatureBox = document.getElementById('author-hitbox');
 	let signatureChanged = true;
-	let signatureWidth, signatureHeight, userDisplayName, signatureText;
+	let signatureWidth, signatureHeight, userDisplayName;
+	let signatureText = '';
 	const signatureFont = 'italic 20px "Pacifico", cursive';
 
 	function calcSignature() {
@@ -525,7 +526,6 @@ function showBackgroundOptions() {
 
 	function drawSignature(contextualInfo) {
 		const context = contextualInfo.twoD;
-		const scale = contextualInfo.scale;
 		if (signatureChanged) {
 			calcSignature();
 		} else {
@@ -534,6 +534,10 @@ function showBackgroundOptions() {
 			context.textAlign = 'left';
 			context.textBaseline = 'bottom';
 		}
+		if (signatureText === '') {
+			return;
+		}
+		const scale = contextualInfo.scale;
 		const fontSize = Math.ceil(20 / scale);
 		context.font = signatureFont.replace('20', fontSize);
 		const scaledWidth = signatureWidth / scale;
@@ -958,10 +962,7 @@ function showBackgroundOptions() {
 	function generatorFactory(url) {
 		let generator = backgroundGenerators.get(url);
 		if (generator === undefined) {
-			let resolvedURL = url;
-			if (!/^http(s)?:/.test(url)) {
-				resolvedURL = document.location.pathname + url;
-			}
+			const resolvedURL = /^http(s)?:/.test(url) ? url : '/sketch/' + url;
 			return import(resolvedURL).then(function (module) {
 				const constructor = module.default;
 				const generator = new constructor();
@@ -1032,7 +1033,7 @@ function showBackgroundOptions() {
 	function loadThumbnails() {
 		for (let img of sketchCards.getElementsByTagName('IMG')) {
 			const input = img.parentElement.parentElement.children[0];
-			img.src = input._sketch.thumbnail;
+			img.src = 'sketch/thumbnail/' + input._sketch.thumbnail;
 		}
 		$('#sketches-modal').off('show.bs.modal', loadThumbnails);
 	}
@@ -1184,7 +1185,7 @@ function showBackgroundOptions() {
 		}
 		if (gen.isShader && !gen.shaderSource) {
 			const fragFileContent = (await Promise.all([
-				requireScript('../lib/gl-matrix.min.js'),
+				requireScript('lib/gl-matrix.min.js'),
 				downloadFile(url.slice(0, -3) + '.frag', 'text')
 			]))[1];
 			gen.shaderSource = fragmentShaderHeader + shaderDeclarations(gen) + fragFileContent;
@@ -1344,7 +1345,7 @@ function showBackgroundOptions() {
 		document.getElementById('help-modal').classList.add('fade');
 		sketchesModal.classList.add('fade');
 
-		const sketchFile = await downloadFile('sketches.json', 'json');
+		const sketchFile = await downloadFile('/sketches.json', 'json');
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {
@@ -1818,7 +1819,7 @@ function showBackgroundOptions() {
 					progressBar.setAttribute('aria-valuenow', percent);
 					framesRendered++;
 					const iconFile = framesRendered % 2 === 0 ? 'record.png' : 'draw_ellipse.png';
-					indicator.src = '../img/' + iconFile;
+					indicator.src = 'img/' + iconFile;
 				} else if (animControlsOpen && tween - lastUIUpdate >= uiUpdateInterval) {
 					animPositionSlider.value = tween;
 					lastUIUpdate = tween;
@@ -1847,7 +1848,7 @@ function showBackgroundOptions() {
 		const progressRow = document.getElementById('video-progress-row');
 		progressRow.hidden = false;
 
-		await requireScript('../lib/CCapture.all.min.js');
+		await requireScript('lib/CCapture.all.min.js');
 		const capturer = new CCapture(properties);
 		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
 		const stopButton = document.getElementById('btn-stop-video-render');
@@ -2245,7 +2246,7 @@ function showBackgroundOptions() {
 
 	function animFinished() {
 		const playStopButton = document.getElementById('btn-play');
-		playStopButton.children[0].src = '../img/control_play_blue.png';
+		playStopButton.children[0].src = 'img/control_play_blue.png';
 		playStopButton.title = 'Play animation';
 		const tween = animController.progress;
 		animPositionSlider.value = tween;
@@ -2256,7 +2257,7 @@ function showBackgroundOptions() {
 	function play() {
 		$(modal).modal('hide');
 		const button = document.getElementById('btn-play');
-		button.children[0].src = '../img/control_stop_blue.png';
+		button.children[0].src = 'img/control_stop_blue.png';
 		button.title = 'Stop animation';
 		successAlert.alert('close');
 		errorAlert.alert('close');
@@ -2458,7 +2459,7 @@ function showBackgroundOptions() {
 			$('#video-modal').modal('show');
 			return;
 		}
-		requireScript('../lib/CCapture.all.min.js');
+		requireScript('lib/CCapture.all.min.js');
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
@@ -2511,7 +2512,7 @@ function showBackgroundOptions() {
 				format: document.getElementById('video-format').value,
 				quality: parseInt(document.getElementById('video-quality').value),
 				name: generateFilename(),
-				workersPath: '../lib/'
+				workersPath: 'lib/'
 			};
 			const startTween = startTime / length;
 

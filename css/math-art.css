@@ -3,12 +3,12 @@
 	--success: hsl(134, 61%, 33%);
 }
 
-a {
+a:not(.nav-tabs .nav-link) {
 	color: hsl(225, 100%, 27%);
 	font-family: America, sans-serif;
 }
 
-a:hover {
+a:not(.nav-tabs .nav-link):hover {
 	color: hsl(225, 100%, 50%);
 	text-decoration: none;
 	text-shadow: 0 0 15px #00000066;
@@ -34,12 +34,12 @@ option:disabled {
 	color: #bbb;
 }
 
-.btn-primary {
+.btn-primary, .btn-primary:disabled {
 	background-color: var(--primary);
 	border-color: var(--primary);
 }
 
-.btn-success {
+.btn-success, .btn-success:disabled {
 	background-color: var(--success);
 	border-color: var(--success);
 }

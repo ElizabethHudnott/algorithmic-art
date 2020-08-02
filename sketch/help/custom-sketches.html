@@ -2,10 +2,9 @@
 <html>
 <head>
 	<title>Custom Sketches</title>
-	<link rel="icon" href="../../img/spirograph.png">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<link rel="stylesheet" href="../../site.css">
-	<link rel="stylesheet" href="../ui.css">
+	<link rel="stylesheet" href="../../css/spirograph.css">
+	<link rel="stylesheet" href="../../css/math-art.css">
 	<style>
 		.codebox {
   			border: 1px solid #dee2e6;
@@ -23,6 +22,7 @@
 			max-height: 500px;
 		}
 	</style>
+	<link rel="icon" href="../../img/spirograph.png">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -35,13 +35,13 @@
 		<main>
 			<h1>Writing The Code</h1>
 			<p>
-				This article discusses creating your own generative art sketches that take advantage of the hosting <a href="../index.html">environment</a> I've created. The code template you will need to follow is shown below.
+				This article discusses creating your own generative art sketches that take advantage of the <a href="../../index.html">environment</a> I've created. The code template you will need to follow is shown below.
 			</p>
 			<p>
 				Each sketch has a title, which is used in GUI elements, and a <code>hasRandomness</code> property. If your sketch's output is deterministic and driven only by input parameters then this should be set to false. On the other hand if you use pseudorandom numbers then set it to true and the environment will add the build icon <span class="btn btn-sm btn-black d-inline-block"><img src="../../img/brick.png" alt="Build" width="16"></span> to the program's toolbar so users can generate a fresh image without adjusting the sketch's parameters. You can populate the <code>helpFile</code> property with a URL directing the environment towards a HTML file containing help information.
 			</p>
 			<p>
-				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during an early development phase, but usually you will want to include it unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix in order to avoid name clashes with elements that are part of the environment itself. For example, in the <a href="../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
+				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during an early development phase, but usually you will want to include it unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix in order to avoid name clashes with elements that are part of the environment itself. For example, in the <a href="../../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
 			</p>
 			<p>
 				The remainder of the code has three significant sections.
@@ -70,7 +70,7 @@
 				</li>
 			</ul>
 			<p>
-				For instance, my <a href="../index.html?gen=phyllotaxis">phyllotaxis</a> sketch uses four values for the <code>preview</code> parameter.
+				For instance, my <a href="../../index.html?gen=phyllotaxis">phyllotaxis</a> sketch uses four values for the <code>preview</code> parameter.
 			</p>
 			<ol start="0">
 				<li>
@@ -166,14 +166,14 @@
 				There are a couple of variant formats, which are particularly useful when working with arrays. The two parameter format <code>setBgProperty(me, '<var>name</var>');</code> forwards the <em>current value</em> of <code>me.<var>name</var></code> to the shader, which is useful when you've altered some elements of an array property directly. This may be easier than passing a whole replacement array in one using the three parameter version. Finally, if you only need to update a single array element then there's <code>setPropertyElement(me, '<var>name</var>', <var>index</var>, <var>value</var>);</code>
 			</p>
 			<h2>WebGL Demo Sketch</h2>
-			<a href="../index.html?gen=webgl-demo" class="btn btn-primary" role="button">Launch Live Sketch</a>
+			<a href="../../index.html?gen=webgl-demo" class="btn btn-primary" role="button">Launch Live Sketch</a>
 			<h3>webgl-demo.js</h3>
 			<div class="codebox" id="webgl-demo-js"></div>
 			<h3>webgl-demo.frag</h3>
 			<div class="codebox" id="webgl-demo-frag"></div>
 		</main>
 	</div>
-	<script src="../../util.js"></script>
+	<script src="../../js/util.js"></script>
 	<script>
 
 		downloadFile('../template.js', 'text').then(function (code) {

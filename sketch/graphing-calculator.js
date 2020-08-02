@@ -565,7 +565,7 @@ export default function GraphingCalculator() {
 			stepInput.value = me.step[shapeNum][pathNum][pieceNum] / units;
 			errorBox.innerHTML = '';
 		}
-		displayPiece();
+		displayPath();
 
 		pathInput.addEventListener('input', function (event) {
 			pathNum = parseInt(this.value);

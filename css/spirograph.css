@@ -4,6 +4,7 @@
 
 :root {
 	--complement-color: #ffb0c8;
+	font-size: 16px;
 }
 
 .form-control:invalid {
@@ -48,7 +49,6 @@
 }
 
 .collapse-horizontal {
-	overflow: hidden;
 	transition: width 0.4s;
 }
 
@@ -100,4 +100,17 @@ input[type=color] {
 
 button[disabled], input[type=color][disabled] {
 	cursor: auto;
+}
+
+.patreon {
+	background-color: rgb(232, 91, 70);
+	border: 1px solid rgb(232, 91, 70);
+	border-radius: 9999px;
+	color: white;
+	display: block;
+	font-family: America, sans-serif;
+	font-size: 0.875rem;
+	font-weight: 500;
+	padding: 5px 1rem;
+	user-select: none;
 }

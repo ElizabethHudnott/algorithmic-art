@@ -4,6 +4,15 @@ const hole1Distance = 0.1;
 const pointerSize = 4;
 const defaultCompositioOp = 'multiply';
 
+{
+	const container = document.getElementById('canvas-container');
+	const form = document.getElementById('spirograph-form');
+	const top = container.offsetTop - 8; // subtract 0.5rem. Sync with stylesheet!
+	const height = window.innerHeight - top;
+	form.style.top = top + 'px';
+	form.style.height = height + 'px';
+}
+
 let rawScale, fixedScale, scale, width, height;
 let fixedSwirlRotation, fixedSwirlRadius;
 let gearsVisible = true;
@@ -634,20 +643,21 @@ const toolColor = 'rgba(0, 64, 255, 0.5)';
 
 function resizeCanvas(fitExact) {
 	saveCanvas();
+	const container = document.getElementById('canvas-container');
 	const penColor = spiroContext.strokeStyle;
-	let pixelWidth = document.getElementById('canvas-container').clientWidth;
+	let pixelWidth = container.clientWidth;
 	if (spiroCanvas < pixelWidth || fitExact) {
 		spiroCanvas.width = pixelWidth;
 		toolCanvas.width = pixelWidth;
 	} else {
 		pixelWidth = spiroCanvas.width;
 	}
-	let pixelHeight = spiroCanvas.height;
+	let pixelHeight = container.clientHeight;
 	if (fitExact && pixelHeight > pixelWidth) {
 		pixelHeight = pixelWidth;
-		spiroCanvas.height = pixelHeight;
-		toolCanvas.height = pixelHeight;
 	}
+	spiroCanvas.height = pixelHeight;
+	toolCanvas.height = pixelHeight;
 	rawScale = pixelWidth >= pixelHeight ? pixelHeight / 2 : pixelWidth / 2;
 	calcScale();
 	restoreCanvas();

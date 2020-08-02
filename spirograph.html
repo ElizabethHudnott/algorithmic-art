@@ -2,7 +2,6 @@
 <html>
 <head>
 	<title>Spirograph Lab</title>
-	<link rel="icon" href="img/spirograph.png">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/spirograph.css">
@@ -13,546 +12,117 @@
 
 	<script src="js/util.js" defer></script>
 	<script src="js/spirograph.js" defer></script>
+	<link rel="icon" href="img/spirograph.png">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-	<div class="container-fluid position-relative d-flex flex-column min-vh-100">
-		<header class="jumbotron jumbotron-compact bg-complement mb-2">
+	<div class="container-fluid d-flex flex-column vh-100">
+		<header class="jumbotron jumbotron-compact mb-0 bg-complement">
 			<h1>
-				<span class="display-4">Elizabeth's Spirograph Lab</span>
-				<div class="d-inline-block font-weight-normal ml-1" style="font-size: 1rem; vertical-align: super">
-					<a href="https://www.patreon.com/bePatron?u=23440273" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+				<span class="display-4">Spirograph Lab</span>
+				<div class="d-inline-block ml-1" style="vertical-align: super">
+					<a href="https://www.patreon.com/bePatron?u=23440273" class="patreon" title="Become a patron">
+						<img src="img/patreon.svg" width="16" height="15" alt="Patreon">
+						<span class="d-none d-lg-inline ml-2">Become a patron</span>
+					</a>
 				</div>
 			</h1>
 			<p class="lead">A childhood toy digitally resurrected.</p>
 		</header>
 
-		<main class="position-relative flex-grow-1">
-			<div>
-				<div id="canvas-container" class="position-relative w-100 mb-2">
-					<canvas id="spirograph-canvas" height="640"></canvas>
-					<canvas class="position-absolute top left" id="tool-canvas" height="640"></canvas>
-				</div>
-				<div class="btn-toolbar my-3" role="toolbar" aria-label="Drawing tools">
-					<button id="btn-draw" type="submit" form="spirograph-form" class="btn btn-light">
-						<img src="img/spirograph.png" alt="Draw shape" title="Draw pattern">
-					</button>
-					<button type="button" class="btn btn-light" id="btn-fill">
-						<img src="img/fill_color_pink.png" alt="Fill shape" title="Fill shape">
-					</button>
-					<button id="btn-fastforward" type="button" class="btn btn-light">
-						<img src="img/control_end_blue.png" alt="Fast forward" title="Fast forward">
-					</button>
-					<button id="btn-randomize" type="button" class="btn btn-light">
-						<img src="img/dice.png" alt="Randomize" title="Randomize">
-					</button>
-					<input type="number" min="1" value="1" id="symmetry" class="form-control" style="width: 4.2rem" title="Number of points of symmetry" aria-label="Number of points of symmetry">
-					<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false" id="btn-mirror">
-						<img src="img/mirror.png" alt="Kaleidoscope" title="Kaleidoscope mode">
-					</button>
-					<button class="btn dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<img src="img/draw_line_32.png" alt="Tool" title="Current tool">
-					</button>
-					<div class="dropdown-menu p-0" aria-labelledby="btn-tools">
-						<div id="tools" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
-							<label class="btn btn-light active w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/draw_line.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="line" checked>Line
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/draw_ellipse.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="circle">Circle
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/pencil.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="freehand">Freehand
-								</div>
-							</label>
-							<label class="btn btn-light w-100 d-flex">
-								<div class="col-auto">
-									<img src="img/fill_color.png">
-								</div>
-								<div class="col text-left">
-									<input type="radio" name="tool" value="fill">Fill
-								</div>
-							</label>
-						</div>
-					</div>
-					<button type="button" class="btn btn-light" id="btn-undo" disabled>
-						<img src="img/undo.png" alt="Undo" title="Undo">
-					</button>
-					<button type="button" class="btn btn-light" id="btn-redo" disabled>
-						<img src="img/redo.png" alt="Redo" title="Redo">
-					</button>
-					<button type="button" class="btn btn-light active" id="btn-toggle-gears" data-toggle="button" aria-pressed="true">
-						<img src="img/gear_in.png" alt="Toggle gears" title="Toggle gears">
-					</button>
-					<div data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
-						<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">
-							<img src="img/information.png" alt="Toggle info" title="Toggle info">
-						</button>
-					</div>
-					<button type="button" class="btn btn-light" id="btn-export" data-toggle="modal" data-target="#export-modal">
-						<img src="img/download_cloud.png" alt="Download" title="Download">
-					</button>
-					<button type="button" class="btn btn-light" data-toggle="modal" data-target="#erase-modal">
-						<img src="img/page_white.png" alt="New" title="New">
-					</button>
-				</div>
-				<div colspan="4" id="info" class="mb-4 collapse">
-					<span class="bg-info bg-light p-2">
-						This spirograph has <span id="num-points"></span> points,
-						requires <span id="num-revolutions"></span> revolutions,
-						and its complete length is <span id="length"></span>.
-					</span>
-				</div>
-			</div>
-
-			<form class="position-absolute top right collapse-horizontal collapsed-horizontal" id="spirograph-form">
-				<table class="border rounded bg-white p-1" style="border-collapse: separate;">
-					<thead>
-						<tr class="row d-md-none">
-							<th colspan="4" class="col-12">Configuration</th>
-						</tr>
-						<tr class="row d-none d-md-flex">
-							<th colspan="2" class="col-6">Rotor and Pen Parameters</th>
-							<th colspan="2" class="col-6">Stator, Paper and Other Parameters</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="row">
-							<td colspan="2" class="col-6 mb-3">
-								<label for="rotor-teeth">Number of rotor teeth</label>
-								<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part" title="Number of teeth on the moving part">
-								<datalist id="rotor-teeth-list">
-									<option>24</option>
-									<option>30</option>
-									<option>32</option>
-									<option>36</option>
-									<option>40</option>
-									<option>42</option>
-									<option>45</option>
-									<option>48</option>
-									<option>50</option>
-									<option>52</option>
-									<option>56</option>
-									<option>60</option>
-									<option>63</option>
-									<option>64</option>
-									<option>72</option>
-									<option>75</option>
-									<option>80</option>
-									<option>84</option>
-									<option>144</option>
-									<option>150</option>
-								</datalist>
-							</td>
-							<td colspan="2" class="col-6 mb-3">
-								<label for="stator-teeth">Number of stator teeth</label>
-								<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part" title="Number of teeth on the stationary part">
-								<datalist id="stator-teeth-list">
-									<option>96</option>
-									<option>105</option>
-									<option>144</option>
-									<option>150</option>
-									<option>24</option>
-									<option>30</option>
-									<option>32</option>
-									<option>36</option>
-									<option>40</option>
-									<option>42</option>
-									<option>45</option>
-									<option>48</option>
-									<option>50</option>
-									<option>52</option>
-									<option>56</option>
-									<option>60</option>
-									<option>63</option>
-									<option>64</option>
-									<option>72</option>
-									<option>75</option>
-									<option>80</option>
-									<option>84</option>
-								</datalist>
-							</td>
-						</tr>
-						<tr class="row">
-							<td class="col-6 col-md-3 mb-3">
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="stator-shape">Stator shape</label>
-								<select id="stator-shape" class="form-control" required value="circle">
-									<option value="circle">Circle</option>
-									<option value="rack">Rack</option>
-								</select>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="stator-aspect">Stator's aspect ratio</label>
-								<input id="stator-aspect" class="form-control" type="number" min="0" max="1" step="any" required value="0.5" disabled>
-							</td>
-						</tr>
-						<tr class="row">
-							<td class="col-6 col-md-3 mb-3">
-								<fieldset>
-									<legend class="col-form-label">Rotor position</legend>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-inside" value="inside" checked>
-										<label class="form-check-label" for="rotor-position-inside">Inside</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-outside" value="outside">
-										<label class="form-check-label" for="rotor-position-outside">Outside</label>
-									</div>
-								</fieldset>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<fieldset>
-									<legend class="col-form-label">Rotor orientation</legend>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="orientation" id="orientation-inward" value="inward" checked>
-										<label class="form-check-label" for="orientation-inward">Inward</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="orientation" id="orientation-outward" value="outward">
-										<label class="form-check-label" for="orientation-outward">Outward</label>
-									</div>
-								</fieldset>
-							</td>
-							<td colspan="2" class="col-6 mb-3">
-								<label for="stator-radius">Scale</label>
-								<input class="form-control" required id="stator-radius" value="1" list="stator-radius-list" pattern="\d+(\.\d*)?(/[1-9]\d*)?" placeholder="Stator radius">
-								<datalist id="stator-radius-list">
-									<option>1</option>
-									<option>96/105</option>
-									<option>96/144</option>
-									<option>96/150</option>
-									<option>105/150</option>
-								</datalist>
-							</td>
-						</tr>
-						<tr class="row">
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<label for="pen-x">Distance from pen to rotor centre</label>
-								<output id="pen-x-readout" class="float-right"></output>
-								<input type="range" class="form-control-range mt-2" id="pen-x" min="0" value="1" aria-describedby="pen-x-readout">
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="start-tooth">Starting tooth</label>
-								<div class="input-group">
-									<input type="number" class="form-control" required value="0" step="any" id="start-tooth" placeholder="Tooth number" title="Tooth number to begin plotting from">
-									<div class="input-group-append">
-										<button class="btn btn-outline-secondary" type="button" id="btn-start-position" data-toggle="modal" data-target="#start-position-modal">
-											&hellip;
-										</button>
-									</div>
-								</div>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="increment">Step size</label>
-								<input class="form-control" type="number" min="0.01" step="any" value="1" required id="increment">
-							</td>
-						</tr>
-						<tr class="row">
-							<td colspan="2" class="col-12 col-md-6">
-								<fieldset class="form-group">
-									<label for="pen-y">Perpendicular pen offset</label>
-									<output id="pen-y-readout" class="float-right"></output>
-									<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-describedby="pen-y-readout">
-								</fieldset>
-							</td>
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<fieldset>
-									<legend class="col-form-label">End position</legend>
-									<div class="input-group mb-2">
-										<div class="input-group-prepend">
-											<div class="input-group-text">
-												<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
-											</div>
-										</div>
-										<label class="form-control input-group-text" for="end-point-auto">Finished shape</label>
-									</div>
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<div class="input-group-text">
-												<input type="radio" name="end-point" value="fixed" aria-label="Rotate around a specific number of times" id="end-point-numbered">
-											</div>
-											<label class="form-control input-group-text" for="end-point-numbered">Number of revolutions</label>
-										</div>
-										<input type="number" id="revolutions" min="0" value="1" step="any" class="form-control" aria-label="Number of revolutions" placeholder="Number of revolutions">
-									</div>
-								</fieldset>
-							</td>
-						</tr>
-						<tr class="row">
-							<td colspan="2" class="col-6 mb-3">
-								<label for="anim-speed">Animation speed</label>
-								<input type="range" class="form-control-range mt-2" id="anim-speed" min="0" max="100" value="60">
-							</td>
-							<td colspan="2" class="col-6 mb-3">
-								<fieldset>
-									<legend class="col-form-label">Translate stator by</legend>
-									<div class="form-group input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">x</span>
-										</div>
-										<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
-										<select class="form-control" id="translation-x-units">
-											<option>teeth</option>
-											<option>units</option>
-										</select>
-									</div>
-									<div class="form-group input-group">
-										<div class="input-group-prepend">
-											<span class="input-group-text">y</span>
-										</div>
-										<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
-										<select class="form-control" id="translation-y-units">
-											<option>teeth</option>
-											<option>units</option>
-										</select>
-									</div>
-								</fieldset>
-							</td>
-						</tr>
-						<tr class="row">
-							<td class="col-3 col-md-2 mb-3">
-								<label for="line-width">Line width</label>
-								<input class="form-control" type="number" id="pen-width" min="1" value="2" required placeholder="Pen width" title="Pen thickness in pixels">
-							</td>
-							<td class="col-3 col-md-4 mb-3">
-								<label for="line-dash">Dash pattern</label>
-								<input class="form-control" id="line-dash" required value="1" pattern="[1-9]\d*(,\s*[1-9]\d*)*" placeholder="Dash pattern" title="Comma separated list of dash and gap lengths">
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="rotation">Rotate stator by</label>
-								<div class="input-group">
-									<input id="rotation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth" title="Number of teeth to rotate stator by" aria-describedby="rotation-units">
-									<div class="input-group-append">
-										<span class="input-group-text" id="rotation-units">teeth</span>
-									</div>
-								</div>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<label for="orbit">Gear to rotate around</label>
-								<input id="orbit" class="form-control" type="number" required min="0" value="0" placeholder="Number of teeth" title="Number of teeth in the gear to rotate around" list="rotor-teeth-list">
-							</td>
-						</tr>
-						<tr class="row">
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<fieldset>
-									<legend class="col-form-label">Pen colour</legend>
-									<div class="btn-group btn-group-toggle w-100 palette">
-										<div class="btn active" style="background-color: black">
-											<input type="radio" name="pen-color" value="black" checked>
-										</div>
-										<div class="btn" style="background-color: hsl(2, 80%, 45%)">
-											<input type="radio" name="pen-color" value="hsl(2, 80%, 45%)">
-										</div>
-										<div class="btn" style="background-color: hsl(140, 70%, 30%)">
-											<input type="radio" name="pen-color" value="hsl(140, 70%, 30%)">
-										</div>
-										<div class="btn" style="background-color: hsl(230, 90%, 30%)">
-											<input type="radio" name="pen-color" value="hsl(230, 90%, 30%)">
-										</div>
-										<div class="btn" style="background-color: hsl(15, 97%, 48%)">
-											<input type="radio" name="pen-color" value="hsl(15, 97%, 48%)">
-										</div>
-									</div>
-									<div class="btn-group btn-group-toggle w-100 palette mb-2">
-										<div class="btn" style="background-color: hsl(270, 95%, 35%)">
-											<input type="radio" name="pen-color" value="hsl(270, 95%, 35%)">
-										</div>
-										<div class="btn" style="background-color: hsl(207, 80%, 50%)">
-											<input type="radio" name="pen-color" value="hsl(207, 80%, 50%)">
-										</div>
-										<div class="btn" style="background-color: hsl(340, 80%, 45%)">
-											<input type="radio" name="pen-color" value="hsl(340, 80%, 45%)">
-										</div>
-										<div class="btn" style="background-color: hsl(96, 70%, 50%)">
-											<input type="radio" name="pen-color" value="hsl(96, 70%, 50%)">
-										</div>
-										<div class="btn btn-light p-0" style="min-width: 20%">
-											<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
-										</div>
-									</div>
-								</fieldset>
-								<fieldset id="composition">
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="composition" id="composition-multiply" value="multiply" checked>
-										<label class="form-check-label" for="composition-multiply">Subtractive mixing (pens)</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="composition" id="composition-screen" value="screen">
-										<label class="form-check-label" for="composition-multiply">Additive (lights)</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="composition" id="composition-eraser" value="destination-out">
-										<label class="form-check-label" for="composition-eraser">Eraser</label>
-									</div>
-								</fieldset>
-							</td>
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<fieldset>
-									<legend class="col-form-label">Paper</legend>
-									<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
-										<div class="btn active" style="background-color: white">
-											<input type="radio" name="paper-color" value="white" checked>
-										</div>
-										<div class="btn" style="background-color: #ffb0c8">
-											<input type="radio" name="paper-color" value="#ffb0c8">
-										</div>
-										<div class="btn" style="background-color: hsl(149, 94%, 69%)">
-											<input type="radio" name="paper-color" value="hsl(149, 94%, 69%)">
-										</div>
-										<div class="btn" style="background-color: hsl(210, 94%, 83%)">
-											<input type="radio" name="paper-color" value="hsl(210, 94%, 83%)">
-										</div>
-										<div class="btn" style="background-color: hsl(30, 94%, 77%)">
-											<input type="radio" name="paper-color" value="hsl(30, 94%, 77%)">
-										</div>
-									</div>
-									<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
-										<div class="btn" style="background-color: black">
-											<input type="radio" name="paper-color" value="black">
-										</div>
-										<div class="btn" style="background-color: hsl(180, 79%, 73%)">
-											<input type="radio" name="paper-color" value="hsl(180, 79%, 73%)">
-										</div>
-										<div class="btn" style="background-color: hsl(57, 97%, 76%)">
-											<input type="radio" name="paper-color" value="hsl(57, 97%, 76%)">
-										</div>
-										<div class="btn btn-light p-0" style="min-width: 20%">
-											<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#f0b0fd">
-										</div>
-										<div class="btn btn-light p-0" style="min-width: 20%">
-											<label for="paper-image" class="w-100 h-100">
-												<img src="img/upload.png" style="vertical-align: baseline" alt="Upload background image" title="Upload background image">
-											</label>
-											<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
-										</div>
-									</div>
-								</fieldset>
-							</td>
-						</tr>
-						<tr class="row">
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<output id="outer-opacity-readout" class="float-right"></output>
-								<label class="d-block" for="outer-opacity">Opacity</label>
-								<div class="btn-group btn-group-round" role="group" aria-label="Opacity presets">
-									<button type="button" id="opacity-0" class="btn btn-light btn-btn-sm" data-value="0">0%</button>
-									<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
-									<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
-									<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
-									<span data-toggle="collapse" data-target=".inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
-										<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
-									</span>
-								</div>
-								<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
-								</div>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<div class="form-group">
-									<label for="stretch-direction">Stretch direction</label>
-									<input type="text" id="stretch-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" required value="0" class="form-control" aria-label="Direction of stretch distortion effect" placeholder="Fraction of a circle">
-								</div>
-								<div class="form-group">
-									<label for="swirl-amount">Swirl angle</label>
-									<input type="number" required value="0" step="any" id="swirl-amount" class="form-control" aria-label="Number of degrees of swirl distortion to apply" placeholder="Number of degrees">
-								</div>
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox" value="" id="swirl-rotate" checked>
-									<label class="form-check-label" for="swirl-rotate">
-										Compensating rotation
-									</label>
-								</div>
-							</td>
-							<td class="col-6 col-md-3 mb-3">
-								<div class="form-group">
-									<label for="stretch-amount">Amount of stretch</label>
-									<input type="number" min="0" required value="1" step="any" id="stretch-amount" class="form-control">
-								</div>
-								<div class="form-group">
-									<label for="swirl-rate">Swirl rate</label>
-									<input type="number" required value="1" step="any" id="swirl-rate" class="form-control" aria-label="Base of the swirl distortion's power curve">
-								</div>
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox" value="" id="swirl-radius-fix">
-									<label class="form-check-label" for="swirl-radius-fix">
-										Single radius
-									</label>
-								</div>
-							</td>
-						</tr>
-						<tr class="row collapse inner-fill-controls">
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-							</td>
-							<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-type">
-								<fieldset>
-									<legend class="col-form-label">Style of gradient</legend>
-									<div class="input-group mb-2">
-										<div class="input-group-prepend">
-											<div class="input-group-text">
-												<input type="radio" name="gradient-type" id="gradient-radial" value="radial" checked>
-											</div>
-										</div>
-										<label class="form-control input-group-text" for="gradient-radial">Outward in all directions</label>
-									</div>
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<div class="input-group-text">
-												<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
-											</div>
-											<div class="input-group-text">Mirror line</div>
-										</div>
-										<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of a circle">
-									</div>
-								</fieldset>
-							</td>
-						</tr>
-						<tr class="row collapse inner-fill-controls">
-							<td colspan="2" class="col-12 col-md-6 mb-3">
-								<label for="inner-opacity">Inner fill opacity</label>
-								<output id="inner-opacity-readout" class="float-right"></output>
-								<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.35" step="0.05" aria-describedby="inner-opacity-readout">
-							</td>
-							<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-centre">
-								<fieldset>
-									<legend class="col-form-label">Centre area</legend>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
-										<label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
-										<label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
-										<label class="form-check-label" for="gradient-centre-clip">Gradient</label>
-									</div>
-								</fieldset>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</form>
-			<button type="button" id="btn-hamburger" class="btn btn-light position-absolute top right">
+		<div class="position-relative w-100 my-2 flex-grow-1 flex-shrink-1 overflow-hidden" id="canvas-container">
+			<canvas class="h-100" id="spirograph-canvas"></canvas>
+			<canvas class="h-100 position-absolute top left" id="tool-canvas"></canvas>
+			<button type="button" id="btn-hamburger" class="btn btn-light position-absolute top right" style="z-index: 1">
 				<img src="img/hamburger.webp">
 			</button>
-		</main>
+		</div>
+
+		<div class="btn-toolbar" role="toolbar" aria-label="Drawing tools">
+			<button id="btn-draw" type="submit" form="spirograph-form" class="btn btn-light">
+				<img src="img/spirograph.png" alt="Draw shape" title="Draw pattern">
+			</button>
+			<button type="button" class="btn btn-light" id="btn-fill">
+				<img src="img/fill_color_pink.png" alt="Fill shape" title="Fill shape">
+			</button>
+			<button id="btn-fastforward" type="button" class="btn btn-light">
+				<img src="img/control_end_blue.png" alt="Fast forward" title="Fast forward">
+			</button>
+			<button id="btn-randomize" type="button" class="btn btn-light">
+				<img src="img/dice.png" alt="Randomize" title="Randomize">
+			</button>
+			<input type="number" min="1" value="1" id="symmetry" class="form-control" style="width: 4.2rem" title="Number of points of symmetry" aria-label="Number of points of symmetry">
+			<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false" id="btn-mirror">
+				<img src="img/mirror.png" alt="Kaleidoscope" title="Kaleidoscope mode">
+			</button>
+			<button class="btn dropdown-toggle" type="button" id="btn-tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<img src="img/draw_line_32.png" alt="Tool" title="Current tool">
+			</button>
+			<div class="dropdown-menu p-0" aria-labelledby="btn-tools">
+				<div id="tools" class="container btn-group-toggle w-100 p-0" data-toggle="buttons">
+					<label class="btn btn-light active w-100 d-flex">
+						<div class="col-auto">
+							<img src="img/draw_line.png">
+						</div>
+						<div class="col text-left">
+							<input type="radio" name="tool" value="line" checked>Line
+						</div>
+					</label>
+					<label class="btn btn-light w-100 d-flex">
+						<div class="col-auto">
+							<img src="img/draw_ellipse.png">
+						</div>
+						<div class="col text-left">
+							<input type="radio" name="tool" value="circle">Circle
+						</div>
+					</label>
+					<label class="btn btn-light w-100 d-flex">
+						<div class="col-auto">
+							<img src="img/pencil.png">
+						</div>
+						<div class="col text-left">
+							<input type="radio" name="tool" value="freehand">Freehand
+						</div>
+					</label>
+					<label class="btn btn-light w-100 d-flex">
+						<div class="col-auto">
+							<img src="img/fill_color.png">
+						</div>
+						<div class="col text-left">
+							<input type="radio" name="tool" value="fill">Fill
+						</div>
+					</label>
+				</div>
+			</div>
+			<button type="button" class="btn btn-light" id="btn-undo" disabled>
+				<img src="img/undo.png" alt="Undo" title="Undo">
+			</button>
+			<button type="button" class="btn btn-light" id="btn-redo" disabled>
+				<img src="img/redo.png" alt="Redo" title="Redo">
+			</button>
+			<button type="button" class="btn btn-light active" id="btn-toggle-gears" data-toggle="button" aria-pressed="true">
+				<img src="img/gear_in.png" alt="Toggle gears" title="Toggle gears">
+			</button>
+			<div data-toggle="collapse" data-target="#info" aria-expanded="false" aria-controls="info">
+				<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">
+					<img src="img/information.png" alt="Toggle info" title="Toggle info">
+				</button>
+			</div>
+			<button type="button" class="btn btn-light" id="btn-export" data-toggle="modal" data-target="#export-modal">
+				<img src="img/download_cloud.png" alt="Download" title="Download">
+			</button>
+			<button type="button" class="btn btn-light" data-toggle="modal" data-target="#erase-modal">
+				<img src="img/page_white.png" alt="New" title="New">
+			</button>
+		</div>
+
+		<div id="info" class="mt-3 mb-2 collapse">
+			<span class="bg-info bg-light p-2">
+				This spirograph has <span id="num-points"></span> points,
+				requires <span id="num-revolutions"></span> revolutions,
+				and its complete length is <span id="length"></span>.
+			</span>
+		</div>
 
 		<footer>
 			<small>
@@ -560,6 +130,437 @@
 			</small>
 		</footer>
 	</div>
+
+	<form class="position-absolute right pr-2 collapse-horizontal collapsed-horizontal overflow-auto" id="spirograph-form">
+		<table class="border rounded bg-white p-1" style="border-collapse: separate;">
+			<thead>
+				<tr class="row d-md-none">
+					<th colspan="4" class="col-12">Configuration</th>
+				</tr>
+				<tr class="row d-none d-md-flex">
+					<th colspan="2" class="col-6">Rotor and Pen Parameters</th>
+					<th colspan="2" class="col-6">Stator, Paper and Other Parameters</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="row">
+					<td colspan="2" class="col-6 mb-3">
+						<label for="rotor-teeth">Number of rotor teeth</label>
+						<input class="form-control" type="number" min="2" required id="rotor-teeth" value="52" list="rotor-teeth-list" placeholder="Number of teeth on the moving part" title="Number of teeth on the moving part">
+						<datalist id="rotor-teeth-list">
+							<option>24</option>
+							<option>30</option>
+							<option>32</option>
+							<option>36</option>
+							<option>40</option>
+							<option>42</option>
+							<option>45</option>
+							<option>48</option>
+							<option>50</option>
+							<option>52</option>
+							<option>56</option>
+							<option>60</option>
+							<option>63</option>
+							<option>64</option>
+							<option>72</option>
+							<option>75</option>
+							<option>80</option>
+							<option>84</option>
+							<option>144</option>
+							<option>150</option>
+						</datalist>
+					</td>
+					<td colspan="2" class="col-6 mb-3">
+						<label for="stator-teeth">Number of stator teeth</label>
+						<input class="form-control" type="number" min="3" required id="stator-teeth" value="96" list="stator-teeth-list" placeholder="Number of teeth on the stationary part" title="Number of teeth on the stationary part">
+						<datalist id="stator-teeth-list">
+							<option>96</option>
+							<option>105</option>
+							<option>144</option>
+							<option>150</option>
+							<option>24</option>
+							<option>30</option>
+							<option>32</option>
+							<option>36</option>
+							<option>40</option>
+							<option>42</option>
+							<option>45</option>
+							<option>48</option>
+							<option>50</option>
+							<option>52</option>
+							<option>56</option>
+							<option>60</option>
+							<option>63</option>
+							<option>64</option>
+							<option>72</option>
+							<option>75</option>
+							<option>80</option>
+							<option>84</option>
+						</datalist>
+					</td>
+				</tr>
+				<tr class="row">
+					<td class="col-6 col-md-3 mb-3">
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="stator-shape">Stator shape</label>
+						<select id="stator-shape" class="form-control" required value="circle">
+							<option value="circle">Circle</option>
+							<option value="rack">Rack</option>
+						</select>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="stator-aspect">Stator's aspect ratio</label>
+						<input id="stator-aspect" class="form-control" type="number" min="0" max="1" step="any" required value="0.5" disabled>
+					</td>
+				</tr>
+				<tr class="row">
+					<td class="col-6 col-md-3 mb-3">
+						<fieldset>
+							<legend class="col-form-label">Rotor position</legend>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-inside" value="inside" checked>
+								<label class="form-check-label" for="rotor-position-inside">Inside</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="rotor-position" id="rotor-position-outside" value="outside">
+								<label class="form-check-label" for="rotor-position-outside">Outside</label>
+							</div>
+						</fieldset>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<fieldset>
+							<legend class="col-form-label">Rotor orientation</legend>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="orientation" id="orientation-inward" value="inward" checked>
+								<label class="form-check-label" for="orientation-inward">Inward</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="orientation" id="orientation-outward" value="outward">
+								<label class="form-check-label" for="orientation-outward">Outward</label>
+							</div>
+						</fieldset>
+					</td>
+					<td colspan="2" class="col-6 mb-3">
+						<label for="stator-radius">Scale</label>
+						<input class="form-control" required id="stator-radius" value="1" list="stator-radius-list" pattern="\d+(\.\d*)?(/[1-9]\d*)?" placeholder="Stator radius">
+						<datalist id="stator-radius-list">
+							<option>1</option>
+							<option>96/105</option>
+							<option>96/144</option>
+							<option>96/150</option>
+							<option>105/150</option>
+						</datalist>
+					</td>
+				</tr>
+				<tr class="row">
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<label for="pen-x">Distance from pen to rotor centre</label>
+						<output id="pen-x-readout" class="float-right"></output>
+						<input type="range" class="form-control-range mt-2" id="pen-x" min="0" value="1" aria-describedby="pen-x-readout">
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="start-tooth">Starting tooth</label>
+						<div class="input-group">
+							<input type="number" class="form-control" required value="0" step="any" id="start-tooth" placeholder="Tooth number" title="Tooth number to begin plotting from">
+							<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button" id="btn-start-position" data-toggle="modal" data-target="#start-position-modal">
+									&hellip;
+								</button>
+							</div>
+						</div>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="increment">Step size</label>
+						<input class="form-control" type="number" min="0.01" step="any" value="1" required id="increment">
+					</td>
+				</tr>
+				<tr class="row">
+					<td colspan="2" class="col-12 col-md-6">
+						<fieldset class="form-group">
+							<label for="pen-y">Perpendicular pen offset</label>
+							<output id="pen-y-readout" class="float-right"></output>
+							<input type="range" class="form-control-range mt-2" id="pen-y" min="0" max="0.99" step="0.03" value="0" aria-describedby="pen-y-readout">
+						</fieldset>
+					</td>
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<fieldset>
+							<legend class="col-form-label">End position</legend>
+							<div class="input-group mb-2">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="end-point" id="end-point-auto" value="auto" checked>
+									</div>
+								</div>
+								<label class="form-control input-group-text" for="end-point-auto">Finished shape</label>
+							</div>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="end-point" value="fixed" aria-label="Rotate around a specific number of times" id="end-point-numbered">
+									</div>
+									<label class="form-control input-group-text" for="end-point-numbered">Number of revolutions</label>
+								</div>
+								<input type="number" id="revolutions" min="0" value="1" step="any" class="form-control" aria-label="Number of revolutions" placeholder="Number of revolutions">
+							</div>
+						</fieldset>
+					</td>
+				</tr>
+				<tr class="row">
+					<td colspan="2" class="col-6 mb-3">
+						<label for="anim-speed">Animation speed</label>
+						<input type="range" class="form-control-range mt-2" id="anim-speed" min="0" max="100" value="60">
+					</td>
+					<td colspan="2" class="col-6 mb-3">
+						<fieldset>
+							<legend class="col-form-label">Translate stator by</legend>
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">x</span>
+								</div>
+								<input id="translation-x" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift right" title="Distance to shift the stator across by" aria-describedby="translation-x-units">
+								<select class="form-control" id="translation-x-units">
+									<option>teeth</option>
+									<option>units</option>
+								</select>
+							</div>
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text">y</span>
+								</div>
+								<input id="translation-y" class="form-control" type="number" required step="any" value="0" placeholder="Distance to shift down" title="Distance to shift the stator down by" aria-describedby="translation-y-units">
+								<select class="form-control" id="translation-y-units">
+									<option>teeth</option>
+									<option>units</option>
+								</select>
+							</div>
+						</fieldset>
+					</td>
+				</tr>
+				<tr class="row">
+					<td class="col-3 col-md-2 mb-3">
+						<label for="line-width">Line width</label>
+						<input class="form-control" type="number" id="pen-width" min="1" value="2" required placeholder="Pen width" title="Pen thickness in pixels">
+					</td>
+					<td class="col-3 col-md-4 mb-3">
+						<label for="line-dash">Dash pattern</label>
+						<input class="form-control" id="line-dash" required value="1" pattern="[1-9]\d*(,\s*[1-9]\d*)*" placeholder="Dash pattern" title="Comma separated list of dash and gap lengths">
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="rotation">Rotate stator by</label>
+						<div class="input-group">
+							<input id="rotation" class="form-control" type="number" required step="any" value="0" placeholder="Number of teeth" title="Number of teeth to rotate stator by" aria-describedby="rotation-units">
+							<div class="input-group-append">
+								<span class="input-group-text" id="rotation-units">teeth</span>
+							</div>
+						</div>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<label for="orbit">Gear to rotate around</label>
+						<input id="orbit" class="form-control" type="number" required min="0" value="0" placeholder="Number of teeth" title="Number of teeth in the gear to rotate around" list="rotor-teeth-list">
+					</td>
+				</tr>
+				<tr class="row">
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<fieldset>
+							<legend class="col-form-label">Pen colour</legend>
+							<div class="btn-group btn-group-toggle w-100 palette">
+								<div class="btn active" style="background-color: black">
+									<input type="radio" name="pen-color" value="black" checked>
+								</div>
+								<div class="btn" style="background-color: hsl(2, 80%, 45%)">
+									<input type="radio" name="pen-color" value="hsl(2, 80%, 45%)">
+								</div>
+								<div class="btn" style="background-color: hsl(140, 70%, 30%)">
+									<input type="radio" name="pen-color" value="hsl(140, 70%, 30%)">
+								</div>
+								<div class="btn" style="background-color: hsl(230, 90%, 30%)">
+									<input type="radio" name="pen-color" value="hsl(230, 90%, 30%)">
+								</div>
+								<div class="btn" style="background-color: hsl(15, 97%, 48%)">
+									<input type="radio" name="pen-color" value="hsl(15, 97%, 48%)">
+								</div>
+							</div>
+							<div class="btn-group btn-group-toggle w-100 palette mb-2">
+								<div class="btn" style="background-color: hsl(270, 95%, 35%)">
+									<input type="radio" name="pen-color" value="hsl(270, 95%, 35%)">
+								</div>
+								<div class="btn" style="background-color: hsl(207, 80%, 50%)">
+									<input type="radio" name="pen-color" value="hsl(207, 80%, 50%)">
+								</div>
+								<div class="btn" style="background-color: hsl(340, 80%, 45%)">
+									<input type="radio" name="pen-color" value="hsl(340, 80%, 45%)">
+								</div>
+								<div class="btn" style="background-color: hsl(96, 70%, 50%)">
+									<input type="radio" name="pen-color" value="hsl(96, 70%, 50%)">
+								</div>
+								<div class="btn btn-light p-0" style="min-width: 20%">
+									<input type="color" id="custom-pen-color" class="w-100 h-100 p-0 m-0 border-0" value="#f8d008">
+								</div>
+							</div>
+						</fieldset>
+						<fieldset id="composition">
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="composition" id="composition-multiply" value="multiply" checked>
+								<label class="form-check-label" for="composition-multiply">Subtractive mixing (pens)</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="composition" id="composition-screen" value="screen">
+								<label class="form-check-label" for="composition-multiply">Additive (lights)</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="composition" id="composition-eraser" value="destination-out">
+								<label class="form-check-label" for="composition-eraser">Eraser</label>
+							</div>
+						</fieldset>
+					</td>
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<fieldset>
+							<legend class="col-form-label">Paper</legend>
+							<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
+								<div class="btn active" style="background-color: white">
+									<input type="radio" name="paper-color" value="white" checked>
+								</div>
+								<div class="btn" style="background-color: #ffb0c8">
+									<input type="radio" name="paper-color" value="#ffb0c8">
+								</div>
+								<div class="btn" style="background-color: hsl(149, 94%, 69%)">
+									<input type="radio" name="paper-color" value="hsl(149, 94%, 69%)">
+								</div>
+								<div class="btn" style="background-color: hsl(210, 94%, 83%)">
+									<input type="radio" name="paper-color" value="hsl(210, 94%, 83%)">
+								</div>
+								<div class="btn" style="background-color: hsl(30, 94%, 77%)">
+									<input type="radio" name="paper-color" value="hsl(30, 94%, 77%)">
+								</div>
+							</div>
+							<div class="btn-group btn-group-toggle w-100 palette border" data-toggle="buttons">
+								<div class="btn" style="background-color: black">
+									<input type="radio" name="paper-color" value="black">
+								</div>
+								<div class="btn" style="background-color: hsl(180, 79%, 73%)">
+									<input type="radio" name="paper-color" value="hsl(180, 79%, 73%)">
+								</div>
+								<div class="btn" style="background-color: hsl(57, 97%, 76%)">
+									<input type="radio" name="paper-color" value="hsl(57, 97%, 76%)">
+								</div>
+								<div class="btn btn-light p-0" style="min-width: 20%">
+									<input type="color" id="custom-paper-color" class="w-100 h-100 p-0 m-0 border-0" value="#f0b0fd">
+								</div>
+								<div class="btn btn-light p-0" style="min-width: 20%">
+									<label for="paper-image" class="w-100 h-100">
+										<img src="img/upload.png" style="vertical-align: baseline" alt="Upload background image" title="Upload background image">
+									</label>
+									<input type="file" accept="image/*" id="paper-image" style="width: 0.1px; height: 0.1px">
+								</div>
+							</div>
+						</fieldset>
+					</td>
+				</tr>
+				<tr class="row">
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<output id="outer-opacity-readout" class="float-right"></output>
+						<label class="d-block" for="outer-opacity">Opacity</label>
+						<div class="btn-group btn-group-round" role="group" aria-label="Opacity presets">
+							<button type="button" id="opacity-0" class="btn btn-light btn-btn-sm" data-value="0">0%</button>
+							<button type="button" id="opacity-50" class="btn btn-light btn-btn-sm" data-value="0.5">50%</button>
+							<button type="button" id="opacity-75" class="btn btn-light btn-btn-sm" data-value="0.75">75%</button>
+							<button type="button" id="opacity-100" class="btn btn-light btn-btn-sm" data-value="1">100%</button>
+							<span data-toggle="collapse" data-target=".inner-fill-controls" aria-expanded="false" aria-controls="inner-fill-controls">
+								<button type="button" class="btn btn-light" data-toggle="button" aria-pressed="false">Gradient Fill</button>
+							</span>
+						</div>
+						<input type="range" class="form-control-range mt-2" id="outer-opacity" min="0" max="1" value="0.75" step="0.05" aria-describedby="outer-opacity-readout">
+						</div>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<div class="form-group">
+							<label for="stretch-direction">Stretch direction</label>
+							<input type="text" id="stretch-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" required value="0" class="form-control" aria-label="Direction of stretch distortion effect" placeholder="Fraction of a circle">
+						</div>
+						<div class="form-group">
+							<label for="swirl-amount">Swirl angle</label>
+							<input type="number" required value="0" step="any" id="swirl-amount" class="form-control" aria-label="Number of degrees of swirl distortion to apply" placeholder="Number of degrees">
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="" id="swirl-rotate" checked>
+							<label class="form-check-label" for="swirl-rotate">
+								Compensating rotation
+							</label>
+						</div>
+					</td>
+					<td class="col-6 col-md-3 mb-3">
+						<div class="form-group">
+							<label for="stretch-amount">Amount of stretch</label>
+							<input type="number" min="0" required value="1" step="any" id="stretch-amount" class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="swirl-rate">Swirl rate</label>
+							<input type="number" required value="1" step="any" id="swirl-rate" class="form-control" aria-label="Base of the swirl distortion's power curve">
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="" id="swirl-radius-fix">
+							<label class="form-check-label" for="swirl-radius-fix">
+								Single radius
+							</label>
+						</div>
+					</td>
+				</tr>
+				<tr class="row collapse inner-fill-controls">
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+					</td>
+					<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-type">
+						<fieldset>
+							<legend class="col-form-label">Style of gradient</legend>
+							<div class="input-group mb-2">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="gradient-type" id="gradient-radial" value="radial" checked>
+									</div>
+								</div>
+								<label class="form-control input-group-text" for="gradient-radial">Outward in all directions</label>
+							</div>
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+										<input type="radio" name="gradient-type" value="linear" aria-label="Change colour along the direction of a line" id="gradient-type-linear">
+									</div>
+									<div class="input-group-text">Mirror line</div>
+								</div>
+								<input type="text" id="gradient-direction" pattern="\d+(\.\d*)?(/[1-9]\d*)?" value="12/96" class="form-control" aria-label="Direction of the gradient line" placeholder="Fraction of a circle">
+							</div>
+						</fieldset>
+					</td>
+				</tr>
+				<tr class="row collapse inner-fill-controls">
+					<td colspan="2" class="col-12 col-md-6 mb-3">
+						<label for="inner-opacity">Inner fill opacity</label>
+						<output id="inner-opacity-readout" class="float-right"></output>
+						<input type="range" class="form-control-range mt-2" id="inner-opacity" min="0" max="1" value="0.35" step="0.05" aria-describedby="inner-opacity-readout">
+					</td>
+					<td colspan="2" class="col-12 col-md-6 mb-3" id="gradient-centre">
+						<fieldset>
+							<legend class="col-form-label">Centre area</legend>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-clip" value="clip" checked>
+								<label class="form-check-label" for="gradient-centre-clip">Don't fill</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-fixed" value="constant">
+								<label class="form-check-label" for="gradient-centre-fixed">Single colour</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="gradient-centre" id="gradient-centre-gradient" value="gradient">
+								<label class="form-check-label" for="gradient-centre-clip">Gradient</label>
+							</div>
+						</fieldset>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
 
 	<div class="modal fade" id="erase-modal" tabindex="-1" role="dialog" aria-labelledby="erase-modal-title" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered" role="document">

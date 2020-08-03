@@ -57,8 +57,8 @@ export default function Phyllotaxis() {
 		const periodicNumeratorsInput = optionsDoc.getElementById('phyllotaxis-periodic-numerators');
 		const periodicDenominatorsInput = optionsDoc.getElementById('phyllotaxis-periodic-denominators');
 
-		function updateFraction() {
-			const regExp = /,\s*/
+		function updateFraction(event) {
+			const regExp = /,\s*/;
 			if (initialNumeratorsInput.value.trim() === '') {
 				me.initialNumerators = [];
 			} else {
@@ -80,35 +80,15 @@ export default function Phyllotaxis() {
 				me.periodicDenominators = periodicDenominatorsInput.value.split(regExp).map(parseFloat);
 			}
 			me.normalizeFractions();
-			generateBackground(0);
-		}
-
-		function fractionSubmit(event) {
-			event.preventDefault();
-			updateFraction();
-		}
-
-		function fractionFocusout(event) {
-			if (!this.contains(event.relatedTarget)) {
-				updateFraction();
+			if (!/,\s*$/.test(this.value)) {
+				generateBackground(0);
 			}
 		}
 
-		const initialNumeratorsForm = optionsDoc.getElementById('phyllotaxis-initial-numerators-form');
-		initialNumeratorsForm.addEventListener('submit', fractionSubmit);
-		initialNumeratorsForm.addEventListener('focusout', fractionFocusout);
-
-		const initialDenominatorsForm = optionsDoc.getElementById('phyllotaxis-initial-denominators-form');
-		initialDenominatorsForm.addEventListener('submit', fractionSubmit);
-		initialDenominatorsForm.addEventListener('focusout', fractionFocusout);
-
-		const periodicNumeratorsForm = optionsDoc.getElementById('phyllotaxis-periodic-numerators-form');
-		periodicNumeratorsForm.addEventListener('submit', fractionSubmit);
-		periodicNumeratorsForm.addEventListener('focusout', fractionFocusout);
-
-		const periodicDenominatorsForm = optionsDoc.getElementById('phyllotaxis-periodic-denominators-form');
-		periodicDenominatorsForm.addEventListener('submit', fractionSubmit);
-		periodicDenominatorsForm.addEventListener('focusout', fractionFocusout);
+		initialDenominatorsInput.addEventListener('input', updateFraction);
+		initialDenominatorsInput.addEventListener('input', updateFraction);
+		periodicNumeratorsInput.addEventListener('input', updateFraction);
+		periodicDenominatorsInput.addEventListener('input', updateFraction);
 
 		optionsDoc.getElementById('phyllotaxis-angle-offset').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -203,6 +183,14 @@ export default function Phyllotaxis() {
 			}
 		});
 
+		optionsDoc.getElementById('phyllotaxis-petal-stretch').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.petalStretch = value;
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('phyllotaxis-petal-enlarge').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
@@ -211,10 +199,10 @@ export default function Phyllotaxis() {
 			}
 		});
 
-		optionsDoc.getElementById('phyllotaxis-petal-stretch').addEventListener('input', function (event) {
+		optionsDoc.getElementById('phyllotaxis-petal-variation').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value > 0) {
-				me.petalStretch = value;
+			if (value <= 100) {
+				me.petalVariation = value;
 				generateBackground(0);
 			}
 		});
@@ -224,14 +212,10 @@ export default function Phyllotaxis() {
 			generateBackground(2);
 		});
 
-		function setStacking(event) {
-			me.stacking = parseInt(this.value);
-			generateBackground(0);
-		}
-
-		for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-stack]')) {
-			item.addEventListener('input', setStacking);
-		};
+		optionsDoc.getElementById('phyllotaxis-stack-increasing').addEventListener('input', function (event) {
+			me.stackIncreasing = this.checked;
+			generateBackground(2);
+		});
 
 		angleModeSelect.addEventListener('input', function (event) {
 			const value = this.value;
@@ -528,10 +512,11 @@ export default function Phyllotaxis() {
 	this.scale = 20;
 	this.start = 1;
 	this.skip = 0;
-	this.stacking = 0;
+	this.stackIncreasing = false;
 	this.petalShape = 'e';
 	this.petalSize = 15;
 	this.petalEnlargement = 0;
+	this.petalVariation = 0;
 	this.petalStretch = 1;
 	this.petalRotation = 0;
 	this.maxPetals = 10000;
@@ -581,7 +566,7 @@ Phyllotaxis.prototype.purgeCache = function () {
 Phyllotaxis.prototype.animatable = {
 	continuous: [
 		'angleOffset', 'radius', 'aspectRatio', 'clipping', 'exponent', 'spread', 'scale',
-		'petalSize', 'petalEnlargement', 'petalStretch', 'petalRotation',
+		'petalSize', 'petalEnlargement', 'petalVariation', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
 		'angularHueMode', 'hueModeIntensity', 'hueModSplit',
@@ -591,7 +576,7 @@ Phyllotaxis.prototype.animatable = {
 	],
 	stepped: [
 		'initialNumerators', 'initialDenominators', 'periodicNumerators', 'periodicDenominators',
-		'direction', 'skip', 'stacking', 'petalShape', 'angleMode', 'continuousMod',
+		'direction', 'skip', 'stackIncreasing', 'petalShape', 'angleMode', 'continuousMod',
 		'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 	],
 	pairedStepped: [
@@ -610,13 +595,24 @@ function continuedFraction(numerators, denominators) {
 
 function periodicContinuedFraction(initialNumerators, initialDenominators, periodicNumerators, periodicDenominators) {
 	const maxError = 1e-15;
+	periodicNumerators = periodicNumerators.slice();
+	periodicDenominators = periodicDenominators.slice();
+	let period = periodicDenominators.length;
+
+	// Collapse Zero rule http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fibonacci/cfINTRO.html#section14.1.4
+	while (period >= 2 && periodicDenominators[period - 1] === 0) {
+		periodicNumerators.splice(period - 2, 2);
+		periodicDenominators.splice(period - 2, 2);
+		period -= 2;
+	}
+
 	let value;
 	let newValue = continuedFraction(initialNumerators, initialDenominators);
-	const period = periodicDenominators.length;
-	const numerators = initialNumerators.slice();
 	if (period == 0) {
 		return newValue;
 	}
+
+	const numerators = initialNumerators.slice();
 	const denominators = initialDenominators.slice();
 	let i = 0;
 	let j = 0;
@@ -637,44 +633,56 @@ function periodicContinuedFraction(initialNumerators, initialDenominators, perio
 
 Phyllotaxis.prototype.normalizeFractions = function () {
 	const numInitialNum = this.initialNumerators.length;
-	const numInitialDenom = this.initialDenominators.length;
+	let numInitialDenom = this.initialDenominators.length;
+	// Pad arrays
 	if (numInitialDenom >= numInitialNum) {
 		for (let i = numInitialNum; i < numInitialDenom; i++) {
 			this.initialNumerators.push(1);
 		}
 	} else {
-		this.initialNumerators.splice(numInitialDenom);
+		for (let i = numInitialDenom; i < numInitialNum; i++) {
+			this.initialDenominators.push(1);
+		}
+		numInitialDenom = numInitialNum;
 	}
+	// Remove NaNs
 	let i = 0;
-	while (i < this.initialNumerators.length) {
+	while (i < numInitialDenom) {
 		if (
 			!Number.isFinite(this.initialNumerators[i]) ||
 			!Number.isFinite(this.initialDenominators[i])
 		) {
 			this.initialNumerators.splice(i, 1);
 			this.initialDenominators.splice(i, 1);
+			numInitialDenom--;
 		} else {
 			i++;
 		}
 	}
 
 	const numNumerators = this.periodicNumerators.length;
-	const numDenominators = this.periodicDenominators.length;
+	let numDenominators = this.periodicDenominators.length;
+	// Pad arrays
 	if (numDenominators >= numNumerators) {
 		for (let i = numNumerators; i < numDenominators; i++) {
 			this.periodicNumerators.push(1);
 		}
 	} else {
-		this.periodicNumerators.splice(numDenominators);
+		for (let i = numDenominators; i < numNumerators; i++) {
+			this.periodicDenominators.push(1);
+		}
+		numDenominators = numNumerators;
 	}
+	// Remove NaNs
 	i = 0;
-	while (i < this.periodicNumerators.length) {
+	while (i < numDenominators) {
 		if (
 			!Number.isFinite(this.periodicNumerators[i]) ||
 			!Number.isFinite(this.periodicDenominators[i])
 		) {
 			this.periodicNumerators.splice(i, 1);
 			this.periodicDenominators.splice(i, 1);
+			numDenominators--;
 		} else {
 			i++;
 		}
@@ -789,6 +797,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
+		const petalVariation = this.petalVariation / 100;
 		const maxPetals = preview === 1 ? Math.min(previewMaxPetals, this.maxPetals) : this.maxPetals;
 		const clipping = this.clipping;
 		const bidirectional = this.direction === 0;
@@ -814,9 +823,15 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		while (numPetals < maxPetals && r < maxR + currentPetalSize * loopConditionMultiplier) {
 			const phi = direction * n * angle;
 			if (numPetals % skip !== skip - 1) {
-				this.points.push(new Petal(r, phi, currentPetalSize));
-				if (bidirectional) {
-					this.points.push(new Petal(r, -phi, currentPetalSize));
+				let thisPetalSize = currentPetalSize;
+				if (petalVariation !== 0) {
+					thisPetalSize = thisPetalSize * (1 - petalVariation * random.next());
+				}
+				if (thisPetalSize >= 0.5) {
+					this.points.push(new Petal(r, phi, thisPetalSize));
+					if (bidirectional) {
+						this.points.push(new Petal(r, -phi, thisPetalSize));
+					}
 				}
 			}
 			numPetals++;
@@ -841,10 +856,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	const lastR = this.points[numPoints - 1].r;
 	const zoom = (preview & 1) === 0 ? 1 : maxR / lastR;
 	const lastRSquared = lastR * lastR;
-	let stacking = this.stacking;
-	if (stacking == 0) {
-		stacking = -1; // iterate from outermost to innermost
-	}
+	const stacking = this.stackIncreasing ? 1 : -1;
 
 	const petalShape = this.petalShape;
 	const strokeStyle = this.strokeStyle;

@@ -34,6 +34,10 @@ option:disabled {
 	color: #bbb;
 }
 
+th.col-form-label {
+	font-weight: normal;
+}
+
 .btn-primary, .btn-primary:disabled {
 	background-color: var(--primary);
 	border-color: var(--primary);
@@ -211,6 +215,7 @@ button.btn-black:hover {
 	background-color: hsl(270, 17%, 97%);
 	border-bottom-width: 0;
 	padding-top: 0.25rem;
+	user-select: none;
 }
 
 .nav-tabs .nav-item {

@@ -390,24 +390,19 @@ class Tile {
 		this.parent = parent;
 		this.relationship = relationship;
 
+		if (relationship === 4) {
+			this.clipPath = undefined;
+			return;
+		} else {
+			this.clipPath = new Path2D();
+		}
+		const path = this.clipPath;
 		const x1 = Math.round(x);
 		const x2 = Math.round(x + width);
 		const y1 = Math.round(y);
 		const y2 = Math.round(y + height);
-		const path = new Path2D();
-		this.clipPath = path;
 
-		let clipRelation = relationship;
-		if (relationship === 4) {
-			clipRelation = parent.relationship;
-			if (clipRelation === 12) {
-				clipRelation = 6;
-			} else if (clipRelation % 2 === 1) {
-				clipRelation = 12;
-			}
-		}
-
-		switch (clipRelation) {
+		switch (relationship) {
 		case 0: 	// Top left
 			path.moveTo(x1, y1);
 			path.lineTo(x2, y1);
@@ -555,7 +550,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	context.save();
 
 	let queue = [new Tile(0, 0, drawWidth, drawHeight, 0, 0, null, 12)];
-	let nextQueue = [];
 	let numProcessed = 0;
 
 	let maxDepth = this.maxDepth - 1;
@@ -571,6 +565,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	) / this.concentricDensity;
 
 	for (let depth = 0; depth <= maxDepth; depth++) {
+		const nextQueue = [];
 		switch (depth) {
 		case 1:
 			applyOpacity = this.opacityEnable === 2;
@@ -579,7 +574,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			applyOpacity = applyOpacity || this.opacityEnable === 1;
 			break;
 		}
-		const useCutouts = overlap > 0 && (overlap < 1 || depth === 0) && depth >= cutoutDepth;
+		const useCutouts = overlap > 0 && (overlap < 1 || depth === 0 || recursive[4]) && depth >= cutoutDepth;
 		const emphasize = depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
@@ -593,11 +588,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		const topLeftCornerX = Math.max(Math.round(this.topLeftCornerX * (combinedSpacing - 1)), 1);
 
 		for (let tile of queue) {
-			let width = tile.width;
-			let height = tile.height;
-			const x = tile.x;
-			const y = tile.y;
-			const relationship = tile.relationship;
+			let {width, height} = tile;
+			const {x, y, relationship} = tile;
 			const permutation = permutations[relationship];
 			if (overlap > 0) {
 				context.restore();
@@ -621,11 +613,12 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 			let roundedX, roundedY, roundedWidth, roundedHeight;
 			context.globalCompositeOperation = this.compositionOp;
-			if (depth <= blendDepth) {
+			if (depth <= blendDepth && relationship !== 4) {
 				roundedX = Math.round(x);
 				roundedY = Math.round(y);
 				roundedWidth = Math.round(width + x - roundedX);
 				roundedHeight = Math.round(height + y - roundedY);
+				let colorRelationship = relationship;
 				context.fillStyle = colors[relationship + (applyOpacity ? 0 : 13)];
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 			}
@@ -674,6 +667,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				}
 				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
 				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
+				let clipPath;
 
 				if (useCutouts) {
 					const centreX2 = roundedX + roundedWidth;
@@ -682,106 +676,118 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					const lx2 = centreX2 - Math.round(rightOverlap);
 					const ly1 = roundedY + Math.round(topOverlap);
 					const ly2 = centreY2 - Math.round(bottomOverlap);
+					clipPath = new Path2D();
 
-					context.beginPath();
 					// Top left
 					if (recursive[permutation[0]] || !cutouts[0]) {
-						context.moveTo(roundedX, ly1);
-						context.lineTo(roundedX, roundedY);
-						context.lineTo(lx1, roundedY);
+						clipPath.moveTo(roundedX, ly1);
+						clipPath.lineTo(roundedX, roundedY);
+						clipPath.lineTo(lx1, roundedY);
 					} else {
-						context.moveTo(lx1, ly1);
+						clipPath.moveTo(lx1, ly1);
 					}
 
 					// Top centre
 					if (recursive[permutation[1]] || !cutouts[1]) {
-						context.lineTo(lx1, roundedY);
-						context.lineTo(lx2, roundedY);
+						clipPath.lineTo(lx1, roundedY);
+						clipPath.lineTo(lx2, roundedY);
 					} else {
-						context.lineTo(lx1, ly1);
-						context.lineTo(lx2, ly1);
+						clipPath.lineTo(lx1, ly1);
+						clipPath.lineTo(lx2, ly1);
 					}
 
 					// Top right
 					if (recursive[permutation[2]] || !cutouts[2]) {
-						context.lineTo(lx2, roundedY);
-						context.lineTo(centreX2, roundedY);
-						context.lineTo(centreX2, ly1);
+						clipPath.lineTo(lx2, roundedY);
+						clipPath.lineTo(centreX2, roundedY);
+						clipPath.lineTo(centreX2, ly1);
 					} else {
-						context.lineTo(lx2, ly1);
+						clipPath.lineTo(lx2, ly1);
 					}
 
 					// Centre right
 					if (recursive[permutation[5]] || !cutouts[5]) {
-						context.lineTo(centreX2, ly1);
-						context.lineTo(centreX2, ly2);
+						clipPath.lineTo(centreX2, ly1);
+						clipPath.lineTo(centreX2, ly2);
 					} else {
-						context.lineTo(lx2, ly1);
-						context.lineTo(lx2, ly2);
+						clipPath.lineTo(lx2, ly1);
+						clipPath.lineTo(lx2, ly2);
 					}
 
 					// Bottom right
 					if (recursive[permutation[8]] || !cutouts[8]) {
-						context.lineTo(centreX2, ly2);
-						context.lineTo(centreX2, centreY2);
-						context.lineTo(lx2, centreY2);
+						clipPath.lineTo(centreX2, ly2);
+						clipPath.lineTo(centreX2, centreY2);
+						clipPath.lineTo(lx2, centreY2);
 					} else {
-						context.lineTo(lx2, ly2);
+						clipPath.lineTo(lx2, ly2);
 					}
 
 					// Bottom centre
 					if (recursive[permutation[7]] || !cutouts[7]) {
-						context.lineTo(lx2, centreY2);
-						context.lineTo(lx1, centreY2);
+						clipPath.lineTo(lx2, centreY2);
+						clipPath.lineTo(lx1, centreY2);
 					} else {
-						context.lineTo(lx2, ly2);
-						context.lineTo(lx1, ly2);
+						clipPath.lineTo(lx2, ly2);
+						clipPath.lineTo(lx1, ly2);
 					}
 
 					// Bottom left
 					if (recursive[permutation[6]] || !cutouts[6]) {
-						context.lineTo(lx1, centreY2);
-						context.lineTo(roundedX, centreY2);
-						context.lineTo(roundedX, ly2);
+						clipPath.lineTo(lx1, centreY2);
+						clipPath.lineTo(roundedX, centreY2);
+						clipPath.lineTo(roundedX, ly2);
 					} else {
-						context.lineTo(lx1, ly2);
+						clipPath.lineTo(lx1, ly2);
 					}
 
 					// Centre Left
 					if (recursive[permutation[3]] || !cutouts[3]) {
-						context.lineTo(roundedX, ly2);
-						context.lineTo(roundedX, ly1);
+						clipPath.lineTo(roundedX, ly2);
+						clipPath.lineTo(roundedX, ly1);
 					} else {
-						context.lineTo(lx1, ly2);
-						context.lineTo(lx1, ly1);
+						clipPath.lineTo(lx1, ly2);
+						clipPath.lineTo(lx1, ly1);
 					}
-					context.clip();
 				}
 
-				if (emphasize) {
-					context.globalCompositeOperation = 'source-over';
-					context.fillStyle = colors[10 + bipartiteColoring];
-				} else {
-					context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
-				}
-				if (!this.blendFilling) {
-					context.globalCompositeOperation = 'source-over';
-				}
-				if (drawPattern && patternLocation) {
-					if (filling === 'c') {
-						this.concentricSquares(context, roundedX, roundedY,
-							roundedWidth, roundedHeight, fgSpacing, bgSpacing,
-							lowerLeftCorner, lowerRightCorner, topLeftCornerX
-						);
-					} else {
-						if (!emphasize) {
-							context.globalAlpha = this.patternOpacities[bipartiteColoring];
-						}
-						context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
-						context.globalAlpha = 1;
+				if (!recursive[4] || depth === maxDepth) {
+					if (useCutouts && (!recursive[4] || maxDepth === 0)) {
+						context.clip(clipPath);
 					}
-				} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
-					context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+					if (emphasize) {
+						context.globalCompositeOperation = 'source-over';
+						context.fillStyle = colors[10 + bipartiteColoring];
+					} else {
+						context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
+					}
+					if (!this.blendFilling) {
+						context.globalCompositeOperation = 'source-over';
+					}
+					if (drawPattern && patternLocation) {
+						if (filling === 'c') {
+							this.concentricSquares(context, roundedX, roundedY,
+								roundedWidth, roundedHeight, fgSpacing, bgSpacing,
+								lowerLeftCorner, lowerRightCorner, topLeftCornerX
+							);
+						} else {
+							if (!emphasize) {
+								context.globalAlpha = this.patternOpacities[bipartiteColoring];
+							}
+							context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
+							context.globalAlpha = 1;
+						}
+					} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
+						context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+					}
+				} else {
+					const centreTile = new Tile(roundedX, roundedY, roundedWidth, roundedHeight, undefined, undefined, null, 4);
+					if (!useCutouts) {
+						clipPath = new Path2D();
+						clipPath.rect(roundedX, roundedY, roundedWidth, roundedHeight);
+					}
+					centreTile.clipPath = clipPath;
+					nextQueue.push(centreTile);
 				}
 			} else {
 				roundedWidth = 0;
@@ -791,39 +797,46 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const overlapX2 = roundedX + roundedWidth;
 			const overlapY2 = roundedY + roundedHeight;
 
-			if (recursive[permutation[0]]) {
+			const haveColumn0 = width0 >= 1;
+			const haveColumn2 = width2 >= 1;
+			const haveRow0 = height0 >= 1;
+			const haveRow2 = height2 >= 1;
+
+			if (recursive[permutation[0]] && (haveColumn0 || haveRow0)) {
 				const topLeftTile = new Tile(x, y, width0, height0, roundedX, roundedY, tile, 0);
 				nextQueue.push(topLeftTile);
 			}
 			if (middleWidth > 0) {
-				if (recursive[permutation[1]]) {
+				const haveColumn1 = width >= 1;
+				if (recursive[permutation[1]] && (haveColumn1 || haveRow0)) {
 					const topMiddleTile = new Tile(x1, y, width, height0, undefined, roundedY, tile, 1);
 					nextQueue.push(topMiddleTile);
 				}
-				if (recursive[permutation[7]]) {
+				if (recursive[permutation[7]] && (haveColumn1 || haveRow2)) {
 					const bottomMiddleTile = new Tile(x1, y2, width, height2, undefined, overlapY2, tile, 7);
 					nextQueue.push(bottomMiddleTile);
 				}
 			}
-			if (recursive[permutation[2]]) {
+			if (recursive[permutation[2]] && (haveColumn2 || haveRow0)) {
 				const topRightTile = new Tile(x2, y, width2, height0, overlapX2, roundedY, tile, 2);
 				nextQueue.push(topRightTile);
 			}
 			if (middleHeight > 0) {
-				if (recursive[permutation[3]]) {
+				const haveRow1 = height >= 1;
+				if (recursive[permutation[3]] && (haveColumn0 || haveRow1)) {
 					const middleLeftTile = new Tile(x, y1, width0, height, roundedX, undefined, tile, 3);
 					nextQueue.push(middleLeftTile);
 				}
-				if (recursive[permutation[5]]) {
+				if (recursive[permutation[5]] && (haveColumn2 || haveRow1)) {
 					const middleRightTile = new Tile(x2, y1, width2, height, overlapX2, undefined, tile, 5);
 					nextQueue.push(middleRightTile);
 				}
 			}
-			if (recursive[permutation[6]]) {
+			if (recursive[permutation[6]] && (haveColumn0 || haveRow2)) {
 				const bottomLeftTile = new Tile(x, y2, width0, height2, roundedX, overlapY2, tile, 6);
 				nextQueue.push(bottomLeftTile);
 			}
-			if (recursive[permutation[8]]) {
+			if (recursive[permutation[8]] && (haveColumn2 || haveRow2)) {
 				const bottomRightTile = new Tile(x2, y2, width2, height2, overlapX2, overlapY2, tile, 8);
 				nextQueue.push(bottomRightTile);
 			}
@@ -838,7 +851,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 		}
 		queue = nextQueue;
-		nextQueue = [];
 	}
 	context.restore();
 };

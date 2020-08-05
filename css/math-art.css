@@ -60,6 +60,13 @@ th.col-form-label {
 	background-color: #e9ecef;
 }
 
+.fade2:not(.show) {
+	opacity: 0;
+}
+.fade2 {
+	transition: opacity .08s linear;
+}
+
 .form-control {
 	border-style: inset;
 	border-width: 2px;
@@ -84,6 +91,20 @@ th.col-form-label {
 .modal {
 	border-radius: 0.5rem;
 	box-shadow: #000000cc 0px 6px 20px 0px;
+}
+
+.modal-floating {
+	height: fit-content;
+	z-index: 0;
+}
+
+.modal-floating-foreground {
+	z-index: 1;
+}
+
+.modal-floating .modal-header {
+	touch-action: none;
+	user-select: none;
 }
 
 .modal-content {
@@ -126,9 +147,13 @@ th.col-form-label {
 	padding: 0.5rem;
 }
 
+.modal-body.collapsing {
+	overflow-y: hidden;
+}
+
 @media (min-width: 1200px) {
 	.modal-body {
-		margin: 0.05rem 0.7rem 0.7rem;
+		margin: 1px 0.65rem 0.65rem;
 	}
 }
 
@@ -141,6 +166,12 @@ th.col-form-label {
 	.modal-wide .modal-content {
 		width: fit-content;
 	}
+}
+
+.modal-floating .modal-body>.nav-tabs {
+	margin-left: -0.5rem;
+	margin-right: -0.5rem;
+	padding-left: 1px;
 }
 
 .modal-footer .btn {
@@ -353,29 +384,8 @@ button.btn-black:hover {
 	}
 }
 
-#background-gen-modal {
-	height: fit-content;
-}
-
-#background-gen-modal-header {
-	touch-action: none;
-	user-select: none;
-}
-
 #background-gen-modal .modal-content {
 	max-height: 50vh;
-}
-
-#background-gen-modal-content {
-	overflow-y: auto;
-}
-
-#background-gen-modal-content .modal-body {
-	overflow-y: unset;
-}
-
-#background-gen-modal-content.collapsing {
-	overflow-y: hidden;
 }
 
 @media (min-width: 576px) {
@@ -394,17 +404,15 @@ button.btn-black:hover {
 
 }
 
-#background-gen-options>.nav-tabs {
-	margin-left: -0.5rem;
-	margin-right: -0.5rem;
-	padding-left: 1px;
-}
-
 #toolbar {
 	bottom: 0;
 	right: 0;
 	margin-bottom: 0;
 	position: absolute;
+}
+
+#toolbar>button:first-of-type {
+	border-top-left-radius: 0.25rem;
 }
 
 #toolbar .btn-group {

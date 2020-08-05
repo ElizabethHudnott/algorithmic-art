@@ -588,7 +588,7 @@ export default function GraphingCalculator() {
 			pathInput.appendChild(option);
 			pieceInput.innerHTML = '<option>0</option>';
 			displayPath();
-			pathControls.classList.remove('d-none');
+			pathControls.classList.add('show');
 			pathDelBtn.disabled = false;
 			addPieceBtn.disabled = false;
 			generateBackground(0);
@@ -627,7 +627,7 @@ export default function GraphingCalculator() {
 				pathDelBtn.disabled = true;
 				pieceInput.innerHTML = '';
 				addPieceBtn.disabled = true;
-				pathControls.classList.add('d-none');
+				pathControls.classList.remove('show');
 			}
 			generateBackground(0);
 		});

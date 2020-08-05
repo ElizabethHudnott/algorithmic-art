@@ -613,9 +613,11 @@ function showBackgroundOptions() {
 	setBgProperty = drawingContext.setProperty.bind(drawingContext);
 	setBgPropertyElement = drawingContext.setPropertyElement.bind(drawingContext);
 
-	bgGeneratorImage.onload = function () {
-		progressiveBackgroundGen(0);
-	};
+	function redraw() {
+		progressiveBackgroundGen(0)
+	}
+
+	bgGeneratorImage.onload = redraw;
 
 	const backgroundGenerators = new Map();
 	let currentSketch;
@@ -645,9 +647,8 @@ function showBackgroundOptions() {
 
 	const sketchCards = document.getElementById('sketch-list');
 	const modal = document.getElementById('background-gen-modal');
-	$(modal).modal({focus: false, show: false});
 	const modalHeader = document.getElementById('background-gen-modal-header');
-	const rotationSlider = document.getElementById('background-rotation');
+	const rotationSlider = document.getElementById('layer-rotation');
 	const toolbar = document.getElementById('toolbar');
 	const seedForm = document.getElementById('random-seed-form');
 	const seedInput = document.getElementById('random-seed');
@@ -1193,7 +1194,6 @@ function showBackgroundOptions() {
 			drawingContext.initializeShader(bgGenerator);
 			drawingContext.setProperties(bgGenerator);
 		}
-		window.addEventListener('resize', resizeListener);
 		signatureChanged = true;
 		progressiveBackgroundGen(0);
 
@@ -1235,7 +1235,7 @@ function showBackgroundOptions() {
 		const helpArea = document.getElementById('help-sketch');
 		helpArea.innerHTML = '';
 		helpDoc = undefined;
-		titleBar.innerHTML = gen.title + ' Options';
+		titleBar.innerHTML = gen.title;
 		container.hidden = false;
 		repositionModal(true);
 		if (gen.helpFile) {
@@ -1294,32 +1294,100 @@ function showBackgroundOptions() {
 	function resizeWindow() {
 		repositionModal(false);
 		drawingContext.resize(window.innerWidth, window.innerHeight);
-		progressiveBackgroundGen(0);
+		if (bgGenerator !== undefined) {
+			progressiveBackgroundGen(0);
+		}
 	}
 
-	function resizeListener(event) {
+	window.addEventListener('resize', function (event) {
 		clearTimeout(resizeTimer);
 		resizeTimer = setTimeout(resizeWindow, 100);
+	});
+
+	let modalDrag;
+	let foregroundModal = modal;
+	let titleBarHeight;
+
+	function dragWindow(event) {
+		if (event.buttons !== 1) {
+			window.removeEventListener('pointermove', dragWindow);
+			return;
+		}
+
+		const child = foregroundModal.children[0];
+		let left = Math.round(event.clientX - modalDrag[0]);
+		const maxLeft = window.innerWidth - 32;
+		left = Math.min(left, maxLeft);
+
+		let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
+		const maxTop = window.innerHeight - toolbar.clientHeight - titleBarHeight;
+		top = Math.min(top, maxTop);
+		foregroundModal.style.left = left + 'px';
+		foregroundModal.style.top = top + 'px';
 	}
+
+	function windowToFront(target) {
+		foregroundModal.classList.remove('modal-floating-foreground');
+		target.classList.add('modal-floating-foreground');
+		foregroundModal = target;
+	}
+
+	function startWindowDrag(event) {
+		const target = event.target;
+		if (target === this || target.tagName === 'H6') {
+			windowToFront(this.parentElement.parentElement.parentElement);
+			window.addEventListener('pointermove', dragWindow);
+			modalDrag = [event.offsetX, event.offsetY];
+			titleBarHeight = this.clientHeight;
+		}
+	}
+
+	function stopWindowDrag(event) {
+		window.removeEventListener('pointermove', dragWindow);
+	}
+
+	function collapseWindow(event) {
+		$(this.parentElement.querySelector('.modal-body')).collapse('toggle');
+	}
+
+	function expandWindow(event) {
+		windowToFront(this);
+		$(this.querySelector('.modal-body')).collapse('show');
+	}
+
+	for (let floating of document.querySelectorAll('.modal-floating')) {
+		const header = floating.querySelector('.modal-header');
+		header.addEventListener('pointerdown', startWindowDrag);
+		header.addEventListener('pointerup', stopWindowDrag);
+		header.addEventListener('dblclick', collapseWindow);
+		const floatingJQ = $(floating);
+		floatingJQ.on('show.bs.modal', expandWindow);
+		floatingJQ.modal({focus: false, show: false});
+	}
+
+	$(modal).on('shown.bs.modal', function (event) {
+		repositionModal(false);
+	});
 
 	async function init() {
 		const sketchesModal = document.getElementById('sketches-modal');
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
 		let nextStep;
+
+		function showParameters() {
+			$(modal).modal('show');
+		}
+
 		if (firstGenURL !== null) {
 			firstGenURL += '.js';
-			nextStep = function () {
-				$(modal).modal('show');
-			}
+			nextStep = showParameters;
 		}
 		if (firstDocID !== null) {
 			const sketchURL = await loadDocument(firstDocID);
 			if (sketchURL !== undefined) {
 				firstGenURL = sketchURL;
-				nextStep = function () {
-					$(modal).modal('show');
-				}
+				nextStep = showParameters;
 			} else {
 				firstDocID = null;
 			}
@@ -1343,8 +1411,6 @@ function showBackgroundOptions() {
 			document.getElementById('show-welcome').checked = false;
 			nextStep();
 		}
-		document.getElementById('help-modal').classList.add('fade');
-		sketchesModal.classList.add('fade');
 
 		const sketchFile = await downloadFile('/sketches.json', 'json');
 		for (let sketch of sketchFile.sketches) {
@@ -1550,16 +1616,18 @@ function showBackgroundOptions() {
 		if (loop) {
 			tween = 1 - 2 * (tween - 0.5);
 		}
-		if (tween <= 1/3) {
+		const startFade = 0.3;
+		const endFade = 0.7;
+		if (tween <= startFade) {
 			if (hasStartImage) {
 				context.drawImage(startImage, 0, 0, dWidth, dHeight);
 			}
-		} else if (tween < 2/3) {
+		} else if (tween < endFade) {
 			if (hasEndImage) {
 				context.drawImage(endImage, 0, 0, dWidth, dHeight);
 			}
 			if (hasStartImage) {
-				context.globalAlpha = (2/3 - tween) * 3;
+				context.globalAlpha = (endFade - tween)  / (endFade - startFade);
 				context.drawImage(startImage, 0, 0, dWidth, dHeight);
 				context.globalAlpha = 1;
 			}
@@ -1939,10 +2007,9 @@ function showBackgroundOptions() {
 			helpContextItem = undefined;
 		}
 
-		let popoverTitle = '';
-		let popoverContent;
-
 		if (helpContext) {
+			let popoverTitle = '';
+			let popoverContent;
 			document.body.classList.remove('context-help');
 			helpContext = false;
 			const rootElement = document.body.parentElement;
@@ -2036,13 +2103,26 @@ function showBackgroundOptions() {
 		}
 	});
 
-	document.getElementById('btn-open-sketch').addEventListener('click', function (event) {
-		const sketchesModal = document.getElementById('sketches-modal');
-		$(sketchesModal).modal('hide');
-		$(modal).modal('show');
-		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
-		switchGenerator(currentSketch.url, true);
-		this.parentElement.querySelector('[data-dismiss=modal]').hidden = false;
+	document.getElementById('background-preset').addEventListener('input', function (event) {
+		const value = this.value;
+		if (value === 'color') {
+			$('#background-color-row').collapse('show');
+			backgroundImage = undefined;
+			progressiveBackgroundGen(0);
+		} else {
+			$('#background-color-row').collapse('hide');
+			document.getElementById('background-color').value = '#ffffff';
+			backgroundElement.style.backgroundColor = '#ffffff';
+			backgroundImage = document.createElement('IMG');
+			backgroundImage.onload = redraw;
+			backgroundImage.src = 'img/texture/' + value + '.jpg';
+		}
+	});
+
+	// Changing background colour.
+	document.getElementById('background-color').addEventListener('input', function (event) {
+		backgroundElement.style.backgroundColor = this.value;
+		drawSignature(drawingContext);
 	});
 
 	rotationSlider.addEventListener('input', function (event) {
@@ -2050,16 +2130,19 @@ function showBackgroundOptions() {
 		progressiveBackgroundGen(0);
 	});
 
-	document.getElementById('background-rotation-reset').addEventListener('click', function (event) {
+	document.getElementById('layer-rotation-reset').addEventListener('click', function (event) {
 		rotationSlider.value = 0;
 		bgGeneratorRotation = 0;
 		progressiveBackgroundGen(0);
 	});
 
-	// Changing background colour.
-	document.getElementById('paper-color').addEventListener('input', function (event) {
-		backgroundElement.style.backgroundColor = this.value;
-		drawSignature(drawingContext);
+	document.getElementById('btn-open-sketch').addEventListener('click', function (event) {
+		const sketchesModal = document.getElementById('sketches-modal');
+		$(sketchesModal).modal('hide');
+		$(modal).modal('show');
+		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
+		switchGenerator(currentSketch.url, true);
+		this.parentElement.querySelector('[data-dismiss=modal]').hidden = false;
 	});
 
 	// Generate new background button.
@@ -2436,14 +2519,6 @@ function showBackgroundOptions() {
 		updateAnimPositionReadout(newPosition);
 	});
 
-	function hideConfig() {
-		$('#background-gen-modal').modal('hide');
-	}
-
-	$('#sketches-modal').on('show.bs.modal', hideConfig);
-	$('#anim-opts-modal').on('show.bs.modal', hideConfig);
-	$('#video-modal').on('show.bs.modal', hideConfig);
-
 	{
 		const currentResStr = screen.width + 'x' + screen.height;
 		let currentResOption = videoResolutionInput.querySelector('option[value="' + currentResStr +'"]');
@@ -2662,51 +2737,6 @@ function showBackgroundOptions() {
 				resultBox.innerHTML = 'Sorry, an error occurred.';
 			}
 		}
-	});
-
-	let modalDrag;
-
-	function dragWindow(event) {
-		if (event.buttons !== 1) {
-			window.removeEventListener('pointermove', dragWindow);
-			return;
-		}
-
-		const child = modal.children[0];
-		let left = Math.round(event.clientX - modalDrag[0]);
-		const maxLeft = window.innerWidth - 32;
-		left = Math.min(left, maxLeft);
-
-		let top = Math.max(Math.round(event.clientY - modalDrag[1]), 0);
-		const maxTop = window.innerHeight - toolbar.clientHeight - modalHeader.clientHeight;
-		top = Math.min(top, maxTop);
-		modal.style.left = left + 'px';
-		modal.style.top = top + 'px';
-	}
-
-
-	modalHeader.addEventListener('pointerdown', function (event) {
-		const target = event.target;
-		if (target === this || target.tagName === 'H6') {
-			window.addEventListener('pointermove', dragWindow);
-			modalDrag = [event.offsetX, event.offsetY];
-		}
-	});
-
-	modalHeader.addEventListener('pointerup', function (event) {
-		window.removeEventListener('pointermove', dragWindow);
-	});
-
-	$(modal).on('show.bs.modal', function (event) {
-		$('#background-gen-modal-content').collapse('show');
-	});
-
-	$(modal).on('shown.bs.modal', function (event) {
-		repositionModal(false);
-	});
-
-	modalHeader.addEventListener('dblclick', function (event) {
-		$('#background-gen-modal-content').collapse('toggle');
 	});
 
 	imageUpload.querySelector('#background-gen-image-upload').addEventListener('input', function (event) {

@@ -35,13 +35,6 @@ export default function MySketch() {
 	this.myThingyMax = 10;
 }
 
-/** This method is optional. When the user switches to another sketch then this method
- *	will be called to try to free up memory.
- */
-MySketch.prototype.purgeCache = function () {
-
-}
-
 /** This property is optional and if it is provided then each of the object's properties
  *  is also optional. It lists the names of the parameters that can be animated and
  *  specifies the manner in which they should be animated.

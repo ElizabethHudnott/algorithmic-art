@@ -559,10 +559,6 @@ export default function Phyllotaxis() {
 	this.spriteSheet = document.createElement('CANVAS');
 }
 
-Phyllotaxis.prototype.purgeCache = function () {
-	this.points = undefined;
-}
-
 Phyllotaxis.prototype.animatable = {
 	continuous: [
 		'angleOffset', 'radius', 'aspectRatio', 'clipping', 'exponent', 'spread', 'scale',

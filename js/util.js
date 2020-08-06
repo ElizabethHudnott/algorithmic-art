@@ -80,7 +80,11 @@ function downloadFile(url, type) {
 		request.responseType = type;
 		request.timeout = 60000;
 		request.addEventListener('load', function() {
-			resolve(this.response);
+			if (this.status === 200) {
+				resolve(this.response);
+			} else {
+				reject();
+			}
 		});
 		request.addEventListener('error', reject);
 		request.addEventListener('timeout', reject);

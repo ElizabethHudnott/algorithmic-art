@@ -18,12 +18,6 @@ try {
 	console.warn('Local storage unavailable.');
 }
 
-function showBackgroundOptions() {
-	$('#video-modal').modal('hide');
-	$('#error-alert').alert('close');
-	$('#background-gen-modal').modal('show');
-}
-
 {
 	const backendRoot = 'http://localhost/';
 	const backgroundElement = document.body;
@@ -954,7 +948,7 @@ function showBackgroundOptions() {
 		elem.classList.add('show');
 		parent.appendChild(elem);
 		clearTimeout(elem.timeout);
-		elem.timeout = setTimeout(hideAlert, 6000, jquery);
+		elem.timeout = setTimeout(hideAlert, 8000, jquery);
 	}
 
 	const modalMargin = 0;
@@ -1133,6 +1127,16 @@ function showBackgroundOptions() {
 	}
 	window.findMissingHelp = findMissingHelp;
 
+	function loadFailure() {
+		if (bgGenerator === undefined) {
+			$('#sketches-modal').modal('show');
+		} else {
+			document.getElementById('background-gen-options').hidden = false;
+			document.getElementById('background-gen-modal-label').innerHTML = bgGenerator.title;
+		}
+		showAlert(errorAlert, 'The requested sketch could not be loaded.', document.body);
+	}
+
 	async function switchGenerator(url, pushToHistory) {
 		// Hide stuff while it changes
 		const container = document.getElementById('background-gen-options');
@@ -1140,16 +1144,41 @@ function showBackgroundOptions() {
 		container.hidden = true;
 		titleBar.innerHTML = 'Loading&hellip;';
 
+		// Switch generator
+		let gen;
+		try {
+			const resolvedURL = /^http(s)?:/.test(url) ? url : '/sketch/' + url;
+			const genModule = await import(resolvedURL)
+			const constructor = genModule.default;
+			gen = new constructor();
+		} catch {
+			loadFailure();
+			return;
+		}
+		if (gen.isShader) {
+			try {
+				const fragFileContent = (await Promise.all([
+					requireScript('lib/gl-matrix.min.js'),
+					downloadFile(url.slice(0, -3) + '.frag', 'text')
+				]))[1];
+				gen.shaderSource =
+					fragmentShaderHeader +
+					shaderDeclarations(gen) +
+					fragFileContent;
+				drawingContext.initializeShader(gen);
+			} catch {
+				loadFailure();
+				return;
+			}
+			drawingContext.setProperties(gen);
+		}
+
+		// Set the new generator as the current one.
+		bgGenerator = gen;
+		generatorURL = url;
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
-
-		// Switch generator
-		const resolvedURL = /^http(s)?:/.test(url) ? url : '/sketch/' + url;
-		const genModule = await import(resolvedURL)
-		const constructor = genModule.default;
-		bgGenerator = new constructor();
-		generatorURL = url;
 
 		// Initialize sketch
 		random = new RandomNumberGenerator();
@@ -1162,29 +1191,17 @@ function showBackgroundOptions() {
 		const saveBtn = document.getElementById('btn-save-form');
 		saveBtn.hidden = !enableSave;
 		// Render sketch
-		const hasTween = 'tween' in bgGenerator;
+		const hasTween = 'tween' in gen;
 		if (hasTween) {
-			bgGenerator.tween = parseFloat(animPositionSlider.value);
-			tweenData = new TweenData(bgGenerator, startFrame, endFrame);
-		}
-		if (bgGenerator.isShader) {
-			const fragFileContent = (await Promise.all([
-				requireScript('lib/gl-matrix.min.js'),
-				downloadFile(url.slice(0, -3) + '.frag', 'text')
-			]))[1];
-			bgGenerator.shaderSource =
-				fragmentShaderHeader +
-				shaderDeclarations(bgGenerator) +
-				fragFileContent;
-			drawingContext.initializeShader(bgGenerator);
-			drawingContext.setProperties(bgGenerator);
+			gen.tween = parseFloat(animPositionSlider.value);
+			tweenData = new TweenData(gen, startFrame, endFrame);
 		}
 		signatureChanged = true;
 		progressiveBackgroundGen(0);
 
 		// Create new options dialog
 		container.innerHTML = '';
-		const optionsDoc = await bgGenerator.optionsDocument;
+		const optionsDoc = await gen.optionsDocument;
 		if (optionsDoc !== undefined) {
 			for (let resetButton of optionsDoc.querySelectorAll('button[data-reset]')) {
 				resetButton.addEventListener('click', resetControl);
@@ -1197,31 +1214,38 @@ function showBackgroundOptions() {
 		}
 
 		// Adapt the environment's UI accordingly
-		document.getElementById('btn-generate-background').parentElement.hidden = !bgGenerator.hasRandomness;
+		document.getElementById('btn-generate-background').parentElement.hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
 		toolbar.hidden = false;
+		for (let close of document.getElementById('sketches-modal').querySelectorAll('button[data-dismiss=modal]')) {
+			close.hidden = false;
+		}
 		if (pushToHistory) {
 			const name = url.slice(0, -3);	// trim .js
 			urlParameters.set('gen', name);
 			updateURL();
 		}
-		document.title = bgGenerator.title;
+		titleBar.innerHTML = gen.title;
+		document.title = gen.title;
 
 		// Load help file & display new sketch options
 		const helpArea = document.getElementById('help-sketch');
 		helpArea.innerHTML = '';
 		helpDoc = undefined;
-		titleBar.innerHTML = bgGenerator.title;
 		container.hidden = false;
 		repositionModal(true);
-		if (bgGenerator.helpFile) {
-			helpDoc = await downloadFile(bgGenerator.helpFile, 'document');
-			const intro = helpDoc.getElementById('about');
-			if (intro !== null) {
-				helpArea.appendChild(intro);
+		if (gen.helpFile) {
+			try {
+				helpDoc = await downloadFile(gen.helpFile, 'document');
+				const intro = helpDoc.getElementById('about');
+				if (intro !== null) {
+					helpArea.appendChild(intro);
+				}
+				findBrokenHelp();
+			} catch {
+				console.error('Unable to load help file.');
 			}
-			findBrokenHelp();
 		}
 	}
 
@@ -1370,7 +1394,6 @@ function showBackgroundOptions() {
 			}
 		}
 		if (firstGenURL === null) {
-			sketchesModal.querySelector('.btn-secondary[data-dismiss=modal]').hidden = true;
 			nextStep = function () {
 				$(sketchesModal).modal('show');
 			};
@@ -1994,7 +2017,7 @@ function showBackgroundOptions() {
 
 		if (helpContext) {
 			let popoverTitle = '';
-			let popoverContent;
+			let popoverContent = null;
 			document.body.classList.remove('context-help');
 			helpContext = false;
 			const rootElement = document.body.parentElement;
@@ -2022,7 +2045,7 @@ function showBackgroundOptions() {
 			} while (target !== rootElement);
 
 			event.preventDefault();
-			if (!popoverContent) {
+			if (popoverContent === null) {
 				popoverTitle = 'No Help Available';
 				popoverContent = 'Sorry, no help is available for this item.';
 			} else {
@@ -2127,7 +2150,6 @@ function showBackgroundOptions() {
 		$(modal).modal('show');
 		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
 		switchGenerator(currentSketch.url, true);
-		this.parentElement.querySelector('[data-dismiss=modal]').hidden = false;
 	});
 
 	// Generate new background button.
@@ -2347,6 +2369,13 @@ function showBackgroundOptions() {
 		animController.start();
 	}
 
+	const noAnimErrorMsg = `
+		<p>The start and end frames are the same so there's nothing to animate. Use the
+		<span class="btn btn-sm btn-black"><img src="img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> and
+		<span class="btn btn-sm btn-black"><img src="img/timeline_marker_end.png" alt="Start Frame" width="16" height="16"></span>
+		buttons to set up animation frames.</p>
+	`;
+
 	document.getElementById('btn-play').addEventListener('click', function (event) {
 		if (animController && animController.status === AnimationController.Status.RUNNING) {
 			// Stop
@@ -2375,8 +2404,7 @@ function showBackgroundOptions() {
 		}
 
 		if (!separateFrames) {
-			const errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
-			showAlert(errorAlert, errorMsg, document.body);
+			showAlert(errorAlert, noAnimErrorMsg, document.body);
 		} else if (unsavedChanges) {
 			animAction = play;
 			$('#assign-bg-change-modal').modal('show');
@@ -2412,8 +2440,7 @@ function showBackgroundOptions() {
 				unsavedChanges = false;
 			}
 			if (!separateFrames) {
-				const errorMsg = 'The start and end frames are the same. Nothing to animate. <button type="button" class="btn btn-primary btn-sm align-baseline" onclick="showBackgroundOptions()">Set up Animation</button>';
-				showAlert(errorAlert, errorMsg, document.body);
+				showAlert(errorAlert, noAnimErrorMsg, document.body);
 				this.value = 1;
 				return;
 			} else if (unsavedChanges) {
@@ -2548,7 +2575,7 @@ function showBackgroundOptions() {
 	document.getElementById('btn-render-video').addEventListener('click', async function (event) {
 		let errorMsg = '';
 		if (startFrame === endFrame && !('tween' in bgGenerator)) {
-			errorMsg += '<p>The start and end frames are the same. Nothing to render.</p><p><button type="button" class="btn btn-primary btn-sm" onclick="showBackgroundOptions()">Set up Animation</button></p>';
+			errorMsg = noAnimErrorMsg;
 		}
 		let length = parseFloat(document.getElementById('anim-length').value);
 		if (!(length > 0)) {

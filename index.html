@@ -22,7 +22,7 @@
 </head>
 <body style="background-color: #ffffff" class="overflow-hidden m-0">
 
-<div class="alert alert-danger alert-dismissible fade position-absolute top-2 center-x" role="alert" id="error-alert">
+<div class="alert alert-danger alert-dismissible fade position-absolute top-2 center-x" role="alert" id="error-alert" style="z-index: 2000">
 	<span></span>
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
@@ -292,7 +292,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h6 class="modal-title" id="sketches-modal-title">Choose A Sketch</h6>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close" hidden>
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -301,7 +301,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" hidden>Cancel</button>
 			  	<button class="btn btn-primary" id="btn-open-sketch" disabled>Select</button>
 			</div>
 		</div>

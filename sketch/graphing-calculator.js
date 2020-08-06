@@ -1247,7 +1247,6 @@ GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasH
 		context.setLineDash(scaledDash);
 		const strokeColor = this.strokeColor[shapeNum];
 		context.strokeStyle = strokeColor;
-		context.globalAlpha = 0.8;
 
 		for (let subpathNum = 0; subpathNum < shapeEquations.length; subpathNum++) {
 			const pathMinRepeat = this.minPathRepeat[shapeNum][subpathNum];
@@ -1291,18 +1290,13 @@ GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasH
 				}
 				if (subpathNum === 0) {
 					context.clip();
-					context.globalAlpha = Math.SQRT1_2;
 					context.save();
 				}
 			}
 		}
 		const fillColor = this.fillColor[shapeNum];
 		context.fillStyle = fillColor;
-		context.globalAlpha = 1;
 		context.fill(this.fillRule[shapeNum]);
-		if (clip) {
-			context.globalAlpha = Math.SQRT1_2;
-		}
 		if (lineWidth > 0) {
 			context.stroke();
 		}

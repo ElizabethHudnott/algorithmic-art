@@ -541,7 +541,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-row form-group align-items-center" hidden id="video-progress-row">
+				<div class="form-row form-group align-items-center invisible" id="video-progress-row">
 					<div class="col-1"></div>
 					<div class="col-2 col-form-label col-form-label-sm">
 						Progress
@@ -558,10 +558,7 @@
 				<div class="alert alert-danger fade" id="video-error"></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" id="btn-stop-video-render" disabled>
-					Abort
-				</button>
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">
+				<button type="button" class="btn btn-secondary" id="btn-cancel-video">
 					Close
 				</button>
 				<button type="button" class="btn btn-primary" id="btn-render-video">

@@ -1056,6 +1056,7 @@ function showBackgroundOptions() {
 		if (sketch.thumbnail) {
 			thumbnail = document.createElement('IMG');
 			thumbnail.alt = sketch.title;
+			thumbnail.height = 168;
 		} else {
 			thumbnail = document.createElement('DIV');
 			thumbnail.classList.add('bg-dark', 'text-white', 'no-thumbnail');
@@ -1911,27 +1912,35 @@ function showBackgroundOptions() {
 	async function captureVideo(contextualInfo, width, height, startTween, length, properties) {
 		const renderButton = document.getElementById('btn-render-video');
 		renderButton.disabled = true;
+		const closeWidget = document.getElementById('video-modal').querySelector('.close');
+		closeWidget.hidden = true;
 		progressBar.style.width = '0';
 		progressBar.innerHTML = '0%';
 		progressBar.setAttribute('aria-valuenow', '0');
 		const progressRow = document.getElementById('video-progress-row');
-		progressRow.hidden = false;
+		progressRow.classList.remove('invisible');
 
 		await requireScript('lib/CCapture.all.min.js');
 		const capturer = new CCapture(properties);
 		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
-		const stopButton = document.getElementById('btn-stop-video-render');
-		stopButton.disabled = false;
+		const stopButton = document.getElementById('btn-cancel-video');
+		stopButton.innerHTML = 'Abort';
+		stopButton.classList.add('btn-danger');
+		stopButton.classList.remove('btn-secondary');
 
 		function reset() {
-			stopButton.disabled = true;
 			capturer.stop();
-			progressRow.hidden = true;
+			stopButton.innerHTML = 'Close';
+			stopButton.classList.add('btn-secondary');
+			stopButton.classList.remove('btn-danger');
+			progressRow.classList.add('invisible');
+			closeWidget.hidden = false;
 			renderButton.disabled = false;
 			if (debug.video) {
 				document.body.removeChild(contextualInfo.twoD.canvas);
+				canvas.hidden = false;
 			}
-			canvas.style.display = 'block';
+			animController = undefined;
 		}
 		animController.promise = animController.promise.then(
 			function () {
@@ -2338,6 +2347,7 @@ function showBackgroundOptions() {
 		animPositionSlider.value = tween;
 		updateAnimPositionReadout(tween);
 		syncToPosition();
+		animController = undefined;
 	}
 
 	function play() {
@@ -2601,7 +2611,7 @@ function showBackgroundOptions() {
 			captureCanvas.width = videoWidth;
 			captureCanvas.height = videoHeight;
 			if (debug.video) {
-				canvas.style.display = 'none';
+				canvas.hidden = true;
 				document.body.appendChild(captureCanvas);
 			}
 			const scale = videoHeight / screen.height;
@@ -2634,8 +2644,12 @@ function showBackgroundOptions() {
 		videoQualityReadout.innerHTML = this.value + '%';
 	});
 
-	document.getElementById('btn-stop-video-render').addEventListener('click', function (event) {
-		animController.abort();
+	document.getElementById('btn-cancel-video').addEventListener('click', function (event) {
+		if (animController === undefined) {
+			$('#video-modal').modal('hide');
+		} else {
+			animController.abort();
+		}
 	});
 
 	document.getElementById('btn-download').addEventListener('click', function (event) {

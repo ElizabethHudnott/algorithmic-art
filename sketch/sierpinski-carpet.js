@@ -10,6 +10,13 @@ export default function SierpinskiCarpet() {
 		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
 		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
 
+		if (darkMode()) {
+			for (let i = 0; i < 9; i++) {
+				colorControls[i].value = '#000000';
+			}
+			colorControls[4].value = '#333333';
+		}
+
 		function fullRedraw() {
 			generateBackground(0);
 		}
@@ -331,8 +338,15 @@ export default function SierpinskiCarpet() {
 	this.topLeftCornerY = 0.02;
 
 	const colors = new Array(25);
-	colors.fill('#ffffff80', 0, 9);
-	colors[4] = '#000000';		// centre
+	if (darkMode()) {
+		colors.fill('#00000080', 0, 9);
+		colors[4] = '#333333';		// centre
+
+	} else {
+		colors.fill('#ffffff80', 0, 9);
+		colors[4] = '#000000';		// centre
+	}
+
 	colors[9] = '#000066';		// second centre color
 	colors[10] = colors[9]		// second centre color with emphasis
 	colors[11] = colors[4];		// centre with emphasis

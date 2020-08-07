@@ -92,6 +92,10 @@ function downloadFile(url, type) {
 	});
 }
 
+function darkMode() {
+	return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 function focusFirst() {
 	const element = this.querySelector('input:enabled:not(:read-only):not([display=none])');
 	if (element.type === 'radio') {

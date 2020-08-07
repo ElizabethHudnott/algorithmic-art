@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<title>Mathematical Art with Elizabeth</title>
+	<meta property="og:title" content="Mathematical Art with Elizabeth">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/math-art.css">
@@ -15,10 +16,14 @@
 
 	<link rel="preload" as="style" href="fonts/pacifico.css" onload="this.onload=null;this.rel='stylesheet'">
 	<link rel="preload" as="style" href="fonts/america.css" onload="this.onload=null;this.rel='stylesheet'">
+	<link rel="preload" as="fetch" href="sketches.json" crossorigin>
 	<link rel="icon" href="img/spirograph.png">
 
 	<meta name="viewport" content="initial-scale=1, minimum-scale=1">
 	<meta name="description" content="Geometric art pieces. Alter numerous parameters to make your own creations. Combine my programming, your crafted customizations and computer randomization. Create videos and still images.">
+	<meta property="og:image" content="img/social/square.png">
+	<meta property="og:image:width" content="1009">
+	<meta property="og:image:height" content="1009">
 </head>
 <body style="background-color: #ffffff" class="overflow-hidden m-0">
 
@@ -216,7 +221,7 @@
 					</li>
 					<li class="nav-item" role="presentation">
 						<a class="nav-link" id="layers-tab" data-toggle="tab" href="#layers" role="tab" aria-controls="layers" aria-selected="false">
-							Sketches
+							Sketch
 						</a>
 					</li>
 				</ul>
@@ -267,6 +272,14 @@
 					</div>
 
 					<div class="tab-pane" id="layers" role="tabpanel" aria-labelledby="layers-tab">
+						<div class="form-row form-group">
+							<label class="col-3 col-form-label col-form-label-sm" for="layer-opacity">
+								Opacity
+							</label>
+							<div class="col-9">
+								<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2" id="layer-opacity">
+							</div>
+						</div>
 						<div class="form-row">
 							<label class="col-3 col-form-label col-form-label-sm" for="layer-rotation">
 								Rotation

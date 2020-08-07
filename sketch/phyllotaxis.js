@@ -866,6 +866,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	}
 	const saturationRange = this.saturationMax - this.saturationMin;
 	const lightnessRange = this.lightnessMax - this.lightnessMin;
+	const baseOpacity = this.globalAlpha;
 	const opacityRange = this.opacityMax - this.opacityMin;
 	const contrast = this.lighting === 1  || petalShape === 'i' ? 0 : this.contrast;
 	const shadowOffset = this.shadowOffset * (petalStretch >= 1 ? 1 : petalStretch);
@@ -1084,7 +1085,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			if (filter !== '') {
 				context.filter = filter;
 			}
-			context.globalAlpha = opacity;
+			context.globalAlpha = baseOpacity * opacity;
 			context.drawImage(image, -imageResizedWidth / 2, -imageResizedHeight / 2, imageResizedWidth, imageResizedHeight);
 		}
 		if (stroke) {

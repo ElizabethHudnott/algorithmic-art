@@ -558,6 +558,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	}
 
 	let applyOpacity = true;
+	const baseOpacity = context.globalAlpha;
 
 	const spacingNumerator = Math.min(
 		drawWidth * (1/3 + overlap / 6),
@@ -772,10 +773,10 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 							);
 						} else {
 							if (!emphasize) {
-								context.globalAlpha = this.patternOpacities[bipartiteColoring];
+								context.globalAlpha = this.patternOpacities[bipartiteColoring] * baseOpacity;
 							}
 							context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
-							context.globalAlpha = 1;
+							context.globalAlpha = baseOpacity;
 						}
 					} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
 						context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);

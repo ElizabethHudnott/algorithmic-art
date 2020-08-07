@@ -22,7 +22,7 @@ try {
 	const backendRoot = 'http://localhost/';
 	const backgroundElement = document.body;
 	let backgroundRedraw;
-	let bgGeneratorRotation = 0;
+	let rotation = 0, opacity = 1;
 
 	const canvas = document.getElementById('background-canvas');
 
@@ -540,8 +540,9 @@ try {
 		const paddingX = Math.round(3 / scale);
 		const paddingY = Math.round(4 / scale);
 		const canvasHeight = context.canvas.height / scale;
-		context.clearRect(0, canvasHeight - scaledHeight, scaledWidth, scaledHeight);
 		const backgroundColor = backgroundElement.style.backgroundColor;
+		context.fillStyle = backgroundColor;
+		context.fillRect(0, canvasHeight - scaledHeight, scaledWidth, scaledHeight);
 		const [colorSystem, colorComponents] = parseColor(backgroundColor);
 		const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
 		context.fillStyle = luma >= 0.5 ? 'black' : 'white';
@@ -551,12 +552,14 @@ try {
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview) {
 		if (generator.isShader) {
 			contextualInfo.drawGL(parseFloat(animPositionSlider.value), preview);
-			if (document.fonts.check(signatureFont)) {
-				drawSignature(contextualInfo);
-			} else {
-				document.fonts.load(signatureFont).then(function () {
+			if (preview === 0) {
+				if (document.fonts.check(signatureFont)) {
 					drawSignature(contextualInfo);
-				});
+				} else {
+					document.fonts.load(signatureFont).then(function () {
+						drawSignature(contextualInfo);
+					});
+				}
 			}
 		} else {
 			random.reset();
@@ -568,12 +571,14 @@ try {
 					done = redraw.next().done;
 					if (done) {
 						backgroundRedraw = undefined;
-						if (document.fonts.check(signatureFont)) {
-							drawSignature(contextualInfo);
-						} else {
-							document.fonts.load(signatureFont).then(function () {
+						if (preview === 0) {
+							if (document.fonts.check(signatureFont)) {
 								drawSignature(contextualInfo);
-							});
+							} else {
+								document.fonts.load(signatureFont).then(function () {
+									drawSignature(contextualInfo);
+								});
+							}
 						}
 					} else {
 						requestAnimationFrame(drawSection);
@@ -600,9 +605,11 @@ try {
 		if (backgroundImage !== undefined) {
 			context.drawImage(backgroundImage, 0, 0, width, height);
 		}
-		rotateCanvas(context, width, height, bgGeneratorRotation);
+		rotateCanvas(context, width, height, rotation);
+		context.globalAlpha = opacity;
 		progressiveBackgroundDraw(bgGenerator, drawingContext, width, height, preview);
 	}
+
 	generateBackground = progressiveBackgroundGen;
 	setBgProperty = drawingContext.setProperty.bind(drawingContext);
 	setBgPropertyElement = drawingContext.setPropertyElement.bind(drawingContext);
@@ -640,6 +647,7 @@ try {
 	const modal = document.getElementById('background-gen-modal');
 	const modalHeader = document.getElementById('background-gen-modal-header');
 	const rotationSlider = document.getElementById('layer-rotation');
+	const opacitySlider = document.getElementById('layer-opacity');
 	const toolbar = document.getElementById('toolbar');
 	const seedForm = document.getElementById('random-seed-form');
 	const seedInput = document.getElementById('random-seed');
@@ -660,7 +668,9 @@ try {
 			this.xy = new Map();
 			this.pairedStepped = new Map();
 			if (arguments.length === 0) {
+				// Used by the fromObject method
 				this.rotation = 0;
+				this.opacity = 1;
 				this.backgroundColor = '#ffffff';
 				this.backgroundImage = undefined;
 				this.random = random;
@@ -712,6 +722,7 @@ try {
 				}
 			}
 			this.rotation = rotation;
+			this.opacity = opacity;
 			this.backgroundColor = backgroundElement.style.backgroundColor;
 			this.backgroundImage = backgroundImage;
 			this.random = random;
@@ -731,6 +742,7 @@ try {
 			const data = {};
 			data.properties = properties;
 			data.rotation = this.rotation;
+			data.opacity = this.opacity;
 			data.backgroundColor = this.backgroundColor;
 			if (this.backgroundImage !== undefined) {
 				data.backgroundImageURL = this.backgroundImage.src;
@@ -785,15 +797,15 @@ try {
 				image.src = data.backgroundImageURL;
 				frame.backgroundImage = image;
 			}
-			if ('random' in data) {
-				frame.random = data.random;
+			if ('seed' in data) {
+				frame.random = new RandomNumberGenerator(data.seed);
 			}
 			return frame;
 		}
 
 		isCurrentFrame() {
 			if (
-				this.rotation !== bgGeneratorRotation ||
+				this.rotation !== rotation ||
 				this.backgroundColor !== backgroundElement.style.backgroundColor ||
 				this.backgroundImage?.src !== backgroundImage?.src
 			) {
@@ -935,7 +947,7 @@ try {
 	}
 
 	function currentFrameData() {
-		return new FrameData(bgGenerator, bgGeneratorRotation, backgroundElement, backgroundImage);
+		return new FrameData(bgGenerator, rotation, backgroundElement, backgroundImage);
 	}
 
 	function hideAlert(jquery) {
@@ -1629,7 +1641,6 @@ try {
 			if (hasStartImage) {
 				context.globalAlpha = (endFade - tween)  / (endFade - startFade);
 				context.drawImage(startImage, 0, 0, dWidth, dHeight);
-				context.globalAlpha = 1;
 			}
 		} else {
 			if (hasEndImage) {
@@ -1824,6 +1835,7 @@ try {
 		context.save();
 		interpolateBackgroundImage(startFrame.backgroundImage, endFrame.backgroundImage, context, tween, loop);
 		rotateCanvas(context, width, height, rotation);
+		context.globalAlpha = interpolateValue(startFrame.opacity, endFrame.opacity, tweenPrime, false);
 		if (generator.isShader) {
 			contextualInfo.setProperties(generator);
 			contextualInfo.drawGL(tweenPrime, preview);
@@ -2133,14 +2145,35 @@ try {
 		drawSignature(drawingContext);
 	});
 
-	rotationSlider.addEventListener('input', function (event) {
-		bgGeneratorRotation = TWO_PI * parseFloat(this.value);
-		progressiveBackgroundGen(0);
+	opacitySlider.addEventListener('input', function (event) {
+		opacity = parseFloat(this.value);
+		progressiveBackgroundGen(1);
 	});
+
+	function opacityListener(event) {
+		opacity = parseFloat(this.value);
+		progressiveBackgroundGen(0);
+	}
+
+	opacitySlider.addEventListener('pointerup', opacityListener);
+	opacitySlider.addEventListener('keyup', opacityListener);
+
+	rotationSlider.addEventListener('input', function (event) {
+		rotation = TWO_PI * parseFloat(this.value);
+		progressiveBackgroundGen(1);
+	});
+
+	function rotationListener(event) {
+		rotation = TWO_PI * parseFloat(this.value);
+		progressiveBackgroundGen(0);
+	}
+
+	rotationSlider.addEventListener('pointerup', rotationListener);
+	rotationSlider.addEventListener('keyup', rotationListener);
 
 	document.getElementById('layer-rotation-reset').addEventListener('click', function (event) {
 		rotationSlider.value = 0;
-		bgGeneratorRotation = 0;
+		rotation = 0;
 		progressiveBackgroundGen(0);
 	});
 
@@ -2460,8 +2493,8 @@ try {
 		const startRotation = startFrame.rotation;
 		const endRotation = endFrame.rotation;
 		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
-		bgGeneratorRotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
-		rotationSlider.value = bgGeneratorRotation / TWO_PI;
+		rotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
+		rotationSlider.value = rotation / TWO_PI;
 		seedInput.value = random.seed;
 		currentFrame = currentFrameData();
 	}

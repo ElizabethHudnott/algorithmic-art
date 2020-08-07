@@ -4,18 +4,64 @@ export default function SierpinskiCarpet() {
 	this.hasRandomness = false;
 	this.helpFile = 'help/sierpinski-carpet.html';
 
+	/*
+	 *	0	Top left
+	 *	1	Top centre
+	 *	2	Top right
+	 *	3	Middle left
+	 *	4	Centre
+	 *	5	Middle right
+	 *	6	Bottom left
+	 *	7	Bottom centre
+	 *	8	Bottom right
+	 *  9	Second centre color
+	 * 10	Second centre color (emphasis)
+	 * 11	Centre (emphasis)
+	 * 12	Centre (depth zero background)
+	 * 13	Top left emphasized
+	 * ...
+	 * 21	Bottom right emphasized
+	 * (Only 0-3, 5-8 & 12 appear in the queue)
+	*/
+	const colors = new Array(25);
+	this.colors = colors;
+	let initialCentreOpacity;
+	if (darkMode()) {
+		colors.fill('#00000080', 0, 9);
+		colors[4] = '#1a1a1ad3';		// centre
+		colors[9] = '#000066d3';		// second centre color
+		colors[10] = '#000066';			// second centre color with emphasis
+		colors[11] = '#1a1a1a';			// centre with emphasis
+		initialCentreOpacity = 211 / 255;
+
+	} else {
+		colors.fill('#ffffff80', 0, 9);
+		colors[4] = '#000000';			// centre
+		colors[9] = '#000066';			// second centre color
+		colors[10] = colors[9];			// second centre color with emphasis
+		colors[11] = colors[4];			// centre with emphasis
+		initialCentreOpacity = 1;
+	}
+
+	colors[12] = '#ffffff00';	// depth zero (transparent)
+	for (let i = 0; i < 12; i++) {
+		const [r, g, b] = hexToRGBA(colors[i]);
+		colors[i + 13] = rgba(r, g, b, 1);
+	}
+	this.patternOpacities = [initialCentreOpacity, initialCentreOpacity];	// [alternate, normal]
+	this.bipartite = false;
+
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
 		const colorControlArea = optionsDoc.getElementById('carpet-colors');
 		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
 		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
 
-		if (darkMode()) {
-			for (let i = 0; i < 9; i++) {
-				colorControls[i].value = '#000000';
-			}
-			colorControls[4].value = '#333333';
+		for (let i = 0; i < 10; i++) {
+			colorControls[i].value = me.colors[i].slice(0, 7);
 		}
+		opacitySliders[4].value = me.patternOpacities[0];
+		opacitySliders[9].value = me.patternOpacities[1];
 
 		function fullRedraw() {
 			generateBackground(0);
@@ -336,48 +382,6 @@ export default function SierpinskiCarpet() {
 	this.lowerRightCorner = 0.75;
 	this.topLeftCornerX = 0.5;
 	this.topLeftCornerY = 0.02;
-
-	const colors = new Array(25);
-	if (darkMode()) {
-		colors.fill('#00000080', 0, 9);
-		colors[4] = '#333333';		// centre
-
-	} else {
-		colors.fill('#ffffff80', 0, 9);
-		colors[4] = '#000000';		// centre
-	}
-
-	colors[9] = '#000066';		// second centre color
-	colors[10] = colors[9]		// second centre color with emphasis
-	colors[11] = colors[4];		// centre with emphasis
-	colors[12] = '#ffffff00';	// depth zero (transparent)
-	for (let i = 0; i < 12; i++) {
-		const [r, g, b] = hexToRGBA(colors[i]);
-		colors[i + 13] = rgba(r, g, b, 1);
-	}
-	this.patternOpacities = [1, 1];
-	this.bipartite = false;
-
-	/*
-	 *	0	Top left
-	 *	1	Top centre
-	 *	2	Top right
-	 *	3	Middle left
-	 *	4	Centre
-	 *	5	Middle right
-	 *	6	Bottom left
-	 *	7	Bottom centre
-	 *	8	Bottom right
-	 *  9	Second centre color
-	 * 10	Second centre color (emphasis)
-	 * 11	Centre (emphasis)
-	 * 12	Centre (depth zero background)
-	 * 13	Top left emphasized
-	 * ...
-	 * 21	Bottom right emphasized
-	 * (Only 0-3, 5-8 & 12 appear in the queue)
-	*/
-	this.colors = colors;
 }
 
 SierpinskiCarpet.prototype.animatable = {

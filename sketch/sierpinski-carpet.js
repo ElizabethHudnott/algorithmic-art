@@ -29,8 +29,8 @@ export default function SierpinskiCarpet() {
 	if (darkMode()) {
 		colors.fill('#00000080', 0, 9);
 		colors[4] = '#1a1a1ad3';		// centre
-		colors[9] = '#000066d3';		// second centre color
-		colors[10] = '#000066';			// second centre color with emphasis
+		colors[9] = '#000055d3';		// second centre color
+		colors[10] = '#000055';			// second centre color with emphasis
 		colors[11] = '#1a1a1a';			// centre with emphasis
 		initialCentreOpacity = 211 / 255;
 

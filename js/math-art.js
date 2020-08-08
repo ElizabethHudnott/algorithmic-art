@@ -21,6 +21,11 @@ try {
 {
 	const backendRoot = 'http://localhost/';
 	const backgroundElement = document.body;
+	if (darkMode()) {
+		document.getElementById('background-color').value = '#000000';
+		backgroundElement.style.backgroundColor = '#000000';
+	}
+
 	let backgroundRedraw;
 	let rotation = 0, opacity = 1;
 
@@ -532,20 +537,39 @@ try {
 		if (signatureText === '') {
 			return;
 		}
+
+		const backgroundColor = backgroundElement.style.backgroundColor;
+		const [bgRed, bgGreen, bgBlue] = parseColor(backgroundColor)[1];
+		let canvasHeight = context.canvas.height;
+		const pixels = context.getImageData(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight).data;
+		let totalRed = 0, totalGreen = 0, totalBlue = 0;
+		const numSamples = 50;
+		for (let i = 0; i < numSamples; i++) {
+			const x = Math.trunc(Math.random() * signatureWidth);
+			const y = Math.trunc(Math.random() * signatureHeight);
+			const offset = (y * signatureWidth + x) * 4;
+			const alpha = pixels[offset + 3] / 255;
+			const bgAmount = 1 - alpha;
+			totalRed += alpha * pixels[offset] + bgAmount * bgRed;
+			totalGreen += alpha * pixels[offset + 1] + bgAmount * bgGreen;
+			totalBlue += alpha * pixels[offset + 2] + bgAmount * bgBlue;
+		}
+		const meanRed = totalRed / numSamples;
+		const meanGreen = totalGreen / numSamples;
+		const meanBlue = totalBlue / numSamples;
+
 		const scale = contextualInfo.scale;
+		canvasHeight /= scale;
 		const fontSize = Math.ceil(20 / scale);
 		context.font = signatureFont.replace('20', fontSize);
 		const scaledWidth = signatureWidth / scale;
 		const scaledHeight = signatureHeight / scale;
 		const paddingX = Math.round(3 / scale);
 		const paddingY = Math.round(4 / scale);
-		const canvasHeight = context.canvas.height / scale;
-		const backgroundColor = backgroundElement.style.backgroundColor;
-		context.fillStyle = backgroundColor;
+		context.fillStyle = rgba(meanRed, meanGreen, meanBlue, 1);
 		context.fillRect(0, canvasHeight - scaledHeight, scaledWidth, scaledHeight);
-		const [colorSystem, colorComponents] = parseColor(backgroundColor);
-		const luma = colorSystem === 'rgb' ?  rgbToLuma(...colorComponents) : colorComponents[2] / 100;
-		context.fillStyle = luma >= 0.5 ? 'black' : 'white';
+		const luma = rgbToLuma(meanRed, meanGreen, meanBlue);
+		context.fillStyle = luma >= 0.5 ? 'black' : '#f0f0f0';
 		context.fillText(signatureText, paddingX, canvasHeight - paddingY);
 	}
 
@@ -2131,8 +2155,9 @@ try {
 			progressiveBackgroundGen(0);
 		} else {
 			$('#background-color-row').collapse('hide');
-			document.getElementById('background-color').value = '#ffffff';
-			backgroundElement.style.backgroundColor = '#ffffff';
+			const color = darkMode() ? '#000000' : '#ffffff';
+			document.getElementById('background-color').value = color;
+			backgroundElement.style.backgroundColor = color;
 			backgroundImage = document.createElement('IMG');
 			backgroundImage.onload = redraw;
 			backgroundImage.src = 'img/texture/' + value + '.jpg';

@@ -43,9 +43,19 @@ th.col-form-label {
 	border-color: var(--primary);
 }
 
+.btn-primary:hover:not(:disabled) {
+	background-color: hsl(225, 61%, 43%);
+	border-color: hsl(225, 61%, 40%);
+}
+
 .btn-success, .btn-success:disabled {
 	background-color: var(--success);
 	border-color: var(--success);
+}
+
+.btn-success:hover:not(:disabled) {
+	background-color: hsl(134, 61%, 37%);
+	border-color: hsl(134, 61%, 35%);
 }
 
 .custom-file-label {
@@ -60,11 +70,18 @@ th.col-form-label {
 	background-color: #e9ecef;
 }
 
+
 .fade2:not(.show) {
 	opacity: 0;
 }
 .fade2 {
 	transition: opacity .08s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fade2 {
+		transition-duration: 0s;
+	}
 }
 
 .form-control {

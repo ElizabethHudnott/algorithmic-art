@@ -1,0 +1,71 @@
+:root {
+	--slate: hsl(220, 25%, 11%);
+	--darkslate: hsl(220, 25%, 6%);
+}
+
+.btn-black, .modal-floating .modal-body>.nav-tabs {
+	background-color: var(--darkslate);
+}
+
+.bg-black, .custom-file-label, .form-control, .modal-body, .nav-tabs a.nav-link {
+	background-color: black;
+}
+
+input[type="color"], .custom-file-label::after, .input-group-text {
+	background-color: var(--slate);
+}
+
+input[type="color"], .custom-file-label, .form-control, .input-group-text {
+	border-color: var(--slate);
+	border-style: groove;
+}
+
+.custom-file-label, .custom-file-label::after, .form-control, .input-group-text, .modal-body, .nav-tabs a.nav-link{
+	color: #eee;
+}
+
+.form-control-range {
+	background-color: transparent;
+}
+
+.form-control-range::-webkit-slider-runnable-track {
+  background-color: var(--slate);
+  height: 9px;
+  border-radius: 4px;
+}
+
+.form-control-range::-moz-range-track {
+  background-color: var(--slate);
+  height: 9px;
+  border-radius: 4px;
+}
+
+.form-control-range::-webkit-slider-thumb {
+  margin-top: -3px;
+}
+
+.input-group-append .input-group-text {
+	border-bottom-style: solid;
+	border-right-style: solid;
+}
+
+.modal-title {
+	color: #c3c3c3;
+}
+
+.modal-header .close {
+	background-color: hsl(354, 70%, 37%);
+}
+
+.modal-content {
+	background-color: hsl(210, 50%, 15%, 0.8);
+	border-color: hsl(0, 0%, 9%, 0.8);
+}
+
+.modal-body {
+	border-width: 0;
+}
+
+.nav-tabs {
+	background-color: transparent;
+}

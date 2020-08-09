@@ -112,6 +112,10 @@
 	This controls how many levels of detail are drawn opaquely without any translucency effect applied to the filling. The opacity slider for the central portion will be ignored initially and translucency will only be applied at the finer levels of detail. This option will have no effect if the centre opacity slider is positioned fully to the right, which is the default position.
 </div>
 
+<div id="carpet-blend-depth">
+	This controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles have their backgrounds painted once but when finer details are added only the centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles also painted with colour and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.
+</div>
+
 <div id="carpet-depth">
 	This is number of levels of detail to draw. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
 </div>

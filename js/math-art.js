@@ -1043,16 +1043,6 @@ try {
 		document.getElementById('btn-open-sketch').disabled = false;
 	}
 
-	function loadThumbnails() {
-		for (let img of sketchCards.getElementsByTagName('IMG')) {
-			const input = img.parentElement.parentElement.children[0];
-			img.src = 'sketch/thumbnail/' + input._sketch.thumbnail;
-		}
-		$('#sketches-modal').off('show.bs.modal', loadThumbnails);
-	}
-
-	$('#sketches-modal').on('show.bs.modal', loadThumbnails);
-
 	function addSketch(sketch) {
 		const label = document.createElement('LABEL');
 		label.classList.add('btn' , 'p-1', 'm-1');
@@ -1067,6 +1057,8 @@ try {
 		let thumbnail;
 		if (sketch.thumbnail) {
 			thumbnail = document.createElement('IMG');
+			thumbnail.loading = 'lazy';
+			thumbnail.src = 'sketch/thumbnail/' + sketch.thumbnail;
 			thumbnail.alt = sketch.title;
 			thumbnail.height = 168;
 		} else {
@@ -2056,7 +2048,7 @@ try {
 			let popoverContent = null;
 			document.body.classList.remove('context-help');
 			helpContext = false;
-			const rootElement = document.body.parentElement;
+			const rootElement = document.body;
 			do {
 				if (target.tagName === 'A') {
 					return;
@@ -2092,6 +2084,15 @@ try {
 						groupNameWords[i] = word[0].toUpperCase() + word.slice(1);
 					}
 					popoverTitle = popoverTitle + ' ' + groupNameWords.join(' ');
+
+				} else if (popoverTitle === '') {
+
+					const groupNameWords = target.id.split('-').slice(1);
+					for (let i = 0; i < groupNameWords.length; i++) {
+						const word = groupNameWords[i];
+						groupNameWords[i] = word[0].toUpperCase() + word.slice(1);
+					}
+					popoverTitle = groupNameWords.join(' ');
 				}
 			}
 

@@ -1452,7 +1452,7 @@ try {
 			if (firstGenURL) {
 				switchGenerator(firstGenURL, false);
 			} else {
-				loadThumbnails();
+				$('#sketches-modal').modal('show');
 			}
 		}
 	}

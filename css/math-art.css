@@ -14,6 +14,10 @@ a:hover, .nav-tabs .nav-link:hover {
 	text-shadow: 0 0 15px #00000066;
 }
 
+.alert {
+	margin-bottom: 0;
+}
+
 button[disabled], input[type=color][disabled], span.btn:hover:not(:disabled) {
 	cursor: auto;
 }
@@ -208,6 +212,10 @@ th.col-form-label {
 
 .progress-bar {
 	overflow: visible;
+}
+
+.progress-bar-animated {
+	animation-duration: 0.7s;
 }
 
 .bg-center {

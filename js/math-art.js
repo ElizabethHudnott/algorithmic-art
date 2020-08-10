@@ -517,7 +517,7 @@ try {
 			context.textBaseline = 'bottom';
 			const metrics = context.measureText(signatureText);
 			signatureWidth = 2 * 3 + Math.ceil(metrics.actualBoundingBoxRight);
-			signatureHeight = 2 * 4 + Math.ceil(metrics.actualBoundingBoxAscent);
+			signatureHeight = 4 + 1 + Math.ceil(metrics.actualBoundingBoxAscent);
 		}
 		signatureBox.style.width = signatureWidth + 'px';
 		signatureBox.style.height = signatureHeight + 'px';
@@ -564,13 +564,18 @@ try {
 		context.font = signatureFont.replace('20', fontSize);
 		const scaledWidth = signatureWidth / scale;
 		const scaledHeight = signatureHeight / scale;
+		const top = canvasHeight - scaledHeight;
 		const paddingX = Math.round(3 / scale);
 		const paddingY = Math.round(4 / scale);
-		context.fillStyle = rgba(meanRed, meanGreen, meanBlue, 1);
-		context.fillRect(0, canvasHeight - scaledHeight, scaledWidth, scaledHeight);
+		const onePx = 1 / scale;
+		const gradient = context.createLinearGradient(0, top, 0, top + paddingY);
+		gradient.addColorStop(0, rgba(meanRed, meanGreen, meanBlue, 0.2));
+		gradient.addColorStop(1, rgba(meanRed, meanGreen, meanBlue, 1));
+		context.fillStyle = gradient;
+		context.fillRect(0, top, scaledWidth, scaledHeight);
 		const luma = rgbToLuma(meanRed, meanGreen, meanBlue);
-		context.fillStyle = luma >= 0.5 ? 'black' : '#f0f0f0';
-		context.fillText(signatureText, paddingX, canvasHeight - paddingY);
+		context.fillStyle = luma >= 0.5 ? 'black' : '#eee';
+		context.fillText(signatureText, paddingX, canvasHeight - onePx);
 	}
 
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview) {
@@ -663,6 +668,9 @@ try {
 	const errorAlert = $('#error-alert');
 	const successAlert = $('#success-alert');
 	const videoErrorAlert = $('#video-error');
+	videoErrorAlert.on('closed.bs.alert', function (event) {
+		this.hidden = true;
+	});
 
 	const authorForm = document.getElementById('author-form');
 	const authorInput = document.getElementById('author');
@@ -1448,12 +1456,8 @@ try {
 			}
 		}
 
-		if (!firstDocID) {
-			if (firstGenURL) {
-				switchGenerator(firstGenURL, false);
-			} else {
-				$('#sketches-modal').modal('show');
-			}
+		if (!firstDocID && firstGenURL) {
+			switchGenerator(firstGenURL, false);
 		}
 	}
 	init();
@@ -1915,8 +1919,8 @@ try {
 					progressBar.innerHTML = percent + '%';
 					progressBar.setAttribute('aria-valuenow', percent);
 					framesRendered++;
-					const iconFile = framesRendered % 2 === 0 ? 'record.png' : 'draw_ellipse.png';
-					indicator.src = 'img/' + iconFile;
+					const iconFile = framesRendered % 2 === 0 ? 'img/record.png' : 'img/draw_ellipse.png';
+					indicator.src = iconFile;
 				} else if (animControlsOpen && tween - lastUIUpdate >= uiUpdateInterval) {
 					animPositionSlider.value = tween;
 					lastUIUpdate = tween;
@@ -2429,7 +2433,7 @@ try {
 	}
 
 	const noAnimErrorMsg = `
-		<p>The start and end frames are the same so there's nothing to animate. Use the
+		<p>The start and end frames are the same so there is nothing to animate. Use the
 		<span class="btn btn-sm btn-black"><img src="img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> and
 		<span class="btn btn-sm btn-black"><img src="img/timeline_marker_end.png" alt="Start Frame" width="16" height="16"></span>
 		buttons to set up animation frames.</p>
@@ -2687,6 +2691,7 @@ try {
 
 			const element = videoErrorAlert.get(0);
 			element.innerHTML = errorMsg;
+			element.hidden = false;
 			element.classList.add('show');
 			document.getElementById('video-modal-body').appendChild(element);
 

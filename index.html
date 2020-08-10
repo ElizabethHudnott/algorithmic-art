@@ -478,7 +478,7 @@
 						Resolution
 					</label>
 					<div class="col-5">
-						<select class="form-control-sm w-100" id="video-resolution">
+						<select class="form-control form-control-sm w-100" id="video-resolution">
 							<option value="640x360">360p</option>
 							<option value="854x480">480p</option>
 							<option value="1280x720">720p</option>
@@ -519,14 +519,14 @@
 				<div class="form-row form-group">
 					<div class="col-1"></div>
 					<label class="col-3 col-form-label col-form-label-sm" for="video-format">
-						Output
+						Format
 					</label>
 					<div class="col-5">
 						<select class="form-control form-control-sm" id="video-format">
 							<option value="webm" selected>WebM Video</option>
 							<option value="gif">Animated GIF</option>
-							<option value="png">PNG Stills</option>
-							<option value="jpg">JPEG Stills</option>
+							<option value="png">PNG Images</option>
+							<option value="jpg">JPEG Images</option>
 						</select>
 					</div>
 				</div>
@@ -580,11 +580,16 @@
 					</div>
 					<div class="col-8">
 						<div class="progress bg-dark" style="height: 20px">
-						  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0; transition: unset" id="video-progress">0%</div>
+						  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0; transition: unset" id="video-progress">0%</div>
 						</div>
 					</div>
 				</div>
-				<div class="alert alert-danger fade" id="video-error"></div>
+				<div class="pl-1">
+					<small class="form-text text-muted">
+						Switching to another browser tab will pause video rendering.
+					</small>
+				</div>
+				<div class="alert alert-danger fade" id="video-error" hidden></div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" id="btn-cancel-video">

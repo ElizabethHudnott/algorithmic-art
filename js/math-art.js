@@ -1,5 +1,5 @@
 'use strict';
-filePath = 'sketch/';
+filePath = document.location.pathname + 'sketch/';
 const urlParameters = new URLSearchParams(document.location.search);
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
@@ -1448,7 +1448,7 @@ try {
 			nextStep();
 		}
 
-		const sketchesURL = (new URL('sketches.json', document.baseURI)).toString();
+		const sketchesURL = document.location.origin + document.location.pathname + 'sketches.json';
 		const sketchFile = await downloadFile(sketchesURL, 'json');
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);

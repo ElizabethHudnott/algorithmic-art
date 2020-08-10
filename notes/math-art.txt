@@ -4,14 +4,14 @@ Carpet: bipartite is not bipartite when middle width and middle height are both 
 
 Environment
 -----------
+Content Security Policy
+Remove animated GIF support, separate "save" and download, update webm-writer
+Service Worker
+Bug: outstanding changes flagged after aborting video rendering
 Bug: WebGL canvas not resizing (needs different field of view)
-Bug: Clicking settings button should unminimize window.
-Bug: Moving position slider while playing is considered to have changes
-Add full screen toggle button?
+Bug: Clicking position slider ignored while playing
 Save As button
-Bug: changing startFrame, endFrame or tweenData while rendering video
-Handle attempting to download non-existent files (e.g. wrong generator name)
-Link from home page
+Link from spirograph page
 Add credits
 Add URL to signature
 User created sketches
@@ -25,7 +25,7 @@ Static image rotation for non-animatable sketches
 Ability to animate image parameters
 Video sizing
 	Pad vs extend
-Download picture sizing
+Download picture sizing & format
 Ability to animate sketches that use random numbers
 Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
@@ -33,7 +33,6 @@ Gallery
 Ability to incorporate video data
 	as component image and as background
 Radial blur
-Background: color, picture, video or layered sketches
 Animation easing
 Progressive Web App
 
@@ -43,7 +42,6 @@ Phyllotaxis
 	Option to draw the spiral line
 	Primes
 	Fill background with spokes?
-	Ways to choose an angle: Continued fractions?
 	Mirrored angular colour transitions
 	Improve performance with images (prerender filters, pre-resize if no growth)
 	Alternative petal shapes:
@@ -69,10 +67,6 @@ Cellular Automata
 
 Julia Set
 	Possible functions
-		Divisions of polynomials
-		z = c*sin(z)
-		z = ci * cos(z)
-		z = c * exp(z);
 		z = c * z * (1-z)
 
 

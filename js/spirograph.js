@@ -1,4 +1,5 @@
 'use strict';
+import {parseFraction, parseLineDash, adjustLineDash} from './parse-util.js';
 
 const hole1Distance = 0.1;
 const pointerSize = 4;
@@ -718,7 +719,7 @@ function drawingEnded() {
 	updateRotorPosition();
 	drawTools(stator, rotor, penX, penY);
 	const img = drawButton.children[0];
-	img.src = 'img/spirograph.png';
+	img.src = 'img/control_play_blue.png';
 	img.alt = 'Draw shape';
 	img.title = 'Draw pattern';
 }

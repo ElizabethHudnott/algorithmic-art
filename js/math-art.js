@@ -6,8 +6,8 @@ let random = new RandomNumberGenerator();
 const bgGeneratorImage = new Image();
 let backgroundImage;
 
-if (!window.debug) {
-	window.debug = {};
+if (!globalThis.debug) {
+	globalThis.debug = {};
 }
 debug.video = false;
 
@@ -654,7 +654,7 @@ try {
 	let helpContext = false;
 	let helpContextIntermediate = false; // True after mouse down but before mouse click.
 
-	window.inHelpContext = function () {
+	globalThis.inHelpContext = function () {
 		return helpContext;
 	};
 
@@ -1161,7 +1161,7 @@ try {
 			}
 		}
 	}
-	window.findMissingHelp = findMissingHelp;
+	globalThis.findMissingHelp = findMissingHelp;
 
 	function loadFailure() {
 		if (bgGenerator === undefined) {

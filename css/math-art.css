@@ -468,6 +468,7 @@ button.btn-black:hover {
 	color: white;
 	display: block;
 	font-family: America, sans-serif;
+	font-display: swap;
 	font-size: 0.875rem;
 	font-weight: 500;
 	padding: 5px 1rem;

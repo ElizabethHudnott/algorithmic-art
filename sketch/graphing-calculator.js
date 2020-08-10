@@ -1,4 +1,5 @@
-import parse from '../parser/real-expression.js';
+import {parseFraction, parseLineDash, adjustLineDash} from '../js/parse-util.js';
+import parseEquation from '../parser/real-expression.js';
 
 class RectangularEquation {
 	constructor(text) {
@@ -7,7 +8,7 @@ class RectangularEquation {
 
 	parseYFormula(input) {
 		const inputStr = String(input);
-		this.yFormula = parse(inputStr);
+		this.yFormula = parseEquation(inputStr);
 		this.yFormulaText = inputStr;
 	}
 
@@ -92,7 +93,7 @@ class MagXEquation {
 
 	parseMagXFormula(input) {
 		const inputStr = String(input);
-		this.magXFormula = parse(inputStr);
+		this.magXFormula = parseEquation(inputStr);
 		this.magXFormulaText = inputStr;
 	}
 
@@ -206,13 +207,13 @@ class ParametricEquation {
 
 	parseXFormula(input) {
 		const inputStr = String(input);
-		this.xFormula = parse(inputStr);
+		this.xFormula = parseEquation(inputStr);
 		this.xFormulaText = inputStr;
 	}
 
 	parseYFormula(input) {
 		const inputStr = String(input);
-		this.yFormula = parse(inputStr);
+		this.yFormula = parseEquation(inputStr);
 		this.yFormulaText = inputStr;
 	}
 
@@ -299,7 +300,7 @@ class PolarEquation {
 
 	parseRFormula(input) {
 		const inputStr = String(input);
-		this.rFormula = parse(inputStr);
+		this.rFormula = parseEquation(inputStr);
 		this.rFormulaText = inputStr;
 	}
 

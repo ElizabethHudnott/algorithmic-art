@@ -80,7 +80,7 @@ function requireScript(src) {
 let filePath = new URL('.', document.location);
 
 function downloadFile(url, type) {
-	const resolvedURL = /^((http(s)?:)|\/)/.test(url) ? url : filePath + url;
+	const resolvedURL = /^(\w+:)?\//.test(url) ? url : filePath + url;
 	return new Promise(function (resolve, reject) {
 		const request = new XMLHttpRequest();
 		request.open("GET", resolvedURL);

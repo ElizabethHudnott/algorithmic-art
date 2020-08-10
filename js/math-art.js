@@ -1448,7 +1448,8 @@ try {
 			nextStep();
 		}
 
-		const sketchFile = await downloadFile('/sketches.json', 'json');
+		const sketchesURL = (new URL('sketches.json', document.baseURI)).toString();
+		const sketchFile = await downloadFile(sketchesURL, 'json');
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {

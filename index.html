@@ -3,20 +3,21 @@
 <head>
 	<title>Mathematical Art with Elizabeth</title>
 	<meta property="og:title" content="Mathematical Art with Elizabeth">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' localhost; img-src 'self' localhost blob:; script-src 'self' localhost stackpath.bootstrapcdn.com code.jquery.com; style-src 'self' localhost stackpath.bootstrapcdn.com 'unsafe-inline'; form-action 'self'; frame-src 'none'; object-src 'none'">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/math-art.css">
 	<link rel="stylesheet" href="css/dark-mode.css" media="(prefers-color-scheme: dark)">
 
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous" defer></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous" defer></script>
+	<script src="lib/popper-1.16.1.min.js" defer></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js" integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J" crossorigin="anonymous" defer></script>
 
 	<script src="js/util.js" defer></script>
 	<script src="js/math-art.js" defer></script>
 
-	<link rel="preload" as="style" href="fonts/pacifico.css" onload="this.onload=null;this.rel='stylesheet'">
-	<link rel="preload" as="style" href="fonts/america.css" onload="this.onload=null;this.rel='stylesheet'">
+	<link rel="preload" as="style" href="fonts/pacifico.css">
+	<link rel="preload" as="style" href="fonts/america.css">
 	<link rel="preload" as="fetch" href="sketches.json" crossorigin>
 	<link rel="icon" href="img/spirograph.png">
 

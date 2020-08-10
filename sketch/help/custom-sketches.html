@@ -196,13 +196,8 @@
 		document.getElementById('url-generator-form').addEventListener('submit', function (event) {
 			event.preventDefault();
 			const sketchURL = document.getElementById('sketch-url').value;
-			let path = window.location.pathname;
-			const slashIndex = path.lastIndexOf('/');
-			if (slashIndex > 0) {
-				path = path.slice(0, slashIndex);
-			}
 			const encodedURL = encodeURIComponent(sketchURL);
-			const preloadURL = window.location.origin + path + '/?gen=' + encodedURL.slice(0, -3);
+			const preloadURL = window.location.origin + '/?gen=' + encodedURL.slice(0, -3);
 			document.getElementById('preload-url').value = preloadURL;
 		});
 	</script>

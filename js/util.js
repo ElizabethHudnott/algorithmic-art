@@ -1,5 +1,12 @@
 'use strict';
 
+for (let preload of document.head.querySelectorAll('link[rel="preload"][as="style"]')) {
+	const link = document.createElement('LINK');
+	link.rel = 'stylesheet';
+	link.href = preload.href;
+	document.head.appendChild(link);
+}
+
 class AnimationController {
 	static Status = Object.freeze({
 		RUNNING: 1,

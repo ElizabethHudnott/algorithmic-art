@@ -5,8 +5,10 @@ Carpet: bipartite is not bipartite when middle width and middle height are both 
 Environment
 -----------
 Content Security Policy
-Remove animated GIF support, separate "save" and download, update webm-writer
 Service Worker
+Add end time and transparency options for video
+Separate video "save" from download
+
 Bug: outstanding changes flagged after aborting video rendering
 Bug: WebGL canvas not resizing (needs different field of view)
 Bug: Clicking position slider ignored while playing

@@ -1512,7 +1512,7 @@ try {
 				tweened[i] = (componentEnd - componentStart) * tween + componentStart;
 			}
 			if (colorSystem === 'rgb') {
-				return 'rgba(' + tweened.join(',') + ')';
+				return 'rgba(' + tweened.join(', ') + ')';
 			} else {
 				return hsla(...tweened);
 			}
@@ -1951,7 +1951,13 @@ try {
 		const progressRow = document.getElementById('video-progress-row');
 		progressRow.classList.remove('invisible');
 
-		await requireScript('lib/CCapture.all.min.js');
+		const downloads =  [requireScript('lib/CCapture.webm.min.js')];
+		const format = properties.format;
+		if (format === 'png' || format === 'jpg') {
+			downloads.push(requireScript('lib/tar.min.js'));
+		}
+		await Promise.all(downloads);
+
 		const capturer = new CCapture(properties);
 		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
 		const stopButton = document.getElementById('btn-cancel-video');
@@ -2613,7 +2619,7 @@ try {
 			$('#video-modal').modal('show');
 			return;
 		}
-		requireScript('lib/CCapture.all.min.js');
+		requireScript('lib/CCapture.webm.min.js');
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
@@ -2634,6 +2640,17 @@ try {
 			$('#video-modal').modal('show');
 		}
 	});
+
+	function loadCodecOnDemand(event) {
+		const format = this.value;
+		if (format === 'png' || format === 'jpg') {
+			requireScript('lib/tar.min.js');
+			document.getElementById('video-format').removeEventListener('input', loadCodecOnDemand);
+			loadCodecOnDemand = undefined;
+		}
+	}
+
+	document.getElementById('video-format').addEventListener('input', loadCodecOnDemand);
 
 	document.getElementById('btn-render-video').addEventListener('click', async function (event) {
 		let errorMsg = '';
@@ -2664,9 +2681,8 @@ try {
 				framerate: framerate,
 				motionBlurFrames: motionBlur,
 				format: document.getElementById('video-format').value,
-				quality: parseInt(document.getElementById('video-quality').value),
+				quality: Math.min(parseInt(document.getElementById('video-quality').value), 0.99999),
 				name: generateFilename(),
-				workersPath: 'lib/'
 			};
 			const startTween = startTime / length;
 

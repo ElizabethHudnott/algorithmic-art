@@ -1183,7 +1183,7 @@ try {
 		// Switch generator
 		let gen;
 		try {
-			const resolvedURL = /^(\w+:)?\//.test(url) ? url : '/sketch/' + url;
+			const resolvedURL = /^(\w+:)?\//.test(url) ? url : filePath + url;
 			const genModule = await import(resolvedURL)
 			const constructor = genModule.default;
 			gen = new constructor();

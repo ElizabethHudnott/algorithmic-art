@@ -1,5 +1,5 @@
 'use strict';
-filePath = document.location.pathname + 'sketch/';
+filePath = document.location.origin + document.location.pathname + 'sketch/';
 const urlParameters = new URLSearchParams(document.location.search);
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
@@ -1242,6 +1242,12 @@ try {
 			for (let resetButton of optionsDoc.querySelectorAll('button[data-reset]')) {
 				resetButton.addEventListener('click', resetControl);
 			}
+			const baseElem = document.createElement('BASE');
+			baseElem.href = filePath;
+			optionsDoc.head.prepend(baseElem);
+			for (let img of optionsDoc.getElementsByTagName('IMG')) {
+				img.src = img.src;
+			}
 			container.append(...optionsDoc.body.children);
 			const imageCtrlLocation = container.querySelector('[data-attach=image]');
 			if (imageCtrlLocation !== null) {
@@ -1448,7 +1454,8 @@ try {
 			nextStep();
 		}
 
-		const sketchFile = await downloadFile('../sketches.json', 'json'); // Relative to the sketches directory
+		const sketchesURL = document.location.origin + document.location.pathname + 'sketches.json';
+		const sketchFile = await downloadFile(sketchesURL, 'json');
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {

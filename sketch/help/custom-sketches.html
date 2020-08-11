@@ -130,7 +130,7 @@
 
 			<h1>Testing Your Sketch</h1>
 			<p>
-				Upload your files to a server and then use the following form to generate a <abbr>URL</abbr>.
+				Upload your files to a local web server that supports CORS. The Node module <a href="https://www.npmjs.com/package/local-web-server">local-web-server</a> can be used for this. Then use the following form to generate a <abbr>URL</abbr>.
 			</p>
 			<form id="url-generator-form">
 				<div class="form-group">
@@ -138,6 +138,9 @@
 						Sketch <abbr>URL</abbr>
 					</label>
 					<div class="input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text">http://localhost/</span>
+						</div>
 						<input type="text" class="form-control" id="sketch-url" aria-describedby="sketch-url-descriptor" pattern=".*\.js" title="The URL should end in .js">
 						<div class="input-group-append">
 							<button class="btn btn-primary" type="submit">
@@ -195,7 +198,7 @@
 
 		document.getElementById('url-generator-form').addEventListener('submit', function (event) {
 			event.preventDefault();
-			const sketchURL = document.getElementById('sketch-url').value;
+			const sketchURL = 'http://localhost/' + document.getElementById('sketch-url').value;
 			const encodedURL = encodeURIComponent(sketchURL);
 			const preloadURL = window.location.origin + '/?gen=' + encodedURL.slice(0, -3);
 			document.getElementById('preload-url').value = preloadURL;

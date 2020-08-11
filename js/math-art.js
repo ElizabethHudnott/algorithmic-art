@@ -1960,8 +1960,14 @@ try {
 
 		const downloads =  [requireScript('lib/CCapture.webm.min.js')];
 		const format = properties.format;
-		if (format === 'png' || format === 'jpg') {
+		switch (format) {
+		case 'gif':
+			downloads.push(requireScript('lib/gif.js'));
+			break;
+		case 'jpg':
+		case 'png':
 			downloads.push(requireScript('lib/tar.min.js'));
+			break;
 		}
 		await Promise.all(downloads);
 
@@ -2648,12 +2654,25 @@ try {
 		}
 	});
 
+	let codecsLoaded = new Set();
+
 	function loadCodecOnDemand(event) {
 		const format = this.value;
-		if (format === 'png' || format === 'jpg') {
+		switch (format) {
+		case 'gif':
+			requireScript('lib/gif.js');
+			codecsLoaded.add('gif');
+			break;
+		case 'jpg':
+		case 'png':
 			requireScript('lib/tar.min.js');
+			codecsLoaded.add('tar');
+			break;
+		}
+		if (codecsLoaded.size === 2) {
 			document.getElementById('video-format').removeEventListener('input', loadCodecOnDemand);
 			loadCodecOnDemand = undefined;
+			codecsLoaded = undefined;
 		}
 	}
 
@@ -2686,6 +2705,7 @@ try {
 				format: document.getElementById('video-format').value,
 				quality: Math.min(parseInt(document.getElementById('video-quality').value), 0.99999),
 				name: generateFilename(),
+				workersPath: 'lib/',
 			};
 
 			const resolutionStr = videoResolutionInput.value;

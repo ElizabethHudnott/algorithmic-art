@@ -156,25 +156,6 @@ export default function Phyllotaxis() {
 			}
 		});
 
-		const polygonOptions = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
-		function setShape(event) {
-			const shape = this.value;
-			me.petalShape = shape;
-			const shapeIsImage = shape === 'i';
-			for (let element of polygonOptions) {
-				element.hidden = shapeIsImage;
-			};
-			if (shapeIsImage && bgGeneratorImage.src === '') {
-				document.getElementById('background-gen-image-upload').click();
-			} else {
-				generateBackground(2);
-			}
-		}
-
-		for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]')) {
-			item.addEventListener('input', setShape);
-		};
-
 		optionsDoc.getElementById('phyllotaxis-petal-size').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
@@ -264,17 +245,28 @@ export default function Phyllotaxis() {
 		});
 
 		const hueMinInput = optionsDoc.getElementById('phyllotaxis-hue-min');
+		const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
+		const hueModeInput = optionsDoc.getElementById('phyllotaxis-hue-mode');
+
 		hueMinInput.addEventListener('input', function (event) {
-			me.hueMin = parseFloat(this.value);
-			generateBackground(3);
+			const value = parseFloat(this.value);
+			me.hueMin = value;
+			if (hueModeInput.value === 'c') {
+				me.hueMax = value;
+				hueMaxInput.value = value;
+			}
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		hueMinInput.addEventListener('pointerup', fullRecolor);
 		hueMinInput.addEventListener('keyup', fullRecolor);
 
-		const hueMaxInput = optionsDoc.getElementById('phyllotaxis-hue-max');
 		hueMaxInput.addEventListener('input', function (event) {
 			me.hueMax = parseFloat(this.value);
-			generateBackground(3);
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		hueMaxInput.addEventListener('pointerup', fullRecolor);
 		hueMaxInput.addEventListener('keyup', fullRecolor);
@@ -283,9 +275,12 @@ export default function Phyllotaxis() {
 		const hueModSplitInput = optionsDoc.getElementById('phyllotaxis-hue-mod-split');
 		const hueModeIntensityInput = optionsDoc.getElementById('phyllotaxis-hue-mode-intensity');
 
-		optionsDoc.getElementById('phyllotaxis-hue-mode').addEventListener('input', function (event) {
+		hueModeInput.addEventListener('input', function (event) {
 			const mode = this.value;
-			$('#phyllotaxis-hue-max').collapse(mode === 'c' ? 'hide' : 'show');
+			const isConstant = mode === 'c';
+			const isImage = mode === 'i';
+			$('#phyllotaxis-hue-min').collapse(isImage ? 'hide' : 'show');
+			$('#phyllotaxis-hue-max').collapse(isConstant || isImage ? 'hide' : 'show');
 			let showAdvanced = false;
 			if (mode[0] === 'a') {
 				me.hueMode = mode[0];
@@ -297,8 +292,15 @@ export default function Phyllotaxis() {
 					showAdvanced = true;
 				}
 				me.angularHueMode = angularMode;
+			} else if (isConstant) {
+				me.hueMax = me.hueMin;
+				hueMaxInput.value = me.hueMin;
 			} else {
 				me.hueMode = mode;
+			}
+			if (!isConstant && !isImage && me.hueMin === me.hueMax) {
+				me.hueMax = 360;
+				hueMaxInput.value = 360;
 			}
 			$(hueModSplitInput.parentElement.parentElement).collapse(showAdvanced ? 'show' : 'hide');
 			generateBackground(2);
@@ -307,59 +309,111 @@ export default function Phyllotaxis() {
 
 		hueModSplitInput.addEventListener('input', function (event) {
 			me.hueModSplit = parseFloat(this.value);
-			generateBackground(3);
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		hueModSplitInput.addEventListener('pointerup', fullRecolor);
 		hueModSplitInput.addEventListener('keyup', fullRecolor);
 
 		hueModeIntensityInput.addEventListener('input', function (event) {
 			me.hueModeIntensity = parseFloat(this.value);
-			generateBackground(3);
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		hueModeIntensityInput.addEventListener('pointerup', fullRecolor);
 		hueModeIntensityInput.addEventListener('keyup', fullRecolor);
 
 		const saturationMinInput = optionsDoc.getElementById('phyllotaxis-saturation-min');
+		const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
+		const saturationModeInput = optionsDoc.getElementById('phyllotaxis-saturation-mode');
+
 		saturationMinInput.addEventListener('input', function (event) {
-			me.saturationMin = parseFloat(this.value);
-			generateBackground(3);
+			const value = parseFloat(this.value);
+			me.saturationMin = value;
+			if (saturationModeInput.value === 'c') {
+				me.saturationMax = value;
+				saturationMaxInput.value = value;
+			}
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		saturationMinInput.addEventListener('pointerup', fullRecolor);
 		saturationMinInput.addEventListener('keyup', fullRecolor);
 
-		const saturationMaxInput = optionsDoc.getElementById('phyllotaxis-saturation-max');
 		saturationMaxInput.addEventListener('input', function (event) {
 			me.saturationMax = parseFloat(this.value);
-			generateBackground(3);
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		saturationMaxInput.addEventListener('pointerup', fullRecolor);
 		saturationMaxInput.addEventListener('keyup', fullRecolor);
 
-		optionsDoc.getElementById('phyllotaxis-saturation-mode').addEventListener('input', function (event) {
-			me.saturationMode = this.value;
-			$('#phyllotaxis-saturation-max').collapse(this.value === 'c' ? 'hide' : 'show');
+		saturationModeInput.addEventListener('input', function (event) {
+			const value = this.value;
+			const isConstant = value === 'c';
+			const isImage = value === 'i';
+			$('#phyllotaxis-saturation-min').collapse(isImage ? 'hide' : 'show');
+			$('#phyllotaxis-saturation-max').collapse(isConstant || isImage ? 'hide' : 'show');
+			if (isConstant) {
+				me.saturationMax = me.saturationMin;
+				saturationMaxInput.value = me.saturationMin;
+			} else {
+				me.saturationMode = value;
+				if (!isImage && me.saturationMin === me.saturationMax) {
+					me.saturationMax = 0;
+					saturationMaxInput.value = 0;
+				}
+			}
 			generateBackground(2);
 		});
 
 		const lightnessMinInput = optionsDoc.getElementById('phyllotaxis-lightness-min');
+		const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
+		const lightnessModeInput = optionsDoc.getElementById('phyllotaxis-lightness-mode');
+
 		lightnessMinInput.addEventListener('input', function (event) {
-			me.lightnessMin = parseFloat(this.value);
-			generateBackground(3);
+			const value = parseFloat(this.value);
+			me.lightnessMin = value;
+			if (lightnessModeInput.value === 'c') {
+				me.lightnessMax = value;
+				lightnessMaxInput.value = value;
+			}
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		lightnessMinInput.addEventListener('pointerup', fullRecolor);
 		lightnessMinInput.addEventListener('keyup', fullRecolor);
 
-		const lightnessMaxInput = optionsDoc.getElementById('phyllotaxis-lightness-max');
 		lightnessMaxInput.addEventListener('input', function (event) {
 			me.lightnessMax = parseFloat(this.value);
-			generateBackground(3);
+			if (me.petalShape !== 'i') {
+				generateBackground(3);
+			}
 		});
 		lightnessMaxInput.addEventListener('pointerup', fullRecolor);
 		lightnessMaxInput.addEventListener('keyup', fullRecolor);
 
-		optionsDoc.getElementById('phyllotaxis-lightness-mode').addEventListener('input', function (event) {
-			me.lightnessMode = this.value;
-			$('#phyllotaxis-lightness-max').collapse(this.value === 'c' ? 'hide' : 'show');
+		lightnessModeInput.addEventListener('input', function (event) {
+			const value = this.value;
+			const isConstant = value === 'c';
+			const isImage = value === 'i';
+			$('#phyllotaxis-lightness-min').collapse(isImage ? 'hide' : 'show');
+			$('#phyllotaxis-lightness-max').collapse(isConstant || isImage ? 'hide' : 'show');
+			if (isConstant) {
+				me.lightnessMax = me.lightnessMin;
+				lightnessMaxInput.value = me.lightnessMin;
+			} else {
+				me.lightnessMode = value;
+				if (!isImage && me.lightnessMin === me.lightnessMax) {
+					me.lightnessMax = 0;
+					lightnessMaxInput.value = 0;
+				}
+			}
 			generateBackground(2);
 		});
 
@@ -380,10 +434,77 @@ export default function Phyllotaxis() {
 		opacityMaxInput.addEventListener('keyup', fullRecolor);
 
 		optionsDoc.getElementById('phyllotaxis-opacity-mode').addEventListener('input', function (event) {
-			me.opacityMode = this.value;
-			$('#phyllotaxis-opacity-max').collapse(this.value === 'c' ? 'hide' : 'show');
+			const value = this.value;
+			const isConstant = value === 'c';
+			if (isConstant) {
+				me.opacityMin = 1;
+				me.opacityMax = 1;
+			} else {
+				me.opacityMode = value;
+				if (me.opacityMin === me.opacityMax) {
+					me.opacityMax = 0;
+					opacityMaxInput.value = 0;
+				}
+			}
+			$('#phyllotaxis-opacity-min, #phyllotaxis-opacity-max').collapse(isConstant ? 'hide' : 'show');
 			generateBackground(2);
 		});
+
+		const polygonOptions = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
+		function setShape(event) {
+			const shape = this.value;
+			const shapeIsImage = shape === 'i';
+			if (me.petalShape === 'i' && !shapeIsImage) {
+				if (me.hueMode === 'i') {
+					me.hueMode = 'rad';
+					me.hueMax = me.hueMin;
+					hueModeInput.value = 'c';
+					hueMaxInput.value = me.hueMin;
+				}
+				if (me.saturationMode === 'i') {
+					me.saturationMode = 'rad';
+					me.saturationMax = me.saturationMin;
+					saturationModeInput.value = 'c';
+					saturationMaxInput.value = me.saturationMin;
+				}
+				if (me.lightnessMode === 'i') {
+					me.lightnessMode = 'rad';
+					me.lightnessMax = me.lightnessMin;
+					lightnessModeInput.value = 'c';
+					lightnessMaxInput.value = me.lightnessMin;
+				}
+			}
+
+			$('#phyllotaxis-hue-min, #phyllotaxis-saturation-min, #phyllotaxis-lightness-min').collapse(shapeIsImage ? 'hide' : 'show');
+			for (let element of polygonOptions) {
+				element.hidden = shapeIsImage;
+			};
+			hueModeInput.querySelector('[value="i"]').hidden = !shapeIsImage;
+			saturationModeInput.querySelector('[value="i"]').hidden = !shapeIsImage;
+			lightnessModeInput.querySelector('[value="i"]').hidden = !shapeIsImage;
+
+			me.petalShape = shape;
+			if (shapeIsImage) {
+				$('#phyllotaxis-hue-max, #phyllotaxis-saturation-max, #phyllotaxis-lightness-max').collapse('hide');
+				me.hueMode = 'i';
+				hueModeInput.value = 'i';
+				me.saturationMode = 'i';
+				saturationModeInput.value = 'i';
+				me.lightnessMode = 'i';
+				lightnessModeInput.value = 'i';
+				if (bgGeneratorImage.src === '') {
+					document.getElementById('background-gen-image-upload').click();
+				} else {
+					generateBackground(2);
+				}
+			} else {
+				generateBackground(2);
+			}
+		}
+
+		for (let item of optionsDoc.querySelectorAll('input[name=phyllotaxis-petal-shape]')) {
+			item.addEventListener('input', setShape);
+		};
 
 		const lightingInput = optionsDoc.getElementById('phyllotaxis-lighting');
 		lightingInput.addEventListener('input', function (event) {
@@ -533,20 +654,20 @@ export default function Phyllotaxis() {
 	this.hueModSplit = 0.25;
 
 	this.hueMin = 30;
-	this.hueMax = 360;
-	this.hueMode = 'c';	// constant
+	this.hueMax = 30;
+	this.hueMode = 'rad';	// radial
 
 	this.saturationMin = 1;
-	this.saturationMax = 0;
-	this.saturationMode = 'c';
+	this.saturationMax = 1;
+	this.saturationMode = 'rad';
 
 	this.lightnessMin = 0.5;
-	this.lightnessMax = 0;
-	this.lightnessMode = 'c';
+	this.lightnessMax = 0.5;
+	this.lightnessMode = 'rad';
 
 	this.opacityMin = 1;
-	this.opacityMax = 0;
-	this.opacityMode = 'c';
+	this.opacityMax = 1;
+	this.opacityMode = 'rad';
 
 	this.lighting = 0;
 	this.contrast = 0;
@@ -866,7 +987,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	}
 	const saturationRange = this.saturationMax - this.saturationMin;
 	const lightnessRange = this.lightnessMax - this.lightnessMin;
-	const baseOpacity = this.globalAlpha;
+	const baseOpacity = context.globalAlpha;
 	const opacityRange = this.opacityMax - this.opacityMin;
 	const contrast = this.lighting === 1  || petalShape === 'i' ? 0 : this.contrast;
 	const shadowOffset = this.shadowOffset * (petalStretch >= 1 ? 1 : petalStretch);
@@ -884,10 +1005,9 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const imageHeight = bgGeneratorImage.height;
 		imageAspect = imageHeight / imageWidth;
 		applyFilters = preview === 0 || preview === 2;
-		const variesRegExp = /[ar]/;
-		hueVaries = variesRegExp.test(this.hueMode);
-		saturationVaries = variesRegExp.test(this.saturationMode);
-		lightnessVaries = variesRegExp.test(this.lightnessMode);
+		hueVaries = this.hueMode !== 'i';
+		saturationVaries = this.saturationMode !== 'i';
+		lightnessVaries = this.lightnessMode !== 'i';
 		if (hueVaries) {
 			this.spriteSheet.width = imageWidth;
 			this.spriteSheet.height = imageHeight;

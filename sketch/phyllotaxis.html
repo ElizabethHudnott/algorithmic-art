@@ -303,10 +303,10 @@
 				Hue
 			</label>
 			<div class="col-3">
-				<input class="form-control-range mt-2" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-min">
+				<input class="form-control-range mt-2 collapse show" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-min">
 			</div>
 			<div class="col-3">
-				<input class="form-control-range mt-2 collapse" type="range" min="0" max="360" value="360" id="phyllotaxis-hue-max">
+				<input class="form-control-range mt-2 collapse" type="range" min="0" max="360" value="30" id="phyllotaxis-hue-max">
 			</div>
 			<div class="col-3">
 				<select class="form-control form-control-sm" id="phyllotaxis-hue-mode">
@@ -316,6 +316,7 @@
 					<option value="a3">Dark Angular</option>
 					<option value="rad">Radial</option>
 					<option value="c" selected>Fixed</option>
+					<option value="i" hidden>Image</option>
 					<option value="rnd">Random</option>
 				</select>
 			</div>
@@ -342,16 +343,17 @@
 				Saturation
 			</label>
 			<div class="col-3">
-				<input class="form-control-range mt-2" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-saturation-min">
+				<input class="form-control-range mt-2 collapse show" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-saturation-min">
 			</div>
 			<div class="col-3">
-				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="0" id="phyllotaxis-saturation-max">
+				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-saturation-max">
 			</div>
 			<div class="col-3">
 				<select class="form-control form-control-sm" id="phyllotaxis-saturation-mode">
 					<option value="a">Angular</option>
 					<option value="rad">Radial</option>
 					<option value="c" selected>Fixed</option>
+					<option value="i" hidden>Image</option>
 					<option value="rnd">Random</option>
 				</select>
 			</div>
@@ -363,16 +365,17 @@
 				Lightness
 			</label>
 			<div class="col-3">
-				<input class="form-control-range mt-2" type="range" min="0" max="1" step="0.004" value="0.5" id="phyllotaxis-lightness-min">
+				<input class="form-control-range mt-2 collapse show" type="range" min="0" max="1" step="0.004" value="0.5" id="phyllotaxis-lightness-min">
 			</div>
 			<div class="col-3">
-				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="0" id="phyllotaxis-lightness-max">
+				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="0.5" id="phyllotaxis-lightness-max">
 			</div>
 			<div class="col-3">
 				<select class="form-control form-control-sm" id="phyllotaxis-lightness-mode">
 					<option value="a">Angular</option>
 					<option value="rad">Radial</option>
 					<option value="c" selected>Fixed</option>
+					<option value="i" hidden>Image</option>
 					<option value="rnd">Random</option>
 				</select>
 			</div>
@@ -384,10 +387,10 @@
 				Opacity
 			</label>
 			<div class="col-3">
-				<input class="form-control-range mt-2" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-opacity-min">
+				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-opacity-min">
 			</div>
 			<div class="col-3">
-				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="0" id="phyllotaxis-opacity-max">
+				<input class="form-control-range mt-2 collapse" type="range" min="0" max="1" step="0.004" value="1" id="phyllotaxis-opacity-max">
 			</div>
 			<div class="col-3">
 				<select class="form-control form-control-sm" id="phyllotaxis-opacity-mode">

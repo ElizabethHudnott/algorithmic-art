@@ -1947,7 +1947,7 @@ try {
 		return newAnimController;
 	}
 
-	async function captureVideo(contextualInfo, width, height, startTween, length, properties) {
+	async function captureVideo(contextualInfo, width, height, length, properties) {
 		const renderButton = document.getElementById('btn-render-video');
 		renderButton.disabled = true;
 		const closeWidget = document.getElementById('video-modal').querySelector('.close');
@@ -1966,7 +1966,7 @@ try {
 		await Promise.all(downloads);
 
 		const capturer = new CCapture(properties);
-		animController = animate(bgGenerator, contextualInfo, width, height, startTween, length, loopAnim, capturer);
+		animController = animate(bgGenerator, contextualInfo, width, height, 0, length, loopAnim, capturer);
 		const stopButton = document.getElementById('btn-cancel-video');
 		stopButton.innerHTML = 'Abort';
 		stopButton.classList.add('btn-danger');
@@ -2676,10 +2676,6 @@ try {
 		if (!(motionBlur >= 1)) {
 			errorMsg += '<p>Invalid number of motion blur frames.</p>';
 		}
-		const startTime = parseFloat(document.getElementById('video-start').value);
-		if (!(startTime >= 0 && startTime < length)) {
-			errorMsg += '<p>Invalid start time.</p>';
-		}
 
 		if (errorMsg === '') {
 
@@ -2691,7 +2687,6 @@ try {
 				quality: Math.min(parseInt(document.getElementById('video-quality').value), 0.99999),
 				name: generateFilename(),
 			};
-			const startTween = startTime / length;
 
 			const resolutionStr = videoResolutionInput.value;
 			const videoWidth = parseInt(resolutionStr);
@@ -2708,7 +2703,7 @@ try {
 			const drawHeight = screen.height;
 			const contextualInfo = new DrawingContext(captureCanvas, videoWidth, videoHeight, scale);
 			contextualInfo.initializeShader(bgGenerator);
-			captureVideo(contextualInfo, drawWidth, drawHeight, startTween, length * 1000, properties);
+			captureVideo(contextualInfo, drawWidth, drawHeight, length * 1000, properties);
 
 		} else {
 

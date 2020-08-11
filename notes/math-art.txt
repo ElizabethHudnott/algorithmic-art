@@ -1,12 +1,12 @@
-Phyllotaxis: remove slider for fixed opacity
 Carpet: bipartite with images: colour background
 Carpet: bipartite is not bipartite when middle width and middle height are both 0
 
 Environment
 -----------
-Content Security Policy
+Aspect ratio when rotating: height squared, as is, hypotenuse square
+	move to layer dialog
 Service Worker
-Add end time and transparency options for video
+Content Security Policy (remove inline CSS)
 Separate video "save" from download
 
 Bug: outstanding changes flagged after aborting video rendering
@@ -29,7 +29,6 @@ Video sizing
 	Pad vs extend
 Download picture sizing & format
 Ability to animate sketches that use random numbers
-Aspect ratio when rotating: height squared, as is, hypotenuse square
 Gallery
 	Share to: Facebook, YouTube, Instagram, Tumblr, Twitter, Pinterest, DeviantArt?
 Ability to incorporate video data

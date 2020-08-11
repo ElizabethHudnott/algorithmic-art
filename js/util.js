@@ -80,10 +80,22 @@ function requireScript(src) {
 let filePath = new URL('.', document.location);
 
 function downloadFile(url, type) {
-	const resolvedURL = /^(\w+:)?\//.test(url) ? url : filePath + url;
+	let useCORS = false;
+	let resolvedURL;
+	if (/^\w+:/.test(url)) {
+		resolvedURL = url;
+		useCORS = true;
+	} else if (url[0] === '/') {
+		resolvedURL = url;
+	} else {
+		resolvedURL = filePath + url;
+	}
 	return new Promise(function (resolve, reject) {
 		const request = new XMLHttpRequest();
 		request.open("GET", resolvedURL);
+		if (useCORS) {
+			request.withCredentials = true;
+		}
 		request.responseType = type;
 		request.timeout = 60000;
 		request.addEventListener('load', function() {

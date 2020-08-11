@@ -1448,8 +1448,7 @@ try {
 			nextStep();
 		}
 
-		const sketchesURL = document.location.origin + document.location.pathname + 'sketches.json';
-		const sketchFile = await downloadFile(sketchesURL, 'json');
+		const sketchFile = await downloadFile('../sketches.json', 'json'); // Relative to the sketches directory
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {

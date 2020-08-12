@@ -1,19 +1,21 @@
+Carpet: stretch does nothing when drawing area is square (use screen aspect ratio instead)
 Carpet: bipartite with images: colour background
 Carpet: bipartite is not bipartite when middle width and middle height are both 0
 
 Environment
 -----------
-Aspect ratio when rotating: height squared, as is, hypotenuse square
-	move to layer dialog
 Service Worker
-Content Security Policy (remove inline CSS)
 Separate video "save" from download
 
+Bug: fading background image to color & color to image?
 Bug: outstanding changes flagged after aborting video rendering
-Bug: WebGL canvas not resizing (needs different field of view)
 Bug: Clicking position slider ignored while playing
-Save As button
+Bug: initial floating window positions
+Bug: resizing window while video rendering
 Link from spirograph page
+Bug: WebGL canvas not resizing (needs different field of view)
+Content Security Policy (remove inline CSS)
+Save As button
 Add credits
 Add URL to signature
 User created sketches

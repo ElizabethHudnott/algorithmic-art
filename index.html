@@ -220,7 +220,7 @@
 	</div>
 </div>
 
-<div class="modal modal-floating fade p-0" id="layers-modal" tabindex="-1" role="dialog" aria-labelledby="layers-modal-title" aria-hidden="true" data-backdrop="false" style="width: 300px">
+<div class="modal modal-floating fade p-0 max-w-fit" id="layers-modal" tabindex="-1" role="dialog" aria-labelledby="layers-modal-title" aria-hidden="true" data-backdrop="false" style="min-width: 300px">
 	<div class="modal-dialog m-0" role="document">
 		<div class="modal-content">
 			<div class="modal-header" title="Double click to collapse">
@@ -290,24 +290,61 @@
 
 					<div class="tab-pane" id="layers" role="tabpanel" aria-labelledby="layers-tab">
 						<div class="form-row form-group">
-							<label class="col-3 col-form-label col-form-label-sm" for="layer-opacity">
+							<div class="col-1"></div>
+							<label class="col-2 col-form-label col-form-label-sm" for="layer-opacity">
 								Opacity
 							</label>
 							<div class="col-9">
 								<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2" id="layer-opacity">
 							</div>
 						</div>
-						<div class="form-row">
-							<label class="col-3 col-form-label col-form-label-sm" for="layer-rotation">
+						<div class="form-row mb-2">
+							<div class="col-1"></div>
+							<label class="col-2 col-form-label col-form-label-sm" for="layer-rotation">
 								Rotation
 							</label>
 							<div class="col-7">
 								<input type="range" min="-1" max="1" value="0" step="0.002" class="form-control-range mt-2" id="layer-rotation">
 							</div>
-							<div class="col-2">
+							<div class="col-2 text-center">
 								<button type="button" class="btn btn-light py-0" id="layer-rotation-reset" title="Reset rotation">
 									<img width="16" height="16" src="img/cross.png" alt="Reset">
 								</button>
+							</div>
+						</div>
+						<div class="form-row form-group" id="rotation-sizing-row">
+							<div class="col-4 text-center" title="No adjustment">
+								<div class="form-check text-center">
+									<label class="form-check-label mb-2" for="rotation-size-screen">
+										<img src="img/rotate-as-is.svg" class="w-100" loading="lazy" alt="No adjustment">
+									</label>
+									<input type="radio" name="rotation-sizing" value="1" id="rotation-size-screen" aria-label="Rotate without any size adjustment" checked>
+								</div>
+							</div>
+							<div class="col-4 text-center" title="Fit screen">
+								<div class="form-check text-center">
+									<label class="form-check-label mb-2" for="rotation-size-square">
+										<img src="img/rotate-square.svg" class="w-100" loading="lazy" alt="Fit screen">
+									</label>
+									<input type="radio" name="rotation-sizing" value="0" id="rotation-size-square" aria-label="Fit everything on screen when rotating">
+								</div>
+							</div>
+							<div class="col-4 text-center" title="Fill screen">
+								<div class="form-check text-center">
+									<label class="form-check-label mb-2" for="rotation-size-fill">
+										<img src="img/rotate-hypotenuse.svg" class="w-100" loading="lazy" alt="Fill screen">
+									</label>
+									<input type="radio" name="rotation-sizing" value="2" id="rotation-size-fill" aria-label="Always fill the screen when rotating">
+								</div>
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="col-1"></div>
+							<label class="col-2 col-form-label col-form-label-sm" for="layer-scale">
+								Size
+							</label>
+							<div class="col-9">
+								<input type="range" min="0" max="1" step="0.005" value="1" class="form-control-range mt-2" id="layer-scale">
 							</div>
 						</div>
 					</div>
@@ -402,13 +439,13 @@
 			<div class="modal-body">
 				<div class="form-row form-group">
 					<div class="col-1"></div>
-					<div class="col-3 col-form-label">
+					<div class="col-3 col-form-label col-form-label-sm">
 						Looping
 					</div>
 					<div class="col-7">
-						<div class="form-check mt-2">
+						<div class="form-check mt-1">
 							<input class="form-check-input" type="checkbox" id="anim-loop">
-							<label class="form-check-label" for="anim-loop">
+							<label class="form-check-label small" for="anim-loop">
 								Rollback some parameters to their start positions
 							</label>
 						</div>
@@ -416,43 +453,11 @@
 				</div>
 				<div class="form-row form-group">
 					<div class="col-1"></div>
-					<label class="col-3 col-form-label">
+					<label class="col-3 col-form-label col-form-label-sm">
 						Full Rotations
 					</label>
-					<div class="col-3">
-						<input type="number" value="0" id="background-rotations" class="form-control">
-					</div>
-				</div>
-				<div class="form-row mb-2">
-					<div class="col-1"></div>
-					<div class="col-11 col-form-label">
-						Rotational Geometry
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-4 text-center" title="No size adjustment">
-						<div class="form-check text-center">
-							<label class="form-check-label mb-2" for="bg-rotation-size-screen">
-								<img src="img/rotate-as-is.svg" class="w-100" loading="lazy" alt="No adjustment">
-							</label>
-							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-screen" aria-label="Rotate without any size adjustment" checked>
-						</div>
-					</div>
-					<div class="col-4 text-center" title="Resize to fit everything on screen">
-						<div class="form-check text-center">
-							<label class="form-check-label mb-2" for="bg-rotation-size-square">
-								<img src="img/rotate-square.svg" class="w-100" loading="lazy" alt="Fit screen">
-							</label>
-							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-square" aria-label="Fit everything on screen when rotating">
-						</div>
-					</div>
-					<div class="col-4 text-center" title="Fill the screen">
-						<div class="form-check text-center">
-							<label class="form-check-label mb-2" for="bg-rotation-size-fill">
-								<img src="img/rotate-hypotenuse.svg" class="w-100" loading="lazy" alt="Fill screen">
-							</label>
-							<input type="radio" class="form-check-label position-static" name="bg-rotation-sizing" id="bg-rotation-size-fill" aria-label="Always fill the screen when rotating">
-						</div>
+					<div class="col-2">
+						<input type="number" min="0" value="0" id="background-rotations" class="form-control form-control-sm">
 					</div>
 				</div>
 			</div>
@@ -525,9 +530,9 @@
 					<div class="col-5">
 						<select class="form-control form-control-sm" id="video-format">
 							<option value="webm" selected>WebM Video</option>
-							<option value="webp">WebP Images</option>
-							<option value="png">PNG Images</option>
 							<option value="jpg">JPEG Images</option>
+							<option value="png">PNG Images</option>
+							<option value="webp">WebP Images</option>
 						</select>
 					</div>
 				</div>

@@ -142,10 +142,6 @@ th.col-form-label {
 	padding: 0.35rem 3px 0.35rem 0.7rem;
 }
 
-.close:hover {
-	color: white;
-}
-
 .modal-header .close {
 	background-color: var(--danger);
 	border-radius: 0 0 0.3rem 0.3rem;
@@ -154,6 +150,11 @@ th.col-form-label {
 	padding: 0 0.7rem;
 	margin: -0.35rem 0.5rem 0 auto;
 }
+
+.modal-header .close:hover {
+	color: white;
+}
+
 
 .close>* {
 	vertical-align: text-top;

@@ -104,8 +104,12 @@
 	This controls the thickness of the bottom part of each coloured band.
 </div>
 
+<div id="carpet-colors">
+	Here you can choose colours for the nine sections of the 3&times;3 grid. These are applied recursively. For example, if red is chosen as the top-left colour then the top-left section of the overall image is painted red (⅑th portion). But a smaller piece, the top-left corner within the top-left corner is painted with a second layer of red paint. Use the sliders underneath each colour to change how thick each layer of paint is. You can make a colour translucent like watercolour or opaque.
+</div>
+
 <div id="carpet-bipartite">
-	Bipartite colouring means organization into two different kinds of pieces with two different colours. When this option is ticked the centre locations (1 at level&nbsp;1, 8&times;1 at level&nbsp;2, etc.) will be coloured using two different colours (black and blue by default).
+	Bipartite colouring means organization into two different kinds of pieces with two different colours. When this option is ticked the centre locations (1 at level&nbsp;1, 8 at level&nbsp;2, etc.) will be coloured using two different colours (black and blue by default).
 </div>
 
 <div id="carpet-emphasis">
@@ -114,6 +118,10 @@
 
 <div id="carpet-blend-depth">
 	This controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles have their backgrounds painted once but when finer details are added only the centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles also painted with colour and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.
+</div>
+
+<div id="carpet-blend-filling">
+	This selects whether or not the blend mode chosen above is applied to the filling (centre rectangle) in addition to being applied to the background areas. If this box is unticked then the filling will be painted in source over mode regardless of which blend mode is selected above. Most blend modes look even better when they're applied to everything (this box ticked) but sometimes a particular blend mode can badly distort the filling, in which case unticking this box improves the image. Alternatively, just experiment and use it as an extra option to play with.
 </div>
 
 <div id="carpet-depth">
@@ -125,7 +133,11 @@
 </div>
 
 <div id="carpet-cutouts">
-	When there's an overlap and one or more edge pieces are not subdivided then these tick boxes let you choose at which corners the overlap is drawn (extending into the blank space, ticked state) and where the overlap is clipped (unticked state).
+	These tick boxes let you choose at which corners the overlap is drawn (extending into blank space, ticked state) and where the overlap is trimmed, creating a non-rectangular shape (unticked state). To see any effect you'll need to set both a non-zero amount of overlap and have one or more of the eight outer tick boxes from the group on the left unticked.
+</div>
+
+<div id="carpet-cutout-depth">
+	When this is &gt;1 the effect of the cut-out tick boxes (above) is turned off for some parts of the image. At low numbered levels of detail (largest shapes) the effect is as if none of the tick boxes were ticked, while for finer details cut-outs are applied according to the settings selected above.
 </div>
 
 <div id="carpet-lopsidedness-x">
@@ -138,6 +150,10 @@
 
 <div id="carpet-middle-width">
 	This slider makes the middle column wider or narrower.
+</div>
+
+<div id="carpet-middle-height">
+	This slider makes the middle row taller or shorter.
 </div>
 
 <div id="carpet-size">
@@ -157,9 +173,5 @@
 </div>
 
 <div id="carpet-rotation">
-	Rotates the image about it's centre. Use the button on the right to return to the initial setting with the sides of the image aligned with the sides of the screen.
-</div>
-
-<div id="carpet-rotation-reset">
-	Resets the rotation control to it's initial position.
+	Rotates the image. Use the button on the right to return to the initial setting. This rotates around the centre of the area where content is drawn. Depending on the values of other parameters like Left and Top this might have an effect different from using the rotation slider in the layers window.
 </div>

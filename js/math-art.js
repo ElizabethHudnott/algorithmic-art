@@ -10,6 +10,7 @@ if (!globalThis.debug) {
 	globalThis.debug = {};
 }
 debug.video = false;
+debug.help = document.location.hostname === 'localhost';
 
 let store;
 try {
@@ -1164,7 +1165,7 @@ try {
 		const ancestorIDs = new Map();
 		for (let element of container.querySelectorAll('input, button')) {
 			let id = element.id;
-			if (id === 'background-gen-image-upload') {
+			if (id === 'background-gen-image-upload' || ('reset' in element.dataset)) {
 					continue;
 			}
 			const tagName = element.tagName.toLowerCase();
@@ -1268,9 +1269,17 @@ try {
 			currentSketch = undefined;
 		}
 
-		// Initialize sketch
+		// Reset layer geometry
+		rotation = 0;
+		rotationSlider.value = 0;
+		scale = 1;
+		scaleSlider.value = 1;
+		scaleMode = ScaleMode.VIEWPORT;
+		document.getElementById('rotation-size-screen').checked = true;
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
+
+		// Initialize sketch
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = startFrame;
@@ -1336,7 +1345,9 @@ try {
 				if (intro !== null) {
 					helpArea.appendChild(intro);
 				}
-				findBrokenHelp();
+				if (debug.help) {
+					findBrokenHelp();
+				}
 			} catch {
 				console.error('Unable to load help file.');
 			}
@@ -2129,6 +2140,7 @@ try {
 			let popoverContent = null;
 			document.body.classList.remove('context-help');
 			helpContext = false;
+
 			const rootElement = document.body;
 			do {
 				if (target.tagName === 'A') {
@@ -2136,6 +2148,12 @@ try {
 				}
 				if ('labels' in target && target.labels.length > 0) {
 					popoverTitle = target.labels[0].innerText;
+				} else if ('reset' in target.dataset) {
+					const resetTarget = document.getElementById(target.dataset.reset);
+					const resetLabel = resetTarget.labels[0].innerText;
+					popoverContent = 'Resets the ' + resetLabel + ' control to it\'s initial setting.';
+					popoverTitle = 'Reset ' + resetLabel;
+					break;
 				} else if (target.title) {
 					popoverTitle = target.title;
 				}
@@ -2160,19 +2178,13 @@ try {
 			} else {
 				if (target.type === 'radio') {
 					const groupNameWords = target.name.split('-');
-					for (let i = 0; i < groupNameWords.length; i++) {
-						const word = groupNameWords[i];
-						groupNameWords[i] = word[0].toUpperCase() + word.slice(1);
-					}
+					capitalize(groupNameWords);
 					popoverTitle = popoverTitle + ' ' + groupNameWords.join(' ');
 
 				} else if (popoverTitle === '') {
 
 					const groupNameWords = target.id.split('-').slice(1);
-					for (let i = 0; i < groupNameWords.length; i++) {
-						const word = groupNameWords[i];
-						groupNameWords[i] = word[0].toUpperCase() + word.slice(1);
-					}
+					capitalize(groupNameWords);
 					popoverTitle = groupNameWords.join(' ');
 				}
 			}

@@ -369,6 +369,13 @@ function idToProperty(id, hasPrefix) {
 	 return words.join('');
 }
 
+function capitalize(words) {
+	for (let i = 0; i < words.length; i++) {
+		const word = words[i];
+		words[i] = word[0].toUpperCase() + word.slice(1);
+	}
+}
+
 const HALF_PI = Math.PI / 2;
 const TWO_PI = 2 * Math.PI;
 

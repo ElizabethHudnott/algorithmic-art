@@ -530,25 +530,37 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	const middleHeight = this.middleHeight / 3;
 	const drawSize = this.size;
 
+	const canvas = context.canvas;
+	const rawWidth = canvas.width;
+	const rawHeight = canvas.height;
+	const aspectRatio = rawWidth / rawHeight;
 	let drawWidth, drawHeight;
 	if (canvasWidth >= canvasHeight) {
 		if (stretch > 0) {
-			drawWidth = drawSize * ((1 - stretch) * canvasHeight + stretch * canvasWidth);
+			drawWidth = ((1 - stretch) + stretch * aspectRatio) * drawSize * canvasHeight;
 		} else {
 			drawWidth = drawSize * (stretch + 1) * canvasHeight;
 		}
 		drawHeight = drawSize * canvasHeight;
 		const idealWidth = drawWidth * (2 / 3 + middleWidth);
-		drawWidth = Math.min(Math.max(idealWidth, drawWidth), canvasWidth);
+		drawWidth = Math.min(Math.max(idealWidth, drawWidth), Math.max(rawWidth, canvasWidth));
+		if (drawWidth > canvasWidth) {
+			drawHeight *= canvasWidth / drawWidth;
+			drawWidth = canvasWidth;
+		}
 	} else {
 		drawWidth = drawSize * canvasWidth;
 		if (stretch > 0) {
-			drawHeight = drawSize * ((1 - stretch) * canvasWidth + stretch * canvasHeight);
+			drawHeight = ((1 - stretch) + stretch / aspectRatio) * drawSize * canvasWidth;
 		} else {
 			drawHeight = drawSize * (stretch + 1) * canvasWidth;
 		}
 		const idealHeight = drawHeight * (2 / 3 + 1 / middleHeight);
-		drawHeight = Math.min(Math.max(idealHeight, drawHeight), canvasHeight);
+		drawHeight = Math.min(Math.max(idealHeight, drawHeight), Math.max(rawHeight, canvasHeight));
+		if (drawHeight > canvasHeight) {
+			drawWidth *= canvasHeight / drawHeight;
+			drawHeight = canvasHeight;
+		}
 	}
 	drawWidth = Math.round(drawWidth);
 	drawHeight = Math.round(drawHeight);

@@ -6,7 +6,7 @@ Environment
 Service Worker
 Separate video "save" from download
 
-Close layers dialog when playing
+Bug: blur doesn't work on still image export
 Bug: scale mode doesn't work with webgl
 Bug: window should be raised when clicking anywhere inside it
 Bug: fading background image to color & color to image?
@@ -14,6 +14,7 @@ Bug: outstanding changes flagged after aborting video rendering
 Bug: Clicking position slider ignored while playing
 Bug: initial floating window positions
 Bug: resizing window while video rendering
+Don't make thumbnails lazy loading when visible on start-up
 Link from spirograph page
 Performance: remove transparency & shadow when dragging sliders (including playback slider)
 

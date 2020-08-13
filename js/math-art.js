@@ -35,7 +35,7 @@ try {
 		VIEWPORT: 1,
 		COVER: 2,
 	});
-	let scale = 1, scaleMode = ScaleMode.VIEWPORT;
+	let scale = 1, scaleMode = ScaleMode.VIEWPORT, blur = 0.4;
 
 	const canvas = document.getElementById('background-canvas');
 
@@ -654,6 +654,19 @@ try {
 		return [scaledWidth, scaledHeight];
 	}
 
+	function calcBlur(value) {
+		if (value < 0.5) {
+			// Compress 0 to 0.5 into 0.4 to 0.5
+			value = (value - 0.4) * 5;
+		}
+		if (value === 0) {
+			return '';
+		} else {
+			return 'blur(' + value + 'px)';
+		}
+	}
+
+
 	function transformCanvas(context, width, height, renderWidth, renderHeight, rotation) {
 		context.translate(width / 2, height / 2);
 		context.rotate(rotation);
@@ -720,6 +733,7 @@ try {
 	const rotationSlider = document.getElementById('layer-rotation');
 	const opacitySlider = document.getElementById('layer-opacity');
 	const scaleSlider = document.getElementById('layer-scale');
+	const blurSlider = document.getElementById('layer-blur');
 	const toolbar = document.getElementById('toolbar');
 	const seedForm = document.getElementById('random-seed-form');
 	const seedInput = document.getElementById('random-seed');
@@ -747,6 +761,7 @@ try {
 				this.rotation = 0;
 				this.scale = 1;
 				this.scaleMode = ScaleMode.VIEWPORT;
+				this.blur = 0.4;
 				this.random = random;
 				return;
 			}
@@ -801,6 +816,7 @@ try {
 			this.rotation = rotation;
 			this.scale = scale;
 			this.scaleMode = scaleMode;
+			this.blur = blur;
 			this.random = random;
 		}
 
@@ -825,6 +841,7 @@ try {
 			data.rotation = this.rotation;
 			data.scale = this.scale;
 			data.scaleMode = this.scaleMode;
+			data.blur = this.blur;
 			if (hasRandomness) {
 				data.seed = this.random.seed;
 			}
@@ -878,6 +895,7 @@ try {
 			frame.opacity = data.opacity;
 			frame.scale = data.scale;
 			frame.scaleMode = data.scaleMode;
+			frame.blur = data.blur;
 			if ('seed' in data) {
 				frame.random = new RandomNumberGenerator(data.seed);
 			}
@@ -891,7 +909,8 @@ try {
 				this.rotation !== rotation ||
 				this.opacity !== opacity ||
 				this.scale !== scale ||
-				this.scaleMode !== scaleMode
+				this.scaleMode !== scaleMode ||
+				this.blur !== blur
 			) {
 				return false;
 			}
@@ -1276,6 +1295,8 @@ try {
 		scaleSlider.value = 1;
 		scaleMode = ScaleMode.VIEWPORT;
 		document.getElementById('rotation-size-screen').checked = true;
+		blur = 0.4;
+		blurSlider.value = 0.4;
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 
@@ -1380,7 +1401,7 @@ try {
 					endFrame = startFrame;
 				}
 				calcTweenData();
-				renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, 0, loopAnim, false, 0);
+				progressiveBackgroundGen(0);
 				displaySeed();
 				animPositionSlider.value = 0;
 				updateAnimPositionReadout(0);
@@ -1399,9 +1420,8 @@ try {
 	function resizeWindow() {
 		repositionModal(false);
 		drawingContext.resize(window.innerWidth, window.innerHeight);
-		const canvas = drawingContext.twoD.canvas;
-		tweenData.calcSize(startFrame, endFrame, canvas.width, canvas.height);
 		if (bgGenerator !== undefined) {
+			tweenData.calcSize(startFrame, endFrame, canvas.width, canvas.height);
 			progressiveBackgroundGen(0);
 		}
 	}
@@ -1748,6 +1768,8 @@ try {
 				startFrame.backgroundColor !== endFrame.backgroundColor &&
 				(startFrame.backgroundImage !== undefined || endFrame.backgroundImage !== undefined);
 
+			this.blurVaries = startFrame.blur !== endFrame.blur;
+
 			this.calcSize(startFrame, endFrame, width, height);
 
 			// Map x property name to the calculated value.
@@ -1813,7 +1835,6 @@ try {
 	}
 
 	function calcTweenData() {
-		const canvas = drawingContext.twoD.canvas;
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame, canvas.width, canvas.height);
 		backgroundElement.style.willChange = tweenData.backgroundColorVaries ? 'background-color' : 'auto';
 	}
@@ -1857,7 +1878,7 @@ try {
 	const tempCanvas = document.createElement('CANVAS');
 	const tempContext = tempCanvas.getContext('2d');
 
-	function fillBackground(context, backgroundColor, width, height) {
+	function fillBackground(context, backgroundColor, filter, width, height) {
 		tempCanvas.width = context.canvas.width;
 		tempCanvas.height = context.canvas.height;
 		tempContext.drawImage(context.canvas, 0, 0);
@@ -1865,8 +1886,10 @@ try {
 		context.save();
 		context.fillStyle = backgroundColor;
 		context.fillRect(0, 0, width, height);
-		context.fillStyle = 'black';
+		context.filter = filter;
 		context.drawImage(tempCanvas, 0, 0, width, height);
+		context.fillStyle = 'black';
+		context.filter = '';
 	}
 
 	function renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview) {
@@ -1955,12 +1978,16 @@ try {
 		} else {
 			progressiveBackgroundDraw(generator, contextualInfo, renderWidth, renderHeight, preview);
 		}
+		const blur = interpolateValue(startFrame.blur, endFrame.blur, tweenPrime, false);
 		if (paintBackground) {
-			fillBackground(context, backgroundColor, width, height);
+			fillBackground(context, backgroundColor, calcBlur(blur), width, height);
+		} else if (tweenData.blurVaries) {
+			canvas.style.filter = calcBlur(blur);
 		}
 	}
 
 	function animate(generator, contextualInfo, width, height, startTween, length, loop, capturer) {
+		const canvas = contextualInfo.twoD.canvas;
 		const paintBackground = capturer !== undefined;
 		const newAnimController = new AnimationController({});
 		const promise = new Promise(function (resolve, reject) {
@@ -1995,7 +2022,7 @@ try {
 				newAnimController.progress = tween;
 
 				if (capturer !== undefined) {
-					capturer.capture(contextualInfo.twoD.canvas);
+					capturer.capture(canvas);
 					let percent = (tween - startTween) / (1 - startTween) * 100;
 					progressBar.style.width = percent + '%';
 					percent = Math.trunc(percent);
@@ -2318,6 +2345,11 @@ try {
 	scaleSlider.addEventListener('pointerup', scaleListener);
 	scaleSlider.addEventListener('keyup', scaleListener);
 
+	blurSlider.addEventListener('input', function (event) {
+		blur = parseFloat(this.value);
+		canvas.style.filter = calcBlur(blur);
+	});
+
 	document.getElementById('btn-open-sketch').addEventListener('click', function (event) {
 		const sketchesModal = document.getElementById('sketches-modal');
 		$(sketchesModal).modal('hide');
@@ -2506,7 +2538,12 @@ try {
 
 	}
 
+	let modalsOpen;
+
 	function animFinished() {
+		for (let modal of modalsOpen) {
+			modal.modal('show');
+		}
 		const playStopButton = document.getElementById('btn-play');
 		playStopButton.children[0].src = 'img/control_play_blue.png';
 		playStopButton.title = 'Play animation';
@@ -2518,7 +2555,19 @@ try {
 	}
 
 	function play() {
-		$(modal).modal('hide');
+		modalsOpen = [];
+		const modalJQ = $(modal);
+		if (modal.classList.contains('show')) {
+			modalsOpen[0] = modalJQ;
+			modalJQ.modal('hide');
+		}
+		const layersModal = document.getElementById('layers-modal');
+		const layersModalJQ = $(layersModal);
+		if (layersModal.classList.contains('show')) {
+			modalsOpen.push(layersModalJQ);
+			layersModalJQ.modal('hide');
+		}
+
 		const button = document.getElementById('btn-play');
 		button.children[0].src = 'img/control_stop_blue.png';
 		button.title = 'Stop animation';

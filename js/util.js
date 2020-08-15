@@ -7,6 +7,8 @@ for (let preload of document.head.querySelectorAll('link[rel="preload"][as="styl
 	document.head.appendChild(link);
 }
 
+const rootPath = document.location.origin + document.location.pathname.replace(/\/[^/]*$/, '/');
+
 class AnimationController {
 	static Status = Object.freeze({
 		RUNNING: 1,

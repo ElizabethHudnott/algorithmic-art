@@ -4,28 +4,22 @@ Carpet: bipartite is not bipartite when middle width and middle height are both 
 Environment
 -----------
 Service Worker
-Separate video "save" from download
 
 Bug: blur doesn't work on still image export
 Bug: scale mode doesn't work with webgl
-Bug: window should be raised when clicking anywhere inside it
 Bug: fading background image to color & color to image?
 Bug: outstanding changes flagged after aborting video rendering
-Bug: Clicking position slider ignored while playing
 Bug: initial floating window positions
 Bug: resizing window while video rendering
+Finish dark mode
+Add spirograph to sketches dialog
 Don't make thumbnails lazy loading when visible on start-up
-Link from spirograph page
-Performance: remove transparency & shadow when dragging sliders (including playback slider)
-
+Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
-Content Security Policy (remove inline CSS)
+
 Save As button
 Add credits
 Add URL to signature
-User created sketches
-	documentation: template download link, GitHub, util functions
-	online editor
 Responsiveness issues
 	toolbar too wide
 	turning iPad from landscape to portrait loses modal partially off to the right
@@ -37,12 +31,18 @@ Video sizing
 Download picture sizing & format
 Ability to animate sketches that use random numbers
 Gallery
-	Share to: Facebook, YouTube, Instagram, Tumblr, Twitter, Pinterest, DeviantArt?
+	Share to: Facebook*, YouTube*, Instagram*, Tumblr, Twitter, Pinterest, DeviantArt?
+Progressive Web App
+
+Low Priority
+------------
+Content Security Policy: remove inline CSS, implement trusted types
 Ability to incorporate video data
 	as component image and as background
-Radial blur
 Animation easing
-Progressive Web App
+User created sketches
+	documentation: template download link, GitHub, util functions
+	online editor
 
 Existing Sketches
 -----------------

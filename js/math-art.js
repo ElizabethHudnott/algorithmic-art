@@ -1,5 +1,5 @@
 'use strict';
-filePath = document.location.origin + document.location.pathname + 'sketch/';
+filePath = rootPath + 'sketch/';
 const urlParameters = new URLSearchParams(document.location.search);
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
 let random = new RandomNumberGenerator();
@@ -1459,6 +1459,10 @@ try {
 		foregroundModal = target;
 	}
 
+	function clickInWindow(event) {
+		windowToFront(this.parentElement.parentElement.parentElement);
+	}
+
 	function startWindowDrag(event) {
 		const target = event.target;
 		if (target === this || target.tagName === 'H6') {
@@ -1487,6 +1491,8 @@ try {
 		header.addEventListener('pointerdown', startWindowDrag);
 		header.addEventListener('pointerup', stopWindowDrag);
 		header.addEventListener('dblclick', collapseWindow);
+		const body = floating.querySelector('.modal-body');
+		body.addEventListener('click', clickInWindow);
 		const floatingJQ = $(floating);
 		floatingJQ.on('show.bs.modal', expandWindow);
 		floatingJQ.modal({focus: false, show: false});
@@ -1538,8 +1544,7 @@ try {
 			nextStep();
 		}
 
-		const sketchesURL = document.location.origin + document.location.pathname + 'sketches.json';
-		const sketchFile = await downloadFile(sketchesURL, 'json');
+		const sketchFile = await downloadFile(rootPath + 'sketches.json', 'json');
 		for (let sketch of sketchFile.sketches) {
 			addSketch(sketch);
 			if (sketch.url === firstGenURL) {
@@ -1989,24 +1994,24 @@ try {
 	function animate(generator, contextualInfo, width, height, startTween, length, loop, capturer) {
 		const canvas = contextualInfo.twoD.canvas;
 		const paintBackground = capturer !== undefined;
-		const newAnimController = new AnimationController({});
+		const newAnimController = new AnimationController({startTween: startTween});
 		const promise = new Promise(function (resolve, reject) {
 			const indicator = document.getElementById('recording-indicator');
 			let framesRendered = 0;
-			let uiUpdateInterval = 2 / animPositionSlider.clientWidth;
+			let uiUpdateInterval = 1 / animPositionSlider.clientWidth;
 			if (!Number.isFinite(uiUpdateInterval)) {
-				uiUpdateInterval = 0.0065;
+				uiUpdateInterval = 1 / 30;
 			}
-			let lastUIUpdate;
 
 			function render(time) {
 				if (capturer !== undefined) {
 					time = performance.now();
 				}
+				const startTween = newAnimController.startTween;
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
 					beginTime = time;
-					lastUIUpdate = startTween;
+					newAnimController.lastUIUpdate = startTween;
 					newAnimController.setup(render, reject, beginTime);
 				}
 
@@ -2031,9 +2036,9 @@ try {
 					framesRendered++;
 					const iconFile = framesRendered % 2 === 0 ? 'img/record.png' : 'img/draw_ellipse.png';
 					indicator.src = iconFile;
-				} else if (animControlsOpen && tween - lastUIUpdate >= uiUpdateInterval) {
+				} else if (animControlsOpen && tween - newAnimController.lastUIUpdate >= uiUpdateInterval) {
 					animPositionSlider.value = tween;
-					lastUIUpdate = tween;
+					newAnimController.lastUIUpdate = tween;
 				}
 				if (lastFrame) {
 					newAnimController.finish(resolve);
@@ -2644,6 +2649,14 @@ try {
 	 let seeking = false;
 
 	animPositionSlider.addEventListener('input', function (event) {
+		const tween = parseFloat(this.value);
+		if (animController !== undefined) {
+			animController.startTween = tween;
+			animController.lastUIUpdate = tween;
+			animController.beginTime = performance.now();
+			return;
+		}
+
 		if (!seeking) {
 			let unsavedChanges = !currentFrame.isCurrentFrame();
 			let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
@@ -2666,7 +2679,6 @@ try {
 			}
 			seeking = true;
 		}
-		const tween = parseFloat(this.value);
 		renderFrame(bgGenerator, drawingContext, canvas.width, canvas.height, tween, loopAnim, false, 1);
 		updateAnimPositionReadout(tween);
 	});

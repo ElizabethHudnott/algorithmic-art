@@ -109,8 +109,15 @@ button[disabled], input[type=color][disabled] {
 	color: white;
 	display: block;
 	font-family: America, sans-serif;
+	font-display: swap;
 	font-size: 0.875rem;
 	font-weight: 500;
 	padding: 5px 1rem;
 	user-select: none;
+}
+
+.patreon:hover {
+	background-color: rgb(231, 81, 59);
+	color: white;
+	text-decoration: none;
 }

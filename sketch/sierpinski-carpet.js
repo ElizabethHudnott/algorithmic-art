@@ -234,10 +234,22 @@ export default function SierpinskiCarpet() {
 		});
 
 		const maxDepthInput = optionsDoc.getElementById('carpet-depth');
+		const centreDepthInput = optionsDoc.getElementById('carpet-centre-depth');
+
+		function limitCentreDepth() {
+			const max = me.maxDepth;
+			const min = Math.min(max, 1);
+			me.centreDepth = Math.max(Math.min(me.centreDepth, max), Math.min(max, 2));
+			centreDepthInput.min = min;
+			centreDepthInput.max = max;
+			centreDepthInput.value = me.centreDepth;
+		}
+
 		maxDepthInput.addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.maxDepth = value;
+				limitCentreDepth();
 				generateBackground(0);
 				blendDepthInput.max = value;
 			}
@@ -315,6 +327,7 @@ export default function SierpinskiCarpet() {
 			if (newDepth < me.maxDepth) {
 				me.maxDepth = newDepth;
 				maxDepthInput.value = newDepth;
+				limitCentreDepth();
 				if (me.blendDepth > newDepth) {
 					me.blendDepth = newDepth;
 					blendDepthInput.value = newDepth;
@@ -363,6 +376,10 @@ export default function SierpinskiCarpet() {
 
 		function changeRecursion(event) {
 			const index = recursiveInputs.indexOf(this);
+			if (index === 4) {
+				const row = centreDepthInput.parentElement.parentElement;
+				row.classList.toggle('show', this.checked);
+			}
 			me.recursive[index] = this.checked;
 			setCutoutVisibility();
 			generateBackground(0);
@@ -371,6 +388,14 @@ export default function SierpinskiCarpet() {
 		for (let i = 0; i < recursiveInputs.length; i++) {
 			recursiveInputs[i].addEventListener('input', changeRecursion);
 		}
+
+		centreDepthInput.addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0) {
+				me.centreDepth = value;
+				generateBackground(0);
+			}
+		});
 
 		const cutoutInputs = Array.from(cutoutFields.querySelectorAll('input[name="carpet-cutouts"]'));
 
@@ -488,14 +513,16 @@ export default function SierpinskiCarpet() {
 	this.cutoutDepth = 1;
 
 	this.maxDepth = 5;
+	this.centreDepth = 2;
+	this.blendDepth = 4;
 	this.patternDepth = 3;
+
 	this.filling = 'b';
 	this.patternLocations = 3;
 	this.patternedCentre = true;
 	this.centreEmphasis = 0;
 
 	this.compositionOp = 'source-over';
-	this.blendDepth = 4;
 	this.blendFilling = true;
 	this.opacityEnable = 2;
 
@@ -515,7 +542,7 @@ SierpinskiCarpet.prototype.animatable = {
 		'colors', 'patternOpacities'
 	],
 	stepped: [
-		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth',
+		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
 		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable',
 		'bipartite'
@@ -647,6 +674,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	permutations[8] = [2, 5, 8, 1, 4, 7, 0, 3, 6];
 	permutations[12] = permutations[4];
 	const recursive = this.recursive;
+	recursive[4] = this.centreDepth > 1;
 	const cutouts = this.cutouts;
 	const cutoutDepth = this.cutoutDepth - 1;
 	const middleWidth = this.middleWidth / 3;
@@ -709,6 +737,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	if (preview > 0 && maxDepth > 3) {
 		maxDepth = 3;
 	}
+	const centreDepth = Math.min(maxDepth, this.centreDepth - 1);
 
 	let applyOpacity = true;
 	const baseOpacity = context.globalAlpha;
@@ -905,7 +934,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					}
 				}
 
-				if (!recursive[4] || depth === maxDepth) {
+				if (!recursive[4] || depth >= centreDepth) {
 					if (useCutouts && (!recursive[4] || maxDepth === 0)) {
 						context.clip(clipPath);
 					}

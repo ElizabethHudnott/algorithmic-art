@@ -1,6 +1,6 @@
 <div id="about">
 	<p>
-		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, removing a smaller shape from it using a cookie cutter, rinse and repeat. It starts by dividing up a large rectangle that covers the entire drawing area into nine smaller rectangular areas arranged in a 3&times;3 grid. The middle rectangle is painted in a colour (black by default). Then every one of the other eight smaller rectangles get painted in a second colour (white by default) and then the entire process is repeated inside each of the eight smaller rectangles, treating each one like the large rectangle we started with. You can see each step of the process by locating the depth control on the Geometry tab in the parameters window and reducing the depth down to one. The result is a single black rectangle. When you increase the depth to two then eight smaller black rectangles appear.
+		<span class="sketch-title">Sierpinski's Carpet</span> works with the idea of taking a big shape, removing a smaller shape from it using a cookie cutter, rinse and repeat. It starts by dividing up a large rectangle that covers the entire drawing area into nine smaller rectangular areas arranged in a 3&times;3 grid. The middle rectangle is painted in a colour (black by default). Then every one of the other eight smaller rectangles get painted in a second colour (white by default) and then the entire process is repeated inside each of the eight smaller rectangles, treating each one like the large rectangle we started with. You can see each step of the process by locating the depth control on the Geometry tab of the parameters window and reducing the depth down to one. The result is a single black rectangle. When you increase the depth to two then eight smaller black rectangles appear.
 	</p>
 
 	<p>
@@ -40,6 +40,9 @@
 		<li>
 			The nine sections are all the same size.
 		</li>
+		<li>
+			There are nine sections, as opposed to seven or five.
+		</li>
 	</ul>
 	<p>
 		All of these things can be changed however.
@@ -65,15 +68,15 @@
 </div>
 
 <div id="carpet-pattern-loc-corner">
-	Selecting this option will apply the chosen pattern to the four corner locations out of the nine total locations which exist at level&nbsp;1 (and 4&times;8 corner locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four locations positioned halfway between two corners will be drawn with a simple block filling.
+	Selecting this option will apply the chosen pattern to the four corner locations out of the nine total locations which exist by default at level&nbsp;1 (and 4&times;8 corner locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four locations positioned halfway between two corners will be drawn with a simple block filling.
 </div>
 
 <div id="carpet-pattern-loc-middle">
-	Selecting this option will apply the chosen pattern to the four locations which are positioned halfway between two corner locations, that is four locations out of the nine total locations which exist at level&nbsp;1 (and 4&times;8 mid-point locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four corner locations will be drawn with a simple block filling.
+	Selecting this option will apply the chosen pattern to the four locations which are positioned halfway between two corner locations, that is four locations out of the nine total locations which exist by default at level&nbsp;1 (and 4&times;8 mid-point locations out of 9&times;8 total locations at level&nbsp;2, etc.). The four corner locations will be drawn with a simple block filling.
 </div>
 
 <div id="carpet-pattern-loc-both">
-	When this option is selected the chosen pattern will be applied as the filling in every possible location. From the nine locations that exist in each grid, no location will consistently have a simple rectangular block filling. However, the filling for the centre of the whole image (level&nbsp;0) can be controlled separately using the "Patterned centre" tick box. The pattern depth control also has an impact.
+	When this option is selected the chosen pattern will be applied as the filling in every possible location. From the nine locations that exist by default in each grid, no location will consistently have a simple rectangular block filling. However, the filling for the centre of the whole image (level&nbsp;0) can be controlled separately using the "Patterned centre" tick box. The pattern depth control also has an impact.
 </div>
 
 <div id="carpet-pattern-depth">
@@ -117,7 +120,7 @@
 </div>
 
 <div id="carpet-blend-depth">
-	This controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles have their backgrounds painted once but when finer details are added only the centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles also painted with colour and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.
+	This controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles (default number) have their backgrounds painted once but when finer details are added only the centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles also painted with colour and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.
 </div>
 
 <div id="carpet-blend-filling">
@@ -125,11 +128,11 @@
 </div>
 
 <div id="carpet-depth">
-	This is number of levels of detail to draw. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 8 smaller rectangles. At level 3 each those 8 rectangles is surrounded by 8 further rectangles, and so on.
+	This is number of levels of detail to draw. At level&nbsp;1 only a single rectangle is drawn. At level&nbsp;2 the centre rectangle is surrounded by 4&ndash;8 rectangles that are each one size smaller. At level 3 each those 4&ndash;8 rectangles is surrounded by 4&ndash;8 rectangles that are smaller still, and so on.
 </div>
 
 <div id="carpet-overlap">
-	This enlarges each centre rectangle so that it partially obscures its eight surrounding rectangles.
+	This enlarges each centre rectangle so that it partially obscures the rectangles surrounding it.
 </div>
 
 <div id="carpet-cutouts">

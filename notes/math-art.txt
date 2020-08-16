@@ -1,3 +1,4 @@
+Carpet: filling emphasis doesn't work when centre is recursive
 Carpet: bipartite with images: colour background
 Carpet: bipartite is not bipartite when middle width and middle height are both 0
 
@@ -10,9 +11,8 @@ Bug: scale mode doesn't work with webgl
 Bug: fading background image to color & color to image?
 Bug: outstanding changes flagged after aborting video rendering
 Bug: initial floating window positions
-Bug: resizing window while video rendering
+Bug: resizing window while video rendering messes up scale parameter
 Finish dark mode
-Add spirograph to sketches dialog
 Don't make thumbnails lazy loading when visible on start-up
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)

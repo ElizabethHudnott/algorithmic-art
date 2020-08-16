@@ -1235,7 +1235,7 @@ try {
 	}
 	globalThis.findMissingHelp = findMissingHelp;
 
-	function loadFailure() {
+	function loadFailure(exception) {
 		if (bgGenerator === undefined) {
 			$('#sketches-modal').modal('show');
 		} else {
@@ -1243,6 +1243,7 @@ try {
 			document.getElementById('background-gen-modal-label').innerHTML = bgGenerator.title;
 		}
 		showAlert(errorAlert, 'The requested sketch could not be loaded.', document.body);
+		console.error(exception);
 	}
 
 	async function switchGenerator(url, pushToHistory) {
@@ -1259,8 +1260,8 @@ try {
 			const genModule = await import(resolvedURL)
 			const constructor = genModule.default;
 			gen = new constructor();
-		} catch {
-			loadFailure();
+		} catch (e) {
+			loadFailure(e);
 			return;
 		}
 		if (gen.isShader) {
@@ -1274,8 +1275,8 @@ try {
 					shaderDeclarations(gen) +
 					fragFileContent;
 				drawingContext.initializeShader(gen);
-			} catch {
-				loadFailure();
+			} catch (e) {
+				loadFailure(e);
 				return;
 			}
 			drawingContext.setProperties(gen);
@@ -2360,7 +2361,12 @@ try {
 		$(sketchesModal).modal('hide');
 		$(modal).modal('show');
 		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
-		switchGenerator(currentSketch.url, true);
+		const url = currentSketch.url;
+		if (/\.html$/.test(url)) {
+			document.location = new URL(url, document.location);
+		} else {
+			switchGenerator(currentSketch.url, true);
+		}
 	});
 
 	// Generate new background button.

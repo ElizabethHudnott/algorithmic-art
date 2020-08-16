@@ -48,6 +48,13 @@
 			"thumbnail": "sierpinski-carpet.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["fractals", "recursion", "squares"]
+		},
+		{
+			"title": "Spirograph",
+			"url": "spirograph.html",
+			"thumbnail": "spirograph.webp",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["drawing machine"]
 		}
 	]
 }

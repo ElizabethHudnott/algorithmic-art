@@ -376,11 +376,19 @@ export default function SierpinskiCarpet() {
 
 		function changeRecursion(event) {
 			const index = recursiveInputs.indexOf(this);
+			const recurse = this.checked;
+			me.recursive[index] = recurse;
 			if (index === 4) {
 				const row = centreDepthInput.parentElement.parentElement;
-				row.classList.toggle('show', this.checked);
+				row.classList.toggle('show', recurse);
+				if (recurse) {
+					const depth = Math.max(me.centreDepth, parseInt(centreDepthInput.value), 2);
+					me.centreDepth = depth;
+					centreDepthInput.value = depth;
+				} else {
+					me.centreDepth = 1;
+				}
 			}
-			me.recursive[index] = this.checked;
 			setCutoutVisibility();
 			generateBackground(0);
 		}
@@ -513,7 +521,7 @@ export default function SierpinskiCarpet() {
 	this.cutoutDepth = 1;
 
 	this.maxDepth = 5;
-	this.centreDepth = 2;
+	this.centreDepth = 1;
 	this.blendDepth = 4;
 	this.patternDepth = 3;
 

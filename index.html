@@ -11,14 +11,14 @@
 	<link rel="preload" as="fetch" href="sketches.json" crossorigin>
 
 	<!-- Stylesheets -->
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/math-art.css">
 	<link rel="stylesheet" href="css/dark-mode.css" media="(prefers-color-scheme: dark)">
 
 	<!-- Libraries -->
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous" defer></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js" integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J" crossorigin="anonymous" defer></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous" defer></script>
 
 	<!-- JavaScript -->
 	<script src="js/util.js" defer></script>
@@ -134,29 +134,24 @@
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
  		</button>
- 		<div class="dropdown-menu drop-align-right bg-black" style="width: min(100%, 552px)" id="anim-controls">
+ 		<div class="dropdown-menu drop-align-right bg-black" style="width: min(100%, 500px)" id="anim-controls">
  			<form class="px-2">
  				<div class="form-row">
- 					<div class="col-5">
+ 					<div class="col-7">
 	 					<label for="anim-position">Position</label>
  					</div>
- 					<div class="col-1 text-right">
+ 					<div class="col-2 text-right">
  						<output id="anim-position-readout">10s</output>
- 					</div>
- 					<div class="col-1 text-right">
- 						<button type="button" class="btn btn-sm p-0" title="Rewind animation" id="btn-rewind">
- 							<img src="img/control_rewind_blue.png" width="24" height="24" alt="Rewind">
- 						</button>
  					</div>
  					<div class="col-3 pl-3">
 	 					<label for="anim-length">Length</label>
  					</div>
  				</div>
- 				<div class="form-row">
-	 				<div class="col-7">
+ 				<div class="form-row mb-2">
+	 				<div class="col-9">
 	 					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="anim-position">
 	 				</div>
-	 				<div class="col-3 pl-3 pr-0">
+	 				<div class="col-3 pl-3 pr-2">
 	 					<div class="input-group input-group-sm">
 	 						<input type="number" min="1" value="10" class="form-control text-right" id="anim-length" aria-describedby="anim-length-units">
 	 						<div class="input-group-append">
@@ -164,8 +159,31 @@
 	 						</div>
 	 					</div>
 	 				</div>
-	 				<div class="col-2 text-center">
-	 					<button type="button" class="btn btn-sm btn-dark" id="btn-anim-opts" title="Advanced animation options">More&hellip;</button>
+ 				</div>
+ 				<div class="form-row" id="play-preview-row">
+ 					<div class="col-5">
+						<div class="form-check mt-1">
+							<input class="form-check-input" type="radio" name="play-preview" id="play-preview-fast" value="1">
+							<label class="form-check-label small" for="play-preview-fast">
+								High performance preview
+							</label>
+						</div>
+ 					</div>
+ 					<div class="col-3">
+						<div class="form-check mt-1">
+							<input class="form-check-input" type="radio" name="play-preview" id="play-preview-detail" value="0">
+							<label class="form-check-label small" for="play-preview-detail">
+								Full detail
+							</label>
+						</div>
+ 					</div>
+ 					<div class="col-1 text-right">
+ 						<button type="button" class="btn btn-sm" title="Rewind animation" id="btn-rewind">
+ 							<img src="img/control_rewind_blue.png" width="24" height="24" alt="Rewind">
+ 						</button>
+ 					</div>
+	 				<div class="col-3 pl-3 pr-2">
+	 					<button type="button" class="btn btn-sm btn-dark w-100" id="btn-anim-opts" title="Advanced animation options">More&hellip;</button>
 	 				</div>
  				</div>
  			</form>
@@ -406,10 +424,10 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<p>
+				<p class="form-text">
 					You have outstanding changes. How do you wish to proceed?
 				</p>
-				<ul class="list-unstyled text-center mb-0">
+				<ul class="list-unstyled mb-0">
 					<li class="mb-2">
 						<button type="button" class="btn btn-primary w-100" id="btn-start-frame2" data-dismiss="modal">
 							Change start frame
@@ -436,6 +454,45 @@
 						</button>
 					</li>
 				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade2" id="play-mode-modal" tabindex="-1" role="dialog" aria-labelledby="play-mode-modal-title" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h6 class="modal-title" id="play-mode-modal-title">Playback Mode</h6>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p class="form-text">
+					How do you wish to play this animation?
+				</p>
+				<ul class="list-unstyled">
+					<li class="mb-2">
+						<button type="button" class="btn btn-primary w-100 text-left" id="btn-play-fast" value="1" data-dismiss="modal">
+							<h5>High Performance Preview Mode</h5>
+							<div class="font-italic pl-1">
+								Some finer details not drawn but smoother animation.
+							</div>
+						</button>
+					</li>
+					<li>
+						<button type="button" class="btn btn-dark w-100 text-left" id="btn-play-detail" value="0" data-dismiss="modal">
+							<h5>Fully Detailed Playback</h5>
+							<div class="font-italic pl-1">
+								All details drawn but might be more jerky.
+							</div>
+						</button>
+					</li>
+				</ul>
+				<p class="form-text">
+					You can choose again at any time by clicking the arrow next to the play button. When you save an image or a video it always includes every detail.
+				</p>
 			</div>
 		</div>
 	</div>

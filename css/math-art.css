@@ -68,6 +68,8 @@ th.col-form-label {
 
 .dropdown-menu {
 	margin-top: 0;
+	padding-bottom: 0.25rem;
+	transition: transform 0.1s;
 }
 
 .dropdown-menu.bg-light .dropdown-item:focus, .dropdown-menu.bg-light .dropdown-item:hover {
@@ -443,10 +445,6 @@ button.btn-black:hover {
 
 #toolbar .btn-group {
 	position: static;
-}
-
-.drop-align-right {
-	transform: translate(0%, -100%) !important;
 }
 
 @media (min-width: 1200px) {

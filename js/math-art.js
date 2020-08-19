@@ -1463,13 +1463,13 @@ try {
 	}
 
 	function clickInWindow(event) {
-		windowToFront(this.parentElement.parentElement.parentElement);
+		windowToFront(this.closest('.modal'));
 	}
 
 	function startWindowDrag(event) {
 		const target = event.target;
 		if (target === this || target.tagName === 'H6') {
-			windowToFront(this.parentElement.parentElement.parentElement);
+			windowToFront(this.closest('.modal'));
 			window.addEventListener('pointermove', dragWindow);
 			modalDrag = [event.offsetX, event.offsetY];
 			titleBarHeight = this.clientHeight;

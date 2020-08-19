@@ -66,7 +66,7 @@ th.col-form-label {
 	overflow: hidden;
 }
 
-.dropdown-menu {
+.dropdown-menu-abs-right {
 	margin-top: 0;
 	padding-bottom: 0.25rem;
 	transition: transform 0.1s;
@@ -230,6 +230,24 @@ th.col-form-label {
 	left: 50%;
 	transform: translateX(-50%);
 	width: fit-content;
+}
+
+#overlay {
+	background-color: #000000d0;
+	color: white;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+}
+
+#overlay .btn {
+	background-color: transparent;
+}
+
+#overlay>* {
+	display: block;
 }
 
 .bg-black {
@@ -453,7 +471,7 @@ button.btn-black:hover {
 		position: relative;
 	}
 
-	.drop-align-right {
+	.dropdown-menu-abs-right {
 		left: unset !important;
 		right: 0 !important;
 	}

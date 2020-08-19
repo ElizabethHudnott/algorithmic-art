@@ -2277,6 +2277,26 @@ try {
 		}
 	});
 
+	function addToOverlay() {
+		const overlay = document.getElementById('overlay');
+		const content = toolbar.children;
+		for (let i = content.length - 1; i >= 0; i--) {
+			const item = content[i];
+			const id = item.id;
+			let parent = overlay;
+			if (id !== '') {
+				const label = overlay.querySelector('label[for="' + id + '"]');
+				if (label !== null) {
+					parent = label;
+				}
+			}
+			parent.prepend(item);
+		}
+	}
+
+	//overlay.hidden = false;
+	//addToOverlay();
+
 	document.getElementById('background-preset').addEventListener('input', function (event) {
 		const value = this.value;
 		if (value === 'color') {
@@ -3058,17 +3078,12 @@ try {
 	});
 
 	clearComboboxesOnFocus();
-
-	function rightAlignDropdown(event) {
-		const menu = this.querySelector('.drop-align-right');
+	$(document.getElementById('anim-controls').parentElement).on('shown.bs.dropdown', 	function (event) {
+		const menu = this.querySelector('.dropdown-menu-abs-right');
 		setTimeout(function () {
 			const height = Math.ceil(menu.clientHeight);
 			menu.style.transform = 'translate(1px, -' + height + 'px)';
 		}, 0);
-	}
-
-	for (let element of document.getElementsByClassName('drop-align-right')) {
-		$(element.parentElement).on('shown.bs.dropdown', rightAlignDropdown);
-	}
+	});
 
 }

@@ -16,12 +16,12 @@ Finish dark mode
 Don't make thumbnails lazy loading when visible on start-up
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
+Preview mode indicator
 
 Save As button
 Add credits
 Add URL to signature
 Responsiveness issues
-	toolbar too wide
 	turning iPad from landscape to portrait loses modal partially off to the right
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider

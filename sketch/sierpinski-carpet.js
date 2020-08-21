@@ -235,14 +235,19 @@ export default function SierpinskiCarpet() {
 
 		const maxDepthInput = optionsDoc.getElementById('carpet-depth');
 		const centreDepthInput = optionsDoc.getElementById('carpet-centre-depth');
+		const globalCentreDepthInput = optionsDoc.getElementById('carpet-global-centre-depth');
 
 		function limitCentreDepth() {
 			const max = me.maxDepth;
-			const min = Math.min(max, 1);
-			me.centreDepth = Math.max(Math.min(me.centreDepth, max), Math.min(max, 2));
-			centreDepthInput.min = min;
+			const minLimit = Math.min(max, 2);
+			me.centreDepth = Math.max(Math.min(me.centreDepth, max), minLimit);
+			me.globalCentreDepth = Math.max(Math.min(me.globalCentreDepth, max), 1);
+			centreDepthInput.min = Math.min(max, 2);
 			centreDepthInput.max = max;
+			globalCentreDepthInput.min = Math.min(max, 1);
+			globalCentreDepthInput.max = max;
 			centreDepthInput.value = me.centreDepth;
+			globalCentreDepthInput.value = me.globalCentreDepth;
 		}
 
 		maxDepthInput.addEventListener('input', function (event) {
@@ -379,14 +384,20 @@ export default function SierpinskiCarpet() {
 			const recurse = this.checked;
 			me.recursive[index] = recurse;
 			if (index === 4) {
-				const row = centreDepthInput.parentElement.parentElement;
+				let row = centreDepthInput.parentElement.parentElement;
+				row.classList.toggle('show', recurse);
+				row = globalCentreDepthInput.parentElement.parentElement;
 				row.classList.toggle('show', recurse);
 				if (recurse) {
-					const depth = Math.max(me.centreDepth, parseInt(centreDepthInput.value), 2);
+					let depth = Math.max(me.centreDepth, parseInt(centreDepthInput.value), 2);
 					me.centreDepth = depth;
 					centreDepthInput.value = depth;
+					depth = Math.max(me.globalCentreDepth, parseInt(globalCentreDepthInput.value), 2);
+					me.globalCentreDepth = depth;
+					globalCentreDepthInput.value = depth;
 				} else {
-					me.centreDepth = 1;
+					me.centreDepth = 2;
+					me.globalCentreDepth = 1;
 				}
 			}
 			setCutoutVisibility();
@@ -401,6 +412,14 @@ export default function SierpinskiCarpet() {
 			const value = parseInt(this.value);
 			if (value >= 0) {
 				me.centreDepth = value;
+				generateBackground(0);
+			}
+		});
+
+		globalCentreDepthInput.addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0) {
+				me.globalCentreDepth = value;
 				generateBackground(0);
 			}
 		});
@@ -521,7 +540,8 @@ export default function SierpinskiCarpet() {
 	this.cutoutDepth = 1;
 
 	this.maxDepth = 5;
-	this.centreDepth = 1;
+	this.centreDepth = 2;
+	this.globalCentreDepth = 1;
 	this.blendDepth = 4;
 	this.patternDepth = 3;
 
@@ -550,7 +570,7 @@ SierpinskiCarpet.prototype.animatable = {
 		'colors', 'patternOpacities'
 	],
 	stepped: [
-		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth',
+		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
 		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable',
 		'bipartite'
@@ -568,10 +588,12 @@ class Tile {
 
 		if (relationship === 4) {
 			this.clipPath = undefined;
+			this.deadCentre = parent.deadCentre;
 			return;
-		} else {
-			this.clipPath = new Path2D();
 		}
+
+		this.clipPath = new Path2D();
+		this.deadCentre = false;
 		const path = this.clipPath;
 		const x1 = Math.round(x);
 		const x2 = Math.round(x + width);
@@ -645,6 +667,7 @@ class Tile {
 
 		case 12: 	// Whole image
 			path.rect(x1, y1, x2 - x1, y2 - y1);
+			this.deadCentre = true;
 			break;
 		}
 
@@ -682,7 +705,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	permutations[8] = [2, 5, 8, 1, 4, 7, 0, 3, 6];
 	permutations[12] = permutations[4];
 	const recursive = this.recursive;
-	recursive[4] = this.centreDepth > 1;
+	recursive[4] = this.centreDepth > 2 || this.globalCentreDepth > 1;
 	const cutouts = this.cutouts;
 	const cutoutDepth = this.cutoutDepth - 1;
 	const middleWidth = this.middleWidth / 3;
@@ -746,6 +769,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		maxDepth = 3;
 	}
 	const centreDepth = Math.min(maxDepth, this.centreDepth - 1);
+	const globalCentreDepth = Math.min(maxDepth, this.globalCentreDepth - 1);
 
 	let applyOpacity = true;
 	const baseOpacity = context.globalAlpha;
@@ -942,7 +966,16 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					}
 				}
 
-				if (!recursive[4] || depth >= centreDepth) {
+				let recurse = recursive[4];
+				if (recurse) {
+					if (tile.deadCentre) {
+						recurse = depth < globalCentreDepth;
+					} else {
+						recurse = depth < centreDepth;
+					}
+				}
+
+				if (!recurse) {
 					if (useCutouts && (!recursive[4] || maxDepth === 0)) {
 						context.clip(clipPath);
 					}
@@ -972,7 +1005,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 						context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 					}
 				} else {
-					const centreTile = new Tile(roundedX, roundedY, roundedWidth, roundedHeight, undefined, undefined, null, 4);
+					const centreTile = new Tile(roundedX, roundedY, roundedWidth, roundedHeight, undefined, undefined, tile, 4);
 					if (!useCutouts) {
 						clipPath = new Path2D();
 						clipPath.rect(roundedX, roundedY, roundedWidth, roundedHeight);

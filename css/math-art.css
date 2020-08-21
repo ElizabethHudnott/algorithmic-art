@@ -1,6 +1,7 @@
 :root {
 	--primary: hsl(225, 61%, 38%);
 	--success: hsl(134, 61%, 33%);
+	--form-color: #e9ecef;
 }
 
 a {
@@ -42,6 +43,11 @@ th.col-form-label {
 	font-weight: normal;
 }
 
+.btn {
+	padding-top: 7px;
+	padding-bottom: 7px;
+}
+
 .btn-primary, .btn-primary:disabled {
 	background-color: var(--primary);
 	border-color: var(--primary);
@@ -62,8 +68,8 @@ th.col-form-label {
 	border-color: hsl(134, 61%, 35%);
 }
 
-.custom-file-label {
-	overflow: hidden;
+.btn-form {
+	background-color: var(--form-color);
 }
 
 .dropdown-menu-abs-right {
@@ -113,7 +119,7 @@ th.col-form-label {
 
 .modal {
 	border-radius: 0.5rem;
-	box-shadow: #000000cc 0px 6px 20px 0px;
+	box-shadow: #000000cc 0px 1px 4px 0px;
 }
 
 .modal-floating {
@@ -136,7 +142,11 @@ th.col-form-label {
 	border-color: #e8e8e8cc;
 	border-radius: 0.5rem;
 	color: black;
-	max-height: calc(100vh - 1.75rem - 46px);
+	max-height: calc(100vh - 1.75rem - 48px);
+}
+
+.modal-floating .modal-content {
+	max-height: 50vh;
 }
 
 .modal-header {
@@ -168,20 +178,35 @@ th.col-form-label {
 	border-radius: 0.25rem;
 	overflow-y: auto;
 	margin: 0rem;
-	padding: 0.5rem;
+	padding: 0.8rem 0.5rem 0.5rem;
+}
+
+.modal-floating .modal-body {
+	padding-top: 0.5rem;
 }
 
 .modal-body.collapsing {
 	overflow-y: hidden;
 }
 
-@media (min-width: 1200px) {
-	.modal-body {
-		margin: 1px 0.65rem 0.65rem;
-	}
+.form-row>[class*=col-].second-col {
+	padding-left: 0.5rem;
 }
 
 @media (min-width: 576px) {
+	.modal-floating {
+		width: min(50vw, 506px);
+	}
+
+	.modal-floating .modal-content {
+		height: 100vh;
+		max-height: unset;
+	}
+
+	.modal-floating .modal-dialog {
+		max-width: 100%;
+	}
+
 	.modal-wide {
 		width: fit-content;
 		max-width: calc(100% - 2rem);
@@ -189,6 +214,31 @@ th.col-form-label {
 
 	.modal-wide .modal-content {
 		width: fit-content;
+	}
+}
+
+@media (min-width: 768px and min-height: 768px) {
+	.modal {
+ 		box-shadow: #000000cc 0px 6px 20px 0px;
+ 	}
+
+	.modal-floating .modal-content {
+		height: unset;
+		max-height: 100vh;
+	}
+
+	.modal-body {
+		margin: 1px 0.65rem 0.65rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.modal-floating .modal-content {
+		max-height: calc(100vh - 48px);
+	}
+
+	.form-row>[class*=col-].second-col {
+		padding-left: 1.25rem;
 	}
 }
 
@@ -230,24 +280,6 @@ th.col-form-label {
 	left: 50%;
 	transform: translateX(-50%);
 	width: fit-content;
-}
-
-#overlay {
-	background-color: #000000d0;
-	color: white;
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100vw;
-	height: 100vh;
-}
-
-#overlay .btn {
-	background-color: transparent;
-}
-
-#overlay>* {
-	display: block;
 }
 
 .bg-black {
@@ -398,6 +430,12 @@ button.btn-black:hover {
 	font-weight: bold;
 }
 
+.thumbnails {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
 .thumbnails>.active {
 	background-color: var(--light);
 	box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);
@@ -416,10 +454,6 @@ button.btn-black:hover {
 	line-height: 1.8;
 }
 
-#help-modal .modal-content {
-	height: calc(100vh - 1.75rem - 46px);
-}
-
 @media (min-width: 576px) {
 	#help-modal .modal-wide {
 		width: min(100% - 2rem, 45rem);
@@ -428,26 +462,6 @@ button.btn-black:hover {
 	#help-modal .modal-content {
 		width: 100%;
 	}
-}
-
-#background-gen-modal .modal-content {
-	max-height: 50vh;
-}
-
-@media (min-width: 576px) {
-
-	#background-gen-modal {
-		width: min(50vw, 506px);
-	}
-
-	#background-gen-modal .modal-dialog {
-		max-width: 100%;
-	}
-
-	#background-gen-modal .modal-content {
-		max-height: calc(100vh - 46px);
-	}
-
 }
 
 #toolbar {
@@ -461,21 +475,64 @@ button.btn-black:hover {
 	border-top-left-radius: 0.25rem;
 }
 
-#toolbar .btn-group {
-	position: static;
+.dropdown-menu-abs-right {
+	left: unset !important;
+	right: 0 !important;
 }
 
-@media (min-width: 1200px) {
+#overlay {
+	background-color: #000000d0;
+	color: white;
+	height: 100vh;
+	left: 0;
+	top: 0;
+	overflow: auto;
+	position: absolute;
+	width: 100vw;
+	z-index: 4;
+}
 
-	#toolbar .btn-group {
-		position: relative;
-	}
+#overlay:not(.show) {
+	pointer-events: none;
+}
 
-	.dropdown-menu-abs-right {
-		left: unset !important;
-		right: 0 !important;
-	}
+.overlay-content {
+	left: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	position: absolute;
+	top: 33vh;
+	transform: translate(-50%, max(-33%, -33vh));
+	width: fit-content;
+}
 
+.overlay-content>* {
+	display: block;
+}
+
+.overlay-content .btn {
+	background-color: transparent;
+}
+
+.overlay-label {
+	display: none;
+	padding-left: 1rem;
+	vertical-align: top;
+}
+
+.overlay-content .overlay-label {
+	display: inline;
+}
+
+#btn-floating-action {
+	background-color: hsla(210, 50%, 80%, 0.85);
+	border-radius: 28px;
+	border-width: 0;
+	box-shadow: #000000cc 0px 6px 20px 0px;
+	position: absolute;
+	bottom: max(2vw, 16px);
+	right: max(2vw, 16px);
+	padding: 8px 0 9px 0;
 }
 
 .patreon {

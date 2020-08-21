@@ -243,7 +243,7 @@
 					</select>
 					<input type="number" min="1" max="5" value="4" class="form-control" id="carpet-blend-depth">
 					<div class="input-group-append">
-						<span class="input-group-text">levels</span>
+						<span class="input-group-text">deep</span>
 					</div>
 				</div>
 			</div>
@@ -256,7 +256,7 @@
 		</div>
 		<div class="form-row mb-1">
 			<div class="col-4"></div>
-			<div class="col-3">
+			<div class="col-auto">
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox" checked id="carpet-blend-filling">
 					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
@@ -301,16 +301,16 @@
 			<div class="col-3 col-form-label col-form-label-sm">
 				Preset
 			</div>
-			<div class="col-8" id="carpet-layouts">
+			<div class="col-9" id="carpet-layouts">
 				<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
 					<label class="btn btn-sm btn-secondary">
-						<input type="radio" name="carpet-layout" value="5">Five Zones
+						<input type="radio" name="carpet-layout" value="5">Five
 					</label>
 					<label class="btn btn-sm btn-secondary">
-						<input type="radio" name="carpet-layout" value="7">Seven Zones
+						<input type="radio" name="carpet-layout" value="7">Seven
 					</label>
 					<label class="btn btn-sm btn-secondary active">
-						<input type="radio" name="carpet-layout" value="9">Nine Zones
+						<input type="radio" name="carpet-layout" value="9">Nine
 					</label>
 				</div>
 			</div>
@@ -319,7 +319,7 @@
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-overlap">
 				Overlap
 			</label>
-			<div class="col-8">
+			<div class="col-9">
 				<input type="range" min="0" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-overlap">
 			</div>
 		</div>
@@ -392,7 +392,7 @@
 			</fieldset>
 			<fieldset class="col-6 fade2" id="carpet-cutouts">
 				<div class="form-row">
-					<div class="col-4 col-form-label col-form-label-sm pb-0">
+					<div class="col-5 col-form-label col-form-label-sm pb-0">
 						Cut-Outs
 					</div>
 					<div class="col-2">
@@ -412,7 +412,7 @@
 					</div>
 				</div>
 				<div class="form-row">
-					<div class="col-4 col-form-label col-form-label-sm pb-0">&nbsp;</div>
+					<div class="col-5 col-form-label col-form-label-sm pb-0">&nbsp;</div>
 					<div class="col-2">
 						<div class="form-check mt-1">
 							<input type="checkbox" checked class="form-check-input" name="carpet-cutouts">
@@ -426,7 +426,7 @@
 					</div>
 				</div>
 				<div class="form-row mb-1">
-					<div class="col-4 col-form-label col-form-label-sm">&nbsp;</div>
+					<div class="col-5 col-form-label col-form-label-sm">&nbsp;</div>
 					<div class="col-2">
 						<div class="form-check mt-1">
 							<input type="checkbox" checked class="form-check-input" name="carpet-cutouts">
@@ -444,7 +444,7 @@
 					</div>
 				</div>
 				<div class="form-row">
-					<label class="col-4 px-0 col-form-label col-form-label-sm" for="carpet-cutout-depth">
+					<label class="col-5 col-form-label col-form-label-sm" for="carpet-cutout-depth">
 						From Depth
 					</label>
 					<div class="col-6">
@@ -466,7 +466,7 @@
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsidedness-x">
-				X-Lopsidedness
+				X-Leaning
 			</label>
 			<div class="col-7">
 				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsidedness-x">
@@ -479,7 +479,7 @@
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-lopsidedness-y">
-				Y-Lopsidedness
+				Y-Leaning
 			</label>
 			<div class="col-7">
 				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-lopsidedness-y">
@@ -492,7 +492,7 @@
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-middle-width">
-				Middle Width
+				Mid-Width
 			</label>
 			<div class="col-7">
 				<input type="range" min="0" max="3" step="0.005" value="1" class="form-control-range mt-2" id="carpet-middle-width">
@@ -505,7 +505,7 @@
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-middle-height">
-				Middle Height
+				Mid-Height
 			</label>
 			<div class="col-7">
 				<input type="range" min="0" max="3" step="0.005" value="1" class="form-control-range mt-2" id="carpet-middle-height">

@@ -103,8 +103,8 @@
 				</label>
 				<div class="col-3">
 					<select class="form-control form-control-sm" id="phyllotaxis-direction">
-						<option value="1" selected>Direction 1</option>
-						<option value="-1">Direction 2</option>
+						<option value="1" selected>1</option>
+						<option value="-1">2</option>
 						<option value="0">Both</option>
 					</select>
 				</div>
@@ -202,13 +202,13 @@
 				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-rotation">
 					Rotation
 				</label>
-				<div class="col-5">
+				<div class="col">
 					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-2" id="phyllotaxis-petal-rotation">
 				</div>
-				<div class="col-4 text-right">
+				<div class="col-auto">
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="checkbox" id="phyllotaxis-stack-increasing">
-						<label class="form-check-label small" for="phyllotaxis-stack-increasing">Stack outer on top</label>
+						<label class="form-check-label small" for="phyllotaxis-stack-increasing">Outermost on top</label>
 					</div>
 				</div>
 			</div>
@@ -221,7 +221,7 @@
 				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-radius-preset">
 					Max Radius
 				</label>
-				<div class="col-3">
+				<div class="col-auto">
 					<select class="form-control form-control-sm" id="phyllotaxis-radius-preset" aria-describedby="phyllotaxis-radius-preset-help">
 						<option value="min" selected>Short Axis</option>
 						<option value="max">Long Axis</option>
@@ -229,7 +229,7 @@
 						<option value="custom">Custom</option>
 					</select>
 				</div>
-				<div class="col-6">
+				<div class="col">
 					<input type="range" min="0" max="1" value="1" step="any" class="form-control-range mt-2 collapse" id="phyllotaxis-radius">
 				</div>
 			</div>

@@ -1339,7 +1339,7 @@ try {
 		}
 
 		// Adapt the environment's UI accordingly
-		document.getElementById('btn-generate-background').parentElement.hidden = !gen.hasRandomness;
+		document.getElementById('generate-btn-group').hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
 		toolbar.hidden = false;
@@ -1418,10 +1418,49 @@ try {
 		}
 	}
 
+	let mobileLayout = false;
+
+	function adaptLayout() {
+		const overlay = document.getElementById('overlay');
+		const overlayContent = overlay.children[0];
+		if (window.innerWidth < 1024) {
+			if (!mobileLayout) {
+				// Switch to mobile layout
+				while (toolbar.children.length > 0) {
+					overlayContent.appendChild(toolbar.children[0]);
+				}
+				document.getElementById('btn-floating-action').hidden = false;
+				mobileLayout = true;
+			}
+		} else {
+			if (mobileLayout) {
+				// Switch to desktop layout
+				overlay.classList.remove('show');
+				while (overlayContent.children.length > 0) {
+					toolbar.appendChild(overlayContent.children[0]);
+				}
+				document.getElementById('btn-floating-action').hidden = true;
+				mobileLayout = false;
+			}
+		}
+	}
+	adaptLayout();
+
+	document.getElementById('overlay').addEventListener('click', function (event) {
+		if (event.target === this) {
+			this.classList.remove('show');
+		}
+	});
+
+	document.getElementById('btn-floating-action').addEventListener('click', function (event) {
+		document.getElementById('overlay').classList.add('show');
+	});
+
 	// After resizing, generate a new background to fit the new window size.
 	let resizeTimer;
 	function resizeWindow() {
 		repositionModal(false);
+		adaptLayout();
 		drawingContext.resize(window.innerWidth, window.innerHeight);
 		if (bgGenerator !== undefined) {
 			tweenData.calcSize(startFrame, endFrame, canvas.width, canvas.height);
@@ -2255,10 +2294,13 @@ try {
 		}
 	});
 
-	signatureBox.addEventListener('mouseenter', function (event) {
+	function showAuthorForm(event) {
 		authorForm.hidden = false;
 		authorInput.focus();
-	});
+	}
+
+	signatureBox.addEventListener('click', showAuthorForm);
+	signatureBox.addEventListener('mouseenter', showAuthorForm);
 
 	authorForm.addEventListener('submit', function (event) {
 		event.preventDefault();
@@ -2276,26 +2318,6 @@ try {
 			}
 		}
 	});
-
-	function addToOverlay() {
-		const overlay = document.getElementById('overlay');
-		const content = toolbar.children;
-		for (let i = content.length - 1; i >= 0; i--) {
-			const item = content[i];
-			const id = item.id;
-			let parent = overlay;
-			if (id !== '') {
-				const label = overlay.querySelector('label[for="' + id + '"]');
-				if (label !== null) {
-					parent = label;
-				}
-			}
-			parent.prepend(item);
-		}
-	}
-
-	//overlay.hidden = false;
-	//addToOverlay();
 
 	document.getElementById('background-preset').addEventListener('input', function (event) {
 		const value = this.value;
@@ -2394,6 +2416,7 @@ try {
 
 	// Generate new background button.
 	document.getElementById('btn-generate-background').addEventListener('click', function (event) {
+		document.getElementById('overlay').classList.remove('show');
 		random = new RandomNumberGenerator();
 		seedInput.value = random.seed;
 		progressiveBackgroundGen(0);
@@ -2469,6 +2492,7 @@ try {
 
 	// Animation controls
 	document.getElementById('btn-start-frame').addEventListener('click', function (event) {
+		document.getElementById('overlay').classList.remove('show');
 		random = random.startGenerator;
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
@@ -2493,6 +2517,7 @@ try {
 	});
 
 	document.getElementById('btn-end-frame').addEventListener('click', function (event) {
+		document.getElementById('overlay').classList.remove('show');
 		random = random.endGenerator;
 		currentFrame = currentFrameData();
 		endFrame = currentFrame;
@@ -2517,6 +2542,7 @@ try {
 	});
 
 	document.getElementById('btn-both-frames').addEventListener('click', function (event) {
+		document.getElementById('overlay').classList.remove('show');
 		const tween = parseFloat(animPositionSlider.value);
 		if (loopAnim) {
 			random = tween < 0.25 || tween > 0.75 ? random.startGenerator : random.endGenerator;
@@ -2685,6 +2711,7 @@ try {
 			return;
 		}
 
+		document.getElementById('overlay').classList.remove('show');
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		let separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
 		if (!separateFrames && unsavedChanges) {
@@ -3073,17 +3100,21 @@ try {
 				URL.revokeObjectURL(bgGeneratorImage.src);
 			}
 			bgGeneratorImage.src = URL.createObjectURL(file);
-			this.parentElement.querySelector('#background-gen-image-label').innerText = file.name;
 		}
 	});
 
 	clearComboboxesOnFocus();
+
 	$(document.getElementById('anim-controls').parentElement).on('shown.bs.dropdown', 	function (event) {
 		const menu = this.querySelector('.dropdown-menu-abs-right');
 		setTimeout(function () {
 			const height = Math.ceil(menu.clientHeight);
 			menu.style.transform = 'translate(1px, -' + height + 'px)';
 		}, 0);
+	});
+
+	$('.modal').on('show.bs.modal', function (event) {
+		document.getElementById('overlay').classList.remove('show');
 	});
 
 }

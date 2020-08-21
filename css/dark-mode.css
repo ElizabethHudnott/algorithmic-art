@@ -1,27 +1,31 @@
 :root {
-	--slate: hsl(220, 25%, 11%);
 	--darkslate: hsl(220, 25%, 6%);
+	--form-color: hsl(220, 25%, 11%);
 }
 
 .btn-black, .modal-floating .modal-body>.nav-tabs {
 	background-color: var(--darkslate);
 }
 
-.bg-black, .custom-file-label, .form-control, .modal-body, .nav-tabs a.nav-link {
+.bg-black, .form-control, .modal-body, .nav-tabs a.nav-link {
 	background-color: black;
 }
 
-input[type="color"], .custom-file-label::after, .input-group-text {
-	background-color: var(--slate);
+input[type="color"], .input-group-text {
+	background-color: var(--form-color);
 }
 
-input[type="color"], .custom-file-label, .form-control, .input-group-text {
-	border-color: var(--slate);
+input[type="color"], .form-control, .input-group-text {
+	border-color: var(--form-color);
 	border-style: groove;
 }
 
-.custom-file-label, .custom-file-label::after, .form-control, .input-group-text, .modal-body, .nav-tabs a.nav-link{
+.btn-form, .form-control, .input-group-text, .modal-body, .nav-tabs a.nav-link{
 	color: #eee;
+}
+
+.btn-form:hover {
+	color: white;
 }
 
 .form-control-range {
@@ -29,13 +33,13 @@ input[type="color"], .custom-file-label, .form-control, .input-group-text {
 }
 
 .form-control-range::-webkit-slider-runnable-track {
-  background-color: var(--slate);
+  background-color: var(--form-color);
   height: 9px;
   border-radius: 4px;
 }
 
 .form-control-range::-moz-range-track {
-  background-color: var(--slate);
+  background-color: var(--form-color);
   height: 9px;
   border-radius: 4px;
 }

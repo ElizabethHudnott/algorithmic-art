@@ -56,7 +56,7 @@
 	</button>
 </div>
 
-<div class="alert alert-success alert-dismissible fade position-absolute top-2 center-x" role="alert" id="success-alert">
+<div class="alert alert-success alert-dismissible fade position-absolute top-2 center-x" role="alert" id="success-alert" style="z-index: 2000">
 	<span></span>
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
@@ -67,10 +67,10 @@
 <div id="author-hitbox" class="position-absolute" style="left: 0; bottom: 0; background-color: transparent">
 	<form class="position-absolute bg-black p-2" hidden style="bottom: 0; width: 300px; z-index: 3" id="author-form">
 		<div class="form-row">
-			<label class="col-2 col-form-label col-form-label-sm" for="author">
+			<label class="col-2 my-auto col-form-label col-form-label-sm" for="author">
 				Name
 			</label>
-			<div class="col-8">
+			<div class="col-8 my-auto">
 				<input type="text" class="form-control form-control-sm" id="author" placeholder="your name">
 			</div>
 			<div class="col-2">
@@ -82,32 +82,38 @@
 	</form>
 </div>
 
-<div id="overlay" hidden>
-	<label for="btn-sketches">Switch sketch</label>
-	<label for="btn-layers">Layers</label>
-	<label for="btn-parameters">Parameters</label>
+<div id="overlay" class="fade2">
+	<div class="overlay-content">
+	</div>
 </div>
+
+<button id="btn-floating-action" hidden title="Open actions list">
+	<img src="img/palette.svg" width="56" height="39" alt="Palette">
+</button>
 
 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 2" hidden>
 	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" class="patreon" title="Become a patron">
 			<img src="img/patreon.svg" width="16" height="15" alt="Patreon">
-			<span class="d-none d-lg-inline ml-2">Become a patron</span>
+			<span class="ml-2">Become a patron</span>
 		</a>
 	</div>
-
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#layers-modal" title="Layers" id="btn-layers">
-		<img src="img/layers.png" width="32" height="32" alt="Layers">
-	</button>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch" id="btn-sketches">
+	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch">
 		<img src="img/module.png" width="32" height="32" alt="Sketch">
+		<span class="overlay-label">Change Sketch</span>
 	</button>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#background-gen-modal" title="Change parameters" id="btn-parameters">
+	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#layers-modal" title="Layers">
+		<img src="img/layers.png" width="32" height="32" alt="Layers">
+		<span class="overlay-label">Layers</span>
+	</button>
+	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#background-gen-modal" title="Change parameters">
 		<img width="32" height="32" src="img/gear_in.png" alt="Parameters">
+		<span class="overlay-label">Parameters</span>
 	</button>
 	<div class="btn-group" role="group" aria-label="Randomization controls" id="generate-btn-group">
 		<button type="button" class="btn btn-black" id="btn-generate-background" title="Randomize">
 			<img width="32" height="32" src="img/dice.png" alt="Dice">
+			<span class="overlay-label">Randomize</span>
 		</button>
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Randomization options">
 			<span class="sr-only">Toggle randomization options</span>
@@ -126,16 +132,20 @@
 	</div>
 	<button type="button" class="btn btn-black" id="btn-start-frame" title="Set start frame">
 		<img width="32" height="32" src="img/timeline_marker_start.png" alt="Start Frame">
+		<span class="overlay-label">Start frame</span>
 	</button>
 	<button type="button" class="btn btn-black" id="btn-end-frame" title="Set end frame">
 		<img width="32" height="32" src="img/timeline_marker_end.png" alt="End Frame">
+		<span class="overlay-label">End frame</span>
 	</button>
 	<button type="button" class="btn btn-black" id="btn-both-frames" title="Set start &amp; end frames">
 		<img width="32" height="32" src="img/timeline_marker_both.png" alt="Both Frames">
+		<span class="overlay-label">Both frames</span>
 	</button>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
 		<button type="button" class="btn btn-black" id="btn-play" title="Play animation">
 			<img width="32" height="32" src="img/control_play_blue.png" alt="Play">
+			<span class="overlay-label">Play</span>
 		</button>
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
 			<span class="sr-only">Toggle playback options</span>
@@ -197,13 +207,16 @@
   	</div>
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
 		<img width="32" height="32" src="img/picture_save.png" alt="Download">
+		<span class="overlay-label">Save image</span>
 	</button>
 	<button type="button" class="btn btn-black" id="btn-video-opts" title="Create video">
 		<img width="32" height="32" src="img/film.png" alt="Video">
+		<span class="overlay-label">Video</span>
 	</button>
 	<div class="btn-group" id="save-dropdown" hidden>
 		<button type="button" class="btn btn-black" id="btn-save-form" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Save parameters">
 			<img width="32" height="32" src="img/diskette.png" alt="Save">
+			<span class="overlay-label">Save</span>
 		</button>
 		<div class="dropdown-menu dropdown-menu-right bg-black" aria-labelledby="btn-save-form" style="width: 375px">
 			<form class="px-2" id="save-form">
@@ -227,16 +240,18 @@
 	</div>
 	<button type="button" class="btn btn-black" id="btn-what-is-this" title="&quot;What's This?&quot; Help">
 		<img width="32" height="32" src="img/what-is-this.svg" alt="What's This?">
+		<span class="overlay-label">What's this?</span>
 	</button>
 	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#help-modal" title="Help">
 		<img width="32" height="32" src="img/help_32.png" alt="Help">
+		<span class="overlay-label">General help</span>
 	</button>
 </div>
 
 <div class="modal modal-floating fade p-0" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false">
 	<div class="modal-dialog m-0" role="document">
 		<div class="modal-content">
-			<div class="modal-header d-none d-xl-flex" title="Double click to collapse">
+			<div class="modal-header d-none d-md-flex" title="Double click to collapse">
 				<h6 class="modal-title" id="background-gen-modal-label"></h6>
 				<button type="button" class="close" data-dismiss="modal" title="Close">
 					<span aria-hidden="true">&times;</span>
@@ -252,7 +267,7 @@
 <div class="modal modal-floating fade p-0 max-w-fit" id="layers-modal" tabindex="-1" role="dialog" aria-labelledby="layers-modal-title" aria-hidden="true" data-backdrop="false" style="min-width: 300px">
 	<div class="modal-dialog m-0" role="document">
 		<div class="modal-content">
-			<div class="modal-header" title="Double click to collapse">
+			<div class="modal-header d-none d-md-flex" title="Double click to collapse">
 				<h6 class="modal-title" id="layers-modal-title">Layers</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
@@ -317,7 +332,7 @@
 						</div>
 					</div>
 
-					<div class="tab-pane" id="layers" role="tabpanel" aria-labelledby="layers-tab">
+					<div class="tab-pane" id="layers" role="tabpanel" aria-labelledby="layers-tab" style="width: 460px">
 						<div class="form-row form-group">
 							<div class="col-1"></div>
 							<label class="col-2 col-form-label col-form-label-sm" for="layer-opacity">
@@ -341,7 +356,7 @@
 								</button>
 							</div>
 						</div>
-						<div class="form-row form-group" id="rotation-sizing-row">
+						<div class="form-row form-group" id="rotation-sizing-row" style="height: 160px">
 							<div class="col-4 text-center" title="No adjustment">
 								<div class="form-check text-center">
 									<label class="form-check-label mb-2" for="rotation-size-screen">
@@ -402,7 +417,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="card-deck btn-group-toggle thumbnails justify-content-center m-0 px-1 border" data-toggle="buttons" id="sketch-list" style="min-height: calc(5.45rem + 174px)">
+				<div class="card-deck btn-group-toggle thumbnails m-0 px-1 border" data-toggle="buttons" id="sketch-list" style="min-height: calc(5.45rem + 174px)">
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -413,11 +428,9 @@
 	</div>
 </div>
 
-<div class="custom-file small" hidden id="background-gen-image">
-	<input type="file" class="custom-file-input" id="background-gen-image-upload" accept="image/*">
-	<label class="custom-file-label" for="background-gen-image-upload" id="background-gen-image-label">
-		No image
-	</label>
+<div id="background-gen-image" hidden>
+	<input type="file" id="background-gen-image-upload" accept="image/*" hidden>
+	<label class="btn btn-form btn-sm" for="background-gen-image-upload">Browse&hellip;</label>
 </div>
 
 <div class="modal fade2" id="assign-bg-change-modal" tabindex="-1" role="dialog" aria-labelledby="assign-bg-change-modal-title" aria-hidden="true">
@@ -560,7 +573,7 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-resolution">
 						Resolution
 					</label>
-					<div class="col-5">
+					<div class="col-7 col-md-5">
 						<select class="form-control form-control-sm w-100" id="video-resolution">
 							<option value="640x360">360p</option>
 							<option value="854x480">480p</option>
@@ -574,7 +587,7 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-framerate">
 						Frame Rate
 					</label>
-					<div class="col-5">
+					<div class="col-7 col-md-5">
 						<div class="input-group input-group-sm">
 							<input type="number" min="1" value="50" class="form-control" id="video-framerate" list="framerate-list" aria-describedby="framerate-units">
 							<datalist id="framerate-list">
@@ -604,7 +617,7 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-format">
 						Format
 					</label>
-					<div class="col-5">
+					<div class="col-7 col-md-5">
 						<select class="form-control form-control-sm" id="video-format">
 							<option value="webm" selected>WebM Video</option>
 							<option value="jpg">JPEG Images</option>
@@ -618,10 +631,10 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="video-quality">
 						Quality
 					</label>
-					<div class="col-4">
+					<div class="col-5 col-md-4">
 						<input type="range" min="0" max="100" value="85" class="form-control-range mt-2" id="video-quality" aria-describedby="video-quality-readout">
 					</div>
-					<div class="col-1">
+					<div class="col-2 col-md-1">
 						<output id="video-quality-readout" class="small">85%</output>
 					</div>
 				</div>
@@ -630,7 +643,7 @@
 					<label class="col-3 col-form-label col-form-label-sm" for="motion-blur">
 						Motion Blur
 					</label>
-					<div class="col-5">
+					<div class="col-7 col-md-5">
 						<div class="input-group input-group-sm">
 							<input type="number" min="0" value="0" class="form-control" id="motion-blur" aria-describedby="motion-blur-units">
 							<div class="input-group-append w-60">
@@ -727,7 +740,7 @@
 				</button>
 			</div>
 			<div class="modal-body pt-2">
-				<div class="tab-content px-1 text-justify">
+				<div class="tab-content px-1 text-justify-md">
 					<div class="tab-pane show active h-100" id="help-intro" role="tabpanel" aria-labelledby="help-intro-tab">
 						<h6>Welcome to Mathematical Art With Elizabeth!</h6>
 
@@ -739,7 +752,7 @@
 
 						<p>If you find anything broken you can report it on <a href="https://github.com/mathematical-art/mathematical-art.github.io/issues" target="_blank" rel="noopener"> GitHub</a>, and feel free to make suggestions for future enhancements there too. I hope you enjoy the site, whether your primary interest is art, mathematics or sensory stimulation. If you want to and are able to then please consider supporting my work via <a href="https://www.patreon.com/bePatron?u=23440273">Patreon</a> or by sharing a link on social media.</p>
 
-						<p>There's documentation available on <a href="sketch/help/custom-sketches.html" target="_blank" rel="noopener">making your own sketches</a> for those familiar with JavaScript. The background images were produced by <a href="http://www.highresolutiontextures.com" target="_blank" rel="noopener">highresolutiontextures.com</a> and other free sites. The site contains icons licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> from <a target="_blank" rel="noopener" href="http://www.fatcow.com/free-icons">fatcow.com</a>.</p>
+						<p>There's documentation available on <a href="sketch/help/custom-sketches.html" target="_blank" rel="noopener">making your own sketches</a> for those familiar with JavaScript. The background images were produced by <a href="http://www.highresolutiontextures.com" target="_blank" rel="noopener">highresolutiontextures.com</a> and other free sites. The site contains icons licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> from <a target="_blank" rel="noopener" href="http://www.fatcow.com/free-icons">fatcow.com</a> and <a href="https://www.vecteezy.com/free-vector/color-palette-vector">Vecteezy</a>.</p>
 
 						<div class="form-check text-center">
 							<input class="form-check-input" id="show-welcome" type="checkbox" checked>

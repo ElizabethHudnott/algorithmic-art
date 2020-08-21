@@ -10,8 +10,14 @@ export default function Phyllotaxis() {
 	this.title = 'Phyllotaxis';
 	this.helpFile = 'help/phyllotaxis.html';
 	this.hasRandomness = true;
+	const scaleFactor = Math.min(screen.width, screen.height) / 1080;
+	this.scale = Math.round(scaleFactor * 20);
+	this.petalSize = Math.round(scaleFactor * 30) / 2;
 
 	this.optionsDocument = downloadFile('phyllotaxis.html', 'document').then(function (optionsDoc) {
+		optionsDoc.getElementById('phyllotaxis-scale').value = me.scale;
+		optionsDoc.getElementById('phyllotaxis-petal-size').value = me.petalSize;
+
 		const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
 		const angleModeSelect = optionsDoc.getElementById('phyllotaxis-angle-mode');
 		const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
@@ -630,12 +636,10 @@ export default function Phyllotaxis() {
 	this.periodicDenominators = [1];
 	this.angleOffset = 0;
 	this.spread = 1;
-	this.scale = 20;
 	this.start = 1;
 	this.skip = 0;
 	this.stackIncreasing = false;
 	this.petalShape = 'e';
-	this.petalSize = 15;
 	this.petalEnlargement = 0;
 	this.petalVariation = 0;
 	this.petalStretch = 1;

@@ -202,7 +202,7 @@
 						</div>
 					</div>
 				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-path-repeat">
+				<label class="col-3 second-col col-form-label col-form-label-sm" for="calc-path-repeat">
 					Repetitions
 				</label>
 				<div class="col-3">
@@ -221,7 +221,7 @@
 					<div class="col-3">
 						<input type="number" step="any" value="0" class="form-control form-control-sm" id="calc-translate-x">
 					</div>
-					<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-translate-y">
+					<label class="col-3 second-col col-form-label col-form-label-sm" for="calc-translate-y">
 						Translate Y
 					</label>
 					<div class="col-3">
@@ -235,7 +235,7 @@
 					<div class="col-3">
 						<input type="number" value="1" step="0.1" class="form-control form-control-sm" id="calc-scale">
 					</div>
-					<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stretch">
+					<label class="col-3 second-col col-form-label col-form-label-sm" for="calc-stretch">
 						Stretch
 					</label>
 					<div class="col-3">
@@ -249,7 +249,7 @@
 					<div class="col-3">
 						<input type="number" value="0" step="0.1" class="form-control form-control-sm" id="calc-shear">
 					</div>
-					<div class="col-3 pl-4">
+					<div class="col-3 second-col">
 						<div class="form-check mt-1">
 							<input class="form-check-input" type="radio" name="calc-shear-direction" value="0" id="calc-shear-direction-x" checked>
 							<label class="form-check-label small" for="calc-shear-direction-x">Horizontal</label>
@@ -266,7 +266,7 @@
 					<div class="col-3 col-form-label col-form-label-sm">
 						Options
 					</div>
-					<div class="col-3">
+					<div class="col-auto">
 						<div class="form-check mt-1">
 							<input class="form-check-input" type="checkbox" id="calc-close-path">
 							<label class="form-check-label small" for="calc-close-path">Close path</label>
@@ -312,13 +312,13 @@
 			<div class="col-3 col-form-label col-form-label-sm">
 				Pen Shape
 			</div>
-			<div class="col-2">
+			<div class="col-auto">
 				<div class="form-check mt-1">
 					<input type="radio" name="calc-line-join" value="round" class="form-check-input" id="calc-join-round" checked>
 					<label class="form-check-label small" for="calc-join-round">Round</label>
 				</div>
 			</div>
-			<div class="col-2">
+			<div class="col-auto pl-4">
 				<div class="form-check mt-1">
 					<input type="radio" name="calc-line-join" value="bevel" class="form-check-input" id="calc-join-square">
 					<label class="form-check-label small" for="calc-join-square">Square</label>
@@ -333,7 +333,7 @@
 				<input type="color" value="#000000" class="w-100" id="calc-stroke-color">
 			</div>
 			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-stroke-opacity">
-				Line Opacity
+				<span class="d-none d-lg-inline">Line</span> Opacity
 			</label>
 			<div class="col-3">
 				<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2" id="calc-stroke-opacity">
@@ -347,7 +347,7 @@
 				<input type="color" value="#ff0080" class="w-100" id="calc-fill-color">
 			</div>
 			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="calc-fill-opacity">
-				Fill Opacity
+				<span class="d-none d-lg-inline">Fill</span> Opacity
 			</label>
 			<div class="col-3">
 				<input type="range" min="0" max="1" step="0.004" value="0.55" class="form-control-range mt-2" id="calc-fill-opacity">

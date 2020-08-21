@@ -195,13 +195,16 @@ export default function CellAutomaton() {
 			element.addEventListener('input', setSeedType);
 		}
 
-		optionsDoc.getElementById('ca-border-row').addEventListener('input', function (event) {
-			me.borderRow = this.checked;
-			me.history = undefined;
-			generateBackground(0);
+		optionsDoc.getElementById('ca-border-height').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				me.borderHeight = value;
+				me.history = undefined;
+				generateBackground(0);
+			}
 		});
 
-		optionsDoc.getElementById('ca-cell-width').addEventListener('change', function (event) {
+		optionsDoc.getElementById('ca-cell-width').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 1) {
 				me.cellWidth = value;
@@ -209,7 +212,7 @@ export default function CellAutomaton() {
 			}
 		});
 
-		optionsDoc.getElementById('ca-cell-height').addEventListener('change', function (event) {
+		optionsDoc.getElementById('ca-cell-height').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 1) {
 				me.cellHeight = value;
@@ -292,7 +295,7 @@ export default function CellAutomaton() {
 	this.repeatSeed = false;
 	this.cellWidth = 11;
 	this.cellHeight = 11;
-	this.borderRow = true;
+	this.borderHeight = 1;
 	this.gapX = 0;
 	this.gapY = 0;
 	this.startHeight = 0;
@@ -306,10 +309,11 @@ export default function CellAutomaton() {
 
 CellAutomaton.prototype.animatable = {
 	continuous: [
-		'hueMin', 'hueMax', 'strokeIntensity', 'gapX', 'gapY'
+		'borderHeight', 'hueMin', 'hueMax', 'strokeIntensity', 'cellWidth', 'cellHeight',
+		'gapX', 'gapY'
 	],
 	stepped: [
-		'seedLength', 'repeatSeed', 'cellWidth', 'cellHeight', 'borderRow'
+		'seedLength', 'repeatSeed'
 	],
 	pairedContinuous: [
 		['endHeight', 'startHeight']
@@ -558,7 +562,7 @@ CellAutomaton.prototype.generateFirstRow = function (width, height) {
 		row.fill(0);
 		const offset1 = height - 1;
 		const offset2 = width - (height - 1) - seedLength;
-		if (offset2 - offset1 >= Math.max(width * 0.1, seedLength)) {
+		if (offset2 - offset1 >= seedLength) {
 			for (let i = 0; i < seedLength; i++) {
 				const value = seed[i];
 				row[offset1 + i] = value;
@@ -577,7 +581,7 @@ CellAutomaton.prototype.generateFirstRow = function (width, height) {
 
 CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 	if (j < 0) {
-		if (this.borderRow) {
+		if (this.borderHeight > 0) {
 			return 0;
 		} else {
 			j = 0;
@@ -608,13 +612,15 @@ CellAutomaton.prototype.getCellValue = function (seed, i, j) {
 }
 
 CellAutomaton.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
-	const cellWidth = this.cellWidth;
-	const cellHeight = this.cellHeight;
-	const totalWidth = Math.round(cellWidth * (1 + this.gapX));
-	const totalHeight = Math.round(cellHeight * (1 + this.gapY));
-	const gridWidth = Math.trunc(canvasWidth / totalWidth);
-	const emptyTopRow = this.borderRow;
-	const gridHeight = Math.ceil(canvasHeight / totalHeight) - emptyTopRow;
+	let cellWidth = this.cellWidth;
+	let cellHeight = this.cellHeight;
+	const totalWidth = cellWidth * (1 + this.gapX);
+	const totalHeight = cellHeight * (1 + this.gapY);
+	const borderHeight = this.borderHeight * totalHeight;
+	let gridWidth = Math.ceil(canvasWidth / totalWidth);
+	gridWidth += gridWidth % 2;
+	const xOffset = -(gridWidth * totalWidth - canvasWidth) / 2;
+	const gridHeight = Math.ceil((canvasHeight - borderHeight) / totalHeight);
 	let seed;
 
 	if (
@@ -667,20 +673,18 @@ CellAutomaton.prototype.generate = function* (context, canvasWidth, canvasHeight
 	const hueRange = this.hueMax - hueMin;
 
 	const strokeIntensity = this.strokeIntensity;
-	context.translate(
-		Math.trunc((canvasWidth - gridWidth * totalWidth) / 2),
-		(emptyTopRow ? cellHeight : 0)
-	);
 	context.strokeStyle = rgba(0, 0, 0, strokeIntensity);
+	cellWidth = Math.round(cellWidth);
+	cellHeight = Math.round(cellHeight);
 
 	for (let j = minRow; j < maxRow; j++) {
-		const y = j * totalHeight;
+		const y = Math.round(j * totalHeight + borderHeight);
 		const firstCol = j === minRow ? minCol : 0;
 		const lastCol = j === maxRow - 1 ? maxCol : gridWidth - 1;
 		for (let i = firstCol; i <= lastCol; i++) {
 			const value = history[j][i];
 			if (value !== 0) {
-				const x = i * totalWidth;
+				const x = Math.round(i * totalWidth + xOffset);
 				let hue, saturation, lightness;
 
 				if (this.numStates === 2) {

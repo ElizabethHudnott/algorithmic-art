@@ -16,7 +16,7 @@ Finish dark mode
 Don't make thumbnails lazy loading when visible on start-up
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
-Preview mode indicator
+Preview mode indicator?
 
 Save As button
 Add credits

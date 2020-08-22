@@ -89,6 +89,9 @@ th.col-form-label {
 .fade2 {
 	transition: opacity .08s linear;
 }
+.fade:not(.show), .fade2:not(.show) {
+	pointer-events: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
 	.fade2 {
@@ -525,14 +528,14 @@ button.btn-black:hover {
 }
 
 #btn-floating-action {
-	background-color: hsla(210, 50%, 80%, 0.85);
-	border-radius: 28px;
+	background-color: hsla(210, 50%, 75%, 0.9);
+	border-radius: 32px;
 	border-width: 0;
-	box-shadow: #000000cc 0px 6px 20px 0px;
+	box-shadow: #000000dd 1px 9px 17px 0px;
 	position: absolute;
 	bottom: max(2vw, 16px);
 	right: max(2vw, 16px);
-	padding: 8px 0 9px 0;
+	padding: 4px;
 }
 
 .patreon {

@@ -33,6 +33,7 @@ Ability to animate sketches that use random numbers
 Gallery
 	Share to: Facebook*, YouTube*, Instagram*, Tumblr, Twitter, Pinterest, DeviantArt?
 Progressive Web App
+Tiling rotation mode
 
 Low Priority
 ------------

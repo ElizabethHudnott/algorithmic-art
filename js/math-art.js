@@ -668,9 +668,9 @@ try {
 
 
 	function transformCanvas(context, width, height, renderWidth, renderHeight, rotation) {
-		context.translate(width / 2, height / 2);
+		context.translate(Math.ceil(width / 2), Math.ceil(height / 2));
 		context.rotate(rotation);
-		context.translate(-renderWidth / 2, -renderHeight / 2);
+		context.translate(Math.ceil(-renderWidth / 2), Math.ceil(-renderHeight / 2));
 	}
 
 	function progressiveBackgroundGen(preview) {
@@ -1235,10 +1235,22 @@ try {
 	}
 	globalThis.findMissingHelp = findMissingHelp;
 
+	function canvasClick(event) {
+		if (event.button !== 0) {
+			return;
+		}
+		const x = event.clientX;
+		const y = event.clientY;
+		const transformedX = matrix.a * x + matrix.c * y + matrix.e;
+		const transformedY = matrix.b * x + matrix.d * y + matrix.f;
+		bgGenerator.onclick(transformedX, transformedY);
+	}
+
 	function loadFailure(exception) {
 		if (bgGenerator === undefined) {
 			$('#sketches-modal').modal('show');
 		} else {
+			// Keep previous generator
 			document.getElementById('background-gen-options').hidden = false;
 			document.getElementById('background-gen-modal-label').innerHTML = bgGenerator.title;
 		}
@@ -1283,6 +1295,7 @@ try {
 		}
 
 		// Set the new generator as the current one.
+		canvas.removeEventListener('click', canvasClick);
 		bgGenerator = gen;
 		generatorURL = url;
 		if (currentSketch && currentSketch.url !== url) {
@@ -1339,6 +1352,9 @@ try {
 		}
 
 		// Adapt the environment's UI accordingly
+		if (typeof(gen.onclick) === 'function') {
+			canvas.addEventListener('click', canvasClick);
+		}
 		document.getElementById('generate-btn-group').hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;

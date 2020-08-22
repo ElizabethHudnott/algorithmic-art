@@ -2606,6 +2606,7 @@ try {
 		if (store !== undefined) {
 			store.setItem('play-preview', playPreview);
 		}
+		document.getElementById('play-badge').hidden = playPreview === 0;
 		const playModeModal = document.getElementById('play-mode-modal');
 		if (playModeModal !== null && playModeModal.style.display !== 'block') {
 			playModeModal.remove();
@@ -2622,6 +2623,7 @@ try {
 			playPreview = value;
 			const radioContainer = document.getElementById('play-preview-row');
 			checkInput(radioContainer, 'play-preview', playPreview);
+			document.getElementById('play-badge').hidden = playPreview === 0;
 		}
 	}
 	if (playPreview === undefined) {
@@ -2630,6 +2632,7 @@ try {
 			playPreview = parseInt(this.value);
 			const radioContainer = document.getElementById('play-preview-row');
 			checkInput(radioContainer, 'play-preview', playPreview);
+			document.getElementById('play-badge').hidden = playPreview === 0;
 			play();
 		}
 

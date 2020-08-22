@@ -143,8 +143,9 @@
 		<span class="overlay-label">Both frames</span>
 	</button>
 	<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
-		<button type="button" class="btn btn-black" id="btn-play" title="Play animation">
+		<button type="button" class="btn btn-black position-relative" id="btn-play" title="Play animation">
 			<img width="32" height="32" src="img/control_play_blue.png" alt="Play">
+			<img width="16" height="16" src="img/record.png" style="position: absolute; top: 4px; right: 5px" id="play-badge" hidden>
 			<span class="overlay-label">Play</span>
 		</button>
 		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">

@@ -32,6 +32,39 @@ export default function CellAutomaton() {
 			generateBackground(0);
 		}
 
+		me.onclick = function (x, y, canvasWidth, canvasHeight) {
+			const totalHeight = me.cellHeight * (1 + me.gapY);
+			const borderHeight = me.borderHeight * totalHeight;
+			if (y > borderHeight + totalHeight) {
+				return;
+			}
+
+			const totalWidth = me.cellWidth * (1 + me.gapX);
+			let gridWidth = Math.ceil(canvasWidth / totalWidth);
+			gridWidth += gridWidth % 2;
+			const xOffset = -(gridWidth * totalWidth - canvasWidth) / 2;
+
+			let cellX = Math.trunc((x - xOffset) / totalWidth);
+			let seed = parseInt(seedInput.value);
+			const {numStates, seedLength} = me;
+
+			if (me.repeatSeed) {
+				cellX = cellX % seedLength;
+				const logSeed = Math.trunc(Math.log2(seed) / Math.log2(numStates));
+				if (cellX <= logSeed) {
+					cellX = logSeed - cellX;
+					const positionValue = numStates ** cellX;
+					const currentValue = Math.trunc(seed / positionValue) % numStates;
+					const value = (currentValue + 1) % numStates;
+					seed = seed + (value - currentValue) * positionValue;
+				}
+			}
+			me.seed = seed;
+			seedInput.value = seed;
+			me.history = undefined;
+			generateBackground(0);
+		}
+
 		function setPreset() {
 			const type = ruleTypeInput.value;
 			const numStates = me.numStates;
@@ -290,7 +323,7 @@ export default function CellAutomaton() {
 	this.hueMax = 45;
 	this.strokeIntensity = 1;
 
-	this.seed = [1];
+	this.seed = 1;
 	this.seedLength = 1;
 	this.repeatSeed = false;
 	this.cellWidth = 11;

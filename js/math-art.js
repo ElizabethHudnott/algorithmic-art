@@ -1257,7 +1257,12 @@ try {
 		const x = event.clientX;
 		const y = event.clientY;
 		const [transformedX, transformedY] = drawingContext.transform2DPoint(x, y);
-		bgGenerator.onclick(transformedX, transformedY);
+
+		const context = drawingContext.twoD;
+		const width = canvas.width;
+		const height = canvas.height;
+		const [scaledWidth, scaledHeight] = calcSize(width, height, scale, scaleMode);
+		bgGenerator.onclick(transformedX, transformedY, scaledWidth, scaledHeight);
 	}
 
 	function loadFailure(exception) {

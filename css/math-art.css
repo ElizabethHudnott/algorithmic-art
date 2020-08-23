@@ -4,11 +4,6 @@
 	--form-color: #e9ecef;
 }
 
-body {
-	height: 100vh;
-	overflow: hidden;
-}
-
 a {
 	color: hsl(225, 100%, 27%);
 	font-family: America, sans-serif;

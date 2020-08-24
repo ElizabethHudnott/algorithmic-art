@@ -7,6 +7,7 @@ Environment
 Service Worker
 
 Bug: only enable random button when relevant
+Bug: changing to fulll detail during playback doesn't update finished image
 Bug: blur doesn't work on still image export
 Bug: scale mode doesn't work with webgl
 Bug: fading background image to color & color to image?

@@ -2022,8 +2022,8 @@ try {
 
 		const startRotation = startFrame.rotation;
 		let endRotation = endFrame.rotation;
-		const loopedRotation = loop && (startRotation + TWO_PI) % TWO_PI !== (endRotation + TWO_PI) % TWO_PI;
-		endRotation += Math.sign(endRotation) * TWO_PI * fullRotations;
+		const loopedRotation = loop && (endRotation - startRotation) % TWO_PI !== 0;
+		endRotation += (endRotation < startRotation ? -1 : 1) * TWO_PI * fullRotations;
 		const rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
 		interpolateRandom(startFrame.random, endFrame.random, tweenPrime);
 
@@ -2830,9 +2830,10 @@ try {
 	function syncToPosition() {
 		const tween = parseFloat(animPositionSlider.value);
 		const startRotation = startFrame.rotation;
-		const endRotation = endFrame.rotation;
-		const loopedRotation = loopAnim && startRotation !== endRotation && (startRotation !== 0 || endRotation !== TWO_PI);
-		rotation = interpolateValue(startRotation, endRotation + TWO_PI * fullRotations, tween, loopedRotation);
+		let endRotation = endFrame.rotation;
+		const loopedRotation = loopAnim && (endRotation - startRotation) % TWO_PI !== 0;
+		endRotation += (endRotation < startRotation ? -1 : 1) * TWO_PI * fullRotations;
+		rotation = interpolateValue(startRotation, endRotation, tween, loopedRotation);
 		rotationSlider.value = rotation / TWO_PI;
 		seedInput.value = random.seed;
 		currentFrame = currentFrameData();

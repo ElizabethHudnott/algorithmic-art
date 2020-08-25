@@ -10,6 +10,7 @@ class RectangularEquation {
 		const inputStr = String(input);
 		this.yFormula = parseEquation(inputStr);
 		this.yFormulaText = inputStr;
+		this.formulas = [this.yFormula];
 	}
 
 	variables = Object.freeze(['y']);
@@ -95,6 +96,7 @@ class MagXEquation {
 		const inputStr = String(input);
 		this.magXFormula = parseEquation(inputStr);
 		this.magXFormulaText = inputStr;
+		this.formulas = [this.magXFormula];
 	}
 
 	variables = Object.freeze(['magX']);
@@ -209,12 +211,14 @@ class ParametricEquation {
 		const inputStr = String(input);
 		this.xFormula = parseEquation(inputStr);
 		this.xFormulaText = inputStr;
+		this.formulas = [this.xFormula, this.yFormula];
 	}
 
 	parseYFormula(input) {
 		const inputStr = String(input);
 		this.yFormula = parseEquation(inputStr);
 		this.yFormulaText = inputStr;
+		this.formulas = [this.xFormula, this.yFormula];
 	}
 
 	variables = Object.freeze(['x', 'y']);
@@ -302,6 +306,7 @@ class PolarEquation {
 		const inputStr = String(input);
 		this.rFormula = parseEquation(inputStr);
 		this.rFormulaText = inputStr;
+		this.formulas = [this.rFormula];
 	}
 
 	variables = Object.freeze(['r']);
@@ -386,7 +391,6 @@ class PolarEquation {
 export default function GraphingCalculator() {
 	const me = this;
 	this.title = 'Graphing Calculator';
-	this.hasRandomness = true;
 	this.equations = [];	// 2D array. Multiple shapes, multiple subpaths, multiple piecewise sections
 	this.min = [];			// Per shape, per subpath, per piece
 	this.max = [];			// Per shape, per subpath, per piece
@@ -691,6 +695,7 @@ export default function GraphingCalculator() {
 				me.equations[shapeNum][pathNum][pieceNum][methodName](formulaText);
 				generateBackground(0);
 				displayBoundingBox();
+				me.checkForRandomness();
 			} catch (e) {
 				errorBox.innerText = 'Error in equation for ' + varName + '. ' + e.message;
 			}
@@ -1051,6 +1056,22 @@ GraphingCalculator.prototype.animatable = {
 		['maxPathRepeat', 'minPathRepeat']
 	]
 };
+
+GraphingCalculator.prototype.checkForRandomness = function () {
+	for (let shape of this.equations) {
+		for (let path of shape) {
+			for (let piece of path) {
+				for (let equation of piece.formulas) {
+					if (equation.hasRandomness) {
+						hasRandomness(true);
+						return;
+					}
+				}
+			}
+		}
+	}
+	hasRandomness(false);
+}
 
 GraphingCalculator.prototype.addShape = function (index) {
 	this.equations.splice(index, 0, []);

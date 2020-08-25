@@ -1,7 +1,6 @@
 export default function JuliaSet() {
 	const me = this;
 	this.title = 'Julia Set';
-	this.hasRandomness = false;
 	this.isShader = true;
 	this.helpFile = 'help/julia-set.html';
 

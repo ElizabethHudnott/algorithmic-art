@@ -19,6 +19,10 @@ try {
 	console.warn('Local storage unavailable.');
 }
 
+function hasRandomness(enabled) {
+	document.getElementById('generate-btn-group').hidden = !enabled;
+}
+
 {
 	const backendRoot = 'http://localhost/';
 	const backgroundElement = document.body;
@@ -835,7 +839,7 @@ try {
 			this.random = random;
 		}
 
-		toObject(hasRandomness) {
+		toObject() {
 			const properties = {};
 			const categories = [
 				'continuous', 'stepped', 'pairedContinuous', 'xy', 'pairedStepped'
@@ -857,9 +861,7 @@ try {
 			data.scale = this.scale;
 			data.scaleMode = this.scaleMode;
 			data.blur = this.blur;
-			if (hasRandomness) {
-				data.seed = this.random.seed;
-			}
+			data.seed = this.random.seed;
 			return data;
 		}
 
@@ -1265,13 +1267,14 @@ try {
 		bgGenerator.onclick(transformedX, transformedY, scaledWidth, scaledHeight);
 	}
 
-	function loadFailure(exception) {
+	function loadFailure(exception, hadRandomness) {
 		if (bgGenerator === undefined) {
 			$('#sketches-modal').modal('show');
 		} else {
 			// Keep previous generator
 			document.getElementById('background-gen-options').hidden = false;
 			document.getElementById('background-gen-modal-label').innerHTML = bgGenerator.title;
+			document.getElementById('generate-btn-group').hidden = !hadRandomness;
 		}
 		showAlert(errorAlert, 'The requested sketch could not be loaded.', document.body);
 		console.error(exception);
@@ -1281,6 +1284,8 @@ try {
 		// Hide stuff while it changes
 		const container = document.getElementById('background-gen-options');
 		const titleBar = document.getElementById('background-gen-modal-label');
+		const randomControls = document.getElementById('generate-btn-group');
+		const hadRandomness = !randomControls.hidden;
 		container.hidden = true;
 		titleBar.innerHTML = 'Loading&hellip;';
 
@@ -1290,9 +1295,10 @@ try {
 			const resolvedURL = /^(\w+:)?\//.test(url) ? url : filePath + url;
 			const genModule = await import(resolvedURL)
 			const constructor = genModule.default;
+			randomControls.hidden = true;
 			gen = new constructor();
 		} catch (e) {
-			loadFailure(e);
+			loadFailure(e, hadRandomness);
 			return;
 		}
 		if (gen.isShader) {
@@ -1307,7 +1313,7 @@ try {
 					fragFileContent;
 				drawingContext.initializeShader(gen);
 			} catch (e) {
-				loadFailure(e);
+				loadFailure(e, hadRandomness);
 				return;
 			}
 			drawingContext.setProperties(gen);
@@ -1374,7 +1380,6 @@ try {
 		if (typeof(gen.onclick) === 'function') {
 			canvas.addEventListener('click', canvasClick);
 		}
-		document.getElementById('generate-btn-group').hidden = !gen.hasRandomness;
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
 		toolbar.hidden = false;
@@ -3083,10 +3088,9 @@ try {
 		data.attachments = [];
 
 		doc.sketch = currentSketch.url;
-		const hasRandomness = bgGenerator.hasRandomness
-		doc.startFrame = startFrame.toObject(hasRandomness);
+		doc.startFrame = startFrame.toObject();
 		if (startFrame !== endFrame) {
-			doc.endFrame = endFrame.toObject(hasRandomness);
+			doc.endFrame = endFrame.toObject();
 		}
 
 		const options = {

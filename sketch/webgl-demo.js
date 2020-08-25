@@ -1,7 +1,6 @@
 export default function WebGLDemo() {
 	const me = this;
 	this.title = 'WebGL Demo Sketch';
-	this.hasRandomness = false;
 	this.isShader = true;
 
 	this.optionsDocument = downloadFile('webgl-demo.html', 'document').then(function (optionsDoc) {

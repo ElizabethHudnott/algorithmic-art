@@ -38,35 +38,35 @@
 				This article discusses creating your own generative art sketches that take advantage of the <a href="../../index.html">environment</a> I've created. The code template you will need to follow is shown below.
 			</p>
 			<p>
-				Each sketch has a title, which is used in GUI elements, and a <code>hasRandomness</code> property. If your sketch's output is deterministic and driven only by input parameters then this should be set to false. On the other hand if you use pseudorandom numbers then set it to true and the environment will add the randomize icon <span class="btn btn-sm btn-black d-inline-block"><img src="../../img/dice.png" alt="Dice" width="16" height="16"></span> to the program's toolbar so users can generate a fresh image without adjusting the sketch's parameters. You can populate the <code>helpFile</code> property with a URL directing the environment towards a HTML file containing help information.
+				Each sketch has a title, which appears in GUI elements. You can populate the <code>helpFile</code> property with a URL directing the environment towards a HTML file containing help information.
 			</p>
 			<p>
-				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during an early development phase, but usually you will want to include it unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix in order to avoid name clashes with elements that are part of the environment itself. For example, in the <a href="../../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
+				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during early development stages, but usually you will want to include it, unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix so as to avoid name clashes with elements that are part of the environment itself. For example, in my <a href="../../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
 			</p>
 			<p>
-				The remainder of the code has three significant sections.
+				The rest of the code comes in three significant sections.
 			</p>
 			<ol>
 				<li>
-					The event handlers inside the callback to <code>downloadFile()</code>, which link the <abbr>HTML</abbr> code to the sketch's JavaScript parameters.
+					Event handlers inside the callback to <code>downloadFile()</code> which link the <abbr>HTML</abbr> to the JavaScript properties that represent the sketch's parameterization.
 				</li>
 				<li>
 					The <code>animatable</code> property, which is a declarative description of how the sketch can be animated.
 				</li>
 				<li>
-					The code that draws the sketch onto the screen, which is contained inside the <code>generate()</code> method.
+					Code that draws the sketch on the screen, which is contained inside the <code>generate()</code> method.
 				</li>
 			</ol>
 			<div class="codebox codebox-long" id="js-template"></div>
 			<p>
-				There is a particularly challenging need to be able to redraw the sketch quickly in response to events like dragging a slider, while at the same time having the desire to create complex and intricate sketches that arouse artistic interest. There are two measures available which you should use to protect the application's performance.
+				There is a particularly challenging need to be able to redraw the sketch quickly in response to events like dragging a slider, while at the same time having the desire to create complex and intricate sketches that arouse artistic interest. There are two mechanisms provided by the environment and you should make use of them to protect the application's performance.
 			</p>
 			<ul>
 				<li>
-					The <code>generate()</code> method is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators">generator function</a>, which means you can use the <code>yield</code> statement periodically during time consuming drawing operations to temporarily suspend drawing and return control to the environment. The environment will then decide whether to continue with the present drawing operation, or alternatively if a parameter's value is changing too quickly then it might decide to abandon the current drawing and start again.
+					The <code>generate()</code> method is <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators">generator function</a>, which means you can use the <code>yield</code> statement periodically during time consuming drawing operations to temporarily suspend drawing and return control to the environment. The environment will then decide whether to continue with the present drawing operation. Alternatively, if a parameter's value is changing too quickly then it might decide to abandon the current drawing and start again.
 				</li>
 				<li>
-					The <code>generate()</code> has a parameter called <code>preview</code> that accepts a numeric argument. A value of 0 always means that a complete redraw with the maximum level of detail has been requested. However, you are free to use other values inside your <abbr>GUI</abbr>'s event handlers in any way that's useful to you. In some situations the environment will request preview level 1.
+					The <code>generate()</code> method has a parameter called <code>preview</code>, which is passed a numeric argument. A value of 0 always means a complete redraw with the maximum level of detail has been requested. However, you are free to use other values inside your <abbr>GUI</abbr>'s event handlers in any way that's useful to you. In some situations the environment will request preview level 1.
 				</li>
 			</ul>
 			<p>
@@ -80,7 +80,7 @@
 					Only a limited number of petals are drawn in order to give an impression of what the finished image would look like, but each petal does have all of its features calculated from scratch.
 				</li>
 				<li>
-					All of the petals are drawn but none of them have their positions recalculated. The positions are retrieved from the cache. This is used when a parameter is changed which affects the petals' shapes or colours but not their locations.
+					All of the petals are drawn but none of them have their positions recalculated. The positions are retrieved from the cache. This is used when a parameter is changed that affects the petals' shapes or colours but not their locations.
 				</li>
 				<li>
 					Only a limited number of petals are drawn and they don't have their positions recalculated. This is used when a visual effect is applied that is time consuming to render for a large number of petals even when much of numerical data is pre-calculated.
@@ -94,7 +94,10 @@
 
 			<h2>Random Numbers</h2>
 			<p>
-				To ensure animations run smoothly you should use the <code>random.next()</code> function instead of <code>Math.random()</code>. This ensures the <var>n</var>th random number requested by <code>generate()</code> when rendering the middle frame of the animation is calculated as being the average of the <var>n</var>th random number used in the start frame and the <var>n</var>th random number used in the end frame. The <code>random.next()</code> function has the additional advantage that the user can record the numbers used to seed this random number generator and use them to reproduce the same sequence of random numbers (and therefore exactly the same image) in a future creative session.
+				To ensure animations run smoothly you should use the <code>random.next()</code> function instead of <code>Math.random()</code>. This ensures the <var>n</var>th random number requested by <code>generate()</code> when rendering the middle frame of animation is interpolated as the average of the <var>n</var>th random number used in the start frame and the <var>n</var>th random number used in the end frame. The <code>random.next()</code> function has the additional advantage that the user can record the numbers used to seed the random number generator and use them to reproduce the same sequence of random numbers and therefore exactly the same image in a future creative session.
+			</p>
+			<p>
+				Whenever the user configures your sketch's parameters in a way that causes the <code>generate()</code> method to use random numbers be sure to call <code>hasRandomness(true)</code> to make the environment add the randomize icon <span class="btn btn-sm btn-black d-inline-block"><img src="../../img/dice.png" alt="Dice" width="16" height="16"></span> to the toolbar so users can generate images using different sequences of random numbers. If the user subsequently reconfigures the sketch in a way that makes it deterministic again then you should call <code>hasRandomness(false)</code>. If your sketch uses random numbers in every possible configuration then call <code>hasRandomness(true)</code> in its constructor. By default the environment assumes that a sketch does not use random numbers.
 			</p>
 
 			<h2>Intrinsic Time</h2>
@@ -104,7 +107,7 @@
 
 			<h2>Data Attributes</h2>
 			<p>
-				You can use a <code>&lt;button&gt;</code> with a <code>data-reset</code> attribute to reset a control and its corresponding JavaScript property to an initial value (which is determined by inspecting the <code>value</code> attribute). For example, <code>&lt;button type="button" data-reset="carpet-stretch"&gt;</code> will reset the <code>&lt;input&gt;</code> element with <code>carpet-stretch</code> as its ID and it will also reset the JavaScript property named <code>stretch</code>.
+				You can use a <code>&lt;button&gt;</code> with a <code>data-reset</code> attribute to reset a control and its corresponding JavaScript property to an initial value (which is determined by inspecting the <code>value</code> attribute). For example, <code>&lt;button type="button" data-reset="carpet-stretch"&gt;</code> will reset the <code>&lt;input&gt;</code> element with <code>carpet-stretch</code> as its ID, and it will also reset the JavaScript property named <code>stretch</code>.
 			</p>
 
 			<h2>Events</h2>
@@ -125,7 +128,7 @@
 
 			<h1>Writing the Help File</h1>
 			<p>
-				Each piece of context sensitive help information should be contained within a single HTML tag (though the tag can contain further HTML tags). Mark up tags in the help file using the <code>id</code> attribute to link help information with the appropriate context.
+				Each itemized piece of context sensitive help information should be contained within a single HTML tag (though the tag can contain further HTML tags). Mark up tags in the help file using the <code>id</code> attribute to link help information with the appropriate context where that information is especially relevant.
 			</p>
 			<ul>
 				<li>
@@ -173,16 +176,16 @@
 
 			<h1>WebGL2 Fragment Shaders</h1>
 			<p>
-				As well as using the 2D canvas API you also have the option of expressing yourself artistically by writing code in the form of a WebGL fragment shader. Sketches that use shaders have much faster performance and create a better user experience than the 2D canvas for designs that are calculation intensive. Although hardware acceleration features of the 3D graphics card are used to speed up rendering in this section we're not discussing creating 3D shapes.
+				As well as using the 2D canvas API you also have the option of expressing yourself artistically by writing a WebGL fragment shader. Sketches that use shaders have much faster performance and create a better user experience than 2D canvas for designs that are calculation intensive. Although hardware acceleration features of the 3D graphics card are used to speed up rendering, in this section we're not discussing creating 3D shapes.
 			</p>
 			<p>
-				A sketch that uses a shader must contain the line <code>this.isShader&nbsp;=&nbsp;true;</code> in its constructor and the code for the shader must be contained in a file with the same name and location as the JavaScript file but with the <kdb>.frag</kdb> extension. For convenience <code>canvasWidth</code>, <code>canvasHeight</code> and <code>tween</code> are predefined as <code>float</code> variables and <code>preview</code> as <code>int</code>, <code>PI</code> as a constant and the <code>hsla</code> function (with four <code>float</code> parameters), all with the same meanings as for 2D canvas sketches. The <code>out</code> variable is named <code>fragColor</code>.
+				A sketch that uses a shader must contain the line <code>this.isShader&nbsp;=&nbsp;true;</code> in its constructor and the code for the shader must be contained in a file with the same name and location as the JavaScript file but with a <kdb>.frag</kdb> extension. For convenience <code>canvasWidth</code>, <code>canvasHeight</code> and <code>tween</code> are predefined as <code>float</code> variables and <code>preview</code> as <code>int</code>, <code>PI</code> as a constant and the <code>hsla</code> function (with four <code>float</code> parameters), all with the same meanings as for 2D canvas sketches. The <code>out</code> variable is named <code>fragColor</code>.
 			</p>
 			<p>
-				There are some differences compared to 2D canvas sketches. Only properties which are declared as animatable get passed to the shader. To ensure new values get passed to the shader, in most cases you won't want to assign to JavaScript properties directly inside your event handlers but instead you'll call <code>setBgProperty(me, '<var>name</var>', <var>value</var>);</code>. A word about type conversion is needed. Properties declared in the continuous, pairedContinuous and xy sections are passed to the shader as <code>float</code>, <code>vec2</code>, <code>vec3</code>, <code>vec4</code> and matrices and arrays of these types. Properties declared in the stepped and pairedStepped sections are passed as <code>int</code>, <code>bool</code>, <code>ivec2</code>, <code>ivec3</code>, <code>ivec4</code>, <code>bvec2</code>, <code>bvec3</code> or <code>bvec4</code>, or as an array of one of these types. The necessary GSGL declarations will be written for you automatically. In your JavaScript code you can have a property that is an array of arrays and it will automatically be converted into a matrix or an array of vectors when it's passed to the shader. However, the length of an array typed property should not change after the sketch is initialized. When using an array of arrays the individual array components must all have the same length.
+				There are some differences compared to 2D canvas sketches. Only properties which are declared as animatable get passed to the shader. To ensure new values get passed to the shader, in most cases you won't want to assign to JavaScript properties directly inside your event handlers. Instead you'll call <code>setBgProperty(me, '<var>name</var>', <var>value</var>);</code>. A word about type conversion is needed. Properties declared in the continuous, pairedContinuous and xy sections are passed to the shader as <code>float</code>, <code>vec2</code>, <code>vec3</code>, <code>vec4</code> and matrices and arrays of these types. Properties declared in the stepped and pairedStepped sections are passed as <code>int</code>, <code>bool</code>, <code>ivec2</code>, <code>ivec3</code>, <code>ivec4</code>, <code>bvec2</code>, <code>bvec3</code> or <code>bvec4</code>, or as an array of one of these types. The necessary GSGL declarations will be written for you automatically. In your JavaScript code you can have a property that is an array of arrays and it will automatically be converted into a matrix or an array of vectors when it's passed to the shader. However, the length of an array typed property should not change after the sketch is initialized. When using an array of arrays the individual array components must all have the same length.
 			</p>
 			<p>
-				There are a couple of variant formats, which are particularly useful when working with arrays. The two parameter format <code>setBgProperty(me, '<var>name</var>');</code> forwards the <em>current value</em> of <code>me.<var>name</var></code> to the shader, which is useful when you've altered some elements of an array property directly. This may be easier than passing a whole replacement array in one using the three parameter version. Finally, if you only need to update a single array element then there's <code>setPropertyElement(me, '<var>name</var>', <var>index</var>, <var>value</var>);</code>
+				There are two variant formats, which are particularly useful when working with arrays. The two parameter format <code>setBgProperty(me, '<var>name</var>');</code> forwards the <em>current value</em> of <code>me.<var>name</var></code> to the shader, which is useful when you've altered some elements of an array property directly. This may be easier than providing a entirely new array using the three parameter version. Finally, if you only need to update a single array element then there's <code>setPropertyElement(me, '<var>name</var>', <var>index</var>, <var>value</var>);</code>
 			</p>
 			<h2>WebGL Demo Sketch</h2>
 			<a href="../../index.html?gen=webgl-demo" class="btn btn-primary" role="button">Launch Live Sketch</a>

@@ -20,9 +20,16 @@ export default parse;
 */
 
 {
-
-	class CachingNode {
+	class Node {
 		constructor() {
+			this.isConstant = false;
+			this.hasRandomness = false;
+		}
+	}
+
+	class CachingNode extends Node {
+		constructor() {
+			super()
 			this.cachedValue = undefined;
 		}
 
@@ -44,14 +51,15 @@ export default parse;
 			this.head = head;
 			this.tail = tail;
 			this.func = func;
-			const numOps = tail.length;
 			let isConstant = head.isConstant;
-			let i = 0;
-			while (isConstant && i < numOps) {
-				isConstant = tail[i][3].isConstant;
-				i++;
+			let hasRandomness = head.hasRandomness;
+			const numOps = tail.length;
+			for (let i = 0; i < numOps; i++) {
+				isConstant = isConstant && tail[i][3].isConstant;
+				hasRandomness = hasRandomness || tail[i][3].hasRandomness;
 			}
 			this.isConstant = isConstant;
+			this.hasRandomness = hasRandomness;
 		}
 
 		evalImpl(variables) {
@@ -76,6 +84,7 @@ export default parse;
 			super();
 			this.arg = arg;
 			this.isConstant = arg.isConstant;
+			this.hasRandomness = arg.hasRandomness;
 		}
 
 		evalImpl(variables) {
@@ -88,14 +97,24 @@ export default parse;
 			super();
 			this.name = name;
 			this.args = args;
-			const numArgs = args.length;
-			let isConstant = numArgs > 0;
-			let i = 0;
-			while (isConstant && i < numArgs) {
-				isConstant = args[i].isConstant;
-				i++;
+
+			if (name === 'random') {
+
+				this.hasRandomness = true;
+
+			} else {
+
+				let isConstant = true;
+				let hasRandomness = false;
+				const numArgs = args.length;
+				for (let i = 0; i < numArgs; i++) {
+					isConstant = isConstant && args[i].isConstant;
+					hasRandomness = hasRandomness || args[i].hasRandomness;
+				}
+				this.isConstant = isConstant;
+				this.hasRandomness = hasRandomness;
+
 			}
-			this.isConstant = isConstant;
 		}
 
 		evalImpl(variables) {
@@ -120,6 +139,7 @@ export default parse;
 			this.multiplier = multiplier.eval();
 			this.multiplicand = multiplicand;
 			this.isConstant = multiplicand.isConstant;
+			this.hasRandomness = multiplicand.hasRandomness;
 		}
 
 		evalImpl(variables) {
@@ -127,11 +147,12 @@ export default parse;
 		}
 	}
 
-	class Constant {
+	class Constant extends Node {
 		static E = new Constant(Math.E);
 		static PI = new Constant(Math.PI);
 
 		constructor(value) {
+			super();
 			this.value = value;
 			this.isConstant = true;
 		}
@@ -141,10 +162,10 @@ export default parse;
 		}
 	}
 
-	class Variable {
+	class Variable extends Node {
 		constructor(name) {
+			super();
 			this.name = name;
-			this.isConstant = false;
 		}
 
 		eval(variables) {

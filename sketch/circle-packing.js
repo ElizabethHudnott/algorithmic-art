@@ -60,7 +60,7 @@ class PolygonRendering {
 export default function CirclePacking() {
 	const me = this;
 	this.title = 'Circle Packing';
-	this.hasRandomness = true;
+	hasRandomness(true);
 
 	this.optionsDocument = downloadFile('circle-packing.html', 'document').then(function (optionsDoc) {
 

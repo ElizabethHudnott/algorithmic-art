@@ -5,7 +5,6 @@
 export default function MySketch() {
 	const me = this;
 	this.title = 'My Sketch';
-	this.hasRandomness = true;
 	this.helpFile = 'my-sketch-help.html'; // Optional
 
 	this.optionsDocument = downloadFile('my-sketch.html', 'document').then(function (optionsDoc) {
@@ -86,8 +85,15 @@ MySketch.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 		 * the numeric values according to need.
 		 */
 		if (i % 20 === 19 && performance.now() >= beginTime + 20) {
+			/* Important! If you previously used context.save() then call context.restore()
+			 * here so we don't accumulate saved states on the stack if the environment
+			 * decides to abort drawing.
+			 */
 			yield;
 			beginTime = performance.now();
+			/* Add context.save() here if needed, so that context.restore() doesn't get
+			 * called too many times.
+			 */
 		}
 	}
 }

@@ -1,7 +1,6 @@
 export default function SierpinskiCarpet() {
 	const me = this;
 	this.title = 'Sierpinski Carpet';
-	this.hasRandomness = false;
 	this.helpFile = 'help/sierpinski-carpet.html';
 
 	/*

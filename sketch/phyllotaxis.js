@@ -9,7 +9,7 @@ export default function Phyllotaxis() {
 	const me = this;
 	this.title = 'Phyllotaxis';
 	this.helpFile = 'help/phyllotaxis.html';
-	this.hasRandomness = true;
+
 	const scaleFactor = Math.min(screen.width, screen.height) / 1080;
 	this.scale = Math.round(scaleFactor * 20);
 	this.petalSize = Math.round(scaleFactor * 30) / 2;
@@ -191,6 +191,7 @@ export default function Phyllotaxis() {
 			if (value <= 100) {
 				me.petalVariation = value;
 				generateBackground(0);
+				hasRandomness(me.hasRandomness());
 			}
 		});
 
@@ -310,6 +311,7 @@ export default function Phyllotaxis() {
 			}
 			$(hueModSplitInput.parentElement.parentElement).collapse(showAdvanced ? 'show' : 'hide');
 			generateBackground(2);
+			hasRandomness(me.hasRandomness());
 		});
 
 
@@ -375,6 +377,7 @@ export default function Phyllotaxis() {
 				}
 			}
 			generateBackground(2);
+			hasRandomness(me.hasRandomness());
 		});
 
 		const lightnessMinInput = optionsDoc.getElementById('phyllotaxis-lightness-min');
@@ -421,6 +424,7 @@ export default function Phyllotaxis() {
 				}
 			}
 			generateBackground(2);
+			hasRandomness(me.hasRandomness());
 		});
 
 		const opacityMinInput = optionsDoc.getElementById('phyllotaxis-opacity-min');
@@ -454,6 +458,7 @@ export default function Phyllotaxis() {
 			}
 			$('#phyllotaxis-opacity-min, #phyllotaxis-opacity-max').collapse(isConstant ? 'hide' : 'show');
 			generateBackground(2);
+			hasRandomness(me.hasRandomness());
 		});
 
 		const polygonOptions = optionsDoc.querySelectorAll('.phyllotaxis-polygon-opts');
@@ -1220,3 +1225,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		context.restore();
 	}
 };
+
+
+Phyllotaxis.prototype.hasRandomness = function () {
+	return this.petalVariation > 0 ||
+		this.hueMode === 'rnd' || this.saturationMode === 'rnd' ||
+		this.lightnessMode === 'rnd' || this.opacityMode === 'rnd';
+}

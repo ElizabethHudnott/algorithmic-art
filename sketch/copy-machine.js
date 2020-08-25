@@ -25,7 +25,6 @@ class TextRendering {
 export default function CopyMachine() {
 	const me = this;
 	this.title = 'Copy Machine';
-	this.hasRandomness = true;
 
 	this.depth = 5;
 	this.sizes = [300, 300, 300];

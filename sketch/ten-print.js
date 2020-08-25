@@ -4,7 +4,7 @@
 export default function TenPrint() {
 	const me = this;
 	this.title = '10 PRINT';
-	this.hasRandomness = true;
+	hasRandomness(true);
 	this.helpFile = 'help/ten-print.html';
 
 	this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {

@@ -6,7 +6,6 @@ export default function CellAutomaton() {
 	const me = this;
 	this.title = 'Cellular Automata';
 	this.helpFile = 'help/cellular-automata.html';
-	this.hasRandomness = true;
 
 	this.optionsDocument = downloadFile('cellular-automata.html', 'document').then(function (optionsDoc) {
 		const helpLinks = new Map();
@@ -207,9 +206,10 @@ export default function CellAutomaton() {
 
 		function setSeedType(event) {
 			const type = this.value;
-			const random = type === 'random' || type === 'all-random';
+			const isRandom = type === 'random' || type === 'all-random';
 			const repeated = type === 'repeat' || type === 'random';
-			if (random) {
+			hasRandomness(isRandom);
+			if (isRandom) {
 				me.seed = undefined;
 			} else {
 				let seed = parseInt(seedInput.value);
@@ -219,7 +219,7 @@ export default function CellAutomaton() {
 				me.seed = seed;
 			}
 			me.repeatSeed = repeated;
-			seedInput.disabled = random;
+			seedInput.disabled = isRandom;
 			seedLengthInput.disabled = !repeated;
 			setSeedLength();
 		}

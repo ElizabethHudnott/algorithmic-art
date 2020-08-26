@@ -19,6 +19,14 @@ try {
 	console.warn('Local storage unavailable.');
 }
 
+let unitsProcessed, yieldTime, benchmark;
+
+function calcBenchmark() {
+	const now = performance.now();
+	benchmark = unitsProcessed / (now - yieldTime + 40) * 40;
+	return now;
+}
+
 function hasRandomness(enabled) {
 	document.getElementById('generate-btn-group').hidden = !enabled;
 }
@@ -618,14 +626,22 @@ function hasRandomness(enabled) {
 				}
 			}
 		} else {
+			let renderBeginTime = performance.now();
+			let totalUnits = 0;
 			random.reset();
 			const redraw = generator.generate(contextualInfo.twoD, width, height, preview);
 			backgroundRedraw = redraw;
 			let done = false;
 			function drawSection() {
 				if (backgroundRedraw === redraw) {
+					unitsProcessed = 0;
+					yieldTime = performance.now() + 40;
 					done = redraw.next().done;
+					totalUnits += unitsProcessed;
 					if (done) {
+						const renderTime = performance.now() - renderBeginTime;
+						totalUnits += unitsProcessed;
+						benchmark = totalUnits / renderTime * 40;
 						backgroundRedraw = undefined;
 						if (preview === 0) {
 							if (document.fonts.check(signatureFont)) {
@@ -1326,6 +1342,7 @@ function hasRandomness(enabled) {
 		if (currentSketch && currentSketch.url !== url) {
 			currentSketch = undefined;
 		}
+		benchmark = Infinity;
 
 		// Reset layer geometry
 		rotation = 0;
@@ -2058,6 +2075,8 @@ function hasRandomness(enabled) {
 			const redraw = generator.generate(context, renderWidth, renderHeight, preview);
 			let done;
 			do {
+				unitsProcessed = 0;
+				yieldTime = performance.now() + 1000;
 				done = redraw.next().done;
 			} while (!done);
 		} else {

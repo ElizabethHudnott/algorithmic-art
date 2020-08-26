@@ -76,24 +76,24 @@ MySketch.prototype.animatable = {
  *		meanings.
  */
 MySketch.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
-	let beginTime = performance.now();
 
 	// Do our drawing here. I'll assume you'll be using some sort of loop.
 	for (let i = 0; ...; i++) {
 
-		/* Occasionally check if we need to relinquish control back to the GUI. Adjust
-		 * the numeric values according to need.
-		 */
-		if (i % 20 === 19 && performance.now() >= beginTime + 20) {
-			/* Important! If you previously used context.save() then call context.restore()
-			 * here so we don't accumulate saved states on the stack if the environment
-			 * decides to abort drawing.
-			 */
-			yield;
-			beginTime = performance.now();
-			/* Add context.save() here if needed, so that context.restore() doesn't get
-			 * called too many times.
-			 */
+		// Occasionally check if we need to relinquish control back to the GUI.
+		unitsProcessed++;
+		if (unitsProcessed >= benchmark) {
+			const now = calcBenchmark();
+			if (now >= yieldTime) {
+				/* Important! If you previously used context.save() then call
+				 * context.restore() here so we don't accumulate saved states on the stack
+				 * if the environment decides to abort drawing.
+				 */
+				yield;
+				/* Add context.save() here if needed, so that context.restore() doesn't
+				 * get called too many times.
+				 */
+			}
 		}
 	}
 }

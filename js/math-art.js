@@ -23,7 +23,7 @@ let unitsProcessed, yieldTime, benchmark;
 
 function calcBenchmark() {
 	const now = performance.now();
-	benchmark = unitsProcessed / (now - yieldTime + 40) * 40;
+	benchmark = Math.trunc(unitsProcessed / Math.max(now - yieldTime + 40, 1) * 40);
 	return now;
 }
 
@@ -626,22 +626,24 @@ function hasRandomness(enabled) {
 				}
 			}
 		} else {
-			let renderBeginTime = performance.now();
-			let totalUnits = 0;
 			random.reset();
 			const redraw = generator.generate(contextualInfo.twoD, width, height, preview);
 			backgroundRedraw = redraw;
 			let done = false;
+			let totalUnits = 0;
+			let totalTime = 1;
 			function drawSection() {
 				if (backgroundRedraw === redraw) {
 					unitsProcessed = 0;
-					yieldTime = performance.now() + 40;
+					const startTime = performance.now();
+					yieldTime = startTime + 40;
 					done = redraw.next().done;
+					totalTime += performance.now() - startTime;
 					totalUnits += unitsProcessed;
 					if (done) {
-						const renderTime = performance.now() - renderBeginTime;
-						totalUnits += unitsProcessed;
-						benchmark = totalUnits / renderTime * 40;
+						if (totalUnits > 0) {
+							benchmark = Math.trunc(totalUnits / totalTime * 40);
+						}
 						backgroundRedraw = undefined;
 						if (preview === 0) {
 							if (document.fonts.check(signatureFont)) {
@@ -657,7 +659,7 @@ function hasRandomness(enabled) {
 					}
 				}
 			}
-			drawSection();
+			requestAnimationFrame(drawSection);
 		}
 	}
 
@@ -2075,8 +2077,8 @@ function hasRandomness(enabled) {
 			const redraw = generator.generate(context, renderWidth, renderHeight, preview);
 			let done;
 			do {
+				yieldTime = performance.now() + 40;
 				unitsProcessed = 0;
-				yieldTime = performance.now() + 1000;
 				done = redraw.next().done;
 			} while (!done);
 		} else {

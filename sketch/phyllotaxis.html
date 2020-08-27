@@ -132,38 +132,32 @@
 
 		<fieldset>
 			<legend>Petals</legend>
-			<div class="form-row mb-1">
+			<div class="form-row">
 				<div class="col-3 col-form-label col-form-label-sm">
 					Shape
 				</div>
-				<div class="col-2">
+				<div class="col-3">
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-ellipse" value="e" checked>
 						<label class="form-check-label small" for="phyllotaxis-shape-ellipse">Elliptical</label>
 					</div>
 				</div>
-				<div class="col-3 pl-4">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-rect" value="r">
-						<label class="form-check-label small" for="phyllotaxis-shape-rect">Rectangular</label>
-					</div>
-				</div>
-				<div class="col-4 pl-4 mt-1">
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" id="phyllotaxis-clipping">
-						<label class="form-check-label small" for="phyllotaxis-clipping">Partial petals</label>
-					</div>
-				</div>
-			</div>
-			<div class="form-row mb-3">
-				<div class="col-3"></div>
-				<div class="col-2">
+				<div class="col-auto">
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-image" value="i">
 						<label class="form-check-label small" for="phyllotaxis-shape-image">Image</label>
 					</div>
 				</div>
-				<div class="col-7 pl-4" data-attach="image"></div>
+				<div class="col-auto pl-3" data-attach="image"></div>
+			</div>
+			<div class="form-row form-group">
+				<div class="col-3"></div>
+				<div class="col-auto">
+					<div class="form-check mt-1">
+						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-rect" value="r">
+						<label class="form-check-label small" for="phyllotaxis-shape-rect">Rectangular</label>
+					</div>
+				</div>
 			</div>
 			<div class="form-row form-group">
 				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
@@ -199,17 +193,28 @@
 				</div>
 			</div>
 			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-rotation">
-					Rotation
+				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-partial-petals">
+					Fade Edges
 				</label>
-				<div class="col">
-					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-2" id="phyllotaxis-petal-rotation">
+				<div class="col-3">
+					<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="phyllotaxis-partial-petals">
+				</div>
+				<div class="col pl-4 col-form-label col-form-label-sm">
+					Stacking
 				</div>
 				<div class="col-auto">
 					<div class="form-check mt-1">
 						<input class="form-check-input" type="checkbox" id="phyllotaxis-stack-increasing">
 						<label class="form-check-label small" for="phyllotaxis-stack-increasing">Outermost on top</label>
 					</div>
+				</div>
+			</div>
+			<div class="form-row collapse" id="phyllotaxis-rotation-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-rotation">
+					Rotation
+				</label>
+				<div class="col-9">
+					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-2" id="phyllotaxis-petal-rotation">
 				</div>
 			</div>
 		</fieldset>

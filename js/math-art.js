@@ -1308,13 +1308,14 @@ function hasRandomness(enabled) {
 		titleBar.innerHTML = 'Loading&hellip;';
 
 		// Switch generator
-		let gen;
+		let gen, optionsDoc;
 		try {
 			const resolvedURL = /^(\w+:)?\//.test(url) ? url : filePath + url;
 			const genModule = await import(resolvedURL)
 			const constructor = genModule.default;
 			randomControls.hidden = true;
 			gen = new constructor();
+			optionsDoc = await gen.optionsDocument;
 		} catch (e) {
 			loadFailure(e, hadRandomness);
 			return;
@@ -1377,7 +1378,6 @@ function hasRandomness(enabled) {
 
 		// Create new options dialog
 		container.innerHTML = '';
-		const optionsDoc = await gen.optionsDocument;
 		if (optionsDoc !== undefined) {
 			for (let resetButton of optionsDoc.querySelectorAll('button[data-reset]')) {
 				resetButton.addEventListener('click', resetControl);
@@ -3164,6 +3164,7 @@ function hasRandomness(enabled) {
 				URL.revokeObjectURL(bgGeneratorImage.src);
 			}
 			bgGeneratorImage.src = URL.createObjectURL(file);
+			// The onload event will redraw the image.
 		}
 	});
 

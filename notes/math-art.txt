@@ -7,7 +7,7 @@ Environment
 Service Worker
 
 Add PayPal donation link
-Bug WebGL context lost
+Bug: Handle WebGL context lost while generating video.
 Bug: changing to full detail during playback doesn't update finished image
 Bug: blur doesn't work on still image export
 Bug: scale mode doesn't work with webgl

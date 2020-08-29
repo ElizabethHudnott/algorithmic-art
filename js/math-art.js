@@ -303,7 +303,8 @@ function hasRandomness(enabled) {
 			this.projectionMatrix = undefined;
 			this.uniformLocations = undefined;
 			this.program = undefined;
-			this.types = new Map();
+			this.types = undefined;
+			this.webglInitialized = false;
 		}
 
 		resize(width, height) {
@@ -338,8 +339,8 @@ function hasRandomness(enabled) {
 				mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 				this.projectionMatrix = projectionMatrix;
 
-				const uniformLocations = this.uniformLocations;
-				if (uniformLocations !== undefined) {
+				if (this.webglInitialized) {
+					const uniformLocations = this.uniformLocations;
 					gl.uniformMatrix4fv(
 						uniformLocations.projectionMatrix,
 						false,
@@ -365,14 +366,18 @@ function hasRandomness(enabled) {
         }
 
 		initializeShader(generator) {
-			if (generator.shaderSource === undefined) {
-				return;
-			}
 			let gl = this.gl;
-			if (this.gl === undefined) {
+			if (gl === undefined) {
 				const glCanvas = document.createElement('CANVAS');
 				gl = glCanvas.getContext('webgl2', {premultipliedAlpha : false});
 				this.gl = gl;
+				const me = this;
+				glCanvas.addEventListener('webglcontextlost', function (event) {
+					event.preventDefault();
+					me.webglInitialized = false;
+				})
+			}
+			if (!this.webglInitialized) {
 				const positionBuffer = gl.createBuffer();
 				gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 				const points = [
@@ -392,6 +397,7 @@ function hasRandomness(enabled) {
 				this.modelViewMatrix = modelViewMatrix;
 				const twoDCanvas = this.twoD.canvas;
 				this.resize(twoDCanvas.width, twoDCanvas.height);
+				this.webglInitialized = true;
 			}
 
 			const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
@@ -431,44 +437,56 @@ function hasRandomness(enabled) {
 			);
 			gl.uniform1f(uniformLocations.width, gl.canvas.width);
 			gl.uniform1f(uniformLocations.height, gl.canvas.height);
+		}
 
-			this.types.clear();
+		restoreShader(generator) {
+			this.initializeShader(generator);
+			this.setProperties(generator);
+		}
+
+		inferTypes(generator) {
+			const types = new Map();
 			const animatable = generator.animatable;
 			if (animatable !== undefined) {
 				const continuous = animatable.continuous;
 				if (continuous !== undefined) {
 					for (let property of continuous) {
-						this.types.set(property, inferGLType(generator[property], false));
+						types.set(property, inferGLType(generator[property], false));
 					}
 				}
 				const stepped = animatable.stepped;
 				if (stepped !== undefined) {
 					for (let property of stepped) {
-						this.types.set(property, inferGLType(generator[property], true));
+						types.set(property, inferGLType(generator[property], true));
 					}
 				}
 				const pairedContinuous = animatable.pairedContinuous;
 				if (pairedContinuous !== undefined) {
 					for (let [property1, property2] of pairedContinuous) {
-						this.types.set(property1, inferGLType(generator[property1], false));
-						this.types.set(property2, inferGLType(generator[property2], false));
+						types.set(property1, inferGLType(generator[property1], false));
+						types.set(property2, inferGLType(generator[property2], false));
 					}
 				}
 				const xy = animatable.xy;
 				if (xy !== undefined) {
 					for (let [property1, property2] of xy) {
-						this.types.set(property1, inferGLType(generator[property1], false));
-						this.types.set(property2, inferGLType(generator[property2], false));
+						types.set(property1, inferGLType(generator[property1], false));
+						types.set(property2, inferGLType(generator[property2], false));
 					}
 				}
 				const pairedStepped = animatable.pairedStepped;
 				if (pairedStepped !== undefined) {
 					for (let [property1, property2] of pairedStepped) {
-						this.types.set(property1, inferGLType(generator[property1], true));
-						this.types.set(property2, inferGLType(generator[property2], true));
+						types.set(property1, inferGLType(generator[property1], true));
+						types.set(property2, inferGLType(generator[property2], true));
 					}
 				}
 			}
+			this.types = types;
+		}
+
+		copyTypes(contextualInfo) {
+			this.types = contextualInfo.types;
 		}
 
 		setProperty(generator, property, value) {
@@ -1383,6 +1401,13 @@ function hasRandomness(enabled) {
 		console.error(exception);
 	}
 
+	function restoreWebGL() {
+		if (bgGenerator.isShader) {
+			drawingContext.restoreShader(bgGenerator);
+			progressiveBackgroundGen(0);
+		}
+	}
+
 	async function switchGenerator(url, pushToHistory) {
 		// Hide stuff while it changes
 		const container = document.getElementById('background-gen-options');
@@ -1416,6 +1441,8 @@ function hasRandomness(enabled) {
 					shaderDeclarations(gen) +
 					fragFileContent;
 				drawingContext.initializeShader(gen);
+				drawingContext.gl.canvas.addEventListener('webglcontextrestored', restoreWebGL);
+				drawingContext.inferTypes(gen);
 			} catch (e) {
 				loadFailure(e, hadRandomness);
 				return;
@@ -1520,8 +1547,8 @@ function hasRandomness(enabled) {
 				if (debug.help) {
 					findBrokenHelp();
 				}
-			} catch {
-				console.error('Unable to load help file.');
+			} catch (e) {
+				console.error(e);
 			}
 		}
 	}
@@ -3112,6 +3139,7 @@ function hasRandomness(enabled) {
 			const drawHeight = screen.height;
 			const contextualInfo = new DrawingContext(captureCanvas, videoWidth, videoHeight, scale);
 			contextualInfo.initializeShader(bgGenerator);
+			contextualInfo.copyTypes(drawingContext);
 			captureVideo(contextualInfo, drawWidth, drawHeight, length * 1000, properties);
 
 		} else {

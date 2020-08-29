@@ -291,11 +291,12 @@ function hasRandomness(enabled) {
 	}
 
 	class DrawingContext {
-		constructor(canvas, width, height, scale) {
+		constructor(canvas, width, height, scale, svg) {
 			const twoD = canvas.getContext('2d');
 			this.twoD = twoD;
 			this.gl = undefined;
 			this.scale = scale;
+			this.svg = svg;
 			this.twoDMatrixInv = new DOMMatrix([scale, 0, 0, scale, 0, 0]);
 			this.resize(width, height);
 			this.modelViewMatrix = undefined;
@@ -316,6 +317,11 @@ function hasRandomness(enabled) {
 				twoD.save();
 			}
 			twoD.save();
+			const svg = this.svg;
+			if (svg !== undefined) {
+				svg.setAttribute('width', width);
+				svg.setAttribute('height', height);
+			}
 
 			const gl = this.gl;
 			if (gl !== undefined) {
@@ -517,7 +523,10 @@ function hasRandomness(enabled) {
 
 	}
 
-	const drawingContext = new DrawingContext(canvas, window.innerWidth, window.innerHeight, 1);
+	const drawingContext = new DrawingContext(
+		canvas, window.innerWidth, window.innerHeight, 1,
+		document.getElementById('canvas-overlay')
+	);
 	const signatureBox = document.getElementById('author-hitbox');
 	let signatureChanged = true;
 	let signatureWidth, signatureHeight, userDisplayName;
@@ -705,9 +714,9 @@ function hasRandomness(enabled) {
 
 
 	function transformCanvas(context, width, height, renderWidth, renderHeight, rotation) {
-		context.translate(Math.ceil(width / 2), Math.ceil(height / 2));
+		context.translate(Math.trunc(width / 2), Math.trunc(height / 2));
 		context.rotate(rotation);
-		context.translate(Math.ceil(-renderWidth / 2), Math.ceil(-renderHeight / 2));
+		context.translate(Math.trunc(-renderWidth / 2), Math.trunc(-renderHeight / 2));
 	}
 
 	function progressiveBackgroundGen(preview) {
@@ -1138,12 +1147,15 @@ function hasRandomness(enabled) {
 	function resetControl(event) {
 		const id = this.dataset.reset;
 		const control = document.getElementById(id);
-		const value = control.getAttribute('value');
-		const property = idToProperty(id, true);
+		let value = control.getAttribute('value');
 		control.value = value;
 		const controlType = control.type;
 		if (controlType === 'range' || controlType === 'number') {
-			bgGenerator[property] = parseFloat(value);
+			value = parseFloat(value);
+		}
+		const property = idToProperty(id, true);
+		if (bgGenerator.isShader) {
+			drawingContext.setProperty(bgGenerator, property, value);
 		} else {
 			bgGenerator[property] = value;
 		}
@@ -1277,13 +1289,86 @@ function hasRandomness(enabled) {
 		const x = event.clientX;
 		const y = event.clientY;
 		const [transformedX, transformedY] = drawingContext.transform2DPoint(x, y);
-
 		const context = drawingContext.twoD;
 		const width = canvas.width;
 		const height = canvas.height;
 		const [scaledWidth, scaledHeight] = calcSize(width, height, scale, scaleMode);
 		bgGenerator.onclick(transformedX, transformedY, scaledWidth, scaledHeight);
 	}
+
+	let dragStartX, dragStartY;
+
+	function canvasDrag(event) {
+		const shape = drawingContext.svg.children[0];
+		let x = Math.round(event.clientX);
+		let y = Math.round(event.clientY);
+		let width = x - dragStartX;
+		if (width < 0) {
+			shape.setAttribute('x', x);
+			width = -width;
+		}
+		let height = y - dragStartY;
+		if (height < 0) {
+			shape.setAttribute('y', y);
+			height = -height;
+		}
+		shape.setAttribute('width', width);
+		shape.setAttribute('height', height);
+	}
+
+	function canvasDragEnd() {
+		const svg = drawingContext.svg;
+		svg.removeEventListener('pointermove', canvasDrag);
+		svg.removeEventListener('pointerup', canvasMouseUp);
+		svg.removeEventListener('pointerleave', canvasDragEnd);
+		svg.children[0].setAttribute('visibility', 'hidden');
+	}
+
+	function canvasMouseUp(event) {
+		canvasDragEnd();
+		const shape = drawingContext.svg.children[0];
+		const width = shape.width.baseVal.value;
+		const height = shape.height.baseVal.value;
+		if (width < 4 && height < 4) {
+			return;
+		}
+		const x1 = shape.x.baseVal.value;
+		const y1 = shape.y.baseVal.value;
+		const x2 = x1 + shape.width.baseVal.value;
+		const y2 = y1 + shape.height.baseVal.value;
+		let [transformedX1, transformedY1] = drawingContext.transform2DPoint(x1, y1);
+		let [transformedX2, transformedY2] = drawingContext.transform2DPoint(x2, y2);
+		const context = drawingContext.twoD;
+		const canvasWidth = canvas.width;
+		const canvasHeight = canvas.height;
+		const [scaledWidth, scaledHeight] = calcSize(canvasWidth, canvasHeight, scale, scaleMode);
+		if (bgGenerator.isShader) {
+			transformedY1 = scaledHeight - transformedY1;
+			transformedY2 = scaledHeight - transformedY2;
+		}
+		bgGenerator.ondrag(transformedX1, transformedY1, transformedX2, transformedY2, scaledWidth, scaledHeight);
+	}
+
+	function canvasMouseDown(event) {
+		if (event.button !== 0) {
+			canvasDragEnd();
+			return;
+		}
+		dragStartX = Math.round(event.clientX);
+		dragStartY = Math.round(event.clientY);
+		const svg = drawingContext.svg;
+		const shape = svg.children[0];
+		shape.setAttribute('x', dragStartX);
+		shape.setAttribute('y', dragStartY);
+		shape.setAttribute('width', 0);
+		shape.setAttribute('height', 0)
+		shape.setAttribute('visibility', 'visible');
+		svg.addEventListener('pointermove', canvasDrag);
+		svg.addEventListener('pointerup', canvasMouseUp);
+		svg.addEventListener('pointerleave', canvasDragEnd);
+	}
+
+	drawingContext.svg.addEventListener('pointerdown', canvasMouseDown);
 
 	function loadFailure(exception, hadRandomness) {
 		if (bgGenerator === undefined) {
@@ -1339,7 +1424,8 @@ function hasRandomness(enabled) {
 		}
 
 		// Set the new generator as the current one.
-		canvas.removeEventListener('click', canvasClick);
+		drawingContext.svg.removeEventListener('pointerdown', canvasMouseDown);
+		drawingContext.svg.removeEventListener('click', canvasClick);
 		bgGenerator = gen;
 		generatorURL = url;
 		if (currentSketch && currentSketch.url !== url) {
@@ -1396,8 +1482,11 @@ function hasRandomness(enabled) {
 		}
 
 		// Adapt the environment's UI accordingly
+		if (typeof(gen.ondrag) === 'function') {
+			drawingContext.svg.addEventListener('pointerdown', canvasMouseDown);
+		}
 		if (typeof(gen.onclick) === 'function') {
-			canvas.addEventListener('click', canvasClick);
+			drawingContext.svg.addEventListener('click', canvasClick);
 		}
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;

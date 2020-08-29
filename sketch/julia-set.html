@@ -329,35 +329,57 @@
 				Centre X
 			</label>
 			<div class="col-3">
-				<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-x">
+				<input type="number" value="0" step="0.1" class="form-control form-control-sm" id="julia-centre-x">
 			</div>
 			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-centre-y">
 				Centre Y
 			</label>
 			<div class="col-3">
-				<input type="number" value="0" step="0.05" class="form-control form-control-sm" id="julia-centre-y">
+				<input type="number" value="0" step="0.1" class="form-control form-control-sm" id="julia-centre-y">
 			</div>
 		</div>
-		<div class="form-row form-group">
+		<div class="form-row mb-2">
 			<label class="col-3 col-form-label col-form-label-sm" for="julia-range-x">
-				Range X
+				Width
 			</label>
 			<div class="col-3">
-				<input type="number" min="0.05" value="3" step="0.05" class="form-control form-control-sm" id="julia-range-x">
+				<input type="number" min="0.1" value="3" step="0.1" class="form-control form-control-sm" id="julia-range-x">
 			</div>
 			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="julia-range-y">
-				Range Y
+				Height
 			</label>
 			<div class="col-3">
-				<input type="number" min="0.05" value="2" step="0.05" class="form-control form-control-sm" id="julia-range-y">
+				<input type="number" min="0.1" value="2" step="0.1" class="form-control form-control-sm" id="julia-range-y">
 			</div>
 		</div>
-		<div class="form-row form-group">
+		<div class="form-row mb-2">
+			<div class="col-3"></div>
+			<div class="col-6">
+				<div class="form-check mt-1">
+					<input type="checkbox" checked class="form-check-input" id="julia-preserve-aspect">
+					<label class="form-check-label small" for="julia-preserve-aspect">
+						Adjust width and height together
+					</label>
+				</div>
+			</div>
+			<div class="col-3">
+				<button class="btn btn-form btn-sm w-100" id="julia-btn-zoom-out">
+					<img src="../img/magnifier_zoom_out.png" width="16" height="16" alt="Magnifier">
+					Zoom Out
+				</button>
+			</div>
+		</div>
+		<div class="form-row">
 			<label class="col-3 col-form-label col-form-label-sm" for="julia-rotation">
 				Rotation
 			</label>
-			<div class="col-3">
-				<input type="range" min="0" max="0.5" step="0.005" value="0" class="form-control-range mt-2" id="julia-rotation">
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.005" value="0" class="form-control-range mt-2" id="julia-rotation">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="julia-rotation" title="Reset rotation">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
 			</div>
 		</div>
 	</div>

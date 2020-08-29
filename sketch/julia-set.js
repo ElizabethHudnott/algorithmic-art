@@ -658,37 +658,113 @@ export default function JuliaSet() {
 			setNonNegativeProperty('maxIterations', this.value, true);
 		});
 
-		optionsDoc.getElementById('julia-centre-x').addEventListener('input', function (event) {
+		function calcStep(input) {
+			const value = parseFloat(input.value);
+			let decimalPlaces = Math.max(input.value.length - String(Math.trunc(value)).length - 1, 0);
+			if (value < 0) {
+				decimalPlaces--;
+			}
+			input.step = Math.min(2 * 10 ** -decimalPlaces, 0.1);
+		}
+
+		const xCentreInput = optionsDoc.getElementById('julia-centre-x');
+		xCentreInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				setBgProperty(me, 'xCentre', value);
 				generateBackground(0);
+				calcStep(this);
 			}
 		});
 
-		optionsDoc.getElementById('julia-centre-y').addEventListener('input', function (event) {
+		const yCentreInput = optionsDoc.getElementById('julia-centre-y');
+		yCentreInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				setBgProperty(me, 'yCentre', value);
 				generateBackground(0);
+				calcStep(this);
 			}
 		});
 
-		optionsDoc.getElementById('julia-range-x').addEventListener('input', function (event) {
+		const preserveAspectInput = optionsDoc.getElementById('julia-preserve-aspect');
+		const widthInput = optionsDoc.getElementById('julia-range-x');
+		const heightInput = optionsDoc.getElementById('julia-range-y');
+		widthInput.value = me.xRange;
+
+		widthInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
+				const aspect = me.xRange / me.yRange;
 				setBgProperty(me, 'xRange', value);
+				if (preserveAspectInput.checked) {
+					const height = value / aspect;
+					setBgProperty(me, 'yRange', height);
+					heightInput.value = Math.round(height * 1000) / 1000;
+				}
 				generateBackground(0);
+				calcStep(this);
 			}
 		});
 
-		optionsDoc.getElementById('julia-range-y').addEventListener('input', function (event) {
+		heightInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
+				const aspect = me.xRange / me.yRange;
 				setBgProperty(me, 'yRange', value);
+				if (preserveAspectInput.checked) {
+					const width = value * aspect;
+					setBgProperty(me, 'xRange', width);
+					widthInput.value = Math.round(width * 1000) / 1000;
+				}
 				generateBackground(0);
+				calcStep(this);
 			}
 		});
+
+		optionsDoc.getElementById('julia-btn-zoom-out').addEventListener('click', function (event) {
+			const zoomFactor = Math.SQRT2;
+			const width = me.xRange * zoomFactor;
+			const height = me.yRange * zoomFactor;
+			setBgProperty(me, 'xRange', width);
+			setBgProperty(me, 'yRange', height);
+			widthInput.value = Math.round(width * 1000) / 1000;
+			heightInput.value = Math.round(height * 1000) / 1000;
+			generateBackground(0);
+		});
+
+		me.ondrag = function (x1, y1, x2, y2, pixelWidth, pixelHeight) {
+			const xScale = this.xRange / pixelWidth;
+			const yScale = this.yRange / pixelHeight;
+			let {xCentre, yCentre} = this;
+			const centrePixelX = pixelWidth / 2;
+			const centrePixelY = pixelHeight / 2;
+			const x1t = (x1 - centrePixelX) * xScale + xCentre;
+			const x2t = (x2 - centrePixelX) * xScale + xCentre;
+			const y1t = (y1 - centrePixelY) * yScale + yCentre;
+			const y2t = (y2 - centrePixelY) * yScale + yCentre;
+			xCentre = (x1t + x2t) / 2;
+			yCentre = (y1t + y2t) / 2;
+			let width = Math.abs(x2t - x1t);
+			let height = Math.abs(y2t - y1t);
+			const desiredAspect = pixelWidth / pixelHeight;
+			const actualAspect = width / height;
+			if (desiredAspect >= actualAspect) {
+				width = height * desiredAspect;
+			} else {
+				height = width / desiredAspect;
+			}
+			setBgProperty(this, 'xCentre', xCentre);
+			setBgProperty(this, 'yCentre', yCentre);
+			setBgProperty(this, 'xRange', width);
+			setBgProperty(this, 'yRange', height);
+			xCentreInput.value = Math.round(xCentre * 1000) / 1000;
+			yCentreInput.value = Math.round(yCentre * 1000) / 1000;
+			widthInput.value = Math.round(width * 1000) / 1000;
+			heightInput.value = Math.round(height * 1000) / 1000;
+			generateBackground(0);
+
+		}
 
 		optionsDoc.getElementById('julia-rotation').addEventListener('input', function (event) {
 			setBgProperty(me, 'rotation', parseFloat(this.value) * Math.PI);
@@ -882,9 +958,9 @@ export default function JuliaSet() {
 	this.inverse = 0;
 	this.muTranslation = 0;
 
-	this.xRange = 3;
-	this.xCentre = 0;
 	this.yRange = 2;
+	this.xRange = Math.round(this.yRange * window.innerWidth / window.innerHeight * 1000) / 1000;
+	this.xCentre = 0;
 	this.yCentre = 0;
 	this.rotation = 0;
 	this.maxIterations = 150;

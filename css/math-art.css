@@ -502,6 +502,12 @@ button.btn-black:hover {
 	right: 0 !important;
 }
 
+#canvas-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
 #overlay {
 	background-color: #000000d0;
 	color: white;

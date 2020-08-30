@@ -1968,11 +1968,15 @@ function hasRandomness(enabled) {
 				context.drawImage(startImage, 0, 0, dWidth, dHeight);
 			}
 		} else if (tween < endFade) {
+			const fadeAmount = (endFade - tween)  / (endFade - startFade);
 			if (hasEndImage) {
+				if (!hasStartImage) {
+					context.globalAlpha = 1 - fadeAmount;
+				}
 				context.drawImage(endImage, 0, 0, dWidth, dHeight);
 			}
 			if (hasStartImage) {
-				context.globalAlpha = (endFade - tween)  / (endFade - startFade);
+				context.globalAlpha = fadeAmount;
 				context.drawImage(startImage, 0, 0, dWidth, dHeight);
 			}
 		} else {
@@ -1986,9 +1990,7 @@ function hasRandomness(enabled) {
 
 		constructor(generator, startFrame, endFrame, width, height) {
 
-			this.backgroundColorVaries =
-				startFrame.backgroundColor !== endFrame.backgroundColor &&
-				(startFrame.backgroundImage !== undefined || endFrame.backgroundImage !== undefined);
+			this.backgroundColorVaries = startFrame.backgroundColor !== endFrame.backgroundColor;
 
 			this.blurVaries = startFrame.blur !== endFrame.blur;
 
@@ -2057,6 +2059,25 @@ function hasRandomness(enabled) {
 	}
 
 	function calcTweenData() {
+		const hasStartImage = startFrame.backgroundImage !== undefined;
+		const hasEndImage = endFrame.backgroundImage !== undefined;
+		if (hasStartImage !== hasEndImage) {
+			let imageFrame, colorFrame;
+			if (hasStartImage) {
+				imageFrame = startFrame;
+				colorFrame = endFrame;
+			} else {
+				imageFrame = endFrame;
+				colorFrame = startFrame;
+			}
+			const [r, g, b] = parseColor(colorFrame.backgroundColor)[1];
+			const color = rgbToLuma(r, g, b) >= 0.5 ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)';
+			imageFrame.backgroundColor = color;
+			if (currentFrame === imageFrame) {
+				backgroundElement.style.backgroundColor = color;
+			}
+		}
+
 		tweenData = new TweenData(bgGenerator, startFrame, endFrame, canvas.width, canvas.height);
 		backgroundElement.style.willChange = tweenData.backgroundColorVaries ? 'background-color' : 'auto';
 	}
@@ -2501,12 +2522,12 @@ function hasRandomness(enabled) {
 		if (value === 'color') {
 			$('#background-color-row').collapse('show');
 			backgroundImage = undefined;
+			const [r, g, b] = parseColor(backgroundElement.style.backgroundColor)[1];
+			const color = rgbToHex(r, g, b);
+			document.getElementById('background-color').value = color;
 			progressiveBackgroundGen(0);
 		} else {
 			$('#background-color-row').collapse('hide');
-			const color = darkMode() ? '#000000' : '#ffffff';
-			document.getElementById('background-color').value = color;
-			backgroundElement.style.backgroundColor = color;
 			backgroundImage = document.createElement('IMG');
 			backgroundImage.onload = redraw;
 			backgroundImage.src = 'img/texture/' + value + '.jpg';
@@ -2831,11 +2852,7 @@ function hasRandomness(enabled) {
 		const tween = animController.progress;
 		animPositionSlider.value = tween;
 		updateAnimPositionReadout(tween);
-		if (playPreview > 0) {
-			syncAndDraw();
-		} else {
-			syncToPosition();
-		}
+		syncAndDraw();
 		animController = undefined;
 	}
 

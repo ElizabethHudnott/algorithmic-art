@@ -7,12 +7,11 @@ Environment
 Service Worker
 
 Add PayPal donation link
+Bug: background images with destination-over
 Bug: Handle WebGL context lost while generating video.
-Bug: changing to full detail during playback doesn't update finished image
 Bug: blur doesn't work on still image export
 Bug: scale mode doesn't work with webgl
 Bug: SVG selection box doesn't rotate when the canvas is rotated
-Bug: fading background image to color & color to image?
 Bug: outstanding changes flagged after aborting video rendering
 Bug: initial floating window positions
 Bug: resizing window while video rendering messes up scale parameter

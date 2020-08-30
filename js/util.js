@@ -288,6 +288,13 @@ function hexToRGBA(color) {
 	return [r, g, b, a];
 }
 
+function rgbToHex(r, g, b) {
+	return '#' +
+		r.toString(16).padStart(2, '0') +
+		g.toString(16).padStart(2, '0') +
+		b.toString(16).padStart(2, '0');
+}
+
 function rgba(r, g, b, a) {
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }

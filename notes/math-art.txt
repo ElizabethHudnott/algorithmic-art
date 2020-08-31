@@ -22,6 +22,7 @@ Performance: remove transparency & shadow when dragging sliders (including playb
 Bug: WebGL canvas not resizing (needs different field of view)
 
 Save As button
+Anonymize button
 Add credits
 Add URL to signature
 Responsiveness issues

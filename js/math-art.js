@@ -1321,17 +1321,32 @@ function hasRandomness(enabled) {
 		let x = Math.round(event.clientX);
 		let y = Math.round(event.clientY);
 		let width = x - dragStartX;
-		if (width < 0) {
-			shape.setAttribute('x', x);
-			width = -width;
-		}
 		let height = y - dragStartY;
-		if (height < 0) {
-			shape.setAttribute('y', y);
-			height = -height;
+
+		switch (shape.tagName) {
+		case 'circle':
+			const radius = Math.hypot(width, height);
+			shape.setAttribute('r', radius);
+			break;
+
+		case 'line':
+			shape.setAttribute('x2', x);
+			shape.setAttribute('y2', y);
+			break;
+
+		case 'rect':
+			if (width < 0) {
+				shape.setAttribute('x', x);
+				width = -width;
+			}
+			if (height < 0) {
+				shape.setAttribute('y', y);
+				height = -height;
+			}
+			shape.setAttribute('width', width);
+			shape.setAttribute('height', height);
+			break;
 		}
-		shape.setAttribute('width', width);
-		shape.setAttribute('height', height);
 	}
 
 	function canvasDragEnd() {
@@ -1345,17 +1360,45 @@ function hasRandomness(enabled) {
 	function canvasMouseUp(event) {
 		canvasDragEnd();
 		const shape = drawingContext.svg.children[0];
-		const width = shape.width.baseVal.value;
-		const height = shape.height.baseVal.value;
+		const shapeType = shape.tagName;
+		let x1, y1, x2, y2, radius, width, height;
+		switch (shapeType) {
+		case 'circle':
+			x1 = dragStartX;
+			y1 = dragStartY;
+			radius = shape.r.baseVal.value;
+			width = radius;
+			height = radius;
+			break;
+
+		case 'line':
+			x1 = dragStartX;
+			y1 = dragStartY;
+			x2 = shape.x2.baseVal.value;
+			y2 = shape.y2.baseVal.value;
+			width = Math.abs(x2 - x1);
+			height = Math.abs(y2 - y1);
+			break;
+
+		case 'rect':
+			x1 = shape.x.baseVal.value;
+			y1 = shape.y.baseVal.value;
+			width = shape.width.baseVal.value;
+			height = shape.height.baseVal.value;
+			x2 = x1 + width;
+			y2 = y1 + height;
+			break;
+		}
 		if (width < 4 && height < 4) {
 			return;
 		}
-		const x1 = shape.x.baseVal.value;
-		const y1 = shape.y.baseVal.value;
-		const x2 = x1 + shape.width.baseVal.value;
-		const y2 = y1 + shape.height.baseVal.value;
 		let [transformedX1, transformedY1] = drawingContext.transform2DPoint(x1, y1);
-		let [transformedX2, transformedY2] = drawingContext.transform2DPoint(x2, y2);
+		let transformedX2, transformedY2;
+		if (shapeType === 'circle') {
+			[transformedX2, transformedY2] = [transformedX1 + radius, transformedY1];
+		} else {
+			[transformedX2, transformedY2] = drawingContext.transform2DPoint(x2, y2);
+		}
 		const context = drawingContext.twoD;
 		const canvasWidth = canvas.width;
 		const canvasHeight = canvas.height;
@@ -1375,11 +1418,47 @@ function hasRandomness(enabled) {
 		dragStartX = Math.round(event.clientX);
 		dragStartY = Math.round(event.clientY);
 		const svg = drawingContext.svg;
-		const shape = svg.children[0];
-		shape.setAttribute('x', dragStartX);
-		shape.setAttribute('y', dragStartY);
-		shape.setAttribute('width', 0);
-		shape.setAttribute('height', 0)
+		let shape = svg.children[0];
+		const shapeType = bgGenerator.dragShape || 'rect';
+		if (shape.tagName !== shapeType) {
+			shape.remove();
+			shape = document.createElementNS('http://www.w3.org/2000/svg', shapeType);
+			switch (shapeType) {
+			case 'line':
+				svg.style.mixBlendMode = 'difference';
+				shape.setAttribute('stroke', 'white');
+				shape.setAttribute('stroke-width', 3);
+				break;
+
+			case 'circle':
+			case 'rect':
+				svg.style.mixBlendMode = 'normal';
+				shape.setAttribute('fill', 'hsla(210, 50%, 50%, 0.55)');
+				break;
+			}
+			svg.appendChild(shape);
+		}
+		switch (shapeType) {
+		case 'circle':
+			shape.setAttribute('cx', dragStartX);
+			shape.setAttribute('cy', dragStartY);
+			shape.setAttribute('r', 0);
+			break;
+
+		case 'line':
+			shape.setAttribute('x1', dragStartX);
+			shape.setAttribute('x2', dragStartX);
+			shape.setAttribute('y1', dragStartY);
+			shape.setAttribute('y2', dragStartY);
+			break;
+
+		case 'rect':
+			shape.setAttribute('x', dragStartX);
+			shape.setAttribute('y', dragStartY);
+			shape.setAttribute('width', 0);
+			shape.setAttribute('height', 0)
+			break;
+		}
 		shape.setAttribute('visibility', 'visible');
 		svg.addEventListener('pointermove', canvasDrag);
 		svg.addEventListener('pointerup', canvasMouseUp);

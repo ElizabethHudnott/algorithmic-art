@@ -8,6 +8,7 @@ Service Worker
 
 Add PayPal donation link
 Bug: Can't drag underneath modals, etc.
+Bug: lose drag selection when dragging outside the window
 Bug: background images with destination-over
 Bug: Handle WebGL context lost while generating video.
 Bug: blur doesn't work on still image export

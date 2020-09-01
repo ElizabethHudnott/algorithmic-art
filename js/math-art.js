@@ -652,6 +652,7 @@ function hasRandomness(enabled) {
 					});
 				}
 			}
+			document.body.classList.remove('cursor-progress');
 		} else {
 			random.reset();
 			const redraw = generator.generate(contextualInfo.twoD, width, height, preview);
@@ -668,10 +669,6 @@ function hasRandomness(enabled) {
 					totalTime += performance.now() - startTime;
 					totalUnits += unitsProcessed;
 					if (done) {
-						if (totalUnits > 0) {
-							benchmark = Math.trunc(totalUnits / totalTime * 40);
-						}
-						backgroundRedraw = undefined;
 						if (preview === 0) {
 							if (document.fonts.check(signatureFont)) {
 								drawSignature(contextualInfo);
@@ -681,6 +678,11 @@ function hasRandomness(enabled) {
 								});
 							}
 						}
+						if (totalUnits > 0) {
+							benchmark = Math.trunc(totalUnits / totalTime * 40);
+						}
+						backgroundRedraw = undefined;
+						document.body.classList.remove('cursor-progress');
 					} else {
 						requestAnimationFrame(drawSection);
 					}
@@ -738,6 +740,7 @@ function hasRandomness(enabled) {
 	}
 
 	function progressiveBackgroundGen(preview) {
+		document.body.classList.add('cursor-progress');
 		const context = drawingContext.twoD;
 		const width = canvas.width;
 		const height = canvas.height;
@@ -1530,8 +1533,9 @@ function hasRandomness(enabled) {
 		}
 
 		// Set the new generator as the current one.
-		drawingContext.svg.removeEventListener('pointerdown', canvasMouseDown);
-		drawingContext.svg.removeEventListener('click', canvasClick);
+		const svg = drawingContext.svg;
+		svg.removeEventListener('pointerdown', canvasMouseDown);
+		svg.removeEventListener('click', canvasClick);
 		bgGenerator = gen;
 		generatorURL = url;
 		if (currentSketch && currentSketch.url !== url) {
@@ -1589,10 +1593,13 @@ function hasRandomness(enabled) {
 
 		// Adapt the environment's UI accordingly
 		if (typeof(gen.ondrag) === 'function') {
-			drawingContext.svg.addEventListener('pointerdown', canvasMouseDown);
+			svg.addEventListener('pointerdown', canvasMouseDown);
+			svg.style.cursor = 'crosshair';
+		} else {
+			svg.style.cursor = 'auto';
 		}
 		if (typeof(gen.onclick) === 'function') {
-			drawingContext.svg.addEventListener('click', canvasClick);
+			svg.addEventListener('click', canvasClick);
 		}
 		document.getElementById('btn-both-frames').hidden = !hasTween;
 		document.getElementById('btn-both-frames2').hidden = !hasTween;
@@ -2304,7 +2311,7 @@ function hasRandomness(enabled) {
 		if (paintBackground) {
 			fillBackground(context, backgroundColor, calcBlur(blur), width, height);
 		} else if (tweenData.blurVaries) {
-			canvas.style.filter = calcBlur(blur);
+			context.canvas.style.filter = calcBlur(blur);
 		}
 		if (paintBackground || !forAnim) {
 			drawSignature(contextualInfo);
@@ -2454,7 +2461,7 @@ function hasRandomness(enabled) {
 			helpContextItem.popover('dispose');
 		}
 
-		document.body.classList.add('context-help');
+		document.body.classList.add('cursor-help');
 		helpContext = true;
 		helpContextItem = $(this);
 		helpContextItem.popover({
@@ -2490,7 +2497,7 @@ function hasRandomness(enabled) {
 		if (helpContext) {
 			let popoverTitle = '';
 			let popoverContent = null;
-			document.body.classList.remove('context-help');
+			document.body.classList.remove('cursor-help');
 			helpContext = false;
 
 			const rootElement = document.body;

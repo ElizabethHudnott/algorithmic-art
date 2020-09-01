@@ -413,7 +413,11 @@ button.btn-black:hover {
 	max-width: fit-content;
 }
 
-.context-help * {
+.cursor-progress * {
+	cursor: progress !important;
+}
+
+.cursor-help * {
 	cursor: help !important;
 }
 

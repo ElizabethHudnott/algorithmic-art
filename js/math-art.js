@@ -979,7 +979,7 @@ function hasRandomness(enabled) {
 		isCurrentFrame() {
 			if (
 				this.backgroundColor !== backgroundElement.style.backgroundColor ||
-				this.backgroundImage?.src !== backgroundImage?.src ||
+				optional(this.backgroundImage, 'src') !== optional(backgroundImage, 'src') ||
 				this.rotation !== rotation ||
 				this.opacity !== opacity ||
 				this.scale !== scale ||

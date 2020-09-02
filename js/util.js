@@ -10,11 +10,6 @@ for (let preload of document.head.querySelectorAll('link[rel="preload"][as="styl
 const rootPath = document.location.origin + document.location.pathname.replace(/\/[^/]*$/, '/');
 
 class AnimationController {
-	static Status = Object.freeze({
-		RUNNING: 1,
-		FINISHED: 0,
-		ABORTED: -1,
-	});
 
 	constructor(properties) {
 		for (let property in properties) {
@@ -56,6 +51,12 @@ class AnimationController {
 	}
 
 }
+
+ AnimationController.Status = Object.freeze({
+	RUNNING: 1,
+	FINISHED: 0,
+	ABORTED: -1,
+});
 
 const loadedScripts = new Map();
 
@@ -364,6 +365,16 @@ function srgbToLAB(r, g, b, alpha) {
 	b = 200 * (fy - f(z / zn));
 
 	return [l, a ,b, alpha];
+}
+
+/** Optional chaining polyfill
+ */
+function optional(obj, property) {
+	if (obj === undefined || obj === null) {
+		return obj[property];
+	} else {
+		return undefined;
+	}
 }
 
 function idToProperty(id, hasPrefix) {

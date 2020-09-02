@@ -800,9 +800,6 @@ const parser = /*
     	}
 
     	class Constant extends Node {
-    		static E = new Constant(Math.E);
-    		static PI = new Constant(Math.PI);
-
     		constructor(value) {
     			super();
     			this.value = value;
@@ -813,6 +810,10 @@ const parser = /*
     			return this.value;
     		}
     	}
+
+    	Constant.E = new Constant(Math.E);
+    	Constant.PI = new Constant(Math.PI);
+
 
     	class Variable extends Node {
     		constructor(name) {

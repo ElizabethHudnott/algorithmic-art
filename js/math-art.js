@@ -637,8 +637,10 @@ function hasRandomness(enabled) {
 	}
 
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview, callback) {
+		const context = contextualInfo.twoD;
 		if (generator.isShader) {
 			contextualInfo.drawGL(parseFloat(animPositionSlider.value), preview);
+			restoreCanvas(context);
 			if (preview === 0) {
 				if (document.fonts.check(signatureFont)) {
 					drawSignature(contextualInfo);
@@ -648,10 +650,10 @@ function hasRandomness(enabled) {
 					});
 				}
 			}
+			callback();
 			document.body.classList.remove('cursor-progress');
 		} else {
 			random.reset();
-			const context = contextualInfo.twoD;
 			const redraw = generator.generate(context, width, height, preview);
 			backgroundRedraw = redraw;
 			let done = false;
@@ -666,8 +668,7 @@ function hasRandomness(enabled) {
 					totalTime += performance.now() - startTime;
 					totalUnits += unitsProcessed;
 					if (done) {
-						context.restore();
-						context.save();
+						restoreCanvas(context);
 						if (preview === 0) {
 							if (document.fonts.check(signatureFont)) {
 								drawSignature(contextualInfo);
@@ -739,6 +740,11 @@ function hasRandomness(enabled) {
 		context.translate(Math.trunc(-renderWidth / 2), Math.trunc(-renderHeight / 2));
 	}
 
+	function restoreCanvas(context) {
+		context.restore();
+		context.save();
+	}
+
 	function drawBackgroundImage() {
 		if (backgroundImage !== undefined) {
 			const context = drawingContext.twoD;
@@ -751,13 +757,11 @@ function hasRandomness(enabled) {
 	function progressiveBackgroundGen(preview) {
 		document.body.classList.add('cursor-progress');
 		const context = drawingContext.twoD;
+		restoreCanvas(context);
 		const width = canvas.width;
 		const height = canvas.height;
-		context.restore();
-		context.clearRect(0, 0, width, height);
-		context.save();
-
 		const [scaledWidth, scaledHeight] = calcSize(width, height, scale, scaleMode);
+		context.clearRect(0, 0, width, height);
 		transformCanvas(context, width, height, scaledWidth, scaledHeight, rotation);
 		context.globalAlpha = opacity;
 		progressiveBackgroundDraw(bgGenerator, drawingContext, scaledWidth, scaledHeight, preview, drawBackgroundImage);
@@ -2283,15 +2287,14 @@ function hasRandomness(enabled) {
 		}
 
 		const context = contextualInfo.twoD;
-		context.restore();
-		context.clearRect(0, 0, width, height);
-		context.save();
+		restoreCanvas(context);
 		const renderWidth = interpolateValue(tweenData.startWidth, tweenData.endWidth, tweenPrime, false);
 		const renderHeight = interpolateValue(tweenData.startHeight, tweenData.endHeight, tweenPrime, false);
-		transformCanvas(context, width, height, renderWidth, renderHeight, rotation);
 		const blur = interpolateValue(startFrame.blur, endFrame.blur, tweenPrime, false);
-		context.globalAlpha = interpolateValue(startFrame.opacity, endFrame.opacity, tweenPrime, false);
 		let needDrawSignature = paintBackground || !forAnim;
+		context.globalAlpha = interpolateValue(startFrame.opacity, endFrame.opacity, tweenPrime, false);
+		context.clearRect(0, 0, width, height);
+		transformCanvas(context, width, height, renderWidth, renderHeight, rotation);
 
 		function postDraw() {
 			context.globalCompositeOperation = 'destination-over';
@@ -2316,6 +2319,7 @@ function hasRandomness(enabled) {
 		if (generator.isShader) {
 			contextualInfo.setProperties(generator);
 			contextualInfo.drawGL(tweenPrime, preview);
+			restoreCanvas(context);
 			postDraw()
 		} else if (forAnim) {
 			// Draw everything in one go when capturing video
@@ -2327,6 +2331,7 @@ function hasRandomness(enabled) {
 				unitsProcessed = 0;
 				done = redraw.next().done;
 			} while (!done);
+			restoreCanvas(context);
 			postDraw();
 		} else {
 			needDrawSignature = false;

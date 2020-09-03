@@ -3,7 +3,7 @@ export default function FieldLines() {
 	this.title = 'Force Lines';
 	this.isShader = true;
 
-	const numAttractors = 8;
+	const numAttractors = 15;
 	const positionX = [];
 	const positionY = [];
 	const strength = [];
@@ -16,15 +16,16 @@ export default function FieldLines() {
 	this.positionX = positionX;
 	this.positionY = positionY;
 	this.strength = strength;
-	this.fieldConstant = 230;
+	this.fieldConstant = 500;
 	this.hueFrequency = 1;
 	this.hueRotation = 0;
 	this.saturation = 1;
 	this.maxLightness = 0.85;
 	this.minLightness = 0;
-	this.colorPortion = 0.9;
+	this.colorPortion = 0.5;
 	this.sharpness = 0;
 	this.fieldExponent = 2;
+	this.antialiasing = 2;
 }
 
 FieldLines.prototype.animatable = {
@@ -34,6 +35,6 @@ FieldLines.prototype.animatable = {
 		'colorPortion', 'sharpness',
 	],
 	stepped: [
-		'numAttractors',
+		'numAttractors', 'antialiasing',
 	],
 }

@@ -14,7 +14,7 @@ void main() {
 		return;
 	}
 
-	vec2 totalColor = vec2(0.0, 0.0);
+	vec2[25] colors;
 	float hue;
 	float antialiasingF = float(antialiasing);
 	float step = 1.0 / antialiasingF;
@@ -37,8 +37,8 @@ void main() {
 			}
 
 			float netForce = sqrt(forceX * forceX + forceY * forceY);
-			float theta = angle(forceX, forceY);
 			if (xShift == 0 && yShift == 0) {
+				float theta = angle(forceX, forceY);
 				hue = mod(-theta + 0.5 * PI, TWO_PI) / TWO_PI;
 				float lastRed = floor(hueFrequency) / hueFrequency;
 				if (hue > lastRed) {
@@ -60,11 +60,40 @@ void main() {
 				}
 			}
 			lightness = max(lightness, minLightness);
-			totalColor += vec2(lightness, opacity);
+			colors[yShift * antialiasing + xShift] = vec2(lightness, opacity);
 		}
 	}
 
-	float samplePoints = antialiasingF * antialiasingF;
-	vec2 meanColor = totalColor / samplePoints;
-	fragColor = hsla(hue, saturation, meanColor[0], meanColor[1]);
+	int samplePoints = antialiasing * antialiasing;
+	float[25] lightnesses, opacities;
+	float lightness, opacity;
+	for (int i = 0; i < samplePoints; i++) {
+		lightness = 0.0;
+		opacity = 0.0;
+		int hueIndex, lightnessIndex, opacityIndex;
+		for (int j = 0; j < samplePoints; j++) {
+			vec2 color = colors[j];
+			if (color[0] >= lightness) {
+				lightness = color[0];
+				lightnessIndex = j;
+			}
+			if (color[1] >= opacity) {
+				opacity = color[1];
+				opacityIndex = j;
+			}
+		}
+		lightnesses[i] = lightness;
+		opacities[i] = opacity;
+		colors[lightnessIndex][0] = -1.0;
+		colors[opacityIndex][1] = -1.0;
+	}
+	int index = (samplePoints - 1) / 2;
+	if (samplePoints % 2 == 0) {
+		lightness = (lightnesses[index] + lightnesses[index + 1]) / 2.0;
+		opacity = (opacities[index] + opacities[index + 1]) / 2.0;
+	} else {
+		lightness = lightnesses[index];
+		opacity = opacities[index];
+	}
+	fragColor = hsla(hue, saturation, lightness, opacity);
 }

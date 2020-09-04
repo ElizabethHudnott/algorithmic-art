@@ -1200,13 +1200,15 @@ function hasRandomness(enabled) {
 		document.getElementById('btn-open-sketch').disabled = false;
 	}
 
+	const inputsToSketches = new Map();
+
 	function addSketch(sketch) {
 		const label = document.createElement('LABEL');
 		label.classList.add('btn' , 'p-1', 'm-1');
 		const input = document.createElement('INPUT');
 		input.type = 'radio';
 		input.name = 'sketch';
-		input._sketch = sketch;
+		inputsToSketches.set(input, sketch);
 		label.appendChild(input);
 		const card = document.createElement('DIV');
 		card.classList.add('card', 'm-0', 'h-100');
@@ -1814,7 +1816,19 @@ function hasRandomness(enabled) {
 		repositionModal(false);
 	});
 
-	async function init() {
+	{
+		function layersModalShown(event) {
+			for (let img of document.getElementById('rotation-sizing-row').getElementsByTagName('IMG')) {
+				img.removeAttribute('loading');
+			}
+			$('#layers-modal').off('show.bs.modal', layersModalShown);
+		}
+
+		$('#layers-modal').on('show.bs.modal', layersModalShown);
+	}
+
+	// Initialization function.
+	(async function () {
 		const sketchesModal = document.getElementById('sketches-modal');
 		let firstDocID = urlParameters.get('doc');
 		let firstGenURL = urlParameters.get('gen');
@@ -1867,8 +1881,7 @@ function hasRandomness(enabled) {
 		if (!firstDocID && firstGenURL) {
 			switchGenerator(firstGenURL, false);
 		}
-	}
-	init();
+	})();
 
 	function calcTween(tween, loop) {
 		if (loop) {
@@ -2710,7 +2723,7 @@ function hasRandomness(enabled) {
 		const sketchesModal = document.getElementById('sketches-modal');
 		$(sketchesModal).modal('hide');
 		$(modal).modal('show');
-		currentSketch = queryChecked(sketchesModal, 'sketch')._sketch;
+		currentSketch = inputsToSketches.get(queryChecked(sketchesModal, 'sketch'));
 		const url = currentSketch.url;
 		if (/\.html$/.test(url)) {
 			document.location = new URL(url, document.location);

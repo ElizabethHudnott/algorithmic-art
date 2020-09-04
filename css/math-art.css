@@ -229,15 +229,6 @@ th.col-form-label {
 	.modal-floating .modal-dialog {
 		max-width: 100%;
 	}
-
-	.modal-wide {
-		width: fit-content;
-		max-width: calc(100% - 2rem);
-	}
-
-	.modal-wide .modal-content {
-		width: fit-content;
-	}
 }
 
 @media (min-width: 768px) and (min-height: 768px) {
@@ -464,7 +455,6 @@ button.btn-black:hover {
 .thumbnails {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: center;
 }
 
 .thumbnails>.active {
@@ -486,12 +476,13 @@ button.btn-black:hover {
 }
 
 @media (min-width: 576px) {
-	#help-modal .modal-wide {
-		width: min(100% - 2rem, 45rem);
+	#sketches-modal .modal-dialog {
+		min-width: calc(100% - 2rem);
+		max-width: calc(100% - 2rem);
 	}
 
-	#help-modal .modal-content {
-		width: 100%;
+	#help-modal .modal-dialog {
+		max-width: min(100% - 2rem, 45rem);
 	}
 }
 

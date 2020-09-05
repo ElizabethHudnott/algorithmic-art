@@ -371,9 +371,9 @@ function srgbToLAB(r, g, b, alpha) {
  */
 function optional(obj, property) {
 	if (obj === undefined || obj === null) {
-		return obj[property];
-	} else {
 		return undefined;
+	} else {
+		return obj[property];
 	}
 }
 

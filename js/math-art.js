@@ -366,6 +366,9 @@ function hasRandomness(enabled) {
         }
 
 		initializeShader(generator) {
+			if (!generator.isShader) {
+				return;
+			}
 			let gl = this.gl;
 			if (gl === undefined) {
 				const glCanvas = document.createElement('CANVAS');

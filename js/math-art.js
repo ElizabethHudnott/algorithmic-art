@@ -2475,9 +2475,14 @@ function hasRandomness(enabled) {
 		stopButton.classList.add('btn-danger');
 		stopButton.classList.remove('btn-secondary');
 
+		function promptSave() {
+			document.removeEventListener('visibilitychange', promptSave);
+			capturer.save();
+			capturer.stop();
+		}
+
 		function reset() {
 			audioContext.close();
-			capturer.stop();
 			pauseButton.hidden = true;
 			pauseButton.removeEventListener('click', pauseResumeRendering);
 			stopButton.innerHTML = 'Close';
@@ -2492,13 +2497,21 @@ function hasRandomness(enabled) {
 			}
 			animController = undefined;
 		}
+
 		animController.promise = animController.promise.then(
 			function () {
 				$('#video-modal').modal('hide');
-				capturer.save();
+				if (document.hidden) {
+					document.addEventListener('visibilitychange', promptSave);
+				} else {
+					promptSave();
+				}
 				reset();
 			},
-			reset
+			function () {
+				capturer.stop();
+				reset();
+			}
 		);
 
 		capturer.start();

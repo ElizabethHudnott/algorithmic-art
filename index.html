@@ -672,20 +672,18 @@
 					</div>
 					<div class="col-8">
 						<div class="progress bg-dark" style="height: 20px">
-						  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0; transition: unset" id="video-progress">0%</div>
+						  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0; transition: unset" id="video-progress">0%</div>
 						</div>
 					</div>
-				</div>
-				<div class="pl-1">
-					<small class="form-text text-muted">
-						Switching to another browser tab will pause video rendering.
-					</small>
 				</div>
 				<div class="alert alert-danger fade" id="video-error" hidden></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" id="btn-cancel-video">
+				<button type="button" class="btn btn-secondary" id="btn-cancel-video-render">
 					Close
+				</button>
+				<button type="button" class="btn btn-dark" hidden id="btn-pause-video-render" style="width: 7em;"><img width="16" height="16" src="img/control_pause.png" class="mr-1">
+					Pause
 				</button>
 				<button type="button" class="btn btn-primary" id="btn-render-video">
 					Render

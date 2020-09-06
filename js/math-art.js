@@ -47,7 +47,7 @@ function hasRandomness(enabled) {
 		VIEWPORT: 1,
 		COVER: 2,
 	});
-	let scale = 1, scaleMode = ScaleMode.VIEWPORT, blur = 0.4;
+	let scale = 1, scaleMode = ScaleMode.VIEWPORT, blur = 0;
 
 	const canvas = document.getElementById('background-canvas');
 
@@ -165,10 +165,10 @@ function hasRandomness(enabled) {
 		/**
 		 * @param {boolean} isArrayElement	true if we're setting a single element inside an array.
 		 */
-		assignValue(gl, location, value, isArrayElement) {
+		assignValue(gl, location, value) {
 			const category = this.category;
 			const isArray = this.length !== undefined;
-			if (isArray && !isArrayElement) {
+			if (isArray) {
 				value = [].concat(...value); // Flatten
 			}
 			if (category === GLTypeCategory.MATRIX) {
@@ -501,7 +501,7 @@ function hasRandomness(enabled) {
 			const gl = this.gl;
 			const location = gl.getUniformLocation(this.program, property);
 			const type = this.types.get(property);
-			type.assignValue(gl, location, value, false);
+			type.assignValue(gl, location, value);
 		}
 
 		setPropertyElement(generator, property, index, value) {
@@ -515,10 +515,10 @@ function hasRandomness(enabled) {
 			const type = this.types.get(property);
 			if (type.length === undefined) {
 				const location = gl.getUniformLocation(this.program, property)
-				type.assignValue(gl, location, arr, false);
+				type.assignValue(gl, location, arr);
 			} else {
 				const location = gl.getUniformLocation(this.program, property + '[' + index + ']');
-				type.assignValue(gl, location, value, true);
+				type.assignValue(gl, location, [value]);
 			}
 		}
 
@@ -529,7 +529,7 @@ function hasRandomness(enabled) {
 			for (let property of types.keys()) {
 				const location = gl.getUniformLocation(program, property);
 				const type = types.get(property);
-				type.assignValue(gl, location, generator[property], false);
+				type.assignValue(gl, location, generator[property]);
 			}
 		}
 
@@ -2318,11 +2318,11 @@ function hasRandomness(enabled) {
 			if (paintBackground) {
 				context.fillStyle = backgroundColor;
 				context.fillRect(0, 0, width, height);
+				context.fillStyle = 'black';
 				if (blur > 0) {
 					context.globalCompositeOperation = 'source-over';
 					applyFilter(context, calcBlur(blur), width, height);
 				}
-				context.fillStyle = 'black';
 			} else if (tweenData.blurVaries) {
 				context.canvas.style.filter = calcBlur(blur);
 			}
@@ -2379,7 +2379,7 @@ function hasRandomness(enabled) {
 					newAnimController.setup(render, reject, beginTime);
 				}
 
-				if (newAnimController.status === AnimationController.Status.ABORTED) {
+				if (newAnimController.status !== AnimationController.Status.RUNNING) {
 					return;
 				}
 				let tween = startTween + (time - beginTime) / length;
@@ -2387,7 +2387,7 @@ function hasRandomness(enabled) {
 				if (lastFrame) {
 					tween = 1;
 				}
-				renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview, !paintBackground);
+				renderFrame(generator, contextualInfo, width, height, tween, loop, paintBackground, preview, true);
 				newAnimController.progress = tween;
 
 				if (capturer !== undefined) {
@@ -2430,22 +2430,56 @@ function hasRandomness(enabled) {
 		const progressRow = document.getElementById('video-progress-row');
 		progressRow.classList.remove('invisible');
 
+		// Generate audio to prevent background page CPU throttling.
+		const audioContext = new AudioContext();
+		let constantNode = audioContext.createConstantSource();
+		const gainNode = audioContext.createGain();
+		gainNode.gain.value = 0.001;
+		constantNode.connect(gainNode);
+ 		gainNode.connect(audioContext.destination);
+ 		constantNode.start();
+
+		const pauseButton = document.getElementById('btn-pause-video-render');
+		function pauseResumeRendering(event) {
+			const paused = animController.status === AnimationController.Status.PAUSED;
+			if (paused) {
+				animController.continue();
+				this.children[0].src = 'img/control_pause.png';
+				this.childNodes[1].textContent = 'Pause';
+				constantNode = audioContext.createConstantSource();
+				constantNode.connect(gainNode);
+				constantNode.start();
+			} else {
+				animController.pause();
+				this.children[0].src = 'img/file_start_workflow.png';
+				this.childNodes[1].textContent = 'Resume';
+				constantNode.stop();
+				constantNode.disconnect();
+			}
+		};
+		pauseButton.children[0].src = 'img/control_pause.png';
+		pauseButton.childNodes[1].textContent = 'Pause';
+		pauseButton.addEventListener('click', pauseResumeRendering);
+		pauseButton.hidden = false;
+
 		const downloads =  [requireScript('lib/CCapture.webm.min.js')];
 		if (properties.format !== 'webm') {
 			downloads.push(requireScript('lib/tar.min.js'));
 		}
-		await Promise.all(downloads);
 
+		await Promise.all(downloads);
 		const capturer = new CCapture(properties);
 		animController = animate(bgGenerator, contextualInfo, width, height, 0, length, loopAnim, 0, capturer);
-		const stopButton = document.getElementById('btn-cancel-video');
+		const stopButton = document.getElementById('btn-cancel-video-render');
 		stopButton.innerHTML = 'Abort';
 		stopButton.classList.add('btn-danger');
 		stopButton.classList.remove('btn-secondary');
 
 		function reset() {
-			capturer.save();
+			audioContext.close();
 			capturer.stop();
+			pauseButton.hidden = true;
+			pauseButton.removeEventListener('click', pauseResumeRendering);
 			stopButton.innerHTML = 'Close';
 			stopButton.classList.add('btn-secondary');
 			stopButton.classList.remove('btn-danger');
@@ -2461,6 +2495,7 @@ function hasRandomness(enabled) {
 		animController.promise = animController.promise.then(
 			function () {
 				$('#video-modal').modal('hide');
+				capturer.save();
 				reset();
 			},
 			reset
@@ -3306,7 +3341,7 @@ function hasRandomness(enabled) {
 		videoQualityReadout.innerHTML = this.value + '%';
 	});
 
-	document.getElementById('btn-cancel-video').addEventListener('click', function (event) {
+	document.getElementById('btn-cancel-video-render').addEventListener('click', function (event) {
 		if (animController === undefined) {
 			$('#video-modal').modal('hide');
 		} else {

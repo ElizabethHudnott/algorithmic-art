@@ -18,12 +18,19 @@ class AnimationController {
 		this.beginTime = undefined;
 		this.status = AnimationController.Status.RUNNING;
 		this.progress = 0;
+		this.timeAccumulated = 0;
 	}
 
 	setAbort(reject) {
 		const me = this;
 		this.abort = function () {
-			if (me.status === AnimationController.Status.RUNNING) {
+			if (
+				me.status === AnimationController.Status.RUNNING ||
+				me.status === AnimationController.Status.PAUSED
+			) {
+				if (me.status === AnimationController.Status.RUNNING) {
+					me.timeAccumulated = performance.now() - me.beginTime;
+				}
 				me.status = AnimationController.Status.ABORTED;
 				reject.call(me);
 			}
@@ -33,8 +40,14 @@ class AnimationController {
 	setContinue(work) {
 		const me = this;
 		this.continue = function () {
-			if (me.status === AnimationController.Status.RUNNING) {
-				requestAnimationFrame(work);
+			if (
+				me.status === AnimationController.Status.ABORTED ||
+				me.status === AnimationController.Status.PAUSED
+			) {
+				me.status = AnimationController.Status.RUNNING;
+				const now = performance.now();
+				me.beginTime = now - me.timeAccumulated;
+				work(now); // Don't use requestAnimationFrame, for compatibility with CCapture.
 			}
 		}
 	}
@@ -50,12 +63,22 @@ class AnimationController {
 		resolve();
 	}
 
+	pause() {
+		if (this.status ===  AnimationController.Status.RUNNING) {
+			if (this.beginTime !== undefined) {
+				this.timeAccumulated = performance.now() - this.beginTime;
+			}
+			this.status =  AnimationController.Status.PAUSED;
+		}
+	}
+
 }
 
  AnimationController.Status = Object.freeze({
-	RUNNING: 1,
 	FINISHED: 0,
-	ABORTED: -1,
+	RUNNING: 1,
+	ABORTED: 2,
+	PAUSED: 3,
 });
 
 const loadedScripts = new Map();

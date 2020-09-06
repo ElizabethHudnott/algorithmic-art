@@ -1,4 +1,4 @@
-export default function FieldLines() {
+export default function ForceLines() {
 	const me = this;
 	this.title = 'Force Lines';
 	this.isShader = true;
@@ -28,7 +28,7 @@ export default function FieldLines() {
 	this.antialiasing = 2;
 }
 
-FieldLines.prototype.animatable = {
+ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
 		'hueFrequency', 'hueRotation', 'saturation', 'minLightness', 'maxLightness',

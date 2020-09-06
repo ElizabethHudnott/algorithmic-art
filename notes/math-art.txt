@@ -21,6 +21,7 @@ Bug: need to load & save loop + full rotation options as part of the document
 Finish dark mode
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
+Epilepsy warning
 
 Save As button
 Anonymize button

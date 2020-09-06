@@ -22,6 +22,8 @@ Finish dark mode
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
 Epilepsy warning
+Logo
+	add to notifications
 
 Save As button
 Anonymize button

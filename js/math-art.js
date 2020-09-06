@@ -2475,8 +2475,13 @@ function hasRandomness(enabled) {
 		stopButton.classList.add('btn-danger');
 		stopButton.classList.remove('btn-secondary');
 
+		let notification;
+
 		function promptSave() {
 			document.removeEventListener('visibilitychange', promptSave);
+			if (notification !== undefined) {
+				notification.close();
+			}
 			capturer.save();
 			capturer.stop();
 		}
@@ -2503,6 +2508,18 @@ function hasRandomness(enabled) {
 				$('#video-modal').modal('hide');
 				if (document.hidden) {
 					document.addEventListener('visibilitychange', promptSave);
+					if (window.Notification && Notification.permission === 'granted' &&
+						document.getElementById('notify-video-render').checked
+					) {
+						notification = new Notification('Mathematical Art With Elizabeth', {
+							body: 'Your video is ready. Click here or return to the app to save it.',
+							silent: true,
+						});
+						notification.onclick = function (event) {
+							event.preventDefault();
+							promptSave();
+						};
+					}
 				} else {
 					promptSave();
 				}
@@ -3281,6 +3298,36 @@ function hasRandomness(enabled) {
 	}
 
 	document.getElementById('video-format').addEventListener('input', loadCodecOnDemand);
+
+	{
+		const notifyInput = document.getElementById('notify-video-render');
+		if (window.Notification) {
+			if (store !== undefined) {
+				notifyInput.checked =
+					Notification.permission === 'granted' &&
+					store.getItem('notify-video-render') === 'true';
+			}
+
+			notifyInput.addEventListener('input', function (event) {
+				if (Notification.permission === 'granted') {
+					if (store !== undefined) {
+						store.setItem('notify-video-render', this.checked);
+					}
+				} else if (this.checked) {
+					Notification.requestPermission().then(function (permission) {
+						if (permission === 'denied') {
+							document.getElementById('notify-video-render').checked = false;
+						} else if (permission === 'granted' && store !== undefined) {
+							store.setItem('notify-video-render', document.getElementById('notify-video-render').checked);
+						}
+					});
+				}
+			});
+
+		} else {
+			notifyInput.hidden = true;
+		}
+	}
 
 	document.getElementById('btn-render-video').addEventListener('click', async function (event) {
 		let errorMsg = '';

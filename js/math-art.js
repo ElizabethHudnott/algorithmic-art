@@ -3256,7 +3256,7 @@ function hasRandomness(enabled) {
 			};
 			$('#assign-bg-change-modal').modal('show')
 		} else {
-			$('#video-modal').modal('show');
+			$('#video-modal').modal({backdrop: 'static', keyboard: false});
 		}
 	});
 

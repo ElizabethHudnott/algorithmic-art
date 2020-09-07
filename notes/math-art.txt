@@ -65,8 +65,6 @@ Phyllotaxis
 		Curves
 		Polygon: join adjacent points
 		Recursive: cauliflower
-	Bug: shadows being clipped
-	Clipping bug when aspectRatio > 1 && petalStretch > aspectRatio
 
 Calculator
 	Object groupings

@@ -16,22 +16,30 @@ export default function ForceLines() {
 	this.positionX = positionX;
 	this.positionY = positionY;
 	this.strength = strength;
+
 	this.fieldConstant = 500;
+	this.fieldExponent = 2;
+
 	this.hueFrequency = 1;
 	this.hueRotation = 0;
+	this.waveHue = 0;
+
 	this.saturation = 1;
+
 	this.maxLightness = 0.85;
 	this.minLightness = 0;
+	this.waveLightness = 1;
+
 	this.colorPortion = 0.5;
 	this.sharpness = 0;
-	this.fieldExponent = 2;
 	this.antialiasing = 2;
 }
 
 ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'hueFrequency', 'hueRotation', 'saturation', 'minLightness', 'maxLightness',
+		'hueFrequency', 'hueRotation', 'waveHue','saturation',
+		'waveLightness', 'minLightness', 'maxLightness',
 		'colorPortion', 'sharpness',
 	],
 	stepped: [

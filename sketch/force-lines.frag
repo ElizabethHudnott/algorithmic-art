@@ -18,6 +18,7 @@ void main() {
 	float hue;
 	float antialiasingF = float(antialiasing);
 	float step = 1.0 / antialiasingF;
+	float lastRed = floor(hueFrequency) / hueFrequency;
 
 	for (int xShift = 0; xShift < antialiasing; xShift++) {
 		for (int yShift = 0; yShift < antialiasing; yShift++) {
@@ -37,19 +38,23 @@ void main() {
 			}
 
 			float netForce = sqrt(forceX * forceX + forceY * forceY);
+			float wave = max(
+				(sin(netForce) + colorPortion * 2.0 - 1.0) / (colorPortion * 2.0),
+				0.0
+			);
+
 			if (xShift == 0 && yShift == 0) {
-				float theta = angle(forceX, forceY);
-				hue = mod(-theta + 0.5 * PI, TWO_PI) / TWO_PI;
-				float lastRed = floor(hueFrequency) / hueFrequency;
+				hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
 				if (hue > lastRed) {
 					hue = (hue - lastRed) / (1.0 - lastRed);
 				} else {
 					hue = hue * hueFrequency;
 				}
-				hue = mod(hue - hueRotation, 1.0);
+				hue = mod(hue - hueRotation - waveHue * wave, 1.0);
 			}
-			float wave = (sin(netForce) + colorPortion * 2.0 - 1.0) / (colorPortion * 2.0);
-			float lightness = maxLightness * max(wave, 0.0);
+
+			float lightness = maxLightness *
+				(waveLightness * wave + 1.0 - waveLightness);
 			float opacity = 1.0;
 			float uncoloredPart = maxLightness * (1.0 - colorPortion);
 			if (lightness < uncoloredPart && lightness < 0.5) {
@@ -70,7 +75,7 @@ void main() {
 	for (int i = 0; i < samplePoints; i++) {
 		lightness = 0.0;
 		opacity = 0.0;
-		int hueIndex, lightnessIndex, opacityIndex;
+		int lightnessIndex, opacityIndex;
 		for (int j = 0; j < samplePoints; j++) {
 			vec2 color = colors[j];
 			if (color[0] >= lightness) {

@@ -3,10 +3,64 @@ export default function ForceLines() {
 	this.title = 'Force Lines';
 	this.isShader = true;
 
+	const maxAttractors = 20;
+
+	this.optionsDocument = downloadFile('force-lines.html', 'document').then(function (optionsDoc) {
+
+		optionsDoc.getElementById('force-field-constant').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'fieldConstant', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-field-exponent').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'fieldExponent', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0 && value <= maxAttractors) {
+				setBgProperty(me, 'numAttractors', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-hue-frequency').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'hueFrequency', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-wave-hue').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'waveHue', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-wave-lightness').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'waveLightness', value);
+				generateBackground(0);
+			}
+		});
+		return optionsDoc;
+	});
+
 	const numAttractors = 15;
-	const positionX = [];
-	const positionY = [];
-	const strength = [];
+	const positionX = new Array(maxAttractors);
+	const positionY = new Array(maxAttractors);
+	const strength = new Array(maxAttractors);
 	for (let i = 0; i < numAttractors; i++) {
 		positionX[i] = Math.random();
 		positionY[i] = Math.random();
@@ -17,7 +71,7 @@ export default function ForceLines() {
 	this.positionY = positionY;
 	this.strength = strength;
 
-	this.fieldConstant = 500;
+	this.fieldConstant = 300;
 	this.fieldExponent = 2;
 
 	this.hueFrequency = 1;

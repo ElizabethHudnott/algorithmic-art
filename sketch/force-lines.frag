@@ -45,7 +45,11 @@ void main() {
 
 			if (xShift == 0 && yShift == 0) {
 				hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
-				if (hue > lastRed) {
+				if (hueFrequency < 1.0) {
+					if (hue > hueFrequency) {
+						hue = hueFrequency - (hue - hueFrequency) / (1.0 - hueFrequency) * hueFrequency;
+					}
+				} else if (hue > lastRed) {
 					hue = (hue - lastRed) / (1.0 - lastRed);
 				} else {
 					hue = hue * hueFrequency;

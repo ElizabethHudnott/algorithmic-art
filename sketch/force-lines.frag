@@ -1,14 +1,23 @@
 const float TWO_PI = 2.0 * PI;
 
-float distanceMetric(float dx, float dy) {
+float distanceMetric(float x1, float y1, float x2, float y2) {
 	if (minkowskiOrder == 0.0) {
 		return 0.0;
 	}
+
+	float dx = x2 - x1;
+	float dy = y2 - y1;
+	float xWeight = 1.0 - distanceWeight + distanceWeight * (x1 + x2) / canvasWidth;
+	float yWeight = 1.0 - distanceWeight + distanceWeight * (y1 + y2) / canvasHeight;
+
 	if (minkowskiOrder > 12.3) {
-		return max(abs(dx), abs(dy));
+		return max(abs(dx) / xWeight, abs(dy) / yWeight);
 	}
 	return pow(
-		pow(abs(dx), minkowskiOrder) + pow(abs(dy), minkowskiOrder),
+		pow(
+			abs(dx) / xWeight, minkowskiOrder) + pow(abs(dy) / yWeight,
+			minkowskiOrder
+		),
 		1.0 / minkowskiOrder
 	);
 }
@@ -49,9 +58,9 @@ void main() {
 			finalPointScale = explosion + finalPointScale * (1.0 - explosion);
 
 			for (int i = 0; i < numPoints; i++) {
-				float displacementX = x - positionX[i] * canvasWidth;
-				float displacementY = y - positionY[i] * canvasHeight;
-				float distance = distanceMetric(displacementX, displacementY);
+				float x2 = positionX[i] * canvasWidth;
+				float y2 = positionY[i] * canvasHeight;
+				float distance = distanceMetric(x, y, x2, y2);
 				if (distance < 1.0) {
 					forceX = 0.0;
 					forceY = 0.0;
@@ -63,7 +72,7 @@ void main() {
 					pointStrength *= finalPointScale;
 				}
 				float force = effectiveFieldConstant * pointStrength / pow(distance, fieldExponent);
-				float attractorAngle = angle(displacementX, displacementY);
+				float attractorAngle = angle(x - x2, y - y2);
 				forceX += force * cos(attractorAngle);
 				forceY += force * sin(attractorAngle);
 			}

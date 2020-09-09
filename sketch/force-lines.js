@@ -126,6 +126,7 @@ export default function ForceLines() {
 	this.fieldConstant = 500;
 	this.fieldExponent = 2;
 	this.minkowskiOrder = 2;
+	this.distanceWeight = 0; // Canberra distance
 
 	this.hueFrequency = 0;
 	this.hueRotation = 0;
@@ -145,7 +146,7 @@ export default function ForceLines() {
 ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'minkowskiOrder',
+		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue','saturation',
 		'waveLightness', 'minLightness', 'maxLightness',
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion'

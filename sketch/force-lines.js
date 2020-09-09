@@ -23,14 +23,6 @@ export default function ForceLines() {
 			}
 		});
 
-		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
-			const value = parseInt(this.value);
-			if (value >= 0 && value <= maxAttractors) {
-				setBgProperty(me, 'numAttractors', value);
-				generateBackground(0);
-			}
-		});
-
 		optionsDoc.getElementById('force-hue-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
@@ -97,10 +89,26 @@ export default function ForceLines() {
 				generateBackground(0);
 			}
 		});
+
+		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= maxAttractors) {
+				setBgProperty(me, 'numAttractors', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-explosion').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'explosion', value);
+				generateBackground(0);
+			}
+		});
+
 		return optionsDoc;
 	});
 
-	const numAttractors = 15;
 	const positionX = new Array(maxAttractors);
 	const positionY = new Array(maxAttractors);
 	const strength = new Array(maxAttractors);
@@ -109,25 +117,27 @@ export default function ForceLines() {
 		positionY[i] = Math.random();
 		strength[i] = Math.random();
 	}
-	this.numAttractors = numAttractors;
+	this.numAttractors = 10;
+	this.explosion = 1;
 	this.positionX = positionX;
 	this.positionY = positionY;
 	this.strength = strength;
 
-	this.fieldConstant = 300;
+	this.fieldConstant = 500;
 	this.fieldExponent = 2;
+	this.minkowskiOrder = 2;
 
-	this.hueFrequency = 1;
+	this.hueFrequency = 0;
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
 	this.saturation = 1;
 
-	this.maxLightness = 0.86;
+	this.maxLightness = 0.4;
 	this.minLightness = 0;
 	this.waveLightness = 1;
 
-	this.colorPortion = 0.5;
+	this.colorPortion = 1;
 	this.sharpness = 0;
 	this.antialiasing = 2;
 }
@@ -135,11 +145,12 @@ export default function ForceLines() {
 ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
+		'minkowskiOrder',
 		'hueFrequency', 'hueRotation', 'waveHue','saturation',
 		'waveLightness', 'minLightness', 'maxLightness',
-		'colorPortion', 'sharpness',
+		'colorPortion', 'sharpness', 'numAttractors', 'explosion'
 	],
 	stepped: [
-		'numAttractors', 'antialiasing',
+		'antialiasing',
 	],
 }

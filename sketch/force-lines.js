@@ -47,6 +47,49 @@ export default function ForceLines() {
 			}
 		});
 
+		optionsDoc.getElementById('force-color-portion').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'colorPortion', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-sharpness').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value <= 1) {
+				setBgProperty(me, 'sharpness', value);
+				generateBackground(0);
+			}
+		});
+
+		const minLightnessInput = optionsDoc.getElementById('force-min-lightness');
+		const maxLightnessInput = optionsDoc.getElementById('force-max-lightness');
+
+		minLightnessInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				setBgProperty(me, 'minLightness', value);
+				if (value > me.maxLightness) {
+					maxLightnessInput.value = value;
+					setBgProperty(me, 'maxLightness', value);
+				}
+				generateBackground(0);
+			}
+		});
+
+		maxLightnessInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				setBgProperty(me, 'maxLightness', value);
+				if (value < me.minLightness) {
+					minLightnessInput.value = value;
+					setBgProperty(me, 'minLightness', value);
+				}
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('force-wave-lightness').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
@@ -61,7 +104,7 @@ export default function ForceLines() {
 	const positionX = new Array(maxAttractors);
 	const positionY = new Array(maxAttractors);
 	const strength = new Array(maxAttractors);
-	for (let i = 0; i < numAttractors; i++) {
+	for (let i = 0; i < maxAttractors; i++) {
 		positionX[i] = Math.random();
 		positionY[i] = Math.random();
 		strength[i] = Math.random();
@@ -80,7 +123,7 @@ export default function ForceLines() {
 
 	this.saturation = 1;
 
-	this.maxLightness = 0.85;
+	this.maxLightness = 0.86;
 	this.minLightness = 0;
 	this.waveLightness = 1;
 

@@ -231,7 +231,7 @@ th.col-form-label {
 	}
 }
 
-@media (min-width: 768px) and (min-height: 768px) {
+@media (min-width: 768px) and (min-height: 576px) {
 	.modal {
  		box-shadow: #000000cc 0px 6px 20px 0px;
  	}

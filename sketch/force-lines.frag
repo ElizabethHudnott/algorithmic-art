@@ -54,7 +54,7 @@ void main() {
 				} else {
 					hue = hue * hueFrequency;
 				}
-				hue = mod(hue - hueRotation - waveHue * wave, 1.0);
+				hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
 			}
 
 			float lightness = maxLightness *

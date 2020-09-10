@@ -1222,6 +1222,7 @@ function hasRandomness(enabled) {
 			thumbnail.loading = 'lazy';
 			thumbnail.src = 'sketch/thumbnail/' + sketch.thumbnail;
 			thumbnail.alt = sketch.title;
+			thumbnail.width = 168;
 			thumbnail.height = 168;
 		} else {
 			thumbnail = document.createElement('DIV');
@@ -1822,7 +1823,7 @@ function hasRandomness(enabled) {
 	{
 		function layersModalShown(event) {
 			for (let img of document.getElementById('rotation-sizing-row').getElementsByTagName('IMG')) {
-				img.removeAttribute('loading');
+				img.loading = 'eager';
 			}
 			$('#layers-modal').off('show.bs.modal', layersModalShown);
 		}

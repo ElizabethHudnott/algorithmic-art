@@ -3,7 +3,7 @@ export default function ForceLines() {
 	this.title = 'Force Lines';
 	this.isShader = true;
 
-	const maxAttractors = 20;
+	const maxAttractors = 30;
 
 	this.optionsDocument = downloadFile('force-lines.html', 'document').then(function (optionsDoc) {
 
@@ -15,10 +15,34 @@ export default function ForceLines() {
 			}
 		});
 
+		optionsDoc.getElementById('force-divisor').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'divisor', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-base').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'base', value);
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('force-field-exponent').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				setBgProperty(me, 'fieldExponent', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-sine-power').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'sinePower', value);
 				generateBackground(0);
 			}
 		});
@@ -123,8 +147,12 @@ export default function ForceLines() {
 	this.positionY = positionY;
 	this.strength = strength;
 
-	this.fieldConstant = 500;
+	this.fieldConstant = 100;
 	this.fieldExponent = 2;
+	this.divisor = 100;
+	this.base = 2.8;
+	this.sinePower = 1;	// Multiplied by 2 in WebGL
+
 	this.minkowskiOrder = 2;
 	this.distanceWeight = 0; // Canberra distance
 
@@ -146,12 +174,13 @@ export default function ForceLines() {
 ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
+		'divisor', 'base',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue','saturation',
 		'waveLightness', 'minLightness', 'maxLightness',
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion'
 	],
 	stepped: [
-		'antialiasing',
+		'antialiasing', 'sinePower',
 	],
 }

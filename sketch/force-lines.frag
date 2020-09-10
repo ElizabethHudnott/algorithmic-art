@@ -30,6 +30,19 @@ float angle(float x, float y) {
 	}
 }
 
+float power(float base, int exponent) {
+	if (base == 0.0) {
+		return 0.0;
+	}
+
+	if (base < 0.0) {
+		float s = exponent % 2 == 0 ? 1.0 : -1.0;
+		return s * pow(base, float(abs(exponent)));
+	} else {
+		return pow(base, float(exponent));
+	}
+}
+
 void main() {
 	if (colorPortion == 0.0) {
 		fragColor = vec4(0.0, 0.0, 0.0, 0.0);
@@ -42,36 +55,39 @@ void main() {
 	float step = 1.0 / antialiasingF;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 
+	int numPoints = int(ceil(numAttractors));
+	float finalPointScale = fract(numAttractors);
+	if (finalPointScale == 0.0) {
+		finalPointScale = 1.0;
+	}
+	finalPointScale = explosion + finalPointScale * (1.0 - explosion);
+
+	float[30] scaledXPos, scaledYPos;
+	for (int i = 0; i < numPoints; i++) {
+		scaledXPos[i] = positionX[i] * canvasWidth;
+		scaledYPos[i] = positionY[i] * canvasHeight;
+	}
+
 	for (int xShift = 0; xShift < antialiasing; xShift++) {
 		for (int yShift = 0; yShift < antialiasing; yShift++) {
 			float x = gl_FragCoord.x + float(xShift) * step;
 			float y = gl_FragCoord.y + float(yShift) * step;
 
 			float forceX = 0.0, forceY = 0.0;
-			float effectiveFieldConstant = fieldConstant * min(canvasWidth, canvasHeight);
-
-			int numPoints = int(ceil(numAttractors));
-			float finalPointScale = fract(numAttractors);
-			if (finalPointScale == 0.0) {
-				finalPointScale = 1.0;
-			}
-			finalPointScale = explosion + finalPointScale * (1.0 - explosion);
 
 			for (int i = 0; i < numPoints; i++) {
-				float x2 = positionX[i] * canvasWidth;
-				float y2 = positionY[i] * canvasHeight;
+				float x2 = scaledXPos[i];
+				float y2 = scaledYPos[i];
 				float distance = distanceMetric(x, y, x2, y2);
-				if (distance < 1.0) {
-					forceX = 0.0;
-					forceY = 0.0;
-					break;
-				}
 
 				float pointStrength = strength[i];
 				if (i == numPoints - 1) {
 					pointStrength *= finalPointScale;
 				}
-				float force = effectiveFieldConstant * pointStrength / pow(distance, fieldExponent);
+				float force =
+					fieldConstant * pointStrength *
+					pow(base, -pow(distance / divisor, fieldExponent));
+
 				float attractorAngle = angle(x - x2, y - y2);
 				forceX += force * cos(attractorAngle);
 				forceY += force * sin(attractorAngle);
@@ -79,7 +95,7 @@ void main() {
 
 			float netForce = sqrt(forceX * forceX + forceY * forceY);
 			float wave = max(
-				(sin(netForce) + colorPortion * 2.0 - 1.0) / (colorPortion * 2.0),
+				(power(sin(netForce), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
 				0.0
 			);
 
@@ -99,8 +115,10 @@ void main() {
 
 			float lightness = maxLightness *
 				(waveLightness * wave + 1.0 - waveLightness);
+
 			float opacity = 1.0;
 			float uncoloredPart = maxLightness * (1.0 - colorPortion);
+
 			if (lightness < uncoloredPart && lightness < 0.5) {
 				if (sharpness == 1.0) {
 					opacity = 0.0;

@@ -1,7 +1,7 @@
 f<ul class="nav nav-tabs mb-3" role="tablist">
 	<li class="nav-item" role="presentation">
 		<a class="nav-link active" id="force-colors-tab" data-toggle="tab" href="#force-colors" role="tab" aria-controls="force-colors" aria-selected="true">
-			Colors
+			Shape/Colour
 		</a>
 	</li>
 	<li class="nav-item" role="presentation">
@@ -50,6 +50,41 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</div>
 		</div>
 		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-minkowski-order">
+				Minkowski Order
+			</label>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<div class="input-group-text">
+							<input type="radio" checked name="force-minkowski-order-type" id="force-minkowski-finite" aria-label="Finite Minkowski order">
+						</div>
+					</div>
+					<input type="number" min="-12.2" max="12.2" step="0.2" value="2" class="form-control" id="force-minkowski-order">
+				</div>
+			</div>
+			<div class="col-3 second-col">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<span class="input-group-text">
+							<input type="radio" name="force-minkowski-order-type" id="force-minkowski-infinite">
+						</span>
+						<label class="d-inline input-group-text" for="force-minkowski-infinite">
+							Infinite
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-distance-weight">
+				Weight Distances
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.1" value="0" class="form-control form-control-sm" id="force-distance-weight">
+			</div>
+		</div>
+		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
 				Hue Frequency
 			</label>
@@ -83,6 +118,18 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</label>
 			<div class="col-3">
 				<input type="number" min="-1" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-wave-lightness">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-antialiasing">
+				Anti-Aliasing
+			</label>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="force-antialiasing">
+					<option value="1" selected>Off</option>
+					<option>2</option>
+					<option>3</option>
+					<option>4</option>
+					<option>5</option>
+				</select>
 			</div>
 		</div>
 		<div class="form-row form-group">

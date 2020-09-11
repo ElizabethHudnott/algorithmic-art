@@ -31,16 +31,8 @@ float angle(float x, float y) {
 }
 
 float power(float base, int exponent) {
-	if (base == 0.0) {
-		return 0.0;
-	}
-
-	if (base < 0.0) {
-		float s = exponent % 2 == 0 ? 1.0 : -1.0;
-		return s * pow(base, float(abs(exponent)));
-	} else {
-		return pow(base, float(exponent));
-	}
+	float s = exponent % 2 == 0 ? 1.0 : sign(base);
+	return s * pow(base, float(abs(exponent)));
 }
 
 void main() {
@@ -54,6 +46,7 @@ void main() {
 	float antialiasingF = float(antialiasing);
 	float step = 1.0 / antialiasingF;
 	float lastRed = floor(hueFrequency) / hueFrequency;
+	float uncoloredPart = maxLightness * (1.0 - colorPortion);
 
 	int numPoints = int(ceil(numAttractors));
 	float finalPointScale = fract(numAttractors);
@@ -117,7 +110,6 @@ void main() {
 				(waveLightness * wave + 1.0 - waveLightness);
 
 			float opacity = 1.0;
-			float uncoloredPart = maxLightness * (1.0 - colorPortion);
 
 			if (lightness < uncoloredPart && lightness < 0.5) {
 				if (sharpness == 1.0) {

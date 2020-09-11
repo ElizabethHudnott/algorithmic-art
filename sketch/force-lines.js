@@ -39,6 +39,38 @@ export default function ForceLines() {
 			}
 		});
 
+		optionsDoc.getElementById('force-minkowski-order').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'minkowskiOrder', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-minkowski-finite').addEventListener('input', function (event) {
+			const numberInput = document.getElementById('force-minkowski-order');
+			numberInput.disabled = false;
+			const value = parseFloat(numberInput.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'minkowskiOrder', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-minkowski-infinite').addEventListener('input', function (event) {
+			document.getElementById('force-minkowski-order').disabled = true;
+			setBgProperty(me, 'minkowskiOrder', 13);
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('force-distance-weight').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'distanceWeight', value);
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('force-sine-power').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (Number.isFinite(value)) {
@@ -114,6 +146,11 @@ export default function ForceLines() {
 			}
 		});
 
+		optionsDoc.getElementById('force-antialiasing').addEventListener('input', function (event) {
+			setBgProperty(me, 'antialiasing', parseInt(this.value));
+			generateBackground(0);
+		});
+
 		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= maxAttractors) {
@@ -168,7 +205,7 @@ export default function ForceLines() {
 
 	this.colorPortion = 1;
 	this.sharpness = 0;
-	this.antialiasing = 2;
+	this.antialiasing = 1;
 }
 
 ForceLines.prototype.animatable = {

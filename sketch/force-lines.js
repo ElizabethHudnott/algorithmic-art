@@ -146,11 +146,6 @@ export default function ForceLines() {
 			}
 		});
 
-		optionsDoc.getElementById('force-antialiasing').addEventListener('input', function (event) {
-			setBgProperty(me, 'antialiasing', parseInt(this.value));
-			generateBackground(0);
-		});
-
 		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= maxAttractors) {
@@ -205,7 +200,6 @@ export default function ForceLines() {
 
 	this.colorPortion = 1;
 	this.sharpness = 0;
-	this.antialiasing = 1;
 }
 
 ForceLines.prototype.animatable = {
@@ -218,6 +212,6 @@ ForceLines.prototype.animatable = {
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion'
 	],
 	stepped: [
-		'antialiasing', 'sinePower',
+		'sinePower',
 	],
 }

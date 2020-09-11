@@ -41,10 +41,7 @@ void main() {
 		return;
 	}
 
-	vec2[25] colors;
-	float hue;
-	float antialiasingF = float(antialiasing);
-	float step = 1.0 / antialiasingF;
+	float hue, lightness, opacity = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 	float uncoloredPart = maxLightness * (1.0 - colorPortion);
 
@@ -61,98 +58,57 @@ void main() {
 		scaledYPos[i] = positionY[i] * canvasHeight;
 	}
 
-	for (int xShift = 0; xShift < antialiasing; xShift++) {
-		for (int yShift = 0; yShift < antialiasing; yShift++) {
-			float x = gl_FragCoord.x + float(xShift) * step;
-			float y = gl_FragCoord.y + float(yShift) * step;
+	float x = gl_FragCoord.x;
+	float y = gl_FragCoord.y;
+	float forceX = 0.0, forceY = 0.0;
 
-			float forceX = 0.0, forceY = 0.0;
+	for (int i = 0; i < numPoints; i++) {
+		float x2 = scaledXPos[i];
+		float y2 = scaledYPos[i];
+		float distance = distanceMetric(x, y, x2, y2);
 
-			for (int i = 0; i < numPoints; i++) {
-				float x2 = scaledXPos[i];
-				float y2 = scaledYPos[i];
-				float distance = distanceMetric(x, y, x2, y2);
-
-				float pointStrength = strength[i];
-				if (i == numPoints - 1) {
-					pointStrength *= finalPointScale;
-				}
-				float force =
-					fieldConstant * pointStrength *
-					pow(base, -pow(distance / divisor, fieldExponent));
-
-				float attractorAngle = angle(x - x2, y - y2);
-				forceX += force * cos(attractorAngle);
-				forceY += force * sin(attractorAngle);
-			}
-
-			float netForce = sqrt(forceX * forceX + forceY * forceY);
-			float wave = max(
-				(power(sin(netForce), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
-				0.0
-			);
-
-			if (xShift == 0 && yShift == 0) {
-				hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
-				if (hueFrequency < 1.0) {
-					if (hue > hueFrequency) {
-						hue = hueFrequency - (hue - hueFrequency) / (1.0 - hueFrequency) * hueFrequency;
-					}
-				} else if (hue > lastRed) {
-					hue = (hue - lastRed) / (1.0 - lastRed);
-				} else {
-					hue = hue * hueFrequency;
-				}
-				hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
-			}
-
-			float lightness = maxLightness *
-				(waveLightness * wave + 1.0 - waveLightness);
-
-			float opacity = 1.0;
-
-			if (lightness < uncoloredPart && lightness < 0.5) {
-				if (sharpness == 1.0) {
-					opacity = 0.0;
-				} else {
-					opacity = lightness / (uncoloredPart * (1.0 - sharpness));
-				}
-			}
-			lightness = max(lightness, minLightness);
-			colors[yShift * antialiasing + xShift] = vec2(lightness, opacity);
+		float pointStrength = strength[i];
+		if (i == numPoints - 1) {
+			pointStrength *= finalPointScale;
 		}
+		float force =
+			fieldConstant * pointStrength *
+			pow(base, -pow(distance / divisor, fieldExponent));
+
+		float attractorAngle = angle(x - x2, y - y2);
+		forceX += force * cos(attractorAngle);
+		forceY += force * sin(attractorAngle);
 	}
 
-	int samplePoints = antialiasing * antialiasing;
-	float[25] lightnesses, opacities;
-	float lightness, opacity;
-	for (int i = 0; i < samplePoints; i++) {
-		lightness = 0.0;
-		opacity = 0.0;
-		int lightnessIndex, opacityIndex;
-		for (int j = 0; j < samplePoints; j++) {
-			vec2 color = colors[j];
-			if (color[0] >= lightness) {
-				lightness = color[0];
-				lightnessIndex = j;
-			}
-			if (color[1] >= opacity) {
-				opacity = color[1];
-				opacityIndex = j;
-			}
+	float netForce = sqrt(forceX * forceX + forceY * forceY);
+	float wave = max(
+		(power(sin(netForce), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
+		0.0
+	);
+
+	hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
+	if (hueFrequency < 1.0) {
+		if (hue > hueFrequency) {
+			hue = hueFrequency - (hue - hueFrequency) / (1.0 - hueFrequency) * hueFrequency;
 		}
-		lightnesses[i] = lightness;
-		opacities[i] = opacity;
-		colors[lightnessIndex][0] = -1.0;
-		colors[opacityIndex][1] = -1.0;
-	}
-	int index = (samplePoints - 1) / 2;
-	if (samplePoints % 2 == 0) {
-		lightness = (lightnesses[index] + lightnesses[index + 1]) / 2.0;
-		opacity = (opacities[index] + opacities[index + 1]) / 2.0;
+	} else if (hue > lastRed) {
+		hue = (hue - lastRed) / (1.0 - lastRed);
 	} else {
-		lightness = lightnesses[index];
-		opacity = opacities[index];
+		hue = hue * hueFrequency;
 	}
+	hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
+
+	lightness = maxLightness *
+		(waveLightness * wave + 1.0 - waveLightness);
+
+	if (lightness < uncoloredPart && lightness < 0.5) {
+		if (sharpness == 1.0) {
+			opacity = 0.0;
+		} else {
+			opacity = lightness / (uncoloredPart * (1.0 - sharpness));
+		}
+	}
+	lightness = max(lightness, minLightness);
+
 	fragColor = hsla(hue, saturation, lightness, opacity);
 }

@@ -60,23 +60,24 @@ void main() {
 		scaledYPos[i] = positionY[i] * canvasHeight;
 	}
 
-	float[MAX_ATTRACTORS] saturationRadii;
-	if (numPoints == 1) {
-		saturationRadii[0] = distanceMetric(0.0, 0.0, canvasWidth, canvasHeight);
-	} else {
-		for (int i = 0; i < numPoints; i++) {
-			float x1 = scaledXPos[i];
-			float y1 = scaledYPos[i];
-			float strength1 = strength[i];
-			float radius = 0.0;
-			for (int j = 0; j < numPoints; j++) {
-				if (i == j) {
-					continue;
-				}
-				float distance = distanceMetric(x1, y1, scaledXPos[j], scaledYPos[j]);
-				radius = max(radius, distance * strength1 / (strength1 + strength[j]));
-			}
-			saturationRadii[i] = radius;
+	float[MAX_ATTRACTORS] saturationRadiiSq;
+	for (int i = 0; i < numPoints; i++) {
+		saturationRadiiSq[i] = 1.0e20;
+	}
+	for (int i = 0; i < numPoints; i++) {
+		float x1 = scaledXPos[i];
+		float y1 = scaledYPos[i];
+		float strength1 = strength[i];
+		for (int j = 0; j < i; j++) {
+			float dx = scaledXPos[j] - x1;
+			float dy = scaledYPos[j] - y1;
+			float distanceSq = dx * dx + dy * dy;
+			float strength2 = strength[j];
+			float strengthTotal = strength1 + strength2;
+			float weight = strength1 / strengthTotal;
+			saturationRadiiSq[i] = min(saturationRadiiSq[i], distanceSq * weight * weight);
+			weight = strength2 / strengthTotal;
+			saturationRadiiSq[j] = min(saturationRadiiSq[j], distanceSq * weight * weight);
 		}
 	}
 
@@ -99,14 +100,16 @@ void main() {
 			pow(base, -pow(distance / divisor, fieldExponent));
 		totalForce += abs(force);
 
-		float saturationRadius = saturationRadii[i];
-		if (distance >= saturationRadius) {
-			saturation += outerSaturation[i];
+		float saturationRadiusSq = saturationRadiiSq[i];
+		float distanceSq = distance * distance;
+		float saturationContrib;
+		if (distanceSq >= saturationRadiusSq) {
+			saturationContrib = outerSaturation[i];
 		} else {
-			saturation += innerSaturation[i] +
-				(outerSaturation[i] - innerSaturation[i]) *
-					(distance * distance) / (saturationRadius * saturationRadius);
+			saturationContrib = innerSaturation[i] +
+				(outerSaturation[i] - innerSaturation[i]) * distanceSq / saturationRadiusSq;
 		}
+		saturation += saturationContrib * abs(force);
 
 		float attractorAngle = angle(x - x2, y - y2);
 		forceX += force * cos(attractorAngle);
@@ -131,7 +134,7 @@ void main() {
 	}
 	hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
 
-	saturation /= trunc(numAttractors);
+	saturation /= totalForce;
 
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);

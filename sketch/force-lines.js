@@ -175,7 +175,7 @@ export default function ForceLines() {
 		positionY[i] = Math.random();
 		strength[i] = Math.random();
 		innerSaturation[i] = 1;
-		outerSaturation[i] = 0;
+		outerSaturation[i] = 0.2;
 	}
 	this.numAttractors = 10;
 	this.explosion = 1;

@@ -1,11 +1,12 @@
-export default function ForceLines() {
+export default function Contours() {
 	const me = this;
-	this.title = 'Force Lines';
+	this.title = 'Contours';
 	this.isShader = true;
 
 	const maxAttractors = 50;
+	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), maxAttractors);
 
-	this.optionsDocument = downloadFile('force-lines.html', 'document').then(function (optionsDoc) {
+	this.optionsDocument = downloadFile('contours.html', 'document').then(function (optionsDoc) {
 
 		optionsDoc.getElementById('force-field-constant').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -67,6 +68,14 @@ export default function ForceLines() {
 			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				setBgProperty(me, 'distanceWeight', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-overall-saturation').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				setBgProperty(me, 'overallSaturation', value);
 				generateBackground(0);
 			}
 		});
@@ -146,7 +155,9 @@ export default function ForceLines() {
 			}
 		});
 
-		optionsDoc.getElementById('force-num-attractors').addEventListener('input', function (event) {
+		const numAttractorsInput = optionsDoc.getElementById('force-num-attractors');
+		numAttractorsInput.value = me.numAttractors;
+		numAttractorsInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && value <= maxAttractors) {
 				setBgProperty(me, 'numAttractors', value);
@@ -168,22 +179,18 @@ export default function ForceLines() {
 	const positionX = new Array(maxAttractors);
 	const positionY = new Array(maxAttractors);
 	const strength = new Array(maxAttractors);
-	const innerSaturation = new Array(maxAttractors);
-	const outerSaturation = new Array(maxAttractors);
+	const saturations = new Array(maxAttractors);
+	saturations.fill(1);
 	for (let i = 0; i < maxAttractors; i++) {
 		positionX[i] = Math.random();
 		positionY[i] = Math.random();
 		strength[i] = Math.random();
-		innerSaturation[i] = 1;
-		outerSaturation[i] = 0;
 	}
-	this.numAttractors = 10;
 	this.explosion = 1;
 	this.positionX = positionX;
 	this.positionY = positionY;
 	this.strength = strength;
-	this.innerSaturation = innerSaturation;
-	this.outerSaturation = outerSaturation;
+	this.saturations = saturations;
 
 	this.fieldConstant = 100;
 	this.fieldExponent = 2;
@@ -198,6 +205,8 @@ export default function ForceLines() {
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
+	this.overallSaturation = 1;
+
 	this.maxLightness = 0.4;
 	this.minLightness = 0;
 	this.waveLightness = 1;
@@ -206,10 +215,10 @@ export default function ForceLines() {
 	this.sharpness = 0;
 }
 
-ForceLines.prototype.animatable = {
+Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'divisor', 'base', 'innerSaturation', 'outerSaturation',
+		'divisor', 'base', 'saturations', 'overallSaturation',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',

@@ -60,26 +60,6 @@ void main() {
 		scaledYPos[i] = positionY[i] * canvasHeight;
 	}
 
-	float[MAX_ATTRACTORS] saturationRadii;
-	if (numPoints == 1) {
-		saturationRadii[0] = distanceMetric(0.0, 0.0, canvasWidth, canvasHeight);
-	} else {
-		for (int i = 0; i < numPoints; i++) {
-			float x1 = scaledXPos[i];
-			float y1 = scaledYPos[i];
-			float strength1 = strength[i];
-			float radius = 0.0;
-			for (int j = 0; j < numPoints; j++) {
-				if (i == j) {
-					continue;
-				}
-				float distance = distanceMetric(x1, y1, scaledXPos[j], scaledYPos[j]);
-				radius = max(radius, distance * strength1 / (strength1 + strength[j]));
-			}
-			saturationRadii[i] = radius;
-		}
-	}
-
 	float x = gl_FragCoord.x;
 	float y = gl_FragCoord.y;
 	float forceX = 0.0, forceY = 0.0;
@@ -97,20 +77,14 @@ void main() {
 		float force =
 			fieldConstant * pointStrength *
 			pow(base, -pow(distance / divisor, fieldExponent));
-		totalForce += abs(force);
-
-		float saturationRadius = saturationRadii[i];
-		if (distance >= saturationRadius) {
-			saturation += outerSaturation[i];
-		} else {
-			saturation += innerSaturation[i] +
-				(outerSaturation[i] - innerSaturation[i]) *
-					(distance * distance) / (saturationRadius * saturationRadius);
-		}
 
 		float attractorAngle = angle(x - x2, y - y2);
 		forceX += force * cos(attractorAngle);
 		forceY += force * sin(attractorAngle);
+
+		float absForce = abs(force);
+		saturation += saturations[i] * absForce;
+		totalForce += absForce;
 	}
 
 	float netForce = sqrt(forceX * forceX + forceY * forceY);
@@ -131,7 +105,7 @@ void main() {
 	}
 	hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
 
-	saturation /= trunc(numAttractors);
+	saturation = overallSaturation * saturation / totalForce;
 
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);

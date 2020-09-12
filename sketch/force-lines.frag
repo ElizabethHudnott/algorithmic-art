@@ -1,3 +1,4 @@
+const int MAX_ATTRACTORS = 50;
 const float TWO_PI = 2.0 * PI;
 
 float distanceMetric(float x1, float y1, float x2, float y2) {
@@ -44,6 +45,7 @@ void main() {
 	float hue, lightness, opacity = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 	float uncoloredPart = maxLightness * (1.0 - colorPortion);
+	float saturation = 0.0;
 
 	int numPoints = int(ceil(numAttractors));
 	float finalPointScale = fract(numAttractors);
@@ -52,15 +54,36 @@ void main() {
 	}
 	finalPointScale = explosion + finalPointScale * (1.0 - explosion);
 
-	float[30] scaledXPos, scaledYPos;
+	float[MAX_ATTRACTORS] scaledXPos, scaledYPos;
 	for (int i = 0; i < numPoints; i++) {
 		scaledXPos[i] = positionX[i] * canvasWidth;
 		scaledYPos[i] = positionY[i] * canvasHeight;
 	}
 
+	float[MAX_ATTRACTORS] saturationRadii;
+	if (numPoints == 1) {
+		saturationRadii[0] = distanceMetric(0.0, 0.0, canvasWidth, canvasHeight);
+	} else {
+		for (int i = 0; i < numPoints; i++) {
+			float x1 = scaledXPos[i];
+			float y1 = scaledYPos[i];
+			float strength1 = strength[i];
+			float radius = 0.0;
+			for (int j = 0; j < numPoints; j++) {
+				if (i == j) {
+					continue;
+				}
+				float distance = distanceMetric(x1, y1, scaledXPos[j], scaledYPos[j]);
+				radius = max(radius, distance * strength1 / (strength1 + strength[j]));
+			}
+			saturationRadii[i] = radius;
+		}
+	}
+
 	float x = gl_FragCoord.x;
 	float y = gl_FragCoord.y;
 	float forceX = 0.0, forceY = 0.0;
+	float totalForce = 0.0;
 
 	for (int i = 0; i < numPoints; i++) {
 		float x2 = scaledXPos[i];
@@ -74,6 +97,16 @@ void main() {
 		float force =
 			fieldConstant * pointStrength *
 			pow(base, -pow(distance / divisor, fieldExponent));
+		totalForce += abs(force);
+
+		float saturationRadius = saturationRadii[i];
+		if (distance >= saturationRadius) {
+			saturation += outerSaturation[i];
+		} else {
+			saturation += innerSaturation[i] +
+				(outerSaturation[i] - innerSaturation[i]) *
+					(distance * distance) / (saturationRadius * saturationRadius);
+		}
 
 		float attractorAngle = angle(x - x2, y - y2);
 		forceX += force * cos(attractorAngle);
@@ -97,6 +130,8 @@ void main() {
 		hue = hue * hueFrequency;
 	}
 	hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
+
+	saturation /= trunc(numAttractors);
 
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);

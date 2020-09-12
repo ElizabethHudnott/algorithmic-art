@@ -3,7 +3,7 @@ export default function ForceLines() {
 	this.title = 'Force Lines';
 	this.isShader = true;
 
-	const maxAttractors = 30;
+	const maxAttractors = 50;
 
 	this.optionsDocument = downloadFile('force-lines.html', 'document').then(function (optionsDoc) {
 
@@ -168,16 +168,22 @@ export default function ForceLines() {
 	const positionX = new Array(maxAttractors);
 	const positionY = new Array(maxAttractors);
 	const strength = new Array(maxAttractors);
+	const innerSaturation = new Array(maxAttractors);
+	const outerSaturation = new Array(maxAttractors);
 	for (let i = 0; i < maxAttractors; i++) {
 		positionX[i] = Math.random();
 		positionY[i] = Math.random();
 		strength[i] = Math.random();
+		innerSaturation[i] = 1;
+		outerSaturation[i] = 0;
 	}
 	this.numAttractors = 10;
 	this.explosion = 1;
 	this.positionX = positionX;
 	this.positionY = positionY;
 	this.strength = strength;
+	this.innerSaturation = innerSaturation;
+	this.outerSaturation = outerSaturation;
 
 	this.fieldConstant = 100;
 	this.fieldExponent = 2;
@@ -192,8 +198,6 @@ export default function ForceLines() {
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
-	this.saturation = 1;
-
 	this.maxLightness = 0.4;
 	this.minLightness = 0;
 	this.waveLightness = 1;
@@ -205,9 +209,9 @@ export default function ForceLines() {
 ForceLines.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'divisor', 'base',
+		'divisor', 'base', 'innerSaturation', 'outerSaturation',
 		'minkowskiOrder', 'distanceWeight',
-		'hueFrequency', 'hueRotation', 'waveHue','saturation',
+		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion'
 	],

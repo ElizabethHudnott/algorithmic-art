@@ -1559,6 +1559,11 @@ function hasRandomness(enabled) {
 		benchmark = Infinity;
 
 		// Reset layer geometry
+		const backgroundColor = gen.backgroundColor;
+		if (Array.isArray(backgroundColor)) {
+			backgroundElement.style.backgroundColor = rgba(...backgroundColor, 1);
+			document.getElementById('background-color').value = rgbToHex(...backgroundColor);
+		}
 		rotation = 0;
 		rotationSlider.value = 0;
 		scale = 1;

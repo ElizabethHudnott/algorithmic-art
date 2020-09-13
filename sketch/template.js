@@ -6,6 +6,7 @@ export default function MySketch() {
 	const me = this;
 	this.title = 'My Sketch';
 	this.helpFile = 'my-sketch-help.html'; // Optional
+	this.backgroundColor = [0, 0, 0]; // Optional. Suggested background color [r, g, b].
 
 	this.optionsDocument = downloadFile('my-sketch.html', 'document').then(function (optionsDoc) {
 		/* Here we download the HTML file containing the controls for adjusting the

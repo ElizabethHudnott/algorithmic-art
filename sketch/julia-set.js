@@ -3,6 +3,7 @@ export default function JuliaSet() {
 	this.title = 'Julia Set';
 	this.isShader = true;
 	this.helpFile = 'help/julia-set.html';
+	this.backgroundColor = [0, 0, 0];
 
 	const palette = new Array(256);
 	this.palette = palette;

@@ -2,6 +2,7 @@ export default function Contours() {
 	const me = this;
 	this.title = 'Contours';
 	this.isShader = true;
+	this.backgroundColor = [0, 0, 0];
 
 	const maxAttractors = 50;
 	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), maxAttractors);
@@ -113,8 +114,11 @@ export default function Contours() {
 		});
 
 		optionsDoc.getElementById('force-sharpness').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
+			let value = parseFloat(this.value);
 			if (value <= 1) {
+				if (value === 1) {
+					value = 0.99;
+				}
 				setBgProperty(me, 'sharpness', value);
 				generateBackground(0);
 			}
@@ -211,7 +215,7 @@ export default function Contours() {
 	this.minLightness = 0;
 	this.waveLightness = 1;
 
-	this.colorPortion = 1;
+	this.colorPortion = 0.5;
 	this.sharpness = 0;
 }
 

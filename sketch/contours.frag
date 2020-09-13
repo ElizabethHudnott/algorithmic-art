@@ -110,12 +110,8 @@ void main() {
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);
 
-	if (lightness < uncoloredPart && lightness < 0.5) {
-		if (sharpness == 1.0) {
-			opacity = 0.0;
-		} else {
-			opacity = lightness / (uncoloredPart * (1.0 - sharpness));
-		}
+	if (wave < uncoloredPart && lightness < 0.5) {
+		opacity = lightness / (uncoloredPart * (1.0 - sharpness));
 	}
 	lightness = max(lightness, minLightness);
 

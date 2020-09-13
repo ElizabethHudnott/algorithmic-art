@@ -2,6 +2,7 @@ export default function Contours() {
 	const me = this;
 	this.title = 'Contours';
 	this.isShader = true;
+	this.helpFile = 'help/contours.html';
 	this.backgroundColor = [0, 0, 0];
 
 	const maxAttractors = 50;
@@ -210,10 +211,12 @@ export default function Contours() {
 	this.waveHue = 0;
 
 	this.overallSaturation = 1;
+	this.backgroundSaturation = 1;
 
 	this.maxLightness = 0.4;
 	this.minLightness = 0;
 	this.waveLightness = 1;
+	this.contrast = 0;
 
 	this.colorPortion = 0.5;
 	this.sharpness = 0;
@@ -222,7 +225,8 @@ export default function Contours() {
 Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'divisor', 'base', 'saturations', 'overallSaturation',
+		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
+		'contrast',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',

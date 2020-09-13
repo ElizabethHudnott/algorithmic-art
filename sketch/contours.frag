@@ -112,6 +112,8 @@ void main() {
 
 	if (wave < uncoloredPart && lightness < 0.5) {
 		opacity = lightness / (uncoloredPart * (1.0 - sharpness));
+		saturation = saturation * min(opacity, backgroundSaturation);
+		lightness *= 1.0 - contrast;
 	}
 	lightness = max(lightness, minLightness);
 

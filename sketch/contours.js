@@ -220,13 +220,18 @@ export default function Contours() {
 
 	this.colorPortion = 0.5;
 	this.sharpness = 0;
+
+	this.baseColor = 0.5;
+	this.baseAmount = 0;
+	this.baseIntensity = 0.5;
+	this.baseScale = 1.5;
 }
 
 Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
 		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
-		'contrast',
+		'contrast', 'baseColor', 'baseAmount', 'baseIntensity', 'baseScale',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',

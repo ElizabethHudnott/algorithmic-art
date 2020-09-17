@@ -44,7 +44,6 @@ void main() {
 
 	float hue, lightness, opacity = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
-	float uncoloredPart = maxLightness * (1.0 - colorPortion);
 	float saturation = 0.0;
 
 	int numPoints = int(ceil(numAttractors));
@@ -110,6 +109,7 @@ void main() {
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);
 
+	float uncoloredPart = maxLightness * (1.0 - colorPortion);
 	if (wave < uncoloredPart && lightness < 0.5) {
 		opacity = lightness / (uncoloredPart * (1.0 - sharpness));
 		saturation = saturation * min(opacity, backgroundSaturation);
@@ -118,4 +118,36 @@ void main() {
 	lightness = max(lightness, minLightness);
 
 	fragColor = hsla(hue, saturation, lightness, opacity);
+
+	float baseMod = mod(baseColor, 1.0) * 6.0;
+	if (baseMod < 0.0) {
+		baseMod = 6.0 + baseMod;
+	}
+	float baseFraction = fract(baseMod);
+	vec4 baseWeights;
+	if (baseMod < 1.0) {
+		// Fade red to yellow
+		baseWeights = vec4(1.0, baseFraction, 0.0, 0.0);
+	} else if (baseMod < 2.0) {
+		// Fade yellow to green
+		baseWeights = vec4(1.0 - baseFraction, 1.0, 0.0, 0.0);
+	} else if (baseMod < 3.0) {
+		// Fade green to cyan
+		baseWeights = vec4(0.0, 1.0, baseFraction, 0.0);
+	} else if (baseMod < 4.0) {
+		// Fade cyan to blue
+		baseWeights = vec4(0.0, 1.0 - baseFraction, 1.0, 0.0);
+	} else if (baseMod < 5.0) {
+		// Fade blue to magenta
+		baseWeights = vec4(baseFraction, 0.0, 1.0, 0.0);
+	} else {
+		// Fade magenta to red
+		baseWeights = vec4(1.0, 0.0, 1.0 - baseFraction, 0.0);
+	}
+	baseWeights *= baseAmount;
+	vec4 maxValues = vec4(baseIntensity, baseIntensity, baseIntensity, 0.0);
+	fragColor =
+		min(baseWeights * netForce / baseScale, maxValues) +
+		(vec4(1.0, 1.0, 1.0, 1.0) - baseWeights * baseIntensity) * fragColor;
+
 }

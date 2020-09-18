@@ -201,6 +201,7 @@ export default function Contours() {
 	this.fieldExponent = 2;
 	this.divisor = 100;
 	this.base = 2.8;
+	this.sineFrequency = 1;
 	this.sinePower = 1;	// Multiplied by 2 in WebGL
 
 	this.minkowskiOrder = 2;
@@ -221,17 +222,16 @@ export default function Contours() {
 	this.colorPortion = 0.5;
 	this.sharpness = 0;
 
-	this.baseColor = 0.5;
-	this.baseAmount = 0;
-	this.baseIntensity = 0.5;
+	this.baseColor = 0;
+	this.baseIntensity = 0;
 	this.baseScale = 1.5;
 }
 
 Contours.prototype.animatable = {
 	continuous: [
-		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
+		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent', 'sineFrequency',
 		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
-		'contrast', 'baseColor', 'baseAmount', 'baseIntensity', 'baseScale',
+		'contrast', 'baseColor', 'baseIntensity', 'baseScale',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',

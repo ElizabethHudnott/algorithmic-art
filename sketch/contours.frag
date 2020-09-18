@@ -23,6 +23,26 @@ float distanceMetric(float x1, float y1, float x2, float y2) {
 	);
 }
 
+vec4 colorFunc(int n, float netForce, float wave) {
+	float a = wave;
+	float aPrime = 1.0 - a;
+	float b = netForce / baseScale;
+	switch (n) {
+	case 0:
+		return vec4(a, b, aPrime, 1.0);
+	case 1:
+		return vec4(b, a, aPrime, 1.0);
+	case 2:
+		return vec4(aPrime, a, b, 1.0);
+	case 3:
+		return vec4(aPrime, b, a, 1.0);
+	case 4:
+		return vec4(b, aPrime, a, 1.0);
+	default:
+		return vec4(a, aPrime, b, 1.0);
+	}
+}
+
 float angle(float x, float y) {
 	if (x == 0.0) {
 		return sign(y) * PI / 2.0;
@@ -37,11 +57,6 @@ float power(float base, int exponent) {
 }
 
 void main() {
-	if (colorPortion == 0.0) {
-		fragColor = vec4(0.0, 0.0, 0.0, 0.0);
-		return;
-	}
-
 	float hue, lightness, opacity = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 	float saturation = 0.0;
@@ -87,10 +102,15 @@ void main() {
 	}
 
 	float netForce = sqrt(forceX * forceX + forceY * forceY);
-	float wave = max(
-		(power(sin(netForce), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
-		0.0
-	);
+	float wave;
+	if (colorPortion == 0.0) {
+		wave = 0.0;
+	} else {
+	 	wave = max(
+			(power(sin(netForce * sineFrequency), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
+			0.0
+		);
+	}
 
 	hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
 	if (hueFrequency < 1.0) {
@@ -110,44 +130,28 @@ void main() {
 		(waveLightness * wave + 1.0 - waveLightness);
 
 	float uncoloredPart = maxLightness * (1.0 - colorPortion);
+	float blurriness = 1.0 - sharpness;
 	if (wave < uncoloredPart && lightness < 0.5) {
-		opacity = lightness / (uncoloredPart * (1.0 - sharpness));
+		opacity = lightness / (uncoloredPart * blurriness);
 		saturation = saturation * min(opacity, backgroundSaturation);
 		lightness *= 1.0 - contrast;
 	}
 	lightness = max(lightness, minLightness);
 
-	fragColor = hsla(hue, saturation, lightness, opacity);
+	vec4 color = hsla(hue, saturation, lightness, opacity);
 
-	float baseMod = mod(baseColor, 1.0) * 6.0;
-	if (baseMod < 0.0) {
-		baseMod = 6.0 + baseMod;
+	float baseColorMod = mod(baseColor, 6.0);
+	if (baseColorMod < 0.0) {
+		baseColorMod = 6.0 + baseColorMod;
 	}
-	float baseFraction = fract(baseMod);
-	vec4 baseWeights;
-	if (baseMod < 1.0) {
-		// Fade red to yellow
-		baseWeights = vec4(1.0, baseFraction, 0.0, 0.0);
-	} else if (baseMod < 2.0) {
-		// Fade yellow to green
-		baseWeights = vec4(1.0 - baseFraction, 1.0, 0.0, 0.0);
-	} else if (baseMod < 3.0) {
-		// Fade green to cyan
-		baseWeights = vec4(0.0, 1.0, baseFraction, 0.0);
-	} else if (baseMod < 4.0) {
-		// Fade cyan to blue
-		baseWeights = vec4(0.0, 1.0 - baseFraction, 1.0, 0.0);
-	} else if (baseMod < 5.0) {
-		// Fade blue to magenta
-		baseWeights = vec4(baseFraction, 0.0, 1.0, 0.0);
-	} else {
-		// Fade magenta to red
-		baseWeights = vec4(1.0, 0.0, 1.0 - baseFraction, 0.0);
-	}
-	baseWeights *= baseAmount;
-	vec4 maxValues = vec4(baseIntensity, baseIntensity, baseIntensity, 0.0);
-	fragColor =
-		min(baseWeights * netForce / baseScale, maxValues) +
-		(vec4(1.0, 1.0, 1.0, 1.0) - baseWeights * baseIntensity) * fragColor;
+	int lowerBaseColor = int(baseColorMod);
+	float baseColorFrac = fract(baseColorMod);
+	int upperBaseColor = (lowerBaseColor + 1) % 6;
+
+	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, netForce, wave);
+	fragColor += baseColorFrac * colorFunc(upperBaseColor, netForce, wave);
+	fragColor *= baseIntensity;
+	fragColor += (1.0 - baseIntensity) * color;
+	fragColor.a = max(baseIntensity * blurriness, opacity);
 
 }

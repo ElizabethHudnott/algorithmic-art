@@ -40,8 +40,7 @@ float sineFunc(float sine, int exponent) {
 	return (power(sine, 2 * exponent) - 1.0 + colorPortion);
 }
 
-vec4 colorFunc(int n, float netForce, float wave) {
-	float scaledForce = min(netForce / baseScale, 1.0);
+vec4 colorFunc(int n, float scaledForce, float wave) {
 	float a = wave * (scaledForce * baseBrightness[2] + (1.0 - scaledForce) * baseBrightness[0]);
 	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[3] + (1.0 - scaledForce) * baseBrightness[1]);
 	float b = scaledForce * (wave * baseBrightness[2] + (1.0 - wave) * baseBrightness[3]);
@@ -62,7 +61,7 @@ vec4 colorFunc(int n, float netForce, float wave) {
 }
 
 void main() {
-	float hue, lightness, opacity = 1.0;
+	float hue, lightness, opacity = 1.0, gradient = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 	float saturation = 0.0;
 
@@ -131,6 +130,7 @@ void main() {
 			0.0
 		);
 	}
+	float scaledForce = min(netForce / baseScale, 1.0);
 
 	hue = mod(-angle(forceX, forceY) + 0.5 * PI, TWO_PI) / TWO_PI;
 	if (hueFrequency < 1.0) {
@@ -152,8 +152,9 @@ void main() {
 	float uncoloredPart = maxLightness * (1.0 - colorPortion);
 	float blurriness = 1.0 - sharpness;
 	if (wave < uncoloredPart && lightness < 0.5) {
-		opacity = lightness / (uncoloredPart * blurriness);
-		saturation = saturation * min(opacity, backgroundSaturation);
+		gradient = lightness / (uncoloredPart * blurriness);
+		opacity = gradient;
+		saturation = saturation * min(gradient, backgroundSaturation);
 		lightness *= 1.0 - contrast;
 	}
 	lightness = max(lightness, minLightness);
@@ -168,10 +169,12 @@ void main() {
 	float baseColorFrac = fract(baseColorMod);
 	int upperBaseColor = (lowerBaseColor + 1) % 6;
 
-	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, totalForce, wave);
-	fragColor += baseColorFrac * colorFunc(upperBaseColor, totalForce, wave);
-	fragColor *= baseIntensity;
-	fragColor += (1.0 - baseIntensity) * color;
-	fragColor.a = max(baseIntensity * blurriness, opacity);
-
+	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, scaledForce, wave);
+	fragColor += baseColorFrac * colorFunc(upperBaseColor, scaledForce, wave);
+	float pixelBaseIntensity = max(baseIntensity, 1.0 - gradient);
+	fragColor *= pixelBaseIntensity;
+	fragColor.a =
+		backgroundOpacity * (1.0 - baseIntensity) +
+		baseIntensity * (backgroundOpacity + (1.0 - backgroundOpacity) * wave);
+	fragColor += (1.0 - pixelBaseIntensity) * color;
 }

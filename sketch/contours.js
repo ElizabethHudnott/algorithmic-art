@@ -173,6 +173,40 @@ export default function Contours() {
 		coloringInput.addEventListener('pointerup', fullRedraw);
 		coloringInput.addEventListener('keyup', fullRedraw);
 
+		const opacityInput = optionsDoc.getElementById('force-background-opacity');
+		opacityInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			setBgProperty(me, 'backgroundOpacity', value);
+			generateBackground(1);
+		});
+		opacityInput.addEventListener('pointerup', fullRedraw);
+		opacityInput.addEventListener('keyup', fullRedraw);
+
+		const baseColorInput = optionsDoc.getElementById('force-base-color');
+		baseColorInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			setBgProperty(me, 'baseColor', value);
+			generateBackground(1);
+		});
+		baseColorInput.addEventListener('pointerup', fullRedraw);
+		baseColorInput.addEventListener('keyup', fullRedraw);
+
+		optionsDoc.getElementById('force-sine-frequency').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'sineFrequency', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-base-scale').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'baseScale', value);
+				generateBackground(0);
+			}
+		});
+
 		const numAttractorsInput = optionsDoc.getElementById('force-num-attractors');
 		numAttractorsInput.value = me.numAttractors;
 		numAttractorsInput.addEventListener('input', function (event) {
@@ -238,6 +272,7 @@ export default function Contours() {
 	this.baseColor = 0;
 	this.baseIntensity = 0;
 	this.baseScale = 1.5;
+	this.backgroundOpacity = 0;
 	this.baseBrightness = [1, 1, 1, 1];
 
 	this.minDotSize = 5;
@@ -253,7 +288,7 @@ Contours.prototype.animatable = {
 		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
-		'waveLightness', 'minLightness', 'maxLightness',
+		'waveLightness', 'minLightness', 'maxLightness', 'backgroundOpacity',
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion',
 		'minDotSize', 'maxDotSize', 'dotColor',
 	],

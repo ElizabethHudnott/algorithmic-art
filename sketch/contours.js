@@ -225,17 +225,23 @@ export default function Contours() {
 	this.baseColor = 0;
 	this.baseIntensity = 0;
 	this.baseScale = 1.5;
+	this.baseBrightness = [1, 1, 1, 1];
+
+	this.minDotSize = 5;
+	this.maxDotSize = this.minDotSize;
+	this.dotColor = [1/6, 1, 0.5, 1];	// HSLA
 }
 
 Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent', 'sineFrequency',
 		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
-		'contrast', 'baseColor', 'baseIntensity', 'baseScale',
+		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness',
-		'colorPortion', 'sharpness', 'numAttractors', 'explosion'
+		'colorPortion', 'sharpness', 'numAttractors', 'explosion',
+		'minDotSize', 'maxDotSize', 'dotColor',
 	],
 	stepped: [
 		'sinePower',

@@ -24,9 +24,10 @@ float distanceMetric(float x1, float y1, float x2, float y2) {
 }
 
 vec4 colorFunc(int n, float netForce, float wave) {
-	float a = wave;
-	float aPrime = 1.0 - a;
-	float b = netForce / baseScale;
+	float scaledForce = min(netForce / baseScale, 1.0);
+	float a = wave * (scaledForce * baseBrightness[2] + (1.0 - scaledForce) * baseBrightness[0]);
+	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[3] + (1.0 - scaledForce) * baseBrightness[1]);
+	float b = scaledForce * (wave * baseBrightness[2] + (1.0 - wave) * baseBrightness[3]);
 	switch (n) {
 	case 0:
 		return vec4(a, b, aPrime, 1.0);
@@ -88,6 +89,14 @@ void main() {
 		if (i == numPoints - 1) {
 			pointStrength *= finalPointScale;
 		}
+
+		float dotSize = round(max(pointStrength * maxDotSize, minDotSize));
+		if (distance < dotSize + 1.0) {
+			float lightness = distance <= dotSize ? 1.0 : 1.0 - fract(distance);
+			fragColor = hsla(dotColor[0], dotColor[1], dotColor[2] * lightness, dotColor[3]);
+			return;
+		}
+
 		float force =
 			fieldConstant * pointStrength *
 			pow(base, -pow(distance / divisor, fieldExponent));

@@ -9,6 +9,10 @@ export default function Contours() {
 	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), maxAttractors);
 
 	this.optionsDocument = downloadFile('contours.html', 'document').then(function (optionsDoc) {
+		function fullRedraw() {
+			generateBackground(0);
+		}
+
 
 		optionsDoc.getElementById('force-field-constant').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -83,7 +87,7 @@ export default function Contours() {
 		});
 
 		optionsDoc.getElementById('force-sine-power').addEventListener('input', function (event) {
-			const value = parseInt(this.value);
+			const value = parseFloat(this.value);
 			if (Number.isFinite(value)) {
 				setBgProperty(me, 'sinePower', value);
 				generateBackground(0);
@@ -160,6 +164,15 @@ export default function Contours() {
 			}
 		});
 
+		const coloringInput = optionsDoc.getElementById('force-base-intensity');
+		coloringInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			setBgProperty(me, 'baseIntensity', value);
+			generateBackground(1);
+		});
+		coloringInput.addEventListener('pointerup', fullRedraw);
+		coloringInput.addEventListener('keyup', fullRedraw);
+
 		const numAttractorsInput = optionsDoc.getElementById('force-num-attractors');
 		numAttractorsInput.value = me.numAttractors;
 		numAttractorsInput.addEventListener('input', function (event) {
@@ -234,7 +247,8 @@ export default function Contours() {
 
 Contours.prototype.animatable = {
 	continuous: [
-		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent', 'sineFrequency',
+		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
+		'sinePower', 'sineFrequency',
 		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
 		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness',
 		'minkowskiOrder', 'distanceWeight',
@@ -242,8 +256,5 @@ Contours.prototype.animatable = {
 		'waveLightness', 'minLightness', 'maxLightness',
 		'colorPortion', 'sharpness', 'numAttractors', 'explosion',
 		'minDotSize', 'maxDotSize', 'dotColor',
-	],
-	stepped: [
-		'sinePower',
 	],
 }

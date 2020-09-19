@@ -68,7 +68,7 @@ th.col-form-label {
 	border-color: hsl(134, 61%, 35%);
 }
 
-.btn-form {
+.btn-form, .bg-form {
 	background-color: var(--form-color);
 }
 

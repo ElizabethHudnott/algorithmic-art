@@ -1,6 +1,19 @@
 const int MAX_ATTRACTORS = 50;
 const float TWO_PI = 2.0 * PI;
 
+float angle(float x, float y) {
+	if (x == 0.0) {
+		return sign(y) * PI / 2.0;
+	} else {
+		return atan(y, x);
+	}
+}
+
+float power(float base, int exponent) {
+	float s = exponent % 2 == 0 ? 1.0 : sign(base);
+	return s * pow(base, float(abs(exponent)));
+}
+
 float distanceMetric(float x1, float y1, float x2, float y2) {
 	if (minkowskiOrder == 0.0) {
 		return 0.0;
@@ -21,6 +34,10 @@ float distanceMetric(float x1, float y1, float x2, float y2) {
 		),
 		1.0 / minkowskiOrder
 	);
+}
+
+float sineFunc(float sine, int exponent) {
+	return (power(sine, 2 * exponent) - 1.0 + colorPortion);
 }
 
 vec4 colorFunc(int n, float netForce, float wave) {
@@ -44,25 +61,15 @@ vec4 colorFunc(int n, float netForce, float wave) {
 	}
 }
 
-float angle(float x, float y) {
-	if (x == 0.0) {
-		return sign(y) * PI / 2.0;
-	} else {
-		return atan(y, x);
-	}
-}
-
-float power(float base, int exponent) {
-	float s = exponent % 2 == 0 ? 1.0 : sign(base);
-	return s * pow(base, float(abs(exponent)));
-}
-
 void main() {
 	float hue, lightness, opacity = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
 	float saturation = 0.0;
 
 	int numPoints = int(ceil(numAttractors));
+	if (preview > 0) {
+		numPoints = min(numPoints, 5);
+	}
 	float finalPointScale = fract(numAttractors);
 	if (finalPointScale == 0.0) {
 		finalPointScale = 1.0;
@@ -115,8 +122,12 @@ void main() {
 	if (colorPortion == 0.0) {
 		wave = 0.0;
 	} else {
+		float sine = sin(netForce * sineFrequency / 2.0);
+		int lowerPower = int(sinePower);
+		float upperPowerFrac = fract(sinePower);
 	 	wave = max(
-			(power(sin(netForce * sineFrequency), 2 * sinePower) - (1.0 - colorPortion)) / colorPortion,
+			((1.0 - upperPowerFrac) *sineFunc(sine, lowerPower) +
+			upperPowerFrac * sineFunc(sine, lowerPower + 1)) / colorPortion,
 			0.0
 		);
 	}
@@ -157,8 +168,8 @@ void main() {
 	float baseColorFrac = fract(baseColorMod);
 	int upperBaseColor = (lowerBaseColor + 1) % 6;
 
-	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, netForce, wave);
-	fragColor += baseColorFrac * colorFunc(upperBaseColor, netForce, wave);
+	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, totalForce, wave);
+	fragColor += baseColorFrac * colorFunc(upperBaseColor, totalForce, wave);
 	fragColor *= baseIntensity;
 	fragColor += (1.0 - baseIntensity) * color;
 	fragColor.a = max(baseIntensity * blurriness, opacity);

@@ -1,7 +1,12 @@
 f<ul class="nav nav-tabs mb-3" role="tablist">
 	<li class="nav-item" role="presentation">
 		<a class="nav-link active" id="force-colors-tab" data-toggle="tab" href="#force-colors" role="tab" aria-controls="force-colors" aria-selected="true">
-			Shape/Colour
+			Colour
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="force-shapes-tab" data-toggle="tab" href="#force-shapes" role="tab" aria-controls="force-points" aria-selected="false">
+			Shapes
 		</a>
 	</li>
 	<li class="nav-item" role="presentation">
@@ -13,6 +18,87 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 
 <div class="tab-content">
 	<div class="tab-pane active" id="force-colors" role="tabpanel" aria-labelledby="force-colors-tab">
+		<fieldset>
+			<legend>HSL Colouring</legend>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-color-portion">
+					Coloured Portion
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" step="0.05" value="0.5" class="form-control form-control-sm" id="force-color-portion">
+				</div>
+				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sharpness">
+					Sharpness
+				</label>
+				<div class="col-3">
+					<input type="number" max="1" step="0.1" value="0" class="form-control form-control-sm" id="force-sharpness">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-overall-saturation">
+					Saturation
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-overall-saturation">
+				</div>
+				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sine-power">
+					Colour Spread
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
+					Hue Frequency
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" step="0.1" value="0" class="form-control form-control-sm" id="force-hue-frequency">
+				</div>
+				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-wave-hue">
+					Hue Wave
+				</label>
+				<div class="col-3">
+					<input type="number" step="0.05" value="0" class="form-control form-control-sm" id="force-wave-hue">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-min-lightness">
+					Min Lightness
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" max="1" step="0.02" value="0" class="form-control form-control-sm" id="force-min-lightness">
+				</div>
+				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-max-lightness">
+					Max Lightness
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" max="1" step="0.04" value="0.4" class="form-control form-control-sm" id="force-max-lightness">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-wave-lightness">
+					Lightness Wave
+				</label>
+				<div class="col-3">
+					<input type="number" min="-1" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-wave-lightness">
+				</div>
+			</div>
+		</fieldset>
+		<div class="form-row form-group bg-form rounded-lg">
+			<div class="col-1 col-form-label col-form-label-sm">
+				HSL
+			</div>
+			<div class="col-10">
+				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="force-base-intensity">
+			</div>
+			<div class="col-1 col-form-label col-form-label-sm">
+				RGB
+			</div>
+		</div>
+	</div>
+
+	<div class="tab-pane" id="force-shapes" role="tabpanel" aria-labelledby="force-shapes-tab">
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="force-field-constant">
 				Multiplier
@@ -75,72 +161,10 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			<div class="col-3">
 				<input type="number" step="0.1" value="0" class="form-control form-control-sm" id="force-distance-weight">
 			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-overall-saturation">
-				Saturation
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-overall-saturation">
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
-				Hue Frequency
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" step="0.1" value="0" class="form-control form-control-sm" id="force-hue-frequency">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-wave-hue">
-				Hue Wave
-			</label>
-			<div class="col-3">
-				<input type="number" step="0.05" value="0" class="form-control form-control-sm" id="force-wave-hue">
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-min-lightness">
-				Min Lightness
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" max="1" step="0.02" value="0" class="form-control form-control-sm" id="force-min-lightness">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-max-lightness">
-				Max Lightness
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" max="1" step="0.04" value="0.4" class="form-control form-control-sm" id="force-max-lightness">
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-wave-lightness">
-				Lightness Wave
-			</label>
-			<div class="col-3">
-				<input type="number" min="-1" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-wave-lightness">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sine-power">
-				Colour Spread
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-color-portion">
-				Coloured Portion
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" step="0.05" value="0.5" class="form-control form-control-sm" id="force-color-portion">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sharpness">
-				Sharpness
-			</label>
-			<div class="col-3">
-				<input type="number" max="1" step="0.1" value="0" class="form-control form-control-sm" id="force-sharpness">
-			</div>
 		</div>
 	</div>
 
-	<div class="tab-pane" id="force-points" role="tabpanel" aria-labelledby="julia-points-tab">
+	<div class="tab-pane" id="force-points" role="tabpanel" aria-labelledby="force-points-tab">
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="force-num-attractors">
 				No. of Points

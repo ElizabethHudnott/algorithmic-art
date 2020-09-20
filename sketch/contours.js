@@ -13,46 +13,29 @@ export default function Contours() {
 			generateBackground(0);
 		}
 
-
-		optionsDoc.getElementById('force-field-constant').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'fieldConstant', value);
-				generateBackground(0);
+		function setNumericProperty(name) {
+			return function(event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value) && value !== me[name]) {
+					setBgProperty(me, name, value);
+					generateBackground(0);
+				}
 			}
-		});
+		}
 
-		optionsDoc.getElementById('force-divisor').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'divisor', value);
-				generateBackground(0);
+		function setSliderProperty(name) {
+			return function(event) {
+				const value = parseFloat(this.value);
+				setBgProperty(me, name, value);
+				generateBackground(1);
 			}
-		});
+		}
 
-		optionsDoc.getElementById('force-base').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'base', value);
-				generateBackground(0);
-			}
-		});
-
-		optionsDoc.getElementById('force-field-exponent').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'fieldExponent', value);
-				generateBackground(0);
-			}
-		});
-
-		optionsDoc.getElementById('force-minkowski-order').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'minkowskiOrder', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('force-field-constant').addEventListener('input', setNumericProperty('fieldConstant'));
+		optionsDoc.getElementById('force-divisor').addEventListener('input', setNumericProperty('divisor'));
+		optionsDoc.getElementById('force-base').addEventListener('input', setNumericProperty('base'));
+		optionsDoc.getElementById('force-field-exponent').addEventListener('input', setNumericProperty('fieldExponent'));
+		optionsDoc.getElementById('force-minkowski-order').addEventListener('input', setNumericProperty('minkowskiOrder'));
 
 		optionsDoc.getElementById('force-minkowski-finite').addEventListener('input', function (event) {
 			const numberInput = document.getElementById('force-minkowski-order');
@@ -70,13 +53,7 @@ export default function Contours() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('force-distance-weight').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'distanceWeight', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('force-distance-weight').addEventListener('input', setNumericProperty('distanceWeight'));
 
 		optionsDoc.getElementById('force-overall-saturation').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -86,13 +63,7 @@ export default function Contours() {
 			}
 		});
 
-		optionsDoc.getElementById('force-sine-power').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'sinePower', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('force-sine-power').addEventListener('input', setNumericProperty('sinePower'));
 
 		optionsDoc.getElementById('force-hue-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -102,13 +73,7 @@ export default function Contours() {
 			}
 		});
 
-		optionsDoc.getElementById('force-wave-hue').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'waveHue', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('force-wave-hue').addEventListener('input', setNumericProperty('waveHue'));
 
 		optionsDoc.getElementById('force-color-portion').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -120,7 +85,7 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-sharpness').addEventListener('input', function (event) {
 			let value = parseFloat(this.value);
-			if (value <= 1) {
+			if (value >= 0 && value <= 1) {
 				if (value === 1) {
 					value = 0.99;
 				}
@@ -158,36 +123,24 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-wave-lightness').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
+			if (value <= 1) {
 				setBgProperty(me, 'waveLightness', value);
 				generateBackground(0);
 			}
 		});
 
 		const coloringInput = optionsDoc.getElementById('force-base-intensity');
-		coloringInput.addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			setBgProperty(me, 'baseIntensity', value);
-			generateBackground(1);
-		});
+		coloringInput.addEventListener('input', setSliderProperty('baseIntensity'));
 		coloringInput.addEventListener('pointerup', fullRedraw);
 		coloringInput.addEventListener('keyup', fullRedraw);
 
 		const opacityInput = optionsDoc.getElementById('force-background-opacity');
-		opacityInput.addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			setBgProperty(me, 'backgroundOpacity', value);
-			generateBackground(1);
-		});
+		opacityInput.addEventListener('input', setSliderProperty('backgroundOpacity'));
 		opacityInput.addEventListener('pointerup', fullRedraw);
 		opacityInput.addEventListener('keyup', fullRedraw);
 
 		const baseColorInput = optionsDoc.getElementById('force-base-color');
-		baseColorInput.addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			setBgProperty(me, 'baseColor', value);
-			generateBackground(1);
-		});
+		baseColorInput.addEventListener('input', setSliderProperty('baseColor'));
 		baseColorInput.addEventListener('pointerup', fullRedraw);
 		baseColorInput.addEventListener('keyup', fullRedraw);
 
@@ -217,13 +170,7 @@ export default function Contours() {
 			}
 		});
 
-		optionsDoc.getElementById('force-explosion').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'explosion', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('force-explosion').addEventListener('input', setNumericProperty('explosion'));
 
 		return optionsDoc;
 	});
@@ -271,7 +218,7 @@ export default function Contours() {
 
 	this.baseColor = 0;
 	this.baseIntensity = 0;
-	this.baseScale = 1.5;
+	this.baseScale = 20;
 	this.backgroundOpacity = 0;
 	this.baseBrightness = [1, 1, 1, 1];
 

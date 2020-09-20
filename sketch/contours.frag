@@ -150,9 +150,8 @@ void main() {
 		(waveLightness * wave + 1.0 - waveLightness);
 
 	float uncoloredPart = maxLightness * (1.0 - colorPortion);
-	float blurriness = 1.0 - sharpness;
 	if (wave < uncoloredPart && lightness < 0.5) {
-		gradient = lightness / (uncoloredPart * blurriness);
+		gradient = lightness / (uncoloredPart * (1.0 - sharpness));
 		opacity = gradient;
 		saturation = saturation * min(gradient, backgroundSaturation);
 		lightness *= 1.0 - contrast;

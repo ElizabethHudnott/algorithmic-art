@@ -391,6 +391,7 @@ class PolarEquation {
 export default function GraphingCalculator() {
 	const me = this;
 	this.title = 'Graphing Calculator';
+	this.backgroundColor = [255, 255, 255];
 	this.equations = [];	// 2D array. Multiple shapes, multiple subpaths, multiple piecewise sections
 	this.min = [];			// Per shape, per subpath, per piece
 	this.max = [];			// Per shape, per subpath, per piece

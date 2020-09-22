@@ -31,8 +31,8 @@ input[type=color] {
 	cursor: pointer;
 }
 
-legend {
-	font-size: 1.25rem;
+h5, h6 {
+	font-weight: normal;
 }
 
 option:disabled {

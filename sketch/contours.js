@@ -55,14 +55,6 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-distance-weight').addEventListener('input', setNumericProperty('distanceWeight'));
 
-		optionsDoc.getElementById('force-overall-saturation').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (value >= 0 && value <= 1) {
-				setBgProperty(me, 'overallSaturation', value);
-				generateBackground(0);
-			}
-		});
-
 		optionsDoc.getElementById('force-sine-power').addEventListener('input', setNumericProperty('sinePower'));
 
 		optionsDoc.getElementById('force-hue-frequency').addEventListener('input', function (event) {
@@ -74,6 +66,25 @@ export default function Contours() {
 		});
 
 		optionsDoc.getElementById('force-wave-hue').addEventListener('input', setNumericProperty('waveHue'));
+
+		const hueRotationTurnsInput = optionsDoc.getElementById('force-hue-rotation-turns');
+		const hueRotationFracInput = optionsDoc.getElementById('force-hue-rotation-fraction');
+
+		function setHueRotation() {
+			let turns = parseInt(hueRotationTurnsInput.value);
+			if (!Number.isFinite(turns)) {
+				turns = Math.trunc(me.hueRotation);
+			}
+			const value = turns + parseFloat(hueRotationFracInput.value);
+			setBgProperty(me, 'hueRotation', value);
+			const preview = event.target === hueRotationFracInput ? 1 : 0;
+			generateBackground(preview);
+		}
+
+		hueRotationTurnsInput.addEventListener('input', setHueRotation);
+		hueRotationFracInput.addEventListener('input', setHueRotation);
+		hueRotationFracInput.addEventListener('pointerup', fullRedraw);
+		hueRotationFracInput.addEventListener('keyup', fullRedraw);
 
 		optionsDoc.getElementById('force-color-portion').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -127,6 +138,34 @@ export default function Contours() {
 				setBgProperty(me, 'waveLightness', value);
 				generateBackground(0);
 			}
+		});
+
+		optionsDoc.getElementById('force-contrast').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				setBgProperty(me, 'contrast', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-foreground-saturation').addEventListener('input', setNumericProperty('foregroundSaturation'));
+
+		const bgSaturationInput = optionsDoc.getElementById('force-background-saturation');
+		const flipHueCheckbox = optionsDoc.getElementById('force-flip-hue');
+
+		bgSaturationInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				const flipped = flipHueCheckbox.checked ? -1 : 1;
+				setBgProperty(me, 'backgroundSaturation', flipped * value);
+				generateBackground(0)
+			}
+		});
+
+		flipHueCheckbox.addEventListener('input', function (event) {
+			const value = me.backgroundSaturation * -1;
+			setBgProperty(me, 'backgroundSaturation', value);
+			generateBackground(0);
 		});
 
 		const coloringInput = optionsDoc.getElementById('force-base-intensity');
@@ -205,7 +244,7 @@ export default function Contours() {
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
-	this.overallSaturation = 1;
+	this.foregroundSaturation = 1;
 	this.backgroundSaturation = 1;
 
 	this.maxLightness = 0.4;
@@ -231,7 +270,7 @@ Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
 		'sinePower', 'sineFrequency',
-		'divisor', 'base', 'saturations', 'overallSaturation', 'backgroundSaturation',
+		'divisor', 'base', 'saturations', 'foregroundSaturation', 'backgroundSaturation',
 		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',

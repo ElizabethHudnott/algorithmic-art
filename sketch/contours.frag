@@ -142,9 +142,9 @@ void main() {
 	} else {
 		hue = hue * hueFrequency;
 	}
-	hue = mod(hue - hueRotation + waveHue * (1.0 - wave), 1.0);
+	hue = mod(hue + hueRotation + waveHue * (1.0 - wave), 1.0);
 
-	saturation = overallSaturation * saturation / totalForce;
+	saturation /= totalForce;
 
 	lightness = maxLightness *
 		(waveLightness * wave + 1.0 - waveLightness);
@@ -155,6 +155,8 @@ void main() {
 		opacity = gradient;
 		saturation = saturation * min(gradient, backgroundSaturation);
 		lightness *= 1.0 - contrast;
+	} else {
+		saturation *= foregroundSaturation;
 	}
 	lightness = max(lightness, minLightness);
 

@@ -18,206 +18,200 @@
 
 <div class="tab-content">
 	<div class="tab-pane active" id="phyllotaxis-geometry" role="tabpanel" aria-labelledby="phyllotaxis-geometry-tab">
-		<fieldset>
-			<legend>
-				Angle (As a Continued Fraction)
-				<a href="https://en.wikipedia.org/wiki/Continued_fraction#Generalized_continued_fraction" target="_blank" rel="noopener" title="More information">
-					<img src="../img/help.png" alt="Help">
-				</a>
-			</legend>
-			<div class="form-row form-group px-1">
-				<table class="w-100">
-					<tr class="form-row">
-						<td class="col-4"></td>
-						<th class="col-4 col-form-label col-form-label-sm text-center">
-							Numerators
-						</th>
-						<th class="col-4 col-form-label col-form-label-sm text-center">
-							Denominators
-						</th>
-					</tr>
-					<tr class="form-row mb-1">
-						<th class="col-4 col-form-label col-form-label-sm">
-							Initial
-						</th>
-						<td class="col-4">
-							<input type="text" class="form-control form-control-sm" id="phyllotaxis-initial-numerators">
-						</td>
-						<td class="col-4">
-							<input type="text" class="form-control form-control-sm" id="phyllotaxis-initial-denominators">
-						</td>
-					</tr>
-					<tr class="form-row">
-						<th class="col-4 col-form-label col-form-label-sm">
-							Periodic
-						</th>
-						<td class="col-4">
-							<input type="text" value="1" class="form-control form-control-sm" id="phyllotaxis-periodic-numerators">
-						</td>
-						<td class="col-4">
-							<input type="text" value="1" class="form-control form-control-sm" id="phyllotaxis-periodic-denominators">
-						</td>
-					</tr>
-				</table>
-			</div>
-			<div class="form-row form-group">
-				<label class="col-4 col-form-label col-form-label-sm" for="phyllotaxis-angle-offset">
-					Additional Amount
-				</label>
-				<div class="col-5">
-					<div class="input-group input-group-sm">
-						<input type="number" value="0" step="0.025" class="form-control form-control-sm" id="phyllotaxis-angle-offset">
-						<div class="input-group-append">
-							<span class="input-group-text">&times; 0.01 turns</span>
-						</div>
+		<h5>
+			Angle (As a Continued Fraction)
+			<a href="https://en.wikipedia.org/wiki/Continued_fraction#Generalized_continued_fraction" target="_blank" rel="noopener" title="More information">
+				<img src="../img/help.png" alt="Help">
+			</a>
+		</h5>
+		<div class="form-row form-group px-1">
+			<table class="w-100">
+				<tr class="form-row">
+					<td class="col-4"></td>
+					<th class="col-4 col-form-label col-form-label-sm text-center">
+						Numerators
+					</th>
+					<th class="col-4 col-form-label col-form-label-sm text-center">
+						Denominators
+					</th>
+				</tr>
+				<tr class="form-row mb-1">
+					<th class="col-4 col-form-label col-form-label-sm">
+						Initial
+					</th>
+					<td class="col-4">
+						<input type="text" class="form-control form-control-sm" id="phyllotaxis-initial-numerators">
+					</td>
+					<td class="col-4">
+						<input type="text" class="form-control form-control-sm" id="phyllotaxis-initial-denominators">
+					</td>
+				</tr>
+				<tr class="form-row">
+					<th class="col-4 col-form-label col-form-label-sm">
+						Periodic
+					</th>
+					<td class="col-4">
+						<input type="text" value="1" class="form-control form-control-sm" id="phyllotaxis-periodic-numerators">
+					</td>
+					<td class="col-4">
+						<input type="text" value="1" class="form-control form-control-sm" id="phyllotaxis-periodic-denominators">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-4 col-form-label col-form-label-sm" for="phyllotaxis-angle-offset">
+				Additional Amount
+			</label>
+			<div class="col-5">
+				<div class="input-group input-group-sm">
+					<input type="number" value="0" step="0.025" class="form-control form-control-sm" id="phyllotaxis-angle-offset">
+					<div class="input-group-append">
+						<span class="input-group-text">&times; 0.01 turns</span>
 					</div>
 				</div>
 			</div>
-		</fieldset>
+		</div>
 
-		<fieldset>
-			<legend>Spiral</legend>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-exponent">
-					Exponent
-				</label>
-				<div class="col-3">
-					<input type="number" min="0.01" step="0.01" value="0.5" id="phyllotaxis-exponent" class="form-control form-control-sm">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-spread">
-					Spread
-				</label>
-				<div class="col-3">
-					<input type="number" step="0.01" value="1" id="phyllotaxis-spread" class="form-control form-control-sm">
-				</div>
+		<h5>Spiral</h5>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-exponent">
+				Exponent
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.01" step="0.01" value="0.5" id="phyllotaxis-exponent" class="form-control form-control-sm">
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-scale">
-					Scale
-				</label>
-				<div class="col-3">
-					<input type="number" min="1" step="any" value="20" id="phyllotaxis-scale" class="form-control form-control-sm">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-direction">
-					Direction
-				</label>
-				<div class="col-3">
-					<select class="form-control form-control-sm" id="phyllotaxis-direction">
-						<option value="1" selected>1</option>
-						<option value="-1">2</option>
-						<option value="0">Both</option>
-					</select>
-				</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-spread">
+				Spread
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.01" value="1" id="phyllotaxis-spread" class="form-control form-control-sm">
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-start">
-					Start
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" value="1" id="phyllotaxis-start" class="form-control form-control-sm">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-skip">
-					Skip
-				</label>
-				<div class="col-3">
-					<div class="input-group input-group-sm">
-						<div class="input-group-prepend">
-							<span class="input-group-text" id="phyllotaxis-skip-label">1 in</span>
-						</div>
-						<input type="number" min="0" value="0" id="phyllotaxis-skip" class="form-control" aria-describedby="phyllotaxis-skip-label">
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-scale">
+				Scale
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" step="any" value="20" id="phyllotaxis-scale" class="form-control form-control-sm">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-direction">
+				Direction
+			</label>
+			<div class="col-3">
+				<select class="form-control form-control-sm" id="phyllotaxis-direction">
+					<option value="1" selected>1</option>
+					<option value="-1">2</option>
+					<option value="0">Both</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-start">
+				Start
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="1" id="phyllotaxis-start" class="form-control form-control-sm">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-skip">
+				Skip
+			</label>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="phyllotaxis-skip-label">1 in</span>
 					</div>
+					<input type="number" min="0" value="0" id="phyllotaxis-skip" class="form-control" aria-describedby="phyllotaxis-skip-label">
 				</div>
 			</div>
-		</fieldset>
+		</div>
 
-		<fieldset>
-			<legend>Petals</legend>
-			<div class="form-row">
-				<div class="col-3 col-form-label col-form-label-sm">
-					Shape
-				</div>
-				<div class="col-3">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-ellipse" value="e" checked>
-						<label class="form-check-label small" for="phyllotaxis-shape-ellipse">Elliptical</label>
-					</div>
-				</div>
-				<div class="col-auto">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-image" value="i">
-						<label class="form-check-label small" for="phyllotaxis-shape-image">Image</label>
-					</div>
-				</div>
-				<div class="col-auto pl-3" data-attach="image"></div>
+		<h5>Petals</h5>
+		<div class="form-row">
+			<div class="col-3 col-form-label col-form-label-sm">
+				Shape
 			</div>
-			<div class="form-row form-group">
-				<div class="col-3"></div>
-				<div class="col-auto">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-rect" value="r">
-						<label class="form-check-label small" for="phyllotaxis-shape-rect">Rectangular</label>
-					</div>
+			<div class="col-3">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-ellipse" value="e" checked>
+					<label class="form-check-label small" for="phyllotaxis-shape-ellipse">Elliptical</label>
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
-					Size
-				</label>
-				<div class="col-3">
-					<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control form-control-sm">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-petal-stretch">
-					Stretch
-				</label>
-				<div class="col-3">
-					<input type="number" min="0.1" value="1" step="0.1" class="form-control form-control-sm" id="phyllotaxis-petal-stretch">
+			<div class="col-auto">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-image" value="i">
+					<label class="form-check-label small" for="phyllotaxis-shape-image">Image</label>
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-enlarge">
-					Growth
-				</label>
-				<div class="col-3">
-					<input type="number" step="0.01" value="0" id="phyllotaxis-petal-enlarge" class="form-control form-control-sm">
-				</div>
-				<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-petal-variation">
-					Variation
-				</label>
-				<div class="col-3">
-					<div class="input-group input-group-sm">
-						<input type="number" value="0" max="100" step="5" class="form-control" id="phyllotaxis-petal-variation">
-						<div class="input-group-append">
-							<span class="input-group-text">%</span>
-						</div>
-					</div>
+			<div class="col-auto pl-3" data-attach="image"></div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3"></div>
+			<div class="col-auto">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="radio" name="phyllotaxis-petal-shape" id="phyllotaxis-shape-rect" value="r">
+					<label class="form-check-label small" for="phyllotaxis-shape-rect">Rectangular</label>
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-partial-petals">
-					Fade Edges
-				</label>
-				<div class="col-3">
-					<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="phyllotaxis-partial-petals">
-				</div>
-				<div class="col pl-4 col-form-label col-form-label-sm">
-					Stacking
-				</div>
-				<div class="col-auto">
-					<div class="form-check mt-1">
-						<input class="form-check-input" type="checkbox" id="phyllotaxis-stack-increasing">
-						<label class="form-check-label small" for="phyllotaxis-stack-increasing">Outermost on top</label>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-size">
+				Size
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.5" step="0.5" value="15" id="phyllotaxis-petal-size" class="form-control form-control-sm">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-petal-stretch">
+				Stretch
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.1" value="1" step="0.1" class="form-control form-control-sm" id="phyllotaxis-petal-stretch">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-enlarge">
+				Growth
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.01" value="0" id="phyllotaxis-petal-enlarge" class="form-control form-control-sm">
+			</div>
+			<label class="col-3 pl-4 col-form-label col-form-label-sm" for="phyllotaxis-petal-variation">
+				Variation
+			</label>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<input type="number" value="0" max="100" step="5" class="form-control" id="phyllotaxis-petal-variation">
+					<div class="input-group-append">
+						<span class="input-group-text">%</span>
 					</div>
 				</div>
 			</div>
-			<div class="form-row collapse" id="phyllotaxis-rotation-row">
-				<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-rotation">
-					Rotation
-				</label>
-				<div class="col-9">
-					<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-2" id="phyllotaxis-petal-rotation">
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-partial-petals">
+				Fade Edges
+			</label>
+			<div class="col-3">
+				<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="phyllotaxis-partial-petals">
+			</div>
+			<div class="col pl-4 col-form-label col-form-label-sm">
+				Stacking
+			</div>
+			<div class="col-auto">
+				<div class="form-check mt-1">
+					<input class="form-check-input" type="checkbox" id="phyllotaxis-stack-increasing">
+					<label class="form-check-label small" for="phyllotaxis-stack-increasing">Outermost on top</label>
 				</div>
 			</div>
-		</fieldset>
+		</div>
+		<div class="form-row collapse" id="phyllotaxis-rotation-row">
+			<label class="col-3 col-form-label col-form-label-sm" for="phyllotaxis-petal-rotation">
+				Rotation
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="any" value="0" class="form-control-range mt-2" id="phyllotaxis-petal-rotation">
+			</div>
+		</div>
 	</div>
 
 	<div class="tab-pane" id="phyllotaxis-size" role="tabpanel" aria-labelledby="phyllotaxis-size-tab">

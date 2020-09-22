@@ -18,73 +18,106 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 
 <div class="tab-content">
 	<div class="tab-pane active" id="force-colors" role="tabpanel" aria-labelledby="force-colors-tab">
-		<fieldset>
-			<legend>HSL Colouring</legend>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-color-portion">
-					Coloured Portion
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" step="0.05" value="0.5" class="form-control form-control-sm" id="force-color-portion">
-				</div>
-				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sharpness">
-					Sharpness
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" max="1" step="0.1" value="0" class="form-control form-control-sm" id="force-sharpness">
+		<h5>HSL Colouring</h5>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-color-portion">
+				Coloured Portion
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" step="0.05" value="0.5" class="form-control form-control-sm" id="force-color-portion">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sharpness">
+				Sharpness
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.1" value="0" class="form-control form-control-sm" id="force-sharpness">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-sine-power">
+				Colour Spread
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
+				Hue Frequency
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" step="0.1" value="0" class="form-control form-control-sm" id="force-hue-frequency">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-wave-hue">
+				Hue Wave
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="0" class="form-control form-control-sm" id="force-wave-hue">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-hue-rotation-turns">
+				Hue Rotation
+			</label>
+			<div class="col-3">
+				<div class="input-group input-group-sm">
+					<input type="number" value="0" class="form-control" id="force-hue-rotation-turns">
+					<div class="input-group-append">
+						<span class="input-group-text">turns</span>
+					</div>
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-overall-saturation">
-					Saturation
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-overall-saturation">
-				</div>
-				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-sine-power">
-					Colour Spread
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
+			<div class="col-6">
+				<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="force-hue-rotation-fraction">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-min-lightness">
+				Min Lightness
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.02" value="0" class="form-control form-control-sm" id="force-min-lightness">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-max-lightness">
+				Max Lightness
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.04" value="0.4" class="form-control form-control-sm" id="force-max-lightness">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-wave-lightness">
+				Lightness Wave
+			</label>
+			<div class="col-3">
+				<input type="number" min="-1" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-wave-lightness">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-contrast">
+				Contrast
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.05" value="0" class="form-control form-control-sm" id="force-contrast">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-foreground-saturation">
+				Fore Saturation
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" step="0.05" value="1" class="form-control form-control-sm" id="force-foreground-saturation">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-background-saturation">
+				Back Saturation
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-background-saturation">
+				<div class="form-check">
+					<input type="checkbox" class="form-check-input" id="force-flip-hue">
+					<label for="force-flip-hue" class="form-check-label small">Invert Hue</label>
 				</div>
 			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
-					Hue Frequency
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" step="0.1" value="0" class="form-control form-control-sm" id="force-hue-frequency">
-				</div>
-				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-wave-hue">
-					Hue Wave
-				</label>
-				<div class="col-3">
-					<input type="number" step="0.05" value="0" class="form-control form-control-sm" id="force-wave-hue">
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-min-lightness">
-					Min Lightness
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" max="1" step="0.02" value="0" class="form-control form-control-sm" id="force-min-lightness">
-				</div>
-				<label class="col-3 second-col col-form-label col-form-label-sm" for="force-max-lightness">
-					Max Lightness
-				</label>
-				<div class="col-3">
-					<input type="number" min="0" max="1" step="0.04" value="0.4" class="form-control form-control-sm" id="force-max-lightness">
-				</div>
-			</div>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-wave-lightness">
-					Lightness Wave
-				</label>
-				<div class="col-3">
-					<input type="number" min="-1" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-wave-lightness">
-				</div>
-			</div>
-		</fieldset>
+		</div>
+
 		<div class="form-row form-group">
 			<div class="col-1 col-form-label col-form-label-sm bg-form">
 				HSL
@@ -102,17 +135,51 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 				<input type="range" min="0" max="1" step="0.02" value="0" class="form-control-range mt-2" id="force-background-opacity">
 			</div>
 		</div>
-		<fieldset>
-			<legend>RGB Colouring</legend>
-			<div class="form-row form-group">
-				<label class="col-3 col-form-label col-form-label-sm" for="force-base-color">
-					Colour Scheme
-				</label>
-				<div class="col-9">
-					<input type="range" min="0" max="6" step="0.125" value="0" class="form-control-range mt-2" id="force-base-color">
-				</div>
+
+		<h5>RGB Colouring</h5>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-base-color">
+				Colour Scheme
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="6" step="0.125" value="0" class="form-control-range mt-2" id="force-base-color">
 			</div>
-		</fieldset>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-base-scale">
+				Splodge Size
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="20" class="form-control form-control-sm" id="force-base-scale">
+			</div>
+		</div>
+	</div>
+
+	<h6>Brightness</h6>
+	<div class="form-row">
+		<div class="col-9">
+			<table class="w-100" style="table-layout: fixed">
+				<tr>
+					<td></td>
+					<th class="col-form-label col-form-label-sm">
+						Foreground
+					</th>
+					<th class="col-form-label col-form-label-sm">
+						Background
+					</th>
+				</tr>
+				<tr>
+					<th class="col-form-label col-form-label-sm">
+						Inner
+					</th>
+				</tr>
+				<tr>
+					<th class="col-form-label col-form-label-sm">
+						Outer
+					</th>
+				</tr>
+			</table>
+		</div>
 	</div>
 
 	<div class="tab-pane" id="force-shapes" role="tabpanel" aria-labelledby="force-shapes-tab">
@@ -150,12 +217,6 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" step="5" value="1" class="form-control form-control-sm" id="force-sine-frequency">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-base-scale">
-				Splodge Size
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" value="20" step="0.5" class="form-control form-control-sm" id="force-base-scale">
 			</div>
 		</div>
 		<div class="form-row form-group">

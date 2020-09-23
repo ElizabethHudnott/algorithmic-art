@@ -47,25 +47,23 @@ vec4 colorFunc(int n, float scaledForce, float wave) {
 	float aDesaturation = 1.0 - foregroundSaturation;
 	float aPrimeDesaturation = 1.0 - abs(backgroundSaturation);
 	float bDesaturation = 1.0 - baseSaturation;
+	float aNew = a  + (1.0 - a) * min(b * bDesaturation + aPrime * aPrimeDesaturation, 1.0);
+	float aPrimeNew = aPrime + (1.0 - aPrime) * min(a * aDesaturation + b * bDesaturation, 1.0);
+	float bNew = b  + (1.0 - b) * min(a * aDesaturation + aPrime * aPrimeDesaturation, 1.0);
 
 	switch (n) {
 	case 0:
-		return vec4(
-			a  + (1.0 - a) * min(b * bDesaturation + aPrime * aPrimeDesaturation, 1.0),
-			b  + (1.0 - b) * min(a * aDesaturation + aPrime * aPrimeDesaturation, 1.0),
-			aPrime + (1.0 - aPrime) * min(a * aDesaturation + b * bDesaturation, 1.0),
-			1.0
-		);
+		return vec4(aNew, bNew, aPrimeNew, 1.0);
 	case 1:
-		return vec4(b, a, aPrime, 1.0);
+		return vec4(bNew, aNew, aPrimeNew, 1.0);
 	case 2:
-		return vec4(aPrime, a, b, 1.0);
+		return vec4(aPrimeNew, aNew, bNew, 1.0);
 	case 3:
-		return vec4(aPrime, b, a, 1.0);
+		return vec4(aPrimeNew, bNew, aNew, 1.0);
 	case 4:
-		return vec4(b, aPrime, a, 1.0);
+		return vec4(bNew, aPrimeNew, aNew, 1.0);
 	default:
-		return vec4(a, aPrime, b, 1.0);
+		return vec4(aNew, aPrimeNew, bNew, 1.0);
 	}
 }
 

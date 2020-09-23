@@ -23,6 +23,16 @@ export default function Contours() {
 			}
 		}
 
+		function setNumericPropertyElement(name, index) {
+			return function(event) {
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value) && value !== me[name][index]) {
+					setBgPropertyElement(me, name, index, value);
+					generateBackground(0);
+				}
+			}
+		}
+
 		function setSliderProperty(name) {
 			return function(event) {
 				const value = parseFloat(this.value);
@@ -182,6 +192,10 @@ export default function Contours() {
 		baseColorInput.addEventListener('input', setSliderProperty('baseColor'));
 		baseColorInput.addEventListener('pointerup', fullRedraw);
 		baseColorInput.addEventListener('keyup', fullRedraw);
+
+		Array.from(optionsDoc.querySelectorAll('input[name="force-brightness"]')).forEach(function (element, index) {
+			element.addEventListener('input', setNumericPropertyElement('baseBrightness', index));
+		});
 
 		optionsDoc.getElementById('force-sine-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);

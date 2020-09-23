@@ -41,9 +41,9 @@ float sineFunc(float sine, int exponent) {
 }
 
 vec4 colorFunc(int n, float scaledForce, float wave) {
-	float a = wave * (scaledForce * baseBrightness[2] + (1.0 - scaledForce) * baseBrightness[0]);
-	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[3] + (1.0 - scaledForce) * baseBrightness[1]);
-	float b = scaledForce * (wave * baseBrightness[2] + (1.0 - wave) * baseBrightness[3]);
+	float a = wave * (scaledForce * baseBrightness[0] + (1.0 - scaledForce) * baseBrightness[2]);
+	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[1] + (1.0 - scaledForce) * baseBrightness[3]);
+	float b = scaledForce * (wave * baseBrightness[0] + (1.0 - wave) * baseBrightness[1]);
 	switch (n) {
 	case 0:
 		return vec4(a, b, aPrime, 1.0);

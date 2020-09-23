@@ -193,10 +193,6 @@ export default function Contours() {
 		baseColorInput.addEventListener('pointerup', fullRedraw);
 		baseColorInput.addEventListener('keyup', fullRedraw);
 
-		Array.from(optionsDoc.querySelectorAll('input[name="force-brightness"]')).forEach(function (element, index) {
-			element.addEventListener('input', setNumericPropertyElement('baseBrightness', index));
-		});
-
 		optionsDoc.getElementById('force-sine-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
@@ -211,6 +207,18 @@ export default function Contours() {
 				setBgProperty(me, 'baseScale', value);
 				generateBackground(0);
 			}
+		});
+
+		optionsDoc.getElementById('force-base-saturation').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				setBgProperty(me, 'baseSaturation', value);
+				generateBackground(0);
+			}
+		});
+
+		Array.from(optionsDoc.querySelectorAll('input[name="force-brightness"]')).forEach(function (element, index) {
+			element.addEventListener('input', setNumericPropertyElement('baseBrightness', index));
 		});
 
 		const numAttractorsInput = optionsDoc.getElementById('force-num-attractors');
@@ -274,6 +282,7 @@ export default function Contours() {
 	this.baseScale = 20;
 	this.backgroundOpacity = 0;
 	this.baseBrightness = [1, 1, 1, 1];
+	this.baseSaturation = 1;
 
 	this.minDotSize = 5;
 	this.maxDotSize = this.minDotSize;
@@ -285,7 +294,7 @@ Contours.prototype.animatable = {
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
 		'sinePower', 'sineFrequency',
 		'divisor', 'base', 'saturations', 'foregroundSaturation', 'backgroundSaturation',
-		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness',
+		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation',
 		'minkowskiOrder', 'distanceWeight',
 		'hueFrequency', 'hueRotation', 'waveHue',
 		'waveLightness', 'minLightness', 'maxLightness', 'backgroundOpacity',

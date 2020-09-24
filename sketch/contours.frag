@@ -92,6 +92,7 @@ void main() {
 	float y = gl_FragCoord.y;
 	float forceX = 0.0, forceY = 0.0;
 	float totalForce = 0.0;
+	float dotAmount = 0.0;
 
 	for (int i = 0; i < numPoints; i++) {
 		float x2 = scaledXPos[i];
@@ -104,10 +105,12 @@ void main() {
 		}
 
 		float dotSize = round(max(pointStrength * maxDotSize, minDotSize));
-		if (distance < dotSize + 1.0) {
-			float lightness = distance <= dotSize ? 1.0 : 1.0 - fract(distance);
-			fragColor = hsla(dotColor[0], dotColor[1], dotColor[2] * lightness, dotColor[3]);
-			return;
+		if (distance < dotSize + 0.5) {
+			if (distance <= dotSize) {
+				dotAmount = 1.0;
+			} else {
+				dotAmount = max(dotAmount, 1.0 - (distance - dotSize) * 2.0);
+			}
 		}
 
 		float force =
@@ -185,4 +188,7 @@ void main() {
 		backgroundOpacity * (1.0 - baseIntensity) +
 		baseIntensity * (backgroundOpacity + (1.0 - backgroundOpacity) * wave);
 	fragColor += (1.0 - pixelBaseIntensity) * color;
+
+	fragColor = fragColor * (1.0 - dotAmount) +
+		dotAmount * hsla(dotColor[0], dotColor[1], dotColor[2], dotColor[3]);
 }

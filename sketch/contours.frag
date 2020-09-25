@@ -1,4 +1,4 @@
-const int MAX_ATTRACTORS = 50;
+const int MAX_ATTRACTORS = 50;	// See the index variable below before modifying.
 const float TWO_PI = 2.0 * PI;
 
 float angle(float x, float y) {
@@ -72,24 +72,17 @@ void main() {
 	float lastRed = floor(hueFrequency) / hueFrequency;
 
 	int numPoints = int(ceil(numAttractors));
-	float finalPointScale, xScale;
+	float finalPointScale;
 	if (preview == 0) {
 		finalPointScale = fract(numAttractors);
 		if (finalPointScale == 0.0) {
 			finalPointScale = 1.0;
 		}
-		xScale = positionX[numPoints - 1] * finalPointScale;
 		finalPointScale = explosion + finalPointScale * (1.0 - explosion);
 	} else {
 		numPoints = min(numPoints, 5);
 		finalPointScale = 1.0;
-		xScale = positionX[numPoints - 1];
 	}
-
-	for (int i = 0; i < numPoints - 1; i++) {
-		xScale += positionX[i];
-	}
-	xScale = min(xScale / numAttractors * 2.0, 1.0);
 
 	float x = gl_FragCoord.x;
 	float y = gl_FragCoord.y;
@@ -97,11 +90,13 @@ void main() {
 	float totalForce = 0.0;
 
 	for (int i = 0; i < numPoints; i++) {
-		float x2 = min((positionX[i] - 0.5 * xScale) / xScale + 0.5, 1.0) * canvasWidth;
-		float y2 = positionY[i] * canvasHeight;
+		// Nine is roughly MAX_ATTRACTORS / NUM_COLUMNS and coprime with NUM_COLUMNS.
+		int index = (i * 9) % MAX_ATTRACTORS;
+		float x2 = positionX[index] * canvasWidth;
+		float y2 = positionY[index] * canvasHeight;
 		float distance = distanceMetric(x, y, x2, y2);
 
-		float pointStrength = strength[i];
+		float pointStrength = strength[index];
 		if (i == numPoints - 1) {
 			pointStrength *= finalPointScale;
 		}
@@ -122,7 +117,7 @@ void main() {
 		forceY += force * sin(attractorAngle);
 
 		float absForce = abs(force);
-		saturation += saturations[i] * absForce;
+		saturation += saturations[index] * absForce;
 		totalForce += absForce;
 	}
 

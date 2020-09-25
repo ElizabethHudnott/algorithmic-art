@@ -1,3 +1,5 @@
+const MAX_ATTRACTORS = 50;
+
 export default function Contours() {
 	const me = this;
 	this.title = 'Contours';
@@ -5,8 +7,7 @@ export default function Contours() {
 	this.helpFile = 'help/contours.html';
 	this.backgroundColor = [0, 0, 0];
 
-	const maxAttractors = 50;
-	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), maxAttractors);
+	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), MAX_ATTRACTORS);
 
 	this.optionsDocument = downloadFile('contours.html', 'document').then(function (optionsDoc) {
 		function fullRedraw() {
@@ -225,7 +226,7 @@ export default function Contours() {
 		numAttractorsInput.value = me.numAttractors;
 		numAttractorsInput.addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value >= 0 && value <= maxAttractors) {
+			if (value >= 0 && value <= MAX_ATTRACTORS) {
 				setBgProperty(me, 'numAttractors', value);
 				generateBackground(0);
 			}
@@ -236,21 +237,15 @@ export default function Contours() {
 		return optionsDoc;
 	});
 
-	const positionX = new Array(maxAttractors);
-	const positionY = new Array(maxAttractors);
-	const strength = new Array(maxAttractors);
-	const saturations = new Array(maxAttractors);
-	saturations.fill(1);
-	for (let i = 0; i < maxAttractors; i++) {
-		positionX[i] = Math.random();
-		positionY[i] = Math.random();
-		strength[i] = Math.random();
-	}
+	this.positionX = new Array(MAX_ATTRACTORS);
+	this.positionY = new Array(MAX_ATTRACTORS);
+	this.strength = new Array(MAX_ATTRACTORS);
+	this.saturations = new Array(MAX_ATTRACTORS);
+	this.xDist = [1, 1, 1, 1, 1];
+	this.yDist = [1, 1, 1];
+	this.strengthDist = [1, 1, 1, 1, 1];
+	this.saturationDist = [0, 0, 0, 0, 1];
 	this.explosion = 1;
-	this.positionX = positionX;
-	this.positionY = positionY;
-	this.strength = strength;
-	this.saturations = saturations;
 
 	this.fieldConstant = 100;
 	this.fieldExponent = 2;
@@ -287,6 +282,95 @@ export default function Contours() {
 	this.minDotSize = 5;
 	this.maxDotSize = this.minDotSize;
 	this.dotColor = [1/6, 1, 0.5, 1];	// HSLA
+
+	this.randomize();
+}
+
+Contours.prototype.randomize = function () {
+	const positionX = this.positionX;
+	const positionY = this.positionY;
+	const strength = this.strength;
+	const saturations = this.saturations;
+
+	const NUM_COLUMNS = 5;
+	const NUM_ROWS = 3;
+	const NUM_STRENGTHS = 5;
+	const NUM_SATURATIONS = 5;
+
+	const xDist = new Array(NUM_COLUMNS);
+	const yDist = new Array(NUM_ROWS);
+	const strengthDist = new Array(NUM_STRENGTHS);
+	const saturationDist = new Array(NUM_SATURATIONS);
+	let xDistTotal = 0, yDistTotal = 0, strengthDistTotal = 0, saturationDistTotal = 0;
+
+	for (let i = 0; i < NUM_COLUMNS; i++) {
+		xDistTotal += this.xDist[i];
+		xDist[i] = xDistTotal;
+	}
+	for (let i = 0; i < NUM_ROWS; i++) {
+		yDistTotal += this.yDist[i];
+		yDist[i] = yDistTotal;
+	}
+	for (let i = 0; i < NUM_STRENGTHS; i++) {
+		strengthDistTotal += this.strengthDist[i];
+		strengthDist[i] = strengthDistTotal;
+	}
+	for (let i = 0; i < NUM_SATURATIONS; i++) {
+		saturationDistTotal += this.saturationDist[i];
+		saturationDist[i] = saturationDistTotal;
+	}
+
+	const grid = new Array(NUM_COLUMNS);
+	for (let i = 0; i < NUM_COLUMNS; i++) {
+		const arr = new Array(NUM_ROWS);
+		grid[i] = arr;
+		for (let j = 0; j < NUM_ROWS; j++) {
+			arr[j] = [];
+		}
+	}
+
+	for (let i = 0; i < MAX_ATTRACTORS; i++) {
+		let p = random.next() * xDistTotal;
+		let column = NUM_COLUMNS - 1;
+		while (column > 0 && xDist[column - 1] >= p) {
+			column--;
+		}
+		p = random.next() * yDistTotal;
+		let row = NUM_ROWS - 1;
+		while (row > 0 && yDist[row - 1] >= p) {
+			row--;
+		}
+		const x = (column + random.next()) / NUM_COLUMNS;
+		const y = (row + random.next()) / NUM_ROWS;
+		grid[column][row].push(x, y);
+
+		p = random.next() * strengthDistTotal;
+		let bin = NUM_STRENGTHS - 1;
+		while (bin > 0 && strengthDist[bin - 1] >= p) {
+			bin--;
+		}
+		strength[i] = (bin + random.next()) / NUM_STRENGTHS;
+
+		p = random.next() * saturationDistTotal;
+		bin = NUM_SATURATIONS - 1;
+		while (bin > 0 && saturationDist[bin - 1] >= p) {
+			bin--;
+		}
+		saturations[i] = (bin + random.next()) / NUM_SATURATIONS;
+	}
+
+	let n = 0;
+	for (let i = 0; i < NUM_COLUMNS; i++) {
+		for (let j = 0; j < NUM_ROWS; j++) {
+			const jPrime = i % 2 === 0 ? j : NUM_ROWS - 1 - j;
+			const cell = grid[i][jPrime];
+			for (let k = 0; k < cell.length; k += 2) {
+				positionX[n] = cell[k];
+				positionY[n] = cell[k + 1];
+				n++;
+			}
+		}
+	}
 }
 
 Contours.prototype.animatable = {

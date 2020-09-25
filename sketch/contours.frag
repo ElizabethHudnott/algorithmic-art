@@ -68,25 +68,28 @@ vec4 colorFunc(int n, float scaledForce, float wave) {
 }
 
 void main() {
-	float hue, lightness, opacity = 1.0, gradient = 1.0;
+	float hue, lightness, saturation = 0.0, opacity = 1.0, gradient = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
-	float saturation = 0.0;
 
 	int numPoints = int(ceil(numAttractors));
-	if (preview > 0) {
+	float finalPointScale, xScale;
+	if (preview == 0) {
+		finalPointScale = fract(numAttractors);
+		if (finalPointScale == 0.0) {
+			finalPointScale = 1.0;
+		}
+		xScale = positionX[numPoints - 1] * finalPointScale;
+		finalPointScale = explosion + finalPointScale * (1.0 - explosion);
+	} else {
 		numPoints = min(numPoints, 5);
-	}
-	float finalPointScale = fract(numAttractors);
-	if (finalPointScale == 0.0) {
 		finalPointScale = 1.0;
+		xScale = positionX[numPoints - 1];
 	}
-	finalPointScale = explosion + finalPointScale * (1.0 - explosion);
 
-	float[MAX_ATTRACTORS] scaledXPos, scaledYPos;
-	for (int i = 0; i < numPoints; i++) {
-		scaledXPos[i] = positionX[i] * canvasWidth;
-		scaledYPos[i] = positionY[i] * canvasHeight;
+	for (int i = 0; i < numPoints - 1; i++) {
+		xScale += positionX[i];
 	}
+	xScale = min(xScale / numAttractors * 2.0, 1.0);
 
 	float x = gl_FragCoord.x;
 	float y = gl_FragCoord.y;
@@ -94,8 +97,8 @@ void main() {
 	float totalForce = 0.0;
 
 	for (int i = 0; i < numPoints; i++) {
-		float x2 = scaledXPos[i];
-		float y2 = scaledYPos[i];
+		float x2 = positionX[i] * canvasWidth / xScale;
+		float y2 = positionY[i] * canvasHeight;
 		float distance = distanceMetric(x, y, x2, y2);
 
 		float pointStrength = strength[i];

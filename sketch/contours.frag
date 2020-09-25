@@ -97,7 +97,7 @@ void main() {
 	float totalForce = 0.0;
 
 	for (int i = 0; i < numPoints; i++) {
-		float x2 = positionX[i] * canvasWidth / xScale;
+		float x2 = min((positionX[i] - 0.5 * xScale) / xScale + 0.5, 1.0) * canvasWidth;
 		float y2 = positionY[i] * canvasHeight;
 		float distance = distanceMetric(x, y, x2, y2);
 

@@ -34,14 +34,6 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-sine-power">
-				Colour Spread
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
-			</div>
-		</div>
-		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="force-hue-frequency">
 				Hue Frequency
 			</label>
@@ -69,6 +61,34 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</div>
 			<div class="col-6">
 				<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="force-hue-rotation-fraction">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-max-saturation">
+				Inner Saturation
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="1" class="form-control form-control-sm" id="force-max-saturation">
+			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="force-min-saturation">
+				Outer Saturation
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="1" class="form-control form-control-sm" id="force-min-saturation">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-sine-power">
+				Colour Spread
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-sine-power">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-lighting">
+				Lighting
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="1" step="0.05" value="0.5" class="form-control form-control-sm" id="force-lighting">
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -100,18 +120,14 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="force-foreground-saturation">
-				Fore Saturation
-			</label>
-			<div class="col-3">
-				<input type="number" min="0" step="0.05" value="1" class="form-control form-control-sm" id="force-foreground-saturation">
-			</div>
-			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-background-saturation">
+			<label class="col-4 col-form-label col-form-label-sm" for="force-background-saturation">
 				Background Saturation
 			</label>
-			<div class="col-3">
+			<div class="col-2">
 				<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" id="force-background-saturation">
-				<div class="form-check">
+			</div>
+			<div class="col-auto second-col">
+				<div class="form-check mt-1">
 					<input type="checkbox" class="form-check-input" id="force-flip-hue">
 					<label for="force-flip-hue" class="form-check-label small">Invert Hue</label>
 				</div>
@@ -283,6 +299,14 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" max="50" value="10" class="form-control form-control-sm" id="force-num-attractors">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-step">
+				Step
+			</label>
+			<div class="col-3">
+				<input type="number" min="1" max="49" step="2" value="23" class="form-control form-control-sm" id="force-step">
 			</div>
 			<label class="col-3 second-col col-form-label col-form-label-sm" for="force-explosion">
 				Explosion

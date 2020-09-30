@@ -82,7 +82,7 @@ export default function Contours() {
 		const hueRotationFracInput = optionsDoc.getElementById('force-hue-rotation-fraction');
 
 		function setHueRotation() {
-			let turns = parseInt(hueRotationTurnsInput.value);
+			let turns = parseFloat(hueRotationTurnsInput.value);
 			if (!Number.isFinite(turns)) {
 				turns = Math.trunc(me.hueRotation);
 			}
@@ -112,6 +112,17 @@ export default function Contours() {
 					value = 0.99;
 				}
 				setBgProperty(me, 'sharpness', value);
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-min-saturation').addEventListener('input', setNumericProperty('minSaturation'));
+		optionsDoc.getElementById('force-max-saturation').addEventListener('input', setNumericProperty('maxSaturation'));
+
+		optionsDoc.getElementById('force-lighting').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'lighting', value);
 				generateBackground(0);
 			}
 		});
@@ -158,8 +169,6 @@ export default function Contours() {
 				generateBackground(0);
 			}
 		});
-
-		optionsDoc.getElementById('force-foreground-saturation').addEventListener('input', setNumericProperty('foregroundSaturation'));
 
 		const bgSaturationInput = optionsDoc.getElementById('force-background-saturation');
 		const flipHueCheckbox = optionsDoc.getElementById('force-flip-hue');
@@ -234,6 +243,14 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-explosion').addEventListener('input', setNumericProperty('explosion'));
 
+		optionsDoc.getElementById('force-step').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >=1 && value < MAX_ATTRACTORS) {
+				setBgProperty(me, 'step', value);
+				generateBackground(0);
+			}
+		});
+
 		return optionsDoc;
 	});
 
@@ -246,6 +263,7 @@ export default function Contours() {
 	this.strengthDist = [1, 1, 1, 1, 1];
 	this.saturationDist = [0, 0, 0, 0, 1];
 	this.explosion = 1;
+	this.step = 23;
 
 	this.fieldConstant = 100;
 	this.fieldExponent = 2;
@@ -261,7 +279,9 @@ export default function Contours() {
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
-	this.foregroundSaturation = 1;
+	this.minSaturation = 1;
+	this.maxSaturation = 1;
+	this.lighting = 0.5;
 	this.backgroundSaturation = 1;
 
 	this.maxLightness = 0.4;
@@ -376,13 +396,14 @@ Contours.prototype.randomize = function () {
 Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'sinePower', 'sineFrequency',
-		'divisor', 'base', 'saturations', 'foregroundSaturation', 'backgroundSaturation',
-		'contrast', 'baseColor', 'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation',
-		'minkowskiOrder', 'distanceWeight',
-		'hueFrequency', 'hueRotation', 'waveHue',
-		'waveLightness', 'minLightness', 'maxLightness', 'backgroundOpacity',
-		'colorPortion', 'sharpness', 'numAttractors', 'explosion',
-		'minDotSize', 'maxDotSize', 'dotColor',
+		'sinePower', 'sineFrequency', 'divisor', 'base', 'saturations', 'minSaturation',
+		'maxSaturation', 'lighting', 'backgroundSaturation', 'contrast', 'baseColor',
+		'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation', 'minkowskiOrder',
+		'distanceWeight', 'hueFrequency', 'hueRotation', 'waveHue', 'waveLightness',
+		'minLightness', 'maxLightness', 'backgroundOpacity', 'colorPortion', 'sharpness',
+		'numAttractors', 'explosion', 'minDotSize', 'maxDotSize', 'dotColor',
 	],
+	stepped: [
+		'step',
+	]
 }

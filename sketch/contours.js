@@ -198,10 +198,7 @@ export default function Contours() {
 		opacityInput.addEventListener('pointerup', fullRedraw);
 		opacityInput.addEventListener('keyup', fullRedraw);
 
-		const baseColorInput = optionsDoc.getElementById('force-base-color');
-		baseColorInput.addEventListener('input', setSliderProperty('baseColor'));
-		baseColorInput.addEventListener('pointerup', fullRedraw);
-		baseColorInput.addEventListener('keyup', fullRedraw);
+		optionsDoc.getElementById('force-base-color').addEventListener('input', setNumericProperty('baseColor'));
 
 		optionsDoc.getElementById('force-sine-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);

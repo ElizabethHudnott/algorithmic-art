@@ -157,8 +157,8 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 			<label class="col-3 col-form-label col-form-label-sm" for="force-base-color">
 				Colour Scheme
 			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="6" step="0.125" value="0" class="form-control-range mt-2" id="force-base-color">
+			<div class="col-3">
+				<input type="number" min="-6" max="6" step="0.25" value="0" class="form-control form-control-sm" id="force-base-color">
 			</div>
 		</div>
 		<h6>Splodges</h6>
@@ -186,7 +186,7 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 						<th class="col-form-label col-form-label-sm">
 							Foreground
 						</th>
-						<th class="col-form-label col-form-label-sm">
+						<th class="col-form-label col-form-label-sm pl-1">
 							Background
 						</th>
 					</tr>
@@ -194,10 +194,10 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 						<th class="col-form-label col-form-label-sm">
 							Inner
 						</th>
-						<td class="pb-2">
+						<td class="pb-2 pr-1">
 							<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" name="force-brightness">
 						</td>
-						<td class="pb-2">
+						<td class="pb-2 pl-1">
 							<input type="number" step="0.05" value="1" class="form-control form-control-sm" name="force-brightness">
 						</td>
 					</tr>
@@ -205,10 +205,10 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 						<th class="col-form-label col-form-label-sm">
 							Outer
 						</th>
-						<td>
+						<td class="pr-1">
 							<input type="number" min="0" max="1" step="0.05" value="1" class="form-control form-control-sm" name="force-brightness">
 						</td>
-						<td>
+						<td class="pl-1">
 							<input type="number" step="0.05" value="1" class="form-control form-control-sm" name="force-brightness">
 						</td>
 					</tr>

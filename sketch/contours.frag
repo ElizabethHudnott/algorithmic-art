@@ -44,7 +44,7 @@ vec4 colorFunc(int n, float scaledForce, float wave) {
 	float a = wave * (scaledForce * baseBrightness[0] + (1.0 - scaledForce) * baseBrightness[2]);
 	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[1] + (1.0 - scaledForce) * baseBrightness[3]);
 	float b = scaledForce * (wave * baseBrightness[0] + (1.0 - wave) * baseBrightness[1]);
-	float aDesaturation = 1.0 - maxSaturation;
+	float aDesaturation = 1.0 - minSaturation;
 	float aPrimeDesaturation = 1.0 - abs(backgroundSaturation);
 	float bDesaturation = 1.0 - baseSaturation;
 	float aNew = a  + (1.0 - a) * min(b * bDesaturation + aPrime * aPrimeDesaturation, 1.0);

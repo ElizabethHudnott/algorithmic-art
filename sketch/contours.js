@@ -279,7 +279,7 @@ export default function Contours() {
 				const varName = distributionSelect.value;
 				const distribution = me[varName + 'Dist'];
 				const value = parseFloat(this.value);
-				if (Number.isFinite(value) && value !== distribution[index]) {
+				if (value >= 0 && value !== distribution[index]) {
 					distribution[index] = value;
 					me.randomize();
 					switch (varName) {

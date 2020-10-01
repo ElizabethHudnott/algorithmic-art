@@ -240,6 +240,28 @@ function deepArrayCopy(arr) {
 	return result;
 }
 
+const ESCAPE_MAP = Object.freeze({
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#39;'
+});
+
+/**	Escapes a string so that any HTML code contained within it is converted into plain
+	text.
+	@param {(string|undefined)} input The text to make safe.
+*/
+function escapeHTML(input) {
+	if (input !== undefined) {
+		return String(input).replace(/[&<>"']/g, function (match) {
+			return ESCAPE_MAP[match];
+		});
+	} else {
+		return undefined;
+	}
+}
+
 /**
  * Doesn't check for cyclic array object references!
  */

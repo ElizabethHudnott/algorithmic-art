@@ -315,5 +315,60 @@ f<ul class="nav nav-tabs mb-3" role="tablist">
 				<input type="number" step="0.1" value="1" class="form-control form-control-sm" id="force-explosion">
 			</div>
 		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="force-distribution">
+				Distribution
+			</label>
+			<div class="col-auto">
+				<select class="form-control form-control-sm" id="force-distribution">
+					<option value="x" selected>Horizontal Position</option>
+					<option value="y">Vertical Position</option>
+					<option value="strength">Strength</option>
+					<option value="saturation">Saturation</option>
+				</select>
+			</div>
+		</div>
+		<fieldset id="force-distribution-values">
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-dist-0">
+					Left
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-dist-0">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-dist-1">
+					Centre-Left
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-dist-1">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-dist-2">
+					Centre
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-dist-2">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-dist-3">
+					Centre-Right
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-dist-3">
+				</div>
+			</div>
+			<div class="form-row form-group">
+				<label class="col-3 col-form-label col-form-label-sm" for="force-dist-4">
+					Right
+				</label>
+				<div class="col-3">
+					<input type="number" min="0" value="1" class="form-control form-control-sm" id="force-dist-4">
+				</div>
+			</div>
+		</fieldset>
 	</div>
 </div>

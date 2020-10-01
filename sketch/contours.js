@@ -248,6 +248,63 @@ export default function Contours() {
 			}
 		});
 
+		const distributionLabels = new Map();
+		distributionLabels.set('x', ['Left', 'Centre-Left', 'Centre', 'Centre-Right', 'Right']);
+		distributionLabels.set('y', ['Top', 'Middle', 'Bottom']);
+		distributionLabels.set('strength', ['Weak', 'Medium Weak', 'Medium', 'Medium Strong', 'Strong']);
+		distributionLabels.set('saturation', ['Low', 'Medium Low', 'Medium', 'Medium High', 'High']);
+
+		const distributionSelect = optionsDoc.getElementById('force-distribution');
+		const distributionFields = optionsDoc.getElementById('force-distribution-values');
+		distributionSelect.addEventListener('input', function (event) {
+			const varName = this.value;
+			const labels = distributionLabels.get(varName);
+			const values = me[varName + 'Dist'];
+			for (let i = 0; i < labels.length; i++) {
+				const row = distributionFields.children[i];
+				const label = row.children[0];
+				label.innerHTML = labels[i];
+				const input = row.children[1].children[0];
+				input.value = values[i];
+				row.hidden = false;
+			}
+			for (let i = labels.length; i < distributionFields.children.length; i++) {
+				const row = distributionFields.children[i];
+				row.hidden = true;
+			}
+		});
+
+		function updateDistribution(index) {
+			return function (event) {
+				const varName = distributionSelect.value;
+				const distribution = me[varName + 'Dist'];
+				const value = parseFloat(this.value);
+				if (Number.isFinite(value) && value !== distribution[index]) {
+					distribution[index] = value;
+					me.randomize();
+					switch (varName) {
+					case 'x':
+						setBgProperty(me, 'positionX');
+						break;
+					case 'y':
+						setBgProperty(me, 'positionY');
+						break;
+					case 'strength':
+						setBgProperty(me, 'strength');
+						break;
+					default:
+						setBgProperty(me, 'saturations');
+					}
+					generateBackground(0);
+				}
+			};
+		}
+
+		for (let i = 0; i < distributionFields.children.length; i++) {
+			const row = distributionFields.children[i];
+			row.children[1].children[0].addEventListener('input', updateDistribution(i));
+		}
+
 		return optionsDoc;
 	});
 
@@ -304,6 +361,7 @@ export default function Contours() {
 }
 
 Contours.prototype.randomize = function () {
+	random.reset();
 	const positionX = this.positionX;
 	const positionY = this.positionY;
 	const strength = this.strength;

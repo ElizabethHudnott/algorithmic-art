@@ -373,6 +373,9 @@ function hasRandomness(enabled) {
 			if (gl === undefined) {
 				const glCanvas = document.createElement('CANVAS');
 				gl = glCanvas.getContext('webgl2', {premultipliedAlpha : false});
+				if (gl === null) {
+					throw new Error('The browser or the graphics processor does not support WebGL sketches.');
+				}
 				this.gl = gl;
 				const me = this;
 				glCanvas.addEventListener('webglcontextlost', function (event) {
@@ -1485,19 +1488,6 @@ function hasRandomness(enabled) {
 
 	drawingContext.svg.addEventListener('pointerdown', canvasMouseDown);
 
-	function loadFailure(exception, hadRandomness) {
-		if (bgGenerator === undefined) {
-			$('#sketches-modal').modal('show');
-		} else {
-			// Keep previous generator
-			document.getElementById('background-gen-options').hidden = false;
-			document.getElementById('background-gen-modal-label').innerHTML = bgGenerator.title;
-			document.getElementById('generate-btn-group').hidden = !hadRandomness;
-		}
-		showAlert(errorAlert, 'The requested sketch could not be loaded.', document.body);
-		console.error(exception);
-	}
-
 	function restoreWebGL() {
 		if (bgGenerator.isShader) {
 			drawingContext.restoreShader(bgGenerator);
@@ -1523,12 +1513,7 @@ function hasRandomness(enabled) {
 			randomControls.hidden = true;
 			gen = new constructor();
 			optionsDoc = await gen.optionsDocument;
-		} catch (e) {
-			loadFailure(e, hadRandomness);
-			return;
-		}
-		if (gen.isShader) {
-			try {
+			if (gen.isShader) {
 				const fragFileContent = (await Promise.all([
 					requireScript('lib/gl-matrix.min.js'),
 					downloadFile(url.slice(0, -3) + '.frag', 'text')
@@ -1540,11 +1525,20 @@ function hasRandomness(enabled) {
 				drawingContext.initializeShader(gen);
 				drawingContext.gl.canvas.addEventListener('webglcontextrestored', restoreWebGL);
 				drawingContext.inferTypes(gen);
-			} catch (e) {
-				loadFailure(e, hadRandomness);
-				return;
+				drawingContext.setProperties(gen);
 			}
-			drawingContext.setProperties(gen);
+		} catch (e) {
+			if (bgGenerator === undefined) {
+				$('#sketches-modal').modal('show');
+			} else {
+				// Keep previous generator
+				container.hidden = false;
+				titleBar.innerHTML = bgGenerator.title;
+				randomControls.hidden = !hadRandomness;
+			}
+			showAlert(errorAlert, 'The requested sketch could not be loaded.<br>' + escapeHTML(e.message), document.body);
+			console.error(exception);
+			return;
 		}
 
 		// Set the new generator as the current one.

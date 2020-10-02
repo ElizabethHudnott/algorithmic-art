@@ -66,8 +66,6 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-distance-weight').addEventListener('input', setNumericProperty('distanceWeight'));
 
-		optionsDoc.getElementById('force-sine-power').addEventListener('input', setNumericProperty('sinePower'));
-
 		optionsDoc.getElementById('force-hue-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
@@ -156,7 +154,7 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-wave-lightness').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value <= 1) {
+			if (value >= -1 && value <= 2) {
 				setBgProperty(me, 'waveLightness', value);
 				generateBackground(0);
 			}
@@ -278,7 +276,12 @@ export default function Contours() {
 			return function (event) {
 				const varName = distributionSelect.value;
 				const distribution = me[varName + 'Dist'];
-				const value = parseFloat(this.value);
+				let value;
+				if (this.value.trim() === '') {
+					value = 0;
+				} else {
+					value = parseFloat(this.value);
+				}
 				if (value >= 0 && value !== distribution[index]) {
 					distribution[index] = value;
 					me.randomize();
@@ -324,7 +327,6 @@ export default function Contours() {
 	this.divisor = 100;
 	this.base = 2.8;
 	this.sineFrequency = 1;
-	this.sinePower = 1;	// Multiplied by 2 in WebGL
 
 	this.minkowskiOrder = 2;
 	this.distanceWeight = 0; // Canberra distance
@@ -340,11 +342,11 @@ export default function Contours() {
 
 	this.maxLightness = 0.4;
 	this.minLightness = 0;
-	this.waveLightness = 1;
+	this.waveLightness = 2;
 	this.contrast = 0;
 
 	this.colorPortion = 0.5;
-	this.sharpness = 0;
+	this.sharpness = 0.5;
 
 	this.baseColor = 0;
 	this.baseIntensity = 0;
@@ -451,7 +453,7 @@ Contours.prototype.randomize = function () {
 Contours.prototype.animatable = {
 	continuous: [
 		'positionX', 'positionY', 'strength', 'fieldConstant', 'fieldExponent',
-		'sinePower', 'sineFrequency', 'divisor', 'base', 'saturations', 'minSaturation',
+		'sineFrequency', 'divisor', 'base', 'saturations', 'minSaturation',
 		'maxSaturation', 'lighting', 'backgroundSaturation', 'contrast', 'baseColor',
 		'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation', 'minkowskiOrder',
 		'distanceWeight', 'hueFrequency', 'hueRotation', 'waveHue', 'waveLightness',

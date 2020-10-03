@@ -159,11 +159,11 @@ void main() {
 
 	saturation = min(saturation, 1.0) * (maxSaturation - minSaturation) + minSaturation;
 
-	float waveLightnessPrime = waveLightness;
+	float waveLightnessPrime;
 	if (waveLightness < 0.0) {
-		waveLightnessPrime *= 1.5;
+		waveLightnessPrime = waveLightness * 1.5 / 2.0;
 	} else if (waveLightness <= 1.0) {
-		waveLightnessPrime *= colorPortion;
+		waveLightnessPrime = waveLightness * colorPortion;
 	} else if (waveLightness > 1.0) {
 		waveLightnessPrime = colorPortion + (1.0 - colorPortion) * (waveLightness - 1.0);
 	}
@@ -192,7 +192,7 @@ void main() {
 
 	fragColor = (1.0 - baseColorFrac) * colorFunc(lowerBaseColor, scaledForce, wave);
 	fragColor += baseColorFrac * colorFunc(upperBaseColor, scaledForce, wave);
-	float pixelBaseIntensity = max(baseIntensity, 1.0 - gradient);
+	float pixelBaseIntensity = max(baseIntensity, (1.0 - gradient) * backgroundOpacity);
 	fragColor *= pixelBaseIntensity;
 	fragColor.a =
 		backgroundOpacity * (1.0 - baseIntensity) +

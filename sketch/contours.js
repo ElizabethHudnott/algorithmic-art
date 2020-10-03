@@ -106,9 +106,7 @@ export default function Contours() {
 		optionsDoc.getElementById('force-sharpness').addEventListener('input', function (event) {
 			let value = parseFloat(this.value);
 			if (value >= 0 && value <= 1) {
-				if (value === 1) {
-					value = 0.99;
-				}
+				value = Math.min(value, 0.94);
 				setBgProperty(me, 'sharpness', value);
 				generateBackground(0);
 			}
@@ -154,7 +152,7 @@ export default function Contours() {
 
 		optionsDoc.getElementById('force-wave-lightness').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value >= -1 && value <= 2) {
+			if (value >= -2 && value <= 2) {
 				setBgProperty(me, 'waveLightness', value);
 				generateBackground(0);
 			}

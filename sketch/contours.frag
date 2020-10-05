@@ -115,8 +115,8 @@ void main() {
 		}
 
 		float dotSize = round(max(pointStrength * maxDotSize, minDotSize));
-		if (distance < dotSize + 1.0) {
-			float lightness = distance <= dotSize ? 1.0 : 1.0 - fract(distance);
+		if (distance < dotSize) {
+			float lightness = distance <= dotSize - 1.0 ? 1.0 : 1.0 - fract(distance);
 			fragColor = hsla(dotColor[0], dotColor[1], dotColor[2] * lightness, dotColor[3]);
 			return;
 		}

@@ -306,6 +306,34 @@ export default function Contours() {
 			row.children[1].children[0].addEventListener('input', updateDistribution(i));
 		}
 
+
+		const minDotInput = optionsDoc.getElementById('force-min-dot-size');
+		const maxDotInput = optionsDoc.getElementById('force-max-dot-size');
+
+		minDotInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'minDotSize', value);
+				if (value > me.maxDotSize) {
+					maxDotInput.value = value;
+					setBgProperty(me, 'maxDotSize', value);
+				}
+				generateBackground(0);
+			}
+		});
+
+		maxDotInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				setBgProperty(me, 'maxDotSize', value);
+				if (value < me.minDotSize) {
+					minDotInput.value = value;
+					setBgProperty(me, 'minDotSize', value);
+				}
+				generateBackground(0);
+			}
+		});
+
 		return optionsDoc;
 	});
 
@@ -333,7 +361,7 @@ export default function Contours() {
 	this.hueRotation = 0;
 	this.waveHue = 0;
 
-	this.minSaturation = 1;
+	this.minSaturation = 0.5;
 	this.maxSaturation = 1;
 	this.lighting = 0.5;
 	this.backgroundSaturation = 1;
@@ -353,7 +381,7 @@ export default function Contours() {
 	this.baseBrightness = [1, 1, 1, 1];
 	this.baseSaturation = 1;
 
-	this.minDotSize = 5;
+	this.minDotSize = 6;
 	this.maxDotSize = this.minDotSize;
 	this.dotColor = [1/6, 1, 0.5, 1];	// HSLA
 

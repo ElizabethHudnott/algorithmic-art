@@ -773,7 +773,19 @@ function hasRandomness(enabled) {
 		progressiveBackgroundDraw(bgGenerator, drawingContext, scaledWidth, scaledHeight, preview, drawBackgroundImage);
 	}
 
-	generateBackground = progressiveBackgroundGen;
+	generateBackground = function (preview) {
+		progressiveBackgroundGen(preview);
+		if (preview > 0) {
+			if (document.fonts.check(signatureFont)) {
+				drawSignature(drawingContext);
+			} else {
+				document.fonts.load(signatureFont).then(function () {
+					drawSignature(drawingContext);
+				});
+			}
+		}
+	}
+
 	setBgProperty = drawingContext.setProperty.bind(drawingContext);
 	setBgPropertyElement = drawingContext.setPropertyElement.bind(drawingContext);
 

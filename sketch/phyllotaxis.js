@@ -21,6 +21,8 @@ export default function Phyllotaxis() {
 		const colorFieldSelect = optionsDoc.getElementById('phyllotaxis-color-field');
 		const angleModeSelect = optionsDoc.getElementById('phyllotaxis-angle-mode');
 		const colorModInput = optionsDoc.getElementById('phyllotaxis-color-mod');
+		const colorStepInput = optionsDoc.getElementById('phyllotaxis-color-step');
+		const continuousColorInput = optionsDoc.getElementById('phyllotaxis-continuous-mod');
 
 		function fullRedraw() {
 			generateBackground(0);
@@ -213,6 +215,32 @@ export default function Phyllotaxis() {
 			generateBackground(2);
 		});
 
+		colorFieldSelect.addEventListener('input', function (event) {
+			const field = this.value;
+			if (field === 'all') {
+				me.angleMode.fill(angleModeSelect.value);
+				for (let i = 1; i <= 3; i++) {
+					if (me.colorMod[i] !== me.colorMod[0]) {
+						colorModInput.value = '';
+						break;
+					}
+				}
+				for (let i = 1; i <= 3; i++) {
+					if (me.colorStep[i] !== me.colorStep[0]) {
+						colorStepInput.value = '';
+						break;
+					}
+				}
+				me.continuousMod.fill(Number(continuousColorInput.checked));
+			} else {
+				const fieldNum = parseInt(field);
+				angleModeSelect.value = me.angleMode[fieldNum];
+				colorModInput.value = me.colorMod[fieldNum];
+				colorStepInput.value = me.colorStep[fieldNum];
+				continuousColorInput.checked = Boolean(me.continuousMod[fieldNum]);
+			}
+		});
+
 		angleModeSelect.addEventListener('input', function (event) {
 			const value = this.value;
 			const field = colorFieldSelect.value;
@@ -222,18 +250,6 @@ export default function Phyllotaxis() {
 				me.angleMode[parseInt(field)] = value;
 			}
 			generateBackground(2);
-		});
-
-		colorFieldSelect.addEventListener('input', function (event) {
-			const field = this.value;
-			if (field === 'all') {
-				me.angleMode.fill(angleModeSelect.value);
-				colorModInput.value = '';
-			} else {
-				const fieldNum = parseInt(field);
-				angleModeSelect.value = me.angleMode[fieldNum];
-				colorModInput.value = me.colorMod[fieldNum];
-			}
 		});
 
 		colorModInput.addEventListener('input', function (event) {
@@ -249,12 +265,26 @@ export default function Phyllotaxis() {
 			}
 		});
 
-		optionsDoc.getElementById('phyllotaxis-continuous-mod').addEventListener('input', function (event) {
+		colorStepInput.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				const field = colorFieldSelect.value;
+				if (field === 'all') {
+					me.colorStep.fill(value);
+				} else {
+					me.colorStep[parseInt(field)] = value;
+				}
+				generateBackground(2);
+			}
+		});
+
+		continuousColorInput.addEventListener('input', function (event) {
+			const value = Number(this.checked);
 			const field = colorFieldSelect.value;
 			if (field === 'all') {
-				me.continuousMod.fill(this.checked);
+				me.continuousMod.fill(value);
 			} else {
-				me.colorMod[parseInt(field)] = this.checked;
+				me.colorMod[parseInt(field)] = value;
 			}
 			generateBackground(2);
 		});
@@ -668,8 +698,10 @@ export default function Phyllotaxis() {
 	this.angleMode.fill('t');
 	this.colorMod = new Array(4);
 	this.colorMod.fill(256);
+	this.colorStep = new Array(4);
+	this.colorStep.fill(1);
 	this.continuousMod = new Array(4);
-	this.continuousMod.fill(true);
+	this.continuousMod.fill(1);
 	this.angularHueMode = AngularHueMode.RED;
 	this.hueModeIntensity = 0.9;
 	this.hueModSplit = 0.25;
@@ -707,14 +739,14 @@ Phyllotaxis.prototype.animatable = {
 		'petalSize', 'petalEnlargement', 'petalVariation', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
-		'angularHueMode', 'hueModeIntensity', 'hueModSplit',
+		'angularHueMode', 'continuousMod', 'hueModeIntensity', 'hueModSplit', 'colorStep',
 		'lighting', 'contrast', 'shadowIntensity', 'shadowAngle', 'shadowBlur',
 		'shadowOffset', 'spotOffset', 'strokeStyle', 'centerInnerRadius',
 		'centerMidRadius', 'centerOuterRadius', 'centerInnerColor', 'centerMidColor'
 	],
 	stepped: [
 		'initialNumerators', 'initialDenominators', 'periodicNumerators', 'periodicDenominators',
-		'direction', 'skip', 'stackIncreasing', 'petalShape', 'angleMode', 'continuousMod',
+		'direction', 'skip', 'stackIncreasing', 'petalShape', 'angleMode',
 		'hueMode', 'saturationMode', 'lightnessMode', 'opacityMode'
 	],
 	pairedStepped: [
@@ -837,27 +869,27 @@ class Petal {
 
 Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, min) {
 	const angleMode = this.angleMode[property];
+	let mod = this.colorMod[property];
 	let value;
 	switch (angleMode) {
 	case 't': 	// Theta
 		value = degrees;
 		break;
 	case 'n': 	// n
-		value = n + this.start;
+		const step = this.colorStep[property];
+		value = (n + this.start + mod * step - 1) / step;
 		break;
 	case 'd': 	// Difference
 		value = degrees - r;
 		break;
 	}
-	let mod = this.colorMod[property];
+
+	const hueMode = this.angularHueMode;
 	const stepped = angleMode === 'n' || !this.continuousMod[property];
 	let extraColors = 0;
-	if (property === 0) {
+
+	if (property === 0 &&  hueMode !== AngularHueMode.RED) {
 		extraColors = this.hueModSplit * mod;
-		const hueMode = this.angularHueMode;
-		if (hueMode < AngularHueMode.WHITE) {
-			extraColors *= hueMode;
-		}
 		if (extraColors > 509) {
 			extraColors = 509;
 		} else if (stepped) {
@@ -867,14 +899,17 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 	if (angleMode !== 'n') {
 		mod = mod - extraColors;
 	}
+
 	let split1 = mod;
 	value = value % (mod + extraColors);
+	const step = 1 - this.continuousMod[property];
+	value = step * Math.trunc(value) + (1 - step) * value;
+
 	let length1 = extraColors / 2;
 	let length2 = length1;
 	let split2;
-	if (stepped) {
-		value = Math.trunc(value);
-		if (split1 <= 1 && value < mod) {
+	if (stepped && (property !== 0 || hueMode !== AngularHueMode.RED)) {
+		if (mod <= 1 && value < mod) {
 			return [min, 0];
 		}
 		split1--;
@@ -935,13 +970,14 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
 		const petalVariation = this.petalVariation / 100;
-		const maxPetals = preview === 1 ? Math.min(benchmark / 2, this.maxPetals) : this.maxPetals;
 		const bidirectional = this.direction === 0;
 		const direction = bidirectional ? 1 : this.direction;
 
-		this.points = []
+		this.points = [];
 		let n = this.start;
-		let numPetals = n - 1;
+		let numPetals = n;
+		let maxPetals = preview === 1 ? Math.min(benchmark / 2, this.maxPetals) : this.maxPetals;
+		maxPetals += numPetals;
 		let r = scale * n ** exponent;
 		let skip = this.skip;
 		if (skip === 1) {
@@ -994,7 +1030,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	}
 	const lastR = this.points[numPoints - 1].r;
 	const zoom = (preview & 1) === 0 ? 1 : maxR / lastR;
-	const lastRSquared = lastR * lastR;
+	const lastRSquared = lastR === 0 ? 1 : lastR * lastR;
 	const stacking = this.stackIncreasing ? 1 : -1;
 
 	const petalShape = this.petalShape;

@@ -752,6 +752,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	const blendDepth = this.blendDepth - 1;
 	const filling = this.filling;
 
+	const bipartitePattern = middleWidth === 0 && middleHeight === 0 ? 8 : 2;
+
 	const left = Math.round(this.left * (canvasWidth - drawWidth));
 	const top = Math.round(this.top * (canvasHeight - drawHeight));
 	context.translate(left + drawWidth / 2, top + drawHeight / 2);
@@ -808,7 +810,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				context.save();
 				tile.clip(context);
 			}
-			let bipartiteColoring = this.bipartite ? relationship % 2 : 1;
+			let bipartiteColoring = this.bipartite ? Number(relationship % bipartitePattern !== 0) : 1;
 			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
 			let patternedCentre;
 			if (relationship === 12) {

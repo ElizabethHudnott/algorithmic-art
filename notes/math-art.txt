@@ -1,6 +1,4 @@
-Carpet: filling emphasis doesn't work when centre is recursive
 Carpet: bipartite with images: colour background
-Carpet: bipartite is not bipartite when middle width and middle height are both 0
 
 Environment
 -----------
@@ -8,6 +6,7 @@ Service Worker
 
 Add PayPal donation link
 Add jump to end frame button (middle frame if looped)
+Bug signature background doesn't follow background image
 Bug: dragging position slider doesn't leave background permanently transitioned
 Bug: Can't drag underneath modals, etc.
 Bug: lose drag selection when dragging outside the window

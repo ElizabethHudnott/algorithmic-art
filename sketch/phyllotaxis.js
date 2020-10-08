@@ -167,6 +167,22 @@ export default function Phyllotaxis() {
 			}
 		});
 
+		optionsDoc.getElementById('phyllotaxis-wobble-size').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				me.wobbleSize = value;
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('phyllotaxis-wobble-frequency').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				me.wobbleFrequency = value;
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('phyllotaxis-petal-size').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
@@ -685,6 +701,8 @@ export default function Phyllotaxis() {
 	this.spread = 1;
 	this.start = 1;
 	this.skip = 0;
+	this.wobbleSize = 0;
+	this.wobbleFrequency = 100;
 	this.stackIncreasing = false;
 	this.petalShape = 'e';
 	this.petalEnlargement = 0;
@@ -735,7 +753,8 @@ export default function Phyllotaxis() {
 
 Phyllotaxis.prototype.animatable = {
 	continuous: [
-		'angleOffset', 'radius', 'aspectRatio', 'partialPetals', 'exponent', 'spread', 'scale',
+		'angleOffset', 'radius', 'aspectRatio', 'partialPetals', 'exponent', 'spread',
+		'scale', 'wobbleSize', 'wobbleFrequency',
 		'petalSize', 'petalEnlargement', 'petalVariation', 'petalStretch', 'petalRotation',
 		'colorMod', 'hueMin', 'hueMax', 'saturationMin',
 		'saturationMax', 'lightnessMin', 'lightnessMax', 'opacityMin', 'opacityMax',
@@ -860,10 +879,11 @@ Phyllotaxis.prototype.normalizeFractions = function () {
 }
 
 class Petal {
-	constructor(r, theta, petalSize) {
+	constructor(r, theta, petalSize, n) {
 		this.r = r;
 		this.theta = theta;
 		this.radius = petalSize;
+		this.n = n;
 	}
 }
 
@@ -972,12 +992,11 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const petalVariation = this.petalVariation / 100;
 		const bidirectional = this.direction === 0;
 		const direction = bidirectional ? 1 : this.direction;
+		const maxPetals = preview === 1 ? Math.min(benchmark / 2, this.maxPetals) : this.maxPetals;
 
 		this.points = [];
 		let n = this.start;
 		let numPetals = n;
-		let maxPetals = preview === 1 ? Math.min(benchmark / 2, this.maxPetals) : this.maxPetals;
-		maxPetals += numPetals;
 		let r = scale * n ** exponent;
 		let skip = this.skip;
 		if (skip === 1) {
@@ -1002,9 +1021,9 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 					if (r + thisPetalSize * petalDistortion <= maxR) {
 						this.lastFullPetalR = r;
 					}
-					this.points.push(new Petal(r, phi, thisPetalSize));
+					this.points.push(new Petal(r, phi, thisPetalSize, n));
 					if (bidirectional) {
-						this.points.push(new Petal(r, -phi, thisPetalSize));
+						this.points.push(new Petal(r, -phi, thisPetalSize, n));
 					}
 				}
 			}
@@ -1031,6 +1050,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 	const lastR = this.points[numPoints - 1].r;
 	const zoom = (preview & 1) === 0 ? 1 : maxR / lastR;
 	const lastRSquared = lastR === 0 ? 1 : lastR * lastR;
+	const wobbleSize = this.wobbleSize * canvasHeight / 1000;
 	const stacking = this.stackIncreasing ? 1 : -1;
 
 	const petalShape = this.petalShape;
@@ -1122,9 +1142,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			context.shadowColor = rgba(0, 0, 0, this.shadowIntensity * fade);
 		}
 		const theta = point.theta;
-		const x = zoom * r * aspectRatio * Math.cos(theta);
-		const y = zoom * r * Math.sin(theta);
 		const petalSize = zoom * point.radius;
+		const x = zoom * r * aspectRatio * Math.cos(theta);
+		const y = zoom * r * Math.sin(theta) +
+			wobbleSize * Math.sin(point.n * this.wobbleFrequency / 100);
 
 		const degrees = Math.abs(theta) / Math.PI * 180;
 		const radialValue = (r * r) / lastRSquared;

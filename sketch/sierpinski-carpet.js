@@ -994,6 +994,9 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 								lowerLeftCorner, lowerRightCorner, topLeftCornerX
 							);
 						} else {
+							if (bipartiteColoring === 0) {
+								context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
+							}
 							if (!emphasize) {
 								context.globalAlpha = this.patternOpacities[bipartiteColoring] * baseOpacity;
 							}

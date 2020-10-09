@@ -975,7 +975,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				}
 
 				if (!recurse) {
-					if (useCutouts && (!recursive[4] || maxDepth === 0)) {
+					if (useCutouts) {
 						context.clip(clipPath);
 					}
 					if (emphasize) {

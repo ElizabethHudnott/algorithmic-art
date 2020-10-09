@@ -788,7 +788,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			applyOpacity = applyOpacity || this.opacityEnable === 1;
 			break;
 		}
-		const useCutouts = overlap > 0 && (overlap < 1 || depth === 0 || recursive[4]) && depth >= cutoutDepth;
+		const useCutouts = overlap > 0 && depth >= cutoutDepth;
 		const emphasize = depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
@@ -804,7 +804,11 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 		for (let tile of queue) {
 			let {width, height} = tile;
 			const {x, y, relationship} = tile;
-			const permutation = permutations[relationship];
+			let permutationSource = tile;
+			while (permutationSource.relationship === 4) {
+				permutationSource = permutationSource.parent;
+			}
+			const permutation = permutations[permutationSource.relationship];
 			if (overlap > 0) {
 				context.restore();
 				context.save();

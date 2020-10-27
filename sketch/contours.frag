@@ -120,17 +120,14 @@ float solveCubic(float a, float b, float c, float d) {
 }
 
 float bezier(float a, float b, float x, bool reverseDirection) {
-	float aPlusB = a + b;
-	float t = solveCubic(-2.0 * aPlusB, 3.0 * aPlusB, 0.0, -b);
-	float y0x = 0.5 + t * (0.75 + t * (0.5 * t - 0.75));
-	float xPrime = mod((reverseDirection ? 1.0 - x : x) + y0x, 1.0);
-	float y;
+	float xPrime = mod((reverseDirection ? 1.0 - x : x) + 0.25, 1.0);
+	float t, y;
 	if (xPrime < 0.5) {
 		t = solveCubic(0.5, -0.75, 0.75, -xPrime);
-		y = aPlusB * (2.0 * t - 3.0) * t * t + a;
+		y = (a + b) * (2.0 * t - 3.0) * t * t + a;
 	} else {
 		t = solveCubic(0.5, -0.75, 0.75, 0.5 - xPrime);
-		y = aPlusB * (3.0 - 2.0 * t) * t * t - b;
+		y = (a + b) * (3.0 - 2.0 * t) * t * t - b;
 	}
 	return y;
 }
@@ -159,7 +156,10 @@ void main() {
 	float lightingDivisor = lighting * min(canvasWidth, canvasHeight) / 10.0;
 	lightingDivisor *= 5.0 * pow(2.0, -log(numAttractors) / log(5.0));
 
-	float maxDisplacementPx = displaceMax * sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
+	float maxDisplacementPx = sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
+	if (displaceMax < 1.0) {
+		maxDisplacementPx *= displaceMax;
+	}
 
 	for (int i = 0; i < numPoints; i++) {
 		int index = (i * modulus) % MAX_ATTRACTORS;
@@ -196,6 +196,10 @@ void main() {
 			} else {
 				displaceLeft = min(displaceLeft, maxDeltaX);
 				displaceRight = min(displaceLeft, displaceRight);
+			}
+			if (displaceMax > 1.0) {
+				displaceLeft *= displaceMax;
+				displaceRight *= displaceMax;
 			}
 			float displaceX = bezier(displaceRight, displaceLeft, tween, reverseDirection);
 			x2 += displaceX;

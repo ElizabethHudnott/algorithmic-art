@@ -329,6 +329,7 @@ export default function Contours() {
 		optionsDoc.getElementById('force-displace-linear').addEventListener('input', function (event) {
 			me.displaceLinear = parseFloat(this.value);
 			me.randomize()
+			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('force-displace-power').addEventListener('input', function (event) {
@@ -336,6 +337,7 @@ export default function Contours() {
 			if (Number.isFinite(value) && value !== me.displacePower) {
 				me.displacePower = value;
 				me.randomize();
+				generateBackground(0);
 			}
 		});
 

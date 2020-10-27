@@ -6,6 +6,7 @@ export default function Contours() {
 	this.isShader = true;
 	this.helpFile = 'help/contours.html';
 	this.backgroundColor = [0, 0, 0];
+	this.tween = 0;
 
 	this.numAttractors = Math.min(Math.round((window.innerWidth * window.innerHeight) / (800 * 600) * 10), MAX_ATTRACTORS);
 
@@ -244,11 +245,33 @@ export default function Contours() {
 			}
 		});
 
+		optionsDoc.getElementById('force-min-strength').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1 && value !== me.minStrength) {
+				me.minStrength = value;
+				me.randomize();
+				setBgProperty(me, 'strength');
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('force-repel-probability').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0 && value <= 1) {
+				me.repelProbability = value;
+				me.randomize();
+				setBgProperty(me, 'strength');
+				generateBackground(0);
+			}
+		});
+
 		const distributionLabels = new Map();
-		distributionLabels.set('x', ['Left', 'Centre-Left', 'Centre', 'Centre-Right', 'Right']);
-		distributionLabels.set('y', ['Top', 'Middle', 'Bottom']);
+		distributionLabels.set('positionX', ['Left', 'Centre-Left', 'Centre', 'Centre-Right', 'Right']);
+		distributionLabels.set('positionY', ['Top', 'Middle', 'Bottom']);
 		distributionLabels.set('strength', ['Weak', 'Medium Weak', 'Medium', 'Medium Strong', 'Strong']);
-		distributionLabels.set('saturation', ['Low', 'Medium Low', 'Medium', 'Medium High', 'High']);
+		distributionLabels.set('saturations', ['Low', 'Medium Low', 'Medium', 'Medium High', 'High']);
+		distributionLabels.set('displaceAmount', ['Small', 'Medium Small', 'Medium', 'Large', 'Largest']);
+		distributionLabels.set('displaceAngle', ['Right', 'Up &amp; Right', 'Up &amp; Left', 'Left', 'Down &amp; Left', 'Down &amp; Right']);
 
 		const distributionSelect = optionsDoc.getElementById('force-distribution');
 		const distributionFields = optionsDoc.getElementById('force-distribution-values');
@@ -284,17 +307,14 @@ export default function Contours() {
 					distribution[index] = value;
 					me.randomize();
 					switch (varName) {
-					case 'x':
-						setBgProperty(me, 'positionX');
+					case 'displaceAmount':
+					case 'displaceAngle':
+						setBgProperty(me, 'displaceAmount');
+						setBgProperty(me, 'displaceGradient');
 						break;
-					case 'y':
-						setBgProperty(me, 'positionY');
-						break;
-					case 'strength':
-						setBgProperty(me, 'strength');
-						break;
+
 					default:
-						setBgProperty(me, 'saturations');
+						setBgProperty(me, varName);
 					}
 					generateBackground(0);
 				}
@@ -306,6 +326,20 @@ export default function Contours() {
 			row.children[1].children[0].addEventListener('input', updateDistribution(i));
 		}
 
+		optionsDoc.getElementById('force-displace-linear').addEventListener('input', function (event) {
+			me.displaceLinear = parseFloat(this.value);
+			me.randomize()
+		});
+
+		optionsDoc.getElementById('force-displace-power').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value) && value !== me.displacePower) {
+				me.displacePower = value;
+				me.randomize();
+			}
+		});
+
+		optionsDoc.getElementById('force-displace-max').addEventListener('input', setNumericProperty('displaceMax'));
 
 		const minDotInput = optionsDoc.getElementById('force-min-dot-size');
 		const maxDotInput = optionsDoc.getElementById('force-max-dot-size');
@@ -341,10 +375,19 @@ export default function Contours() {
 	this.positionY = new Array(MAX_ATTRACTORS);
 	this.strength = new Array(MAX_ATTRACTORS);
 	this.saturations = new Array(MAX_ATTRACTORS);
-	this.xDist = [1, 1, 1, 1, 1];
-	this.yDist = [1, 1, 1];
+	this.displaceAmount = new Array(MAX_ATTRACTORS);
+	this.displaceGradient = new Array(MAX_ATTRACTORS);
+	this.positionXDist = [1, 1, 1, 1, 1];
+	this.positionYDist = [1, 1, 1];
 	this.strengthDist = [1, 1, 1, 1, 1];
-	this.saturationDist = [0, 0, 0, 0, 1];
+	this.minStrength = 0.1;
+	this.repelProbability = 0;
+	this.saturationsDist = [0, 0, 0, 0, 1];
+	this.displaceAmountDist = [1, 0, 0, 0, 0];
+	this.displaceAngleDist = [1, 1, 1, 1, 1, 1];
+	this.displaceLinear = 0.2;
+	this.displacePower = 2;
+	this.displaceMax = 1;
 	this.explosion = 1;
 	this.step = 23;
 
@@ -384,6 +427,7 @@ export default function Contours() {
 	this.minDotSize = 6;
 	this.maxDotSize = this.minDotSize;
 	this.dotColor = [1/6, 1, 0.5, 1];	// HSLA
+	this.repelDotColor = [2.4/6, 1, 0.45, 1];
 
 	this.randomize();
 }
@@ -394,24 +438,31 @@ Contours.prototype.randomize = function () {
 	const positionY = this.positionY;
 	const strength = this.strength;
 	const saturations = this.saturations;
+	const displaceAmount = this.displaceAmount;
+	const displaceGradient = this.displaceGradient;
 
 	const NUM_COLUMNS = 5;
 	const NUM_ROWS = 3;
 	const NUM_STRENGTHS = 5;
 	const NUM_SATURATIONS = 5;
+	const NUM_DISPLACEMENTS = 5;
+	const NUM_ANGLES = 6;
 
 	const xDist = new Array(NUM_COLUMNS);
 	const yDist = new Array(NUM_ROWS);
 	const strengthDist = new Array(NUM_STRENGTHS);
-	const saturationDist = new Array(NUM_SATURATIONS);
-	let xDistTotal = 0, yDistTotal = 0, strengthDistTotal = 0, saturationDistTotal = 0;
+	const saturationsDist = new Array(NUM_SATURATIONS);
+	const displaceDist = new Array(NUM_DISPLACEMENTS);
+	const displaceAngleDist = new Array(NUM_ANGLES);
+	let xDistTotal = 0, yDistTotal = 0, strengthDistTotal = 0, saturationsDistTotal = 0;
+	let displaceDistTotal = 0, displaceAngleDistTotal = 0;
 
 	for (let i = 0; i < NUM_COLUMNS; i++) {
-		xDistTotal += this.xDist[i];
+		xDistTotal += this.positionXDist[i];
 		xDist[i] = xDistTotal;
 	}
 	for (let i = 0; i < NUM_ROWS; i++) {
-		yDistTotal += this.yDist[i];
+		yDistTotal += this.positionYDist[i];
 		yDist[i] = yDistTotal;
 	}
 	for (let i = 0; i < NUM_STRENGTHS; i++) {
@@ -419,8 +470,16 @@ Contours.prototype.randomize = function () {
 		strengthDist[i] = strengthDistTotal;
 	}
 	for (let i = 0; i < NUM_SATURATIONS; i++) {
-		saturationDistTotal += this.saturationDist[i];
-		saturationDist[i] = saturationDistTotal;
+		saturationsDistTotal += this.saturationsDist[i];
+		saturationsDist[i] = saturationsDistTotal;
+	}
+	for (let i = 0; i < NUM_DISPLACEMENTS; i++) {
+		displaceDistTotal += this.displaceAmountDist[i];
+		displaceDist[i] = displaceDistTotal;
+	}
+	for (let i = 0; i < NUM_ANGLES; i++) {
+		displaceAngleDistTotal += this.displaceAngleDist[i];
+		displaceAngleDist[i] = displaceAngleDistTotal;
 	}
 
 	const grid = new Array(NUM_COLUMNS);
@@ -432,34 +491,125 @@ Contours.prototype.randomize = function () {
 		}
 	}
 
+	let {displaceLinear, displacePower} = this;
+	displaceLinear = displaceLinear * displaceLinear * displaceLinear;
+	if (Math.abs(displacePower) < 0.0625) {
+		displacePower = 0.0625;
+	}
+	const displaceK = displaceLinear === 0 ? 1 :
+		(displaceLinear - 1) / (displaceLinear ** displacePower - 1);
+
 	for (let i = 0; i < MAX_ATTRACTORS; i++) {
+		let x, y, column, row, pointStrength, bin;
+
+		// X-position
 		let p = random.next() * xDistTotal;
-		let column = NUM_COLUMNS - 1;
-		while (column > 0 && xDist[column - 1] >= p) {
-			column--;
+		let offset = random.next();
+		if (xDistTotal === 0) {
+			// Fixed position in centre
+			x = 0.5;
+			column = Math.trunc(NUM_COLUMNS / 2);
+		} else {
+			// Randomized x-position
+			column = NUM_COLUMNS - 1;
+			while (column > 0 && xDist[column - 1] >= p) {
+				column--;
+			}
+			x = (column + offset) / NUM_COLUMNS;
 		}
+
+		// Y-position
 		p = random.next() * yDistTotal;
-		let row = NUM_ROWS - 1;
-		while (row > 0 && yDist[row - 1] >= p) {
-			row--;
+		offset = random.next();
+		if (yDistTotal === 0) {
+			// Fixed position in centre
+			y = 0.5;
+			row = Math.trunc(NUM_ROWS / 2);
+		} else {
+			// Randomized y-position
+			row = NUM_ROWS - 1;
+			while (row > 0 && yDist[row - 1] >= p) {
+				row--;
+			}
+			y = (row + offset) / NUM_ROWS;
 		}
-		const x = (column + random.next()) / NUM_COLUMNS;
-		const y = (row + random.next()) / NUM_ROWS;
 		grid[column][row].push(x, y);
 
+		// Strength
 		p = random.next() * strengthDistTotal;
-		let bin = NUM_STRENGTHS - 1;
-		while (bin > 0 && strengthDist[bin - 1] >= p) {
-			bin--;
+		offset = random.next();
+		if (strengthDistTotal === 0) {
+			// Fixed strength, all points equal
+			pointStrength = 0.5;
+		} else {
+			// Randomized strength
+			bin = NUM_STRENGTHS - 1;
+			while (bin > 0 && strengthDist[bin - 1] >= p) {
+				bin--;
+			}
+			pointStrength = (bin + offset) / NUM_STRENGTHS;
 		}
-		strength[i] = (bin + random.next()) / NUM_STRENGTHS;
+		pointStrength = Math.max(pointStrength, this.minStrength);
+		if (random.next() < this.repelProbability) {
+			pointStrength = -pointStrength;
+		}
+		strength[i] = pointStrength;
 
-		p = random.next() * saturationDistTotal;
-		bin = NUM_SATURATIONS - 1;
-		while (bin > 0 && saturationDist[bin - 1] >= p) {
-			bin--;
+		// Saturation
+		p = random.next() * saturationsDistTotal;
+		offset = random.next();
+		if  (saturationsDistTotal === 0) {
+			// Fixed saturation, fully saturated
+			saturations[i] = 1;
+		} else {
+			// Random saturation
+			bin = NUM_SATURATIONS - 1;
+			while (bin > 0 && saturationsDist[bin - 1] >= p) {
+				bin--;
+			}
+			saturations[i] = (bin + offset) / NUM_SATURATIONS;
 		}
-		saturations[i] = (bin + random.next()) / NUM_SATURATIONS;
+
+		// Displacement amount
+		p = random.next() * displaceDistTotal;
+		offset = random.next();
+		if (displaceDistTotal === 0) {
+			// Fixed displacement amount
+			displaceAmount[i] = 0.15;
+		} else {
+			// Randomized displacement amount
+			bin = NUM_DISPLACEMENTS - 1;
+			while (bin > 0 && displaceDist[bin - 1] >= p) {
+				bin--;
+			}
+			let displacePortion = (bin + offset) / NUM_DISPLACEMENTS;
+			if (displacePortion > displaceLinear) {
+				displacePortion = displaceK * displacePortion ** displacePower + 1 - displaceK;
+			}
+			displaceAmount[i] = displacePortion;
+		}
+
+		// Displacement angle
+		if (displaceAngleDistTotal === 0) {
+			// Fixed angles, horizontal left or right
+			displaceGradient[i] = 0;
+			if (random.next() >= 0.5) {
+				displaceAmount[i] *= -1;
+			}
+		} else {
+			// Randomized angles
+			p = random.next() * displaceAngleDistTotal;
+			bin = NUM_ANGLES - 1;
+			while (bin > 0 && displaceAngleDist[bin - 1] >= p) {
+				bin--;
+			}
+			let displaceAngle = (bin + random.next()) / NUM_ANGLES;
+			displaceAngle = displaceAngle * TWO_PI - Math.PI / 6;
+			displaceGradient[i] = Math.tan(displaceAngle);
+			if (displaceAngle > Math.PI / 2 && displaceAngle < 1.5 * Math.PI) {
+				displaceAmount[i] *= -1;
+			}
+		}
 	}
 
 	let n = 0;
@@ -484,7 +634,8 @@ Contours.prototype.animatable = {
 		'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation', 'minkowskiOrder',
 		'distanceWeight', 'hueFrequency', 'hueRotation', 'waveHue', 'waveLightness',
 		'minLightness', 'maxLightness', 'backgroundOpacity', 'colorPortion', 'sharpness',
-		'numAttractors', 'explosion', 'minDotSize', 'maxDotSize', 'dotColor',
+		'numAttractors', 'explosion', 'minDotSize', 'maxDotSize', 'dotColor', 'repelDotColor',
+		'displaceAmount', 'displaceGradient', 'displaceMax'
 	],
 	stepped: [
 		'step',

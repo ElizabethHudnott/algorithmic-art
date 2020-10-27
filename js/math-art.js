@@ -1500,6 +1500,14 @@ function hasRandomness(enabled) {
 
 	drawingContext.svg.addEventListener('pointerdown', canvasMouseDown);
 
+	function displaySeed() {
+		if (startFrame.random.seed === endFrame.random.seed) {
+			seedInput.value = startFrame.random.seed;
+		} else {
+			seedInput.value = startFrame.random.seed + '\n' + endFrame.random.seed;
+		}
+	}
+
 	function restoreWebGL() {
 		if (bgGenerator.isShader) {
 			drawingContext.restoreShader(bgGenerator);
@@ -1549,7 +1557,7 @@ function hasRandomness(enabled) {
 				randomControls.hidden = !hadRandomness;
 			}
 			showAlert(errorAlert, 'The requested sketch could not be loaded.<br>' + escapeHTML(e.message), document.body);
-			console.error(exception);
+			console.error(e);
 			return;
 		}
 
@@ -1578,13 +1586,12 @@ function hasRandomness(enabled) {
 		document.getElementById('rotation-size-screen').checked = true;
 		blur = 0.4;
 		blurSlider.value = 0.4;
-		random = new RandomNumberGenerator();
-		seedInput.value = random.seed;
 
 		// Initialize sketch
 		currentFrame = currentFrameData();
 		startFrame = currentFrame;
 		endFrame = startFrame;
+		displaySeed();
 		// Hide the save button for experimental sketches
 		const enableSave = (new URL(url, document.location)).hostname === document.location.hostname;
 		const saveBtn = document.getElementById('btn-save-form');
@@ -2382,7 +2389,11 @@ function hasRandomness(enabled) {
 			function render(time) {
 				if (capturer !== undefined) {
 					time = performance.now();
+				} else if (time - newAnimController.previousTime > 1000) {
+					console.log("Slow render!");
 				}
+				newAnimController.previousTime = time;
+
 				const startTween = newAnimController.startTween;
 				let beginTime = newAnimController.beginTime;
 				if (beginTime === undefined) {
@@ -2424,7 +2435,9 @@ function hasRandomness(enabled) {
 			};
 			newAnimController.progress = 0;
 			newAnimController.start = function () {
-				render(performance.now());
+				const time = performance.now();
+				this.previousTime = time;
+				render(time);
 			}
 		});
 		newAnimController.promise = promise;
@@ -2819,14 +2832,6 @@ function hasRandomness(enabled) {
 		seedInput.value = random.seed;
 		progressiveBackgroundGen(0);
 	});
-
-	function displaySeed() {
-		if (startFrame.random.seed === endFrame.random.seed) {
-			seedInput.value = startFrame.random.seed;
-		} else {
-			seedInput.value = startFrame.random.seed + '\n' + endFrame.random.seed;
-		}
-	}
 
 	function parseSeed(seed) {
 		if (seed === undefined) {

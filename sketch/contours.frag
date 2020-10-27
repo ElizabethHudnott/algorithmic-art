@@ -79,6 +79,62 @@ int findCoprime(int n, int m) {
 	return m;
 }
 
+float solveCubic(float a, float b, float c, float d) {
+	float threeAC = 3.0 * a * c;
+	float bSquared = b * b;
+	float threeASquared = 3.0 * a * a;
+	float p = (threeAC - bSquared) / threeASquared;
+	float q = (2.0 * bSquared * b - 3.0 * threeAC * b + 9.0 * threeASquared * d) / (9.0 * threeASquared * a);
+
+	float discriminant = -4.0 * p * p * p - 27.0 * q *q;
+	float root3 = sqrt(3.0);
+	float t, rootP;
+
+	if (discriminant >= 0.0) {
+
+		rootP = sqrt(-p);
+		t = 2.0 * rootP / root3 * cos(
+			1.0 / 3.0 * acos(1.5 * q / p * root3 / rootP) - 2.0 / 3.0 * PI
+		);
+
+	} else if (p == 0.0) {
+
+		t = pow(-q, 1.0 / 3.0);
+
+	} else if (p < 0.0) {
+
+		rootP = sqrt(-p);
+		t = -2.0 * sign(q) * rootP / root3 * cosh(
+			1.0 / 3.0  * acosh(-1.5 * abs(q) / p * root3 / rootP)
+		);
+
+	} else {
+
+		rootP = sqrt(p);
+		t = -2.0 * rootP / root3 * sinh(
+			1.0 / 3.0 * asinh(1.5 * q / p * root3 / rootP)
+		);
+
+	}
+	return t - b / (3.0 * a);
+}
+
+float bezier(float a, float b, float x, bool reverseDirection) {
+	float aPlusB = a + b;
+	float t = solveCubic(-2.0 * aPlusB, 3.0 * aPlusB, 0.0, -b);
+	float y0x = 0.5 + t * (0.75 + t * (0.5 * t - 0.75));
+	float xPrime = mod((reverseDirection ? 1.0 - x : x) + y0x, 1.0);
+	float y;
+	if (xPrime < 0.5) {
+		t = solveCubic(0.5, -0.75, 0.75, -xPrime);
+		y = aPlusB * (2.0 * t - 3.0) * t * t + a;
+	} else {
+		t = solveCubic(0.5, -0.75, 0.75, 0.5 - xPrime);
+		y = aPlusB * (3.0 - 2.0 * t) * t * t - b;
+	}
+	return y;
+}
+
 void main() {
 	float hue, lightness, saturation = 0.0, opacity = 1.0, gradient = 1.0;
 	float lastRed = floor(hueFrequency) / hueFrequency;
@@ -103,10 +159,49 @@ void main() {
 	float lightingDivisor = lighting * min(canvasWidth, canvasHeight) / 10.0;
 	lightingDivisor *= 5.0 * pow(2.0, -log(numAttractors) / log(5.0));
 
+	float maxDisplacementPx = displaceMax * sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
+
 	for (int i = 0; i < numPoints; i++) {
 		int index = (i * modulus) % MAX_ATTRACTORS;
 		float x2 = positionX[index] * canvasWidth;
 		float y2 = positionY[index] * canvasHeight;
+		{
+			float displacePortion = displaceAmount[index];
+			bool reverseDirection = displacePortion < 0.0;
+			displacePortion = abs(displacePortion);
+
+			float m = displaceGradient[index];
+			float c = y2 - m * x2;
+			float yZeroX = -c / m;
+			float yMaxX = (canvasHeight - c) / m;
+			float xMin, xMax;
+			if (m == 0.0) {
+				xMin = 0.0;
+				xMax = canvasWidth;
+			} else if (m > 0.0) {
+				xMin = max(yZeroX, 0.0);
+				xMax = min(yMaxX, canvasWidth);
+			} else {
+				xMin = max(yMaxX, 0.0);
+				xMax = min(yZeroX, canvasWidth);
+			}
+			float displaceLeft = x2 - xMin;
+			float displaceRight = xMax - x2;
+			float maxDeltaX = displacePortion * maxDisplacementPx;
+			maxDeltaX *= maxDeltaX;
+			maxDeltaX = sqrt(maxDeltaX / (1.0 + m * m));
+			if (displaceRight > displaceLeft) {
+				displaceRight = min(displaceRight, maxDeltaX);
+				displaceLeft = min(displaceLeft, displaceRight);
+			} else {
+				displaceLeft = min(displaceLeft, maxDeltaX);
+				displaceRight = min(displaceLeft, displaceRight);
+			}
+			float displaceX = bezier(displaceRight, displaceLeft, tween, reverseDirection);
+			x2 += displaceX;
+			y2 += m * displaceX;
+		}
+
 		float distance = distanceMetric(x, y, x2, y2);
 
 		float pointStrength = strength[index];
@@ -114,10 +209,11 @@ void main() {
 			pointStrength *= finalPointScale;
 		}
 
-		float dotSize = round(max(pointStrength * maxDotSize, minDotSize));
+		float dotSize = round(max(abs(pointStrength) * maxDotSize, minDotSize));
 		if (distance < dotSize) {
 			float lightness = distance <= dotSize - 1.0 ? 1.0 : 1.0 - fract(distance);
-			fragColor = hsla(dotColor[0], dotColor[1], dotColor[2] * lightness, dotColor[3]);
+			vec4 color = pointStrength < 0.0 ? repelDotColor : dotColor;
+			fragColor = hsla(color[0], color[1], color[2] * lightness, color[3]);
 			return;
 		}
 

@@ -552,6 +552,13 @@ button.btn-black:hover {
 	display: inline;
 }
 
+.center-mark {
+	background-image: linear-gradient(0deg, Highlight, Highlight);
+	background-size: 2px 70%;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
 #btn-floating-action {
 	background-color: hsla(210, 50%, 75%, 0.9);
 	border-radius: 32px;

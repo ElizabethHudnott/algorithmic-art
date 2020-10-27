@@ -5,8 +5,7 @@ Environment
 Service Worker
 
 Add PayPal donation link
-Force preview animation mode (when not for a video) if excessive computation time used.
-Add jump to end frame button (middle frame if looped)
+* Force preview animation mode (when not for a video) if excessive computation time used.
 Bug signature background doesn't follow background image
 Bug: dragging position slider doesn't leave background permanently transitioned
 Bug: Can't drag underneath modals, etc.

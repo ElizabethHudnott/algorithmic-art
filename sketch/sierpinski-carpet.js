@@ -20,7 +20,7 @@ export default function SierpinskiCarpet() {
 	 * 13	Top left emphasized
 	 * ...
 	 * 21	Bottom right emphasized
-	 * (Only 0-3, 5-8 & 12 appear in the queue)
+	 * (Only 0-8 & 12 appear in the queue)
 	*/
 	const colors = new Array(25);
 	this.colors = colors;

@@ -162,7 +162,7 @@ void main() {
 	}
 
 	for (int i = 0; i < numPoints; i++) {
-		int index = (i * modulus) % MAX_ATTRACTORS;
+		int index = ((i + 1) * modulus) % MAX_ATTRACTORS;
 		float x2 = positionX[index] * canvasWidth;
 		float y2 = positionY[index] * canvasHeight;
 		{

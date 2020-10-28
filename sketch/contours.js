@@ -370,6 +370,50 @@ export default function Contours() {
 			}
 		});
 
+		const dotPalette = optionsDoc.getElementById('force-dot-color');
+
+		function updateDotColor(component) {
+			return function (event) {
+				const colorIndex = parseInt(queryChecked(dotPalette, 'force-dot-color').value);
+				me.dotColors[colorIndex][component] = parseFloat(this.value);
+				setBgPropertyElement(me, 'dotColors', colorIndex);
+				generateBackground(1);
+			}
+		}
+
+		const dotHueInput = optionsDoc.getElementById('force-dot-hue');
+		dotHueInput.addEventListener('input', updateDotColor(0));
+		dotHueInput.addEventListener('pointerup', fullRedraw);
+		dotHueInput.addEventListener('keyup', fullRedraw);
+
+		const dotSaturationInput = optionsDoc.getElementById('force-dot-saturation');
+		dotSaturationInput.addEventListener('input', updateDotColor(1));
+		dotSaturationInput.addEventListener('pointerup', fullRedraw);
+		dotSaturationInput.addEventListener('keyup', fullRedraw);
+
+		const dotLightnessInput = optionsDoc.getElementById('force-dot-lightness');
+		dotLightnessInput.addEventListener('input', updateDotColor(2));
+		dotLightnessInput.addEventListener('pointerup', fullRedraw);
+		dotLightnessInput.addEventListener('keyup', fullRedraw);
+
+		const dotOpacityInput = optionsDoc.getElementById('force-dot-opacity');
+		dotOpacityInput.addEventListener('input', updateDotColor(3));
+		dotOpacityInput.addEventListener('pointerup', fullRedraw);
+		dotOpacityInput.addEventListener('keyup', fullRedraw);
+
+		function switchColor(event) {
+			const colorIndex = parseInt(this.value);
+			const color = me.dotColors[colorIndex];
+			dotHueInput.value = color[0];
+			dotSaturationInput.value = color[1];
+			dotLightnessInput.value = color[2];
+			dotSaturationInput.value = color[3];
+		}
+
+		for (let radio of dotPalette.getElementsByTagName('INPUT')) {
+			radio.addEventListener('input', switchColor);
+		}
+
 		return optionsDoc;
 	});
 
@@ -428,8 +472,10 @@ export default function Contours() {
 
 	this.minDotSize = 6;
 	this.maxDotSize = this.minDotSize;
-	this.dotColor = [1/6, 1, 0.5, 1];	// HSLA
-	this.repelDotColor = [2.4/6, 1, 0.45, 1];
+	this.dotColors = [
+		[0.1665, 1, 0.5, 1],	// Attractive points (HSLA)
+		[0.4, 1, 0.45, 1]		// Repulsive points
+	];
 
 	this.randomize();
 }
@@ -636,7 +682,7 @@ Contours.prototype.animatable = {
 		'baseIntensity', 'baseScale', 'baseBrightness', 'baseSaturation', 'minkowskiOrder',
 		'distanceWeight', 'hueFrequency', 'hueRotation', 'waveHue', 'waveLightness',
 		'minLightness', 'maxLightness', 'backgroundOpacity', 'colorPortion', 'sharpness',
-		'numAttractors', 'explosion', 'minDotSize', 'maxDotSize', 'dotColor', 'repelDotColor',
+		'numAttractors', 'explosion', 'minDotSize', 'maxDotSize', 'dotColors',
 		'displaceAmount', 'displaceGradient', 'displaceMax'
 	],
 	stepped: [

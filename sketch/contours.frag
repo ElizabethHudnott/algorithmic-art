@@ -120,7 +120,7 @@ float solveCubic(float a, float b, float c, float d) {
 }
 
 float bezier(float a, float b, float x, bool reverseDirection) {
-	float xPrime = mod((reverseDirection ? 1.0 - x : x) + 0.25, 1.0);
+	float xPrime = mod((reverseDirection ? 1.0 - x : x) + 0.75, 1.0);
 	float t, y;
 	if (xPrime < 0.5) {
 		t = solveCubic(0.5, -0.75, 0.75, -xPrime);
@@ -216,7 +216,7 @@ void main() {
 		float dotSize = round(max(abs(pointStrength) * maxDotSize, minDotSize));
 		if (distance < dotSize) {
 			float lightness = distance <= dotSize - 1.0 ? 1.0 : 1.0 - fract(distance);
-			vec4 color = pointStrength < 0.0 ? repelDotColor : dotColor;
+			vec4 color = dotColors[pointStrength < 0.0 ? 1 : 0];
 			fragColor = hsla(color[0], color[1], color[2] * lightness, color[3]);
 			return;
 		}

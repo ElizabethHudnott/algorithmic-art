@@ -28,15 +28,15 @@ export default function SierpinskiCarpet() {
 	if (darkMode()) {
 		colors.fill('#00000080', 0, 9); 	// Backgrounds (0-8)
 		colors.fill('#000000', 10, 19);		// Backgrounds with emphasis (10-18)
-		colors.fill('#1a1a1ad3', 20, 30)	// Foregrounds (20-29)
-		colors.fill('#1a1a1a', 30, 40);		// Foregrounds with emphasis (30-39)
+		colors.fill('#1a1a1ad3', 20, 29)	// Foregrounds (20-29)
+		colors.fill('#1a1a1a', 29, 40);		// Foregrounds with emphasis (30-39)
 		this.foreOpacities.fill(211 / 255);
 
 	} else {
 		colors.fill('#ffffff80', 0, 9);		// Backgrounds (0-8)
 		colors.fill('#ffffff', 10, 19);		// Backgrounds with emphasis (10-18)
-		colors.fill('#00000080', 20, 30);	// Foregrounds (20-29)
-		colors.fill('#000000', 30, 40);		// Foregrounds with emphasis (30-39)
+		colors.fill('#00000080', 20, 29);	// Foregrounds (20-29)
+		colors.fill('#000000', 29, 40);		// Foregrounds with emphasis (30-39)
 		this.foreOpacities.fill(1);
 	}
 	colors[9] = '#ffffff00';				// Depth zero background (transparent)
@@ -198,7 +198,7 @@ export default function SierpinskiCarpet() {
 						colorControls[index].value = color;
 						opacitySliders[index].value = opacity;
 						if (colorSetInput.value === 'f') {
-							me.foreOpacities[index] = alpha;
+							me.foreOpacities[index] = opacity;
 							index += 20;
 						}
 						me.colors[index] = colorWithAlpha;
@@ -854,7 +854,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			break;
 		}
 		const useCutouts = overlap > 0 && depth >= cutoutDepth;
-		const emphasize = depth <= this.centreEmphasis;
+		const emphasize = depth !== 0 && depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
 		let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);

@@ -2,8 +2,10 @@ export default function SierpinskiCarpet() {
 	const me = this;
 	this.title = 'Sierpinski Carpet';
 	this.helpFile = 'help/sierpinski-carpet.html';
+	this.backgroundColor = [255, 255, 255];
 
 	/*
+	 *	0-9	Backgrounds
 	 *	0	Top left
 	 *	1	Top centre
 	 *	2	Top right
@@ -13,54 +15,38 @@ export default function SierpinskiCarpet() {
 	 *	6	Bottom left
 	 *	7	Bottom centre
 	 *	8	Bottom right
-	 *  9	Second centre color
-	 * 10	Second centre color (emphasis)
-	 * 11	Centre (emphasis)
-	 * 12	Centre (depth zero background)
-	 * 13	Top left emphasized
-	 * ...
-	 * 21	Bottom right emphasized
-	 * (Only 0-8 & 12 appear in the queue)
+	 * 	9	Root
+	 *
+	 *	+10 Backgrounds, emphasized
+	 *	+20	Foregrounds
+	 *	+30 Foregrounds, emphasized
+	 *	Only 0-9 appear in the queue.
 	*/
-	const colors = new Array(25);
+	const colors = new Array(40);
 	this.colors = colors;
-	let initialCentreOpacity;
+	this.foreOpacities = new Array(10);
 	if (darkMode()) {
-		colors.fill('#00000080', 0, 9);
-		colors[4] = '#1a1a1ad3';		// centre
-		colors[9] = '#000055d3';		// second centre color
-		colors[10] = '#000055';			// second centre color with emphasis
-		colors[11] = '#1a1a1a';			// centre with emphasis
-		initialCentreOpacity = 211 / 255;
+		colors.fill('#00000080', 0, 9); 	// Backgrounds (0-8)
+		colors.fill('#000000', 10, 19);		// Backgrounds with emphasis (10-18)
+		colors.fill('#1a1a1ad3', 20, 30)	// Foregrounds (20-29)
+		colors.fill('#1a1a1a', 30, 40);		// Foregrounds with emphasis (30-39)
+		this.foreOpacities.fill(211 / 255);
 
 	} else {
-		colors.fill('#ffffff80', 0, 9);
-		colors[4] = '#000000';			// centre
-		colors[9] = '#000066';			// second centre color
-		colors[10] = colors[9];			// second centre color with emphasis
-		colors[11] = colors[4];			// centre with emphasis
-		initialCentreOpacity = 1;
+		colors.fill('#ffffff80', 0, 9);		// Backgrounds (0-8)
+		colors.fill('#ffffff', 10, 19);		// Backgrounds with emphasis (10-18)
+		colors.fill('#00000080', 20, 30);	// Foregrounds (20-29)
+		colors.fill('#000000', 30, 40);		// Foregrounds with emphasis (30-39)
+		this.foreOpacities.fill(1);
 	}
-
-	colors[12] = '#ffffff00';	// depth zero (transparent)
-	for (let i = 0; i < 12; i++) {
-		const [r, g, b] = hexToRGBA(colors[i]);
-		colors[i + 13] = rgba(r, g, b, 1);
-	}
-	this.patternOpacities = [initialCentreOpacity, initialCentreOpacity];	// [alternate, normal]
-	this.bipartite = false;
+	colors[9] = '#ffffff00';				// Depth zero background (transparent)
+	colors[19] = '#ffffff00';				// Depth zero background (transparent)
 
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
 		const colorControlArea = optionsDoc.getElementById('carpet-colors');
 		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
 		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
-
-		for (let i = 0; i < 10; i++) {
-			colorControls[i].value = me.colors[i].slice(0, 7);
-		}
-		opacitySliders[4].value = me.patternOpacities[0];
-		opacitySliders[9].value = me.patternOpacities[1];
 
 		function fullRedraw() {
 			generateBackground(0);
@@ -141,20 +127,104 @@ export default function SierpinskiCarpet() {
 			}
 		});
 
+		const colorSetInput = optionsDoc.getElementById('carpet-color-set');
+
+		colorSetInput.addEventListener('input', function (event) {
+			const offset = this.value === 'b' ? 0 : 20;
+			for (let i = 0; i <= 9; i++) {
+				const [r, g, b, a] = parseColor(me.colors[offset + i])[1];
+				colorControls[i].value = rgbToHex(r, g, b);
+				opacitySliders[i].value = a;
+			}
+		});
+
+		const editModeInput = optionsDoc.getElementById('carpet-edit-mode');
+		// Maps and edit mode to an array (one element per colour control) of array of affect colour indicies
+		const editModes = new Array(editModeInput.children.length);
+		{
+			for (let i = 0; i < editModes.length; i++) {
+				editModes[i] = new Array(10);
+			}
+			for (let i = 0; i <= 9; i++) {
+				editModes[0][i] = [i];	// All independent colours
+			}
+			editModes[1].fill([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);	// All same colour
+
+			const partitions = [];
+			partitions[0] = [[0, 2, 4, 6, 8, 9], [1, 3, 5, 7]];	// Corners & Middles 1
+			partitions[1] = [[0, 2, 6, 8], [1, 3, 4, 5, 7, 9]];	// Corners & Middles 2
+			partitions[2] = [[0, 1, 2, 3, 5, 6, 7, 8], [4, 9]];	// Inner & Outer
+			partitions[3] = [[0, 1, 3], [2, 6], [5, 7, 8], [4,9]]; // Two L-Shapes
+			partitions[4] = [[0, 1, 3, 5, 7, 8], [2, 6], [4,9]]; // Matching L-Shapes
+			for (let i = 0; i < partitions.length; i++) {
+				const editMode = editModes[i + 2];
+				for (let j = 0; j < editMode.length; j++) {
+					editMode[j] = [];
+				}
+				const partition = partitions[i];
+				for (let j = 0; j < partition.length; j++) {
+					const list = partition[j];
+					for (let item of list) {
+						editMode[item] = list;
+					}
+				}
+			}
+		}
+
+		editModeInput.addEventListener('input', function (event) {
+			const editMode = editModes[parseInt(this.value)];
+			const done = [];
+			const colors = [];
+			for (let i = 0; i <= 9; i++) {
+				const indicies = editMode[i];
+				let index = indicies[0];
+				if (!done.includes(index)) {
+					const numLocations = indicies.length;
+					let color, representative;
+					for (let j = 0; j < numLocations; j++) {
+						representative = indicies[j];
+						color = colorControls[representative].value;
+						if (!colors.includes(color)) {
+							colors.push(color);
+							break;
+						}
+					}
+					const opacity = parseFloat(opacitySliders[representative].value);
+					const [r, g, b] = hexToRGBA(color);
+					const colorWithAlpha = rgba(r, g, b, opacity);
+					done.push(index);
+					for (let j = 0; j < numLocations; j++) {
+						index = indicies[j];
+						colorControls[index].value = color;
+						opacitySliders[index].value = opacity;
+						if (colorSetInput.value === 'f') {
+							me.foreOpacities[index] = alpha;
+							index += 20;
+						}
+						me.colors[index] = colorWithAlpha;
+						me.colors[index + 10] = color;	// emphasized version
+					}
+				}
+			}
+			generateBackground(0);
+		});
+
 		function changeColor(index, preview) {
 			return function (event) {
 				const color = colorControls[index].value;
 				const [r, g, b] = hexToRGBA(color);
 				const alpha = parseFloat(opacitySliders[index].value);
-				me.colors[index] = rgba(r, g, b, alpha);
-				if (index === 4) {
-					me.colors[11] = color;
-					me.patternOpacities[1] = alpha;
-				} else if (index === 9) {
-					me.colors[10] = color;
-					me.patternOpacities[0] = alpha;
-				} else {
-					me.colors[index + 13] = color;
+				const colorWithAlpha = rgba(r, g, b, alpha);
+				const indicies = editModes[parseInt(editModeInput.value)][index];
+				for (let colorIndex of indicies) {
+					colorControls[colorIndex].value = color;
+					opacitySliders[colorIndex].value = alpha;
+					if (colorSetInput.value === 'f') {
+						me.foreOpacities[index] = alpha;
+						colorIndex += 20;
+					}
+					me.colors[colorIndex] = colorWithAlpha;
+					me.colors[colorIndex + 10] = color;	// emphasized version
 				}
 				generateBackground(preview);
 			};
@@ -169,11 +239,6 @@ export default function SierpinskiCarpet() {
 			opacitySliders[i].addEventListener('pointerup', fullRedraw);
 			opacitySliders[i].addEventListener('keyup', fullRedraw);
 		};
-
-		optionsDoc.getElementById('carpet-bipartite').addEventListener('input', function (event) {
-			me.bipartite = this.checked;
-			generateBackground(0);
-		});
 
 		optionsDoc.getElementById('carpet-concentric-density').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -547,7 +612,7 @@ export default function SierpinskiCarpet() {
 	this.filling = 'b';
 	this.patternLocations = 3;
 	this.patternedCentre = true;
-	this.centreEmphasis = 0;
+	this.centreEmphasis = 3;
 
 	this.compositionOp = 'source-over';
 	this.blendFilling = true;
@@ -566,13 +631,12 @@ SierpinskiCarpet.prototype.animatable = {
 		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'middleHeight',
 		'overlap', 'left', 'top', 'rotation', 'fgSpacingFraction', 'concentricDensity',
 		'lowerLeftCorner', 'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY',
-		'colors', 'patternOpacities'
+		'colors', 'foreOpacities'
 	],
 	stepped: [
 		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
-		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable',
-		'bipartite'
+		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable'
 	]
 };
 
@@ -588,11 +652,13 @@ class Tile {
 		if (relationship === 4) {
 			this.clipPath = undefined;
 			this.deadCentre = parent.deadCentre;
+			this.central = parent.central || parent.relationship === 9;
 			return;
 		}
 
 		this.clipPath = new Path2D();
 		this.deadCentre = false;
+		this.central = relationship !== 9 && parent.central;
 		const path = this.clipPath;
 		const x1 = Math.round(x);
 		const x2 = Math.round(x + width);
@@ -664,7 +730,7 @@ class Tile {
 			path.lineTo(lx, ly);
 			break;
 
-		case 12: 	// Whole image
+		case 9: 	// Whole image
 			path.rect(x1, y1, x2 - x1, y2 - y1);
 			this.deadCentre = true;
 			break;
@@ -701,7 +767,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	permutations[6] = permutations[4];
 	permutations[7] = [1, 2, 0, 3, 4, 5, 7, 6, 8];
 	permutations[8] = [2, 5, 8, 1, 4, 7, 0, 3, 6];
-	permutations[12] = permutations[4];
+	permutations[9] = permutations[4];
 	const recursive = this.recursive;
 	recursive[4] = this.centreDepth > 2 || this.globalCentreDepth > 1;
 	const cutouts = this.cutouts;
@@ -751,7 +817,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	const colors = this.colors;
 	const blendDepth = this.blendDepth - 1;
 	const filling = this.filling;
-
 	const bipartitePattern = middleWidth === 0 && middleHeight === 0 ? 8 : 2;
 
 	const left = Math.round(this.left * (canvasWidth - drawWidth));
@@ -761,7 +826,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	context.translate(-drawWidth / 2, -drawHeight / 2);
 	context.save();
 
-	let queue = [new Tile(0, 0, drawWidth, drawHeight, 0, 0, null, 12)];
+	let queue = [new Tile(0, 0, drawWidth, drawHeight, 0, 0, null, 9)];
 
 	let maxDepth = this.maxDepth - 1;
 	if (preview > 0 && maxDepth > 3) {
@@ -803,7 +868,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 		for (let tile of queue) {
 			let {width, height} = tile;
-			const {x, y, relationship} = tile;
+			const {x, y, parent, relationship} = tile;
+			const relationshipPrime = relationship === 4 && tile.central ? 9 : relationship;
 			let permutationSource = tile;
 			while (permutationSource.relationship === 4) {
 				permutationSource = permutationSource.parent;
@@ -814,30 +880,19 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				context.save();
 				tile.clip(context);
 			}
-			let bipartiteColoring = this.bipartite ? Number(relationship % bipartitePattern !== 0) : 1;
-			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
-			let patternedCentre;
-			if (relationship === 12) {
-				patternedCentre = this.patternedCentre
-				if (this.bipartite) {
-					if (this.patternLocations === 2) {
-						bipartiteColoring = Number(patternedCentre);
-					} else {
-						bipartiteColoring = Number(!patternedCentre);
-					}
-				}
-				patternLocation = patternedCentre;
+			let patternLocation = (this.patternLocations & (2 ** (relationship % bipartitePattern))) !== 0;
+			if (relationship === 9) {
+				patternLocation = this.patternedCentre;
 			}
 
 			let roundedX, roundedY, roundedWidth, roundedHeight;
 			context.globalCompositeOperation = this.compositionOp;
-			if (depth <= blendDepth && relationship !== 4) {
+			if (depth <= blendDepth && relationship !== 9) {
 				roundedX = Math.round(x);
 				roundedY = Math.round(y);
 				roundedWidth = Math.round(width + x - roundedX);
 				roundedHeight = Math.round(height + y - roundedY);
-				let colorRelationship = relationship;
-				context.fillStyle = colors[relationship + (applyOpacity ? 0 : 13)];
+				context.fillStyle = colors[relationshipPrime + (applyOpacity ? 0 : 10)];
 				context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 			}
 
@@ -984,9 +1039,9 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					}
 					if (emphasize) {
 						context.globalCompositeOperation = 'source-over';
-						context.fillStyle = colors[10 + bipartiteColoring];
+						context.fillStyle = colors[30 + relationshipPrime];
 					} else {
-						context.fillStyle = colors[bipartiteColoring === 0 ? 9 : 4];
+						context.fillStyle = colors[20 + relationshipPrime];
 					}
 					if (!this.blendFilling) {
 						context.globalCompositeOperation = 'source-over';
@@ -998,16 +1053,14 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 								lowerLeftCorner, lowerRightCorner, topLeftCornerX
 							);
 						} else {
-							if (bipartiteColoring === 0) {
-								context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
-							}
+							context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 							if (!emphasize) {
-								context.globalAlpha = this.patternOpacities[bipartiteColoring] * baseOpacity;
+								context.globalAlpha = this.foreOpacities[relationship] * baseOpacity;
 							}
 							context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
 							context.globalAlpha = baseOpacity;
 						}
-					} else if (relationship !== 12 || patternedCentre || this.bipartite || (filling !== 'b' && this.patternLocations !== 3)) {
+					} else {
 						context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 					}
 				} else {

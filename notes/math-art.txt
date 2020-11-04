@@ -1,5 +1,3 @@
-Carpet: bipartite with images: colour background
-
 Environment
 -----------
 Service Worker
@@ -55,6 +53,9 @@ User created sketches
 
 Existing Sketches
 -----------------
+Carpet
+	Transparency option: image, colour or both
+
 Contours
 	Displace distribution graph
 	Presets

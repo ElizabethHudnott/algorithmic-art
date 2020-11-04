@@ -127,7 +127,7 @@
 				Filling Emphasis
 			</label>
 			<div class="col-2">
-				<input class="form-control form-control-sm" min="0" value="4" type="number" id="carpet-emphasis">
+				<input class="form-control form-control-sm" min="1" value="3" type="number" id="carpet-emphasis">
 			</div>
 		</div>
 
@@ -262,7 +262,7 @@
 						<label class="form-check-label small" for="carpet-pattern-loc-middle">Middles</label>
 					</div>
 				</div>
-				<div class="col-2">
+				<div class="col-4">
 					<div class="form-check">
 						<input class="form-check-input" type="radio" name="carpet-pattern-location" id="carpet-pattern-loc-both" value="3" checked>
 						<label class="form-check-label small" for="carpet-pattern-loc-both">Everywhere</label>
@@ -277,6 +277,22 @@
 				<div class="col-2">
 					<input id="carpet-pattern-depth" class="form-control form-control-sm" type="number" min="0" value="4">
 				</div>
+			</div>
+		</div>
+		<div id="carpet-image-opts" class="collapse" aria-expanded="false">
+			<div class="form-row form-group">
+				<div class="col-1"></div>
+				<label class="col-3 col-form-label col-form-label-sm" for="carpet-image-opacity">
+					Image Opacity
+				</label>
+				<div class="col-6">
+					<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-image-opacity">
+				</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="carpet-image-opacity" title="Reset image opacity">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
 			</div>
 		</div>
 		<div id="carpet-concentric-opts" class="collapse" aria-expanded="false">

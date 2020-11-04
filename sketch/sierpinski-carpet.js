@@ -25,6 +25,8 @@ export default function SierpinskiCarpet() {
 	const colors = new Array(40);
 	this.colors = colors;
 	this.foreOpacities = new Array(10);
+	this.imageOpacity = 0;
+
 	if (darkMode()) {
 		colors.fill('#00000080', 0, 9); 	// Backgrounds (0-8)
 		colors.fill('#000000', 10, 19);		// Backgrounds with emphasis (10-18)
@@ -37,8 +39,9 @@ export default function SierpinskiCarpet() {
 		colors.fill('#ffffff', 10, 19);		// Backgrounds with emphasis (10-18)
 		colors.fill('#00000080', 20, 29);	// Foregrounds (20-29)
 		colors.fill('#000000', 29, 40);		// Foregrounds with emphasis (30-39)
-		this.foreOpacities.fill(1);
+		this.foreOpacities.fill(0.5);
 	}
+	this.foreOpacities[9] = 1;
 	colors[9] = '#ffffff00';				// Depth zero background (transparent)
 	colors[19] = '#ffffff00';				// Depth zero background (transparent)
 
@@ -51,8 +54,6 @@ export default function SierpinskiCarpet() {
 		function fullRedraw() {
 			generateBackground(0);
 		}
-
-		const concentricOpts = optionsDoc.getElementById('carpet-concentric-opts');
 
 		optionsDoc.getElementById('carpet-pattern-depth').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
@@ -94,7 +95,8 @@ export default function SierpinskiCarpet() {
 			const filling = this.value;
 			me.filling = filling;
 			$('#carpet-pattern-opts').collapse(filling !== 'b' ? 'show' : 'hide');
-			$(concentricOpts).collapse(filling === 'c' ? 'show' : 'hide');
+			$('#carpet-image-opts').collapse(filling === 'i' ? 'show' : 'hide');
+			$('#carpet-concentric-opts').collapse(filling === 'c' ? 'show' : 'hide');
 			if (filling === 'i' && bgGeneratorImage.src === '') {
 				document.getElementById('background-gen-image-upload').click();
 			} else {
@@ -121,11 +123,19 @@ export default function SierpinskiCarpet() {
 
 		optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
-			if (value >= 0) {
+			if (value >= 1) {
 				me.centreEmphasis = value - 1;
 				generateBackground(0);
 			}
 		});
+
+		const imageOpacitySlider = optionsDoc.getElementById('carpet-image-opacity');
+		imageOpacitySlider.addEventListener('input', function(event) {
+			me.imageOpacity = parseFloat(this.value);
+			generateBackground(1);
+		});
+		imageOpacitySlider.addEventListener('pointerup', fullRedraw);
+		imageOpacitySlider.addEventListener('keyup', fullRedraw);
 
 		const colorSetInput = optionsDoc.getElementById('carpet-color-set');
 
@@ -612,7 +622,7 @@ export default function SierpinskiCarpet() {
 	this.filling = 'b';
 	this.patternLocations = 3;
 	this.patternedCentre = true;
-	this.centreEmphasis = 3;
+	this.centreEmphasis = 2;
 
 	this.compositionOp = 'source-over';
 	this.blendFilling = true;
@@ -631,7 +641,7 @@ SierpinskiCarpet.prototype.animatable = {
 		'size', 'stretch', 'lopsidednessX', 'lopsidednessY', 'middleWidth', 'middleHeight',
 		'overlap', 'left', 'top', 'rotation', 'fgSpacingFraction', 'concentricDensity',
 		'lowerLeftCorner', 'lowerRightCorner', 'topLeftCornerX', 'topLeftCornerY',
-		'colors', 'foreOpacities'
+		'colors', 'foreOpacities', 'imageOpacity'
 	],
 	stepped: [
 		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
@@ -1055,7 +1065,13 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 						} else {
 							context.fillRect(roundedX, roundedY, roundedWidth, roundedHeight);
 							if (!emphasize) {
-								context.globalAlpha = this.foreOpacities[relationship] * baseOpacity;
+								let opacity = this.foreOpacities[relationship];
+								if (this.imageOpacity >= 0) {
+									opacity += this.imageOpacity * (1 - opacity);
+								} else {
+									opacity *= 1 + this.imageOpacity;
+								}
+								context.globalAlpha = opacity * baseOpacity;
 							}
 							context.drawImage(bgGeneratorImage, roundedX, roundedY, roundedWidth, roundedHeight);
 							context.globalAlpha = baseOpacity;

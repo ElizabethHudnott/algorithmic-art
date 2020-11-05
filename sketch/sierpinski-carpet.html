@@ -1,3 +1,25 @@
+<div class="form-row mt-1 mb-2">
+	<label class="col-auto mt-1 col-form-label col-form-label-sm" for="carpet-edit-mode">
+		Editing Mode
+	</label>
+	<div class="col-auto mt-1">
+		<select class="form-control form-control-sm" id="carpet-edit-mode">
+			<option value="0" selected>Individual Settings</option>
+			<option value="1">Same Value</option>
+			<option value="2">Corners &amp; Middles 1</option>
+			<option value="3">Corners &amp; Middles 2</option>
+			<option value="4">Inner &amp; Outer</option>
+			<option value="5">L-Shapes</option>
+			<option value="6">Matching L-Shapes</option>
+		</select>
+	</div>
+	<div class="col-auto">
+		<button class="btn btn-form btn-sm border" id="carpet-btn-conform">
+			Conform
+		</button>
+	</div>
+</div>
+
 <ul class="nav nav-tabs mb-3" role="tablist">
 	<li class="nav-item" role="presentation">
 		<a class="nav-link active" id="carpet-rendering-tab" data-toggle="tab" href="#carpet-rendering" role="tab" aria-controls="carpet-rendering" aria-selected="true">
@@ -100,25 +122,6 @@
 					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2">
 				</div>
 			</div>
-
-			<div class="form-row form-group">
-				<div class="col-1"></div>
-				<label class="col-3 col-form-label col-form-label-sm" for="carpet-edit-mode">
-					Editing Mode
-				</label>
-				<div class="col-5">
-					<select class="form-control form-control-sm" id="carpet-edit-mode">
-						<option value="0" selected>Separate Colours</option>
-						<option value="1">Same Colour</option>
-						<option value="2">Corners &amp; Middles 1</option>
-						<option value="3">Corners &amp; Middles 2</option>
-						<option value="4">Inner &amp; Outer</option>
-						<option value="5">L-Shapes</option>
-						<option value="6">Matching L-Shapes</option>
-					</select>
-				</div>
-			</div>
-
 		</fieldset>
 
 		<div class="form-row form-group">
@@ -141,33 +144,33 @@
 					<img src="../img/help.png" alt="Help">
 				</a>
 			</div>
-			<div class="col-7">
-				<div class="input-group input-group-sm">
-					<select id="carpet-composition-op" class="form-control" aria-describedby="carpet-composition-bug" style="flex-grow: 3">
-						<option value="source-over">Source Over</option>
-						<option value="destination-over">Destination Over</option>
-						<option value="lighter">Lighter (+)</option>
-						<option value="lighten">Lightest (max)</option>
-						<option value="darken">Darkest (min)</option>
-						<option value="xor">XOR</option>
-						<option value="multiply">Multiply</option>
-						<option value="screen">Screen</option>
-						<option value="overlay">Overlay</option>
-						<option value="color-dodge">Colour Dodge</option>
-						<option value="color-burn">Colour Burn</option>
-						<option value="hard-light">Hard Light</option>
-						<option value="soft-light">Soft Light</option>
-						<option value="difference">Difference</option>
-						<option value="exclusion">Exclusion</option>
-						<option value="hue">Hue</option>
-						<option value="saturation">Saturation</option>
-						<option value="color">Hue &amp; Saturation</option>
-						<option value="luminosity">Luminosity</option>
-					</select>
-					<input type="number" min="1" max="5" value="4" class="form-control" id="carpet-blend-depth">
-					<div class="input-group-append">
-						<span class="input-group-text">deep</span>
-					</div>
+			<div class="col-5">
+				<select id="carpet-composition-op" class="form-control form-control-sm" aria-describedby="carpet-composition-bug" style="flex-grow: 3">
+					<option value="source-over">Source Over</option>
+					<option value="destination-over">Destination Over</option>
+					<option value="lighter">Lighter (+)</option>
+					<option value="lighten">Lightest (max)</option>
+					<option value="darken">Darkest (min)</option>
+					<option value="xor">XOR</option>
+					<option value="multiply">Multiply</option>
+					<option value="screen">Screen</option>
+					<option value="overlay">Overlay</option>
+					<option value="color-dodge">Colour Dodge</option>
+					<option value="color-burn">Colour Burn</option>
+					<option value="hard-light">Hard Light</option>
+					<option value="soft-light">Soft Light</option>
+					<option value="difference">Difference</option>
+					<option value="exclusion">Exclusion</option>
+					<option value="hue">Hue</option>
+					<option value="saturation">Saturation</option>
+					<option value="color">Hue &amp; Saturation</option>
+					<option value="luminosity">Luminosity</option>
+				</select>
+			</div>
+			<div class="col-3">
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" checked id="carpet-blend-filling">
+					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
 				</div>
 			</div>
 		</div>
@@ -177,16 +180,7 @@
 				<small id="carpet-composition-bug" class="form-text text-muted">Many modes cause poor performance in Firefox.</small>
 			</div>
 		</div>
-		<div class="form-row mb-1">
-			<div class="col-4"></div>
-			<div class="col-auto">
-				<div class="form-check">
-					<input class="form-check-input" type="checkbox" checked id="carpet-blend-filling">
-					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
-				</div>
-			</div>
-		</div>
-		<div class="form-row form-group">
+		<div class="form-row mb-2">
 			<div class="col-4 col-form-label col-form-label-sm">
 				Background Opacities
 			</div>
@@ -209,6 +203,47 @@
 				</div>
 			</div>
 		</div>
+		<fieldset id="carpet-blend-depth">
+			<div class="form-row mb-2">
+				<div class="col-1"></div>
+				<div class="col-3 col-form-label col-form-label-sm">
+					Blend Depths
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+			</div>
+			<div class="form-row mb-2">
+				<div class="col-4"></div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+			</div>
+			<div class="form-row mb-2">
+				<div class="col-4"></div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+			</div>
+		</fieldset>
 	</div>
 
 	<div class="tab-pane" id="carpet-filling" role="tabpanel" aria-labelledby="carpet-filling-tab">

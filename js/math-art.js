@@ -1,4 +1,5 @@
 'use strict';
+document.getElementById('site-url').innerHTML = document.location.origin;
 filePath = rootPath + 'sketch/';
 const urlParameters = new URLSearchParams(document.location.search);
 let bgGenerator, generateBackground, setBgProperty, setBgPropertyElement;
@@ -1879,13 +1880,26 @@ function hasRandomness(enabled) {
 			};
 		}
 
-		if (store === undefined || store.getItem('no-welcome') !== 'true') {
+		const licensed = store !== undefined && store.getItem('licence-accepted') === 'true'
+		document.getElementById('accept-licence').checked = licensed;
+
+		if (store === undefined || store.getItem('no-welcome') !== 'true' || !licensed) {
 			const helpModal = $('#help-modal');
-			function nextStepOnce(event) {
-				nextStep();
-				helpModal.off('hidden.bs.modal', nextStepOnce);
+			function initialDialogue(event) {
+				const licensed = document.getElementById('accept-licence').checked;
+				document.getElementById('licence-message').hidden = licensed;
+				if (store !== undefined) {
+					store.setItem('licence-accepted', licensed);
+				}
+				if (!licensed) {
+					document.getElementById('licence').scrollIntoView();
+					return false;
+				} else if (nextStep) {
+					nextStep();
+					nextStep = undefined;
+				}
 			}
-			helpModal.on('hidden.bs.modal', nextStepOnce);
+			helpModal.on('hide.bs.modal', initialDialogue);
 			helpModal.modal('show');
 		} else {
 			document.getElementById('show-welcome').checked = false;

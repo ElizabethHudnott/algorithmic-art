@@ -1618,6 +1618,7 @@ function hasRandomness(enabled) {
 			for (let img of optionsDoc.getElementsByTagName('IMG')) {
 				img.src = img.src;
 			}
+			container.append(...optionsDoc.head.getElementsByTagName('STYLE'));
 			container.append(...optionsDoc.body.children);
 			const imageCtrlLocation = container.querySelector('[data-attach=image]');
 			if (imageCtrlLocation !== null) {

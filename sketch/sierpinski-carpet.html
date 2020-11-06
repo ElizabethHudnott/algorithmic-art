@@ -1,3 +1,15 @@
+<style id="carpet-location-styles">
+	.carpet-location-0 {  }
+	.carpet-location-1 {  }
+	.carpet-location-2 {  }
+	.carpet-location-3 {  }
+	.carpet-location-4 {  }
+	.carpet-location-5 {  }
+	.carpet-location-6 {  }
+	.carpet-location-7 {  }
+	.carpet-location-8 {  }
+	.carpet-location-9 {  }
+</style>
 <div class="form-row mb-2">
 	<label class="col-auto mt-1 col-form-label col-form-label-sm" for="carpet-edit-mode">
 		Editing Mode
@@ -59,20 +71,36 @@
 				</div>
 			</div>
 
-			<div class="form-row form-group">
+			<div class="form-row">
 				<div class="col-1"></div>
 				<div class="col-3 col-form-label col-form-label-sm pt-0">
 					Opacities
 				</div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-0 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-1 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-2 py-3">
+					<input type="color" value="#ffffff"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="col-4"></div>
+				<div class="col-2 text-center carpet-location-3 py-3">
+					<input type="color" value="#ffffff"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+				<div class="col-2 text-center carpet-location-4 py-3">
+					<input type="color" value="#ffffff"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+				<div class="col-2 text-center carpet-location-5 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
@@ -80,31 +108,15 @@
 
 			<div class="form-row form-group">
 				<div class="col-4"></div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-6 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-7 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-			</div>
-
-			<div class="form-row form-group">
-				<div class="col-4"></div>
-				<div class="col-2 text-center">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-				<div class="col-2 text-center">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-				<div class="col-2 text-center">
+				<div class="col-2 text-center carpet-location-8 py-3">
 					<input type="color" value="#ffffff"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
@@ -112,14 +124,14 @@
 
 			<div class="form-row form-group">
 				<div class="col-4"></div>
-				<label class="col-2 col-form-label col-form-label-sm" for="carpet-root-color">
+				<label class="col-2 col-form-label col-form-label-sm mt-1" for="carpet-root-color">
 					Centre
 				</label>
-				<div class="col-2 text-center mt-1">
+				<div class="col-2 text-center carpet-location-9 py-2">
 					<input type="color" value="#ffffff" id="carpet-root-color">
 				</div>
-				<div class="col-2">
-					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-2">
+				<div class="col-2 carpet-location-9 py-2">
+					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1">
 				</div>
 			</div>
 		</fieldset>
@@ -204,42 +216,42 @@
 			</div>
 		</div>
 		<fieldset id="carpet-blend-depth">
-			<div class="form-row mb-2">
+			<div class="form-row">
 				<div class="col-1"></div>
-				<div class="col-3 col-form-label col-form-label-sm">
+				<div class="col-3 col-form-label col-form-label-sm mt-2">
 					Blend Depths
 				</div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-0 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-1 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-			</div>
-			<div class="form-row mb-2">
-				<div class="col-4"></div>
-				<div class="col-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-				<div class="col-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-2 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
 			</div>
-			<div class="form-row mb-2">
+			<div class="form-row">
 				<div class="col-4"></div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-3 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-4 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2">
+				<div class="col-2 carpet-location-5 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="col-4"></div>
+				<div class="col-2 carpet-location-6 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2 carpet-location-7 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-2 carpet-location-8 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
 			</div>

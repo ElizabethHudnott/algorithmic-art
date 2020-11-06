@@ -84,6 +84,44 @@ export default function SierpinskiCarpet() {
 			}
 		}
 
+		const locationColors = [
+			'hsl(220, 60%, 75%)',	// Blue
+			'hsl( 30, 90%, 75%)',	// Orange
+			'#999999',				// Grey
+			'#666666',				// Dark grey
+			'hsl(0, 75%, 85%)',		// Pink
+			// Add more as needed.
+		];
+
+		editModeInput.addEventListener('input', function (event) {
+			const editMode = editModes[parseInt(this.value)];
+			const rules = document.getElementById('carpet-location-styles').sheet.cssRules;
+			if (editMode.every(function (element) {
+				return element.length === 1;
+			})) {
+				for (let i = 0; i < rules.length; i++) {
+					rules[i].style.removeProperty('background-color');
+				}
+				return;
+			}
+			const done = [];
+			let numColors = 0;
+			for (let i = 0; i <= 9; i++) {
+				const indicies = editMode[i];
+				let index = indicies[0];
+				if (!done.includes(index)) {
+					done.push(index);
+					const color = locationColors[numColors];
+					numColors++;
+					rules[index].style.backgroundColor = color;
+					for (let j = 1; j < indicies.length; j++) {
+						index = indicies[j];
+						rules[index].style.backgroundColor = color;
+					}
+				}
+			}
+		});
+
 		const colorControlArea = optionsDoc.getElementById('carpet-colors');
 		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
 		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
@@ -98,13 +136,14 @@ export default function SierpinskiCarpet() {
 				const indicies = editMode[i];
 				let index = indicies[0];
 				if (!done.includes(index)) {
+					done.push(index);
 					const numLocations = indicies.length;
 					let color, representative, blendDepth;
 					let colorChosen = false;
 					let blendDepthChosen = false;
 					for (let j = 0; j < numLocations; j++) {
+						index = indicies[j];
 						if (!colorChosen) {
-							const index = indicies[j];
 							representative = index;
 							color = colorControls[representative].value;
 							if (!colors.includes(color)) {
@@ -123,7 +162,6 @@ export default function SierpinskiCarpet() {
 					const opacity = parseFloat(opacitySliders[representative].value);
 					const [r, g, b] = hexToRGBA(color);
 					const colorWithAlpha = rgba(r, g, b, opacity);
-					done.push(index);
 					for (let j = 0; j < numLocations; j++) {
 						index = indicies[j];
 						colorControls[index].value = color;

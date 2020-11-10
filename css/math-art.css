@@ -277,6 +277,10 @@ th.col-form-label {
 	overflow-y: auto;
 }
 
+.popover-body h1 {
+	font-size: 1rem;
+}
+
 .progress-bar {
 	overflow: visible;
 }

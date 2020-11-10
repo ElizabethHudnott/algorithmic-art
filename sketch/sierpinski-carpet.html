@@ -18,11 +18,19 @@
 		<select class="form-control form-control-sm" id="carpet-edit-mode">
 			<option value="0" selected>Individual Settings</option>
 			<option value="1">Same Value</option>
-			<option value="2">Corners &amp; Middles 1</option>
-			<option value="3">Corners &amp; Middles 2</option>
+			<option value="2">Diagonals &amp; Middles</option>
+			<option value="3">Cross &amp; Corners</option>
 			<option value="4">Inner &amp; Outer</option>
 			<option value="5">L-Shapes</option>
 			<option value="6">Matching L-Shapes</option>
+			<option value="7">Dominoes 1</option>
+			<option value="8">Dominoes 2</option>
+			<option value="9">Dominoes 3</option>
+			<option value="10">Columns</option>
+			<option value="11">Rows</option>
+			<option value="12">Diagonals</option>
+			<option value="13">T-Shape</option>
+			<option value="14">S-Shape</option>
 		</select>
 	</div>
 	<div class="col-auto">
@@ -63,7 +71,7 @@
 				<div class="col-3 col-form-label col-form-label-sm">
 					Colours &amp;
 				</div>
-				<div class="col-5">
+				<div class="col-5 pl-2">
 					<select class="form-control form-control-sm" id="carpet-color-set" aria-description="Controls which colour palette is altered by the controls below">
 						<option value="b" selected>Background Colours</option>
 						<option value="f">Foreground Colours</option>
@@ -124,7 +132,7 @@
 
 			<div class="form-row form-group">
 				<div class="col-4"></div>
-				<label class="col-2 col-form-label col-form-label-sm mt-1" for="carpet-root-color">
+				<label class="col-2 col-form-label col-form-label-sm pl-2 mt-1" for="carpet-root-color">
 					Centre
 				</label>
 				<div class="col-2 text-center carpet-location-9 py-2">
@@ -136,16 +144,6 @@
 			</div>
 		</fieldset>
 
-		<div class="form-row form-group">
-			<div class="col-1"></div>
-			<label class="col-3 col-form-label col-form-label-sm" for="carpet-emphasis">
-				Filling Emphasis
-			</label>
-			<div class="col-2">
-				<input class="form-control form-control-sm" min="1" value="3" type="number" id="carpet-emphasis">
-			</div>
-		</div>
-
 		<div class="form-row">
 			<div class="col-1"></div>
 			<div class="col-3">
@@ -156,7 +154,7 @@
 					<img src="../img/help.png" alt="Help">
 				</a>
 			</div>
-			<div class="col-5">
+			<div class="col-5 pl-2">
 				<select id="carpet-composition-op" class="form-control form-control-sm" aria-describedby="carpet-composition-bug" style="flex-grow: 3">
 					<option value="source-over">Source Over</option>
 					<option value="destination-over">Destination Over</option>
@@ -179,7 +177,7 @@
 					<option value="luminosity">Luminosity</option>
 				</select>
 			</div>
-			<div class="col-3">
+			<div class="col-3 mt-1">
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox" checked id="carpet-blend-filling">
 					<label class="form-check-label small" for="carpet-blend-filling">Blend filling</label>
@@ -188,7 +186,7 @@
 		</div>
 		<div class="form-row mb-1">
 			<div class="col-4"></div>
-			<div class="col-8">
+			<div class="col-8 pl-2">
 				<small id="carpet-composition-bug" class="form-text text-muted">Many modes cause poor performance in Firefox.</small>
 			</div>
 		</div>
@@ -196,7 +194,7 @@
 			<div class="col-4 col-form-label col-form-label-sm">
 				Background Opacities
 			</div>
-			<div class="col-2">
+			<div class="col-2 pl-2">
 				<div class="form-check mt-1">
 					<input type="radio" name="carpet-opacity-enable" value="2" checked class="form-check-input" id="carpet-opacity-on">
 					<label class="form-check-label small" for="carpet-opacity-on">On</label>
@@ -215,12 +213,21 @@
 				</div>
 			</div>
 		</div>
-		<fieldset id="carpet-blend-depth">
-			<div class="form-row">
+		<fieldset id="carpet-coloring-grid">
+			<div class="form-row mb-2">
 				<div class="col-1"></div>
-				<div class="col-3 col-form-label col-form-label-sm mt-2">
-					Blend Depths
+				<label class="col-3 col-form-label col-form-label-sm" for="carpet-coloring-grid-param">
+					Parameter
+				</label>
+				<div class="col-5 pl-2">
+					<select class="form-control form-control-sm" id="carpet-coloring-grid-param">
+						<option value="bd" selected>Blend Depth</option>
+						<option value="fe">Filling Emphasis</option>
+					</select>
 				</div>
+			</div>
+			<div class="form-row">
+				<div class="col-4"></div>
 				<div class="col-2 carpet-location-0 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>

@@ -64,11 +64,19 @@ export default function SierpinskiCarpet() {
 			editModes[1].fill([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);	// All same colour
 
 			const partitions = [];
-			partitions[0] = [[0, 2, 4, 6, 8, 9], [1, 3, 5, 7]];	// Corners & Middles 1
-			partitions[1] = [[0, 2, 6, 8], [1, 3, 4, 5, 7, 9]];	// Corners & Middles 2
-			partitions[2] = [[0, 1, 2, 3, 5, 6, 7, 8], [4, 9]];	// Inner & Outer
-			partitions[3] = [[0, 1, 3], [2, 6], [5, 7, 8], [4,9]]; // Two L-Shapes
-			partitions[4] = [[0, 1, 3, 5, 7, 8], [2, 6], [4,9]]; // Matching L-Shapes
+			partitions[0] = [[0, 2, 4, 6, 8, 9], [1, 3, 5, 7]];			// Diagonals & Middles
+			partitions[1] = [[0, 2, 6, 8], [1, 3, 4, 5, 7, 9]];			// Cross & Corners
+			partitions[2] = [[0, 1, 2, 3, 5, 6, 7, 8], [4, 9]];			// Inner & Outer
+			partitions[3] = [[0, 1, 3], [2, 6], [5, 7, 8], [4,9]];		// Two L-Shapes
+			partitions[4] = [[0, 1, 3, 5, 7, 8], [2, 6], [4,9]];		// Matching L-Shapes
+			partitions[5] = [[0, 1], [2, 5], [3, 6], [7, 8], [4, 9]];	// Dominoes 1
+			partitions[6] = [[0, 3], [1, 2], [5, 8], [6, 7], [4, 9]];	// Dominoes 2
+			partitions[7] = [[0, 1], [2, 3, 6], [4, 5, 9], [7, 8]];		// Dominoes 3
+			partitions[8] = [[0, 3, 6], [1, 4, 7, 9], [2, 5, 8]];		// Columns
+			partitions[9] = [[0, 1, 2], [3, 4, 5, 9], [6, 7, 8]];		// Rows
+			partitions[10] = [[0, 8], [1, 3], [2, 4, 6, 9], [5, 7]];	// Diagonals
+			partitions[11] = [[0, 2], [1, 3, 5], [4, 6, 7, 8, 9]];		// T-Shape
+			partitions[12] = [[0, 3], [1, 2, 8], [4, 5, 6, 7, 9]];		// S-Shape
 			for (let i = 0; i < partitions.length; i++) {
 				const editMode = editModes[i + 2];
 				for (let j = 0; j < editMode.length; j++) {
@@ -125,22 +133,35 @@ export default function SierpinskiCarpet() {
 		const colorControlArea = optionsDoc.getElementById('carpet-colors');
 		const colorControls = colorControlArea.querySelectorAll('input[type=color]');
 		const opacitySliders = colorControlArea.querySelectorAll('input[type=range]');
-		const blendDepthInputs = Array.from(optionsDoc.getElementById('carpet-blend-depth').getElementsByTagName('INPUT'));
+		const coloringGridParam = optionsDoc.getElementById('carpet-coloring-grid-param');
+		const coloringGrid = Array.from(optionsDoc.getElementById('carpet-coloring-grid').getElementsByTagName('INPUT'));
+
+		function getColoringGridParam() {
+			return coloringGridParam.value == 'bd' ? me.blendDepth : me.emphasis;
+		}
+
+		coloringGridParam.addEventListener('input', function (event) {
+			const gridParam = getColoringGridParam();
+			for (let i = 0; i < coloringGrid.length; i++) {
+				coloringGrid[i].value = gridParam[i];
+			}
+		});
 
 		optionsDoc.getElementById('carpet-btn-conform').addEventListener('click', function (event) {
 			const editMode = editModes[parseInt(editModeInput.value)];
 			const done = [];
 			const colors = [];
-			const blendDepths = [];
+			const gridValues = [];
+			const gridParam = getColoringGridParam();
 			for (let i = 0; i <= 9; i++) {
 				const indicies = editMode[i];
 				let index = indicies[0];
 				if (!done.includes(index)) {
 					done.push(index);
 					const numLocations = indicies.length;
-					let color, representative, blendDepth;
+					let color, representative, gridValue;
 					let colorChosen = false;
-					let blendDepthChosen = false;
+					let gridValueChosen = false;
 					for (let j = 0; j < numLocations; j++) {
 						index = indicies[j];
 						if (!colorChosen) {
@@ -151,11 +172,11 @@ export default function SierpinskiCarpet() {
 								colors.push(color);
 							}
 						}
-						if (!blendDepthChosen && index < 9) {
-							blendDepth = me.blendDepth[index];
-							if (!blendDepths.includes(blendDepth)) {
-								blendDepthChosen = true;
-								blendDepths.push(blendDepth);
+						if (!gridValueChosen && index < 9) {
+							gridValue = gridParam[index];
+							if (!gridValues.includes(gridValue)) {
+								gridValueChosen = true;
+								gridValues.push(gridValue);
 							}
 						}
 					}
@@ -167,8 +188,8 @@ export default function SierpinskiCarpet() {
 						colorControls[index].value = color;
 						opacitySliders[index].value = opacity;
 						if (index < 9) {
-							blendDepthInputs[index].value = blendDepth;
-							me.blendDepth[index] = blendDepth;
+							coloringGrid[index].value = gridValue;
+							gridParam[index] = gridValue;
 						}
 						if (colorSetInput.value === 'f') {
 							me.foreOpacities[index] = opacity;
@@ -195,17 +216,18 @@ export default function SierpinskiCarpet() {
 			generateBackground(0);
 		});
 
-		for (let i = 0; i < blendDepthInputs.length; i++) {
-			blendDepthInputs[i].addEventListener('input', function (event) {
+		for (let i = 0; i < coloringGrid.length; i++) {
+			coloringGrid[i].addEventListener('input', function (event) {
 				const value = parseInt(this.value);
 				if (value >= 0) {
 					const indicies = editModes[parseInt(editModeInput.value)][i];
+					const gridParam = getColoringGridParam();
 					for (let index of indicies) {
 						if (index === 9) {
 							continue;
 						}
-						me.blendDepth[index] = value;
-						blendDepthInputs[index].value = value;
+						gridParam[index] = value;
+						coloringGrid[index].value = value;
 					}
 					generateBackground(0);
 				}
@@ -254,14 +276,6 @@ export default function SierpinskiCarpet() {
 		optionsDoc.getElementById('carpet-patterned-centre').addEventListener('input', function (event) {
 			me.patternedCentre = this.checked;
 			generateBackground(0);
-		});
-
-		optionsDoc.getElementById('carpet-emphasis').addEventListener('input', function (event) {
-			const value = parseInt(this.value);
-			if (value >= 1) {
-				me.centreEmphasis = value - 1;
-				generateBackground(0);
-			}
 		});
 
 		const imageOpacitySlider = optionsDoc.getElementById('carpet-image-opacity');
@@ -388,20 +402,35 @@ export default function SierpinskiCarpet() {
 			globalCentreDepthInput.value = me.globalCentreDepth;
 		}
 
+		function limitGrids() {
+			const depth = me.maxDepth;
+			const gridParam = getColoringGridParam();
+			for (let i = 0; i < coloringGrid.length; i++) {
+				const input = coloringGrid[i];
+				let value = me.blendDepth[i];
+				if (value > depth) {
+					me.blendDepth[i] = depth;
+					if (gridParam === me.blendDepth) {
+						input.value = depth;
+					}
+				}
+				value = me.emphasis[i];
+				if (value > depth) {
+					me.emphasis[i] = depth;
+					if (gridParam === me.emphasis) {
+						input.value = depth;
+					}
+				}
+				input.max = depth;
+			}
+		}
+
 		maxDepthInput.addEventListener('input', function (event) {
 			const depth = parseInt(this.value);
 			if (depth >= 0) {
 				me.maxDepth = depth;
 				limitCentreDepth();
-				for (let i = 0; i < me.blendDepth.length; i++) {
-					const value = me.blendDepth[i];
-					const input = blendDepthInputs[i];
-					if (value > depth) {
-						me.blendDepth[i] = depth;
-						input.value = depth;
-					}
-					input.max = depth;
-				}
+				limitGrids();
 				generateBackground(0);
 			}
 		});
@@ -479,15 +508,7 @@ export default function SierpinskiCarpet() {
 				me.maxDepth = newDepth;
 				maxDepthInput.value = newDepth;
 				limitCentreDepth();
-				for (let i = 0; i < me.blendDepth.length; i++) {
-					const value = me.blendDepth[i];
-					const input = blendDepthInputs[i];
-					if (value > newDepth) {
-						me.blendDepth[i] = newDepth;
-						input.value = depth;
-					}
-					input.max = newDepth;
-				}
+				limitGrids();
 			}
 		}
 
@@ -699,7 +720,8 @@ export default function SierpinskiCarpet() {
 	this.filling = 'b';
 	this.patternLocations = 3;
 	this.patternedCentre = true;
-	this.centreEmphasis = 2;
+	this.emphasis = new Array(9);
+	this.emphasis.fill(3);
 
 	this.compositionOp = 'source-over';
 	this.blendFilling = true;
@@ -723,7 +745,7 @@ SierpinskiCarpet.prototype.animatable = {
 	stepped: [
 		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
-		'patternedCentre', 'centreEmphasis', 'blendFilling', 'opacityEnable'
+		'patternedCentre', 'emphasis', 'blendFilling', 'opacityEnable'
 	]
 };
 
@@ -943,7 +965,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			break;
 		}
 		const useCutouts = overlap > 0 && depth >= cutoutDepth;
-		const emphasize = depth !== 0 && depth <= this.centreEmphasis;
 		const drawPattern = filling !== 'b' && depth <= this.patternDepth;
 		const combinedSpacing = Math.round(spacingNumerator * 3 ** -depth);
 		let fgSpacing = Math.round(combinedSpacing * this.fgSpacingFraction);
@@ -1126,6 +1147,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					if (useCutouts) {
 						context.clip(clipPath);
 					}
+					const emphasize = depth !== 0 && depth <= this.emphasis[baseRelation] - 1;
 					if (emphasize) {
 						context.globalCompositeOperation = 'source-over';
 						context.fillStyle = colors[30 + relationshipPrime];

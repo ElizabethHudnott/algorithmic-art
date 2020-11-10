@@ -111,12 +111,14 @@
 	Here you can choose colours for the nine sections of the 3&times;3 grid. These are applied recursively. For example, if red is chosen as the top-left colour then the top-left section of the overall image is painted red (⅑th portion). But a smaller piece, the top-left corner within the top-left corner is painted with a second layer of red paint. Use the sliders underneath each colour to change how thick each layer of paint is. You can make a colour translucent like watercolour or opaque.
 </div>
 
-<div id="carpet-emphasis">
-	This controls how many levels of detail are drawn opaquely without any translucency effect applied to the filling. The opacity slider for the central portion will be ignored initially and translucency will only be applied at the finer levels of detail. This option will have no effect if the centre opacity slider is positioned fully to the right, which is the default position.
-</div>
+<div id="carpet-coloring-grid-param">
+	<p>This selects which parameter the numbers underneath are applied to.</p>
 
-<div id="carpet-blend-depth">
-	This controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles (default number) have their backgrounds painted once but when the finer details are added only their centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles, and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.
+	<h1>Blend Depth</h1>
+	<p>Blend depth controls how many times rectangles are painted with colour. No background painting is performed at level 1. When set to 2 then the 8 large outer rectangles (default number) have their backgrounds painted once but when the finer details are added only their centre rectangles are painted. When set to 3 then 8 large rectangles are painted followed by 8&times;8 smaller rectangles, and everywhere except the very centre ends up being painted twice. You can build up layered effects using opacities and blend modes.</p>
+
+	<h1>Filling Emphasis</h1>
+	<p>Filling emphasis controls how many levels of detail are drawn opaquely without any translucency effect applied to the filling. The opacity slider for the central portion will be ignored initially and translucency will only be applied at the finer levels of detail. This option will have no effect if the centre opacity slider is positioned fully to the right, which is the default position.</p>
 </div>
 
 <div id="carpet-blend-filling">

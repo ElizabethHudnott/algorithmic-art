@@ -590,7 +590,7 @@ function hasRandomness(enabled) {
 		signatureChanged = false;
 	}
 
-	function drawSignature(contextualInfo) {
+	function drawSignature(contextualInfo, sample) {
 		const context = contextualInfo.twoD;
 		contextualInfo.save2DMatrix();
 		if (signatureChanged) {
@@ -604,24 +604,28 @@ function hasRandomness(enabled) {
 		}
 
 		const backgroundColor = backgroundElement.style.backgroundColor;
-		const [bgRed, bgGreen, bgBlue] = parseColor(backgroundColor)[1];
+		let [bgRed, bgGreen, bgBlue] = parseColor(backgroundColor)[1];
 		let canvasHeight = context.canvas.height;
-		const pixels = context.getImageData(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight).data;
-		let totalRed = 0, totalGreen = 0, totalBlue = 0;
-		const numSamples = 50;
-		for (let i = 0; i < numSamples; i++) {
-			const x = Math.trunc(Math.random() * signatureWidth);
-			const y = Math.trunc(Math.random() * signatureHeight);
-			const offset = (y * signatureWidth + x) * 4;
-			const alpha = pixels[offset + 3] / 255;
-			const bgAmount = 1 - alpha;
-			totalRed += alpha * pixels[offset] + bgAmount * bgRed;
-			totalGreen += alpha * pixels[offset + 1] + bgAmount * bgGreen;
-			totalBlue += alpha * pixels[offset + 2] + bgAmount * bgBlue;
+		let featherOpacity = 1;
+		if (sample) {
+			featherOpacity = 0.2;
+			const pixels = context.getImageData(0, canvasHeight - signatureHeight, signatureWidth, signatureHeight).data;
+			let totalRed = 0, totalGreen = 0, totalBlue = 0;
+			const numSamples = 50;
+			for (let i = 0; i < numSamples; i++) {
+				const x = Math.trunc(Math.random() * signatureWidth);
+				const y = Math.trunc(Math.random() * signatureHeight);
+				const offset = (y * signatureWidth + x) * 4;
+				const alpha = pixels[offset + 3] / 255;
+				const bgAmount = 1 - alpha;
+				totalRed += alpha * pixels[offset] + bgAmount * bgRed;
+				totalGreen += alpha * pixels[offset + 1] + bgAmount * bgGreen;
+				totalBlue += alpha * pixels[offset + 2] + bgAmount * bgBlue;
+			}
+			bgRed = totalRed / numSamples;
+			bgGreen = totalGreen / numSamples;
+			bgBlue = totalBlue / numSamples;
 		}
-		const meanRed = totalRed / numSamples;
-		const meanGreen = totalGreen / numSamples;
-		const meanBlue = totalBlue / numSamples;
 
 		const scale = contextualInfo.scale;
 		canvasHeight /= scale;
@@ -634,13 +638,23 @@ function hasRandomness(enabled) {
 		const paddingY = Math.round(4 / scale);
 		const onePx = 1 / scale;
 		const gradient = context.createLinearGradient(0, top, 0, top + paddingY);
-		gradient.addColorStop(0, rgba(meanRed, meanGreen, meanBlue, 0.2));
-		gradient.addColorStop(1, rgba(meanRed, meanGreen, meanBlue, 1));
+		gradient.addColorStop(0, rgba(bgRed, bgGreen, bgBlue, featherOpacity));
+		gradient.addColorStop(1, rgba(bgRed, bgGreen, bgBlue, 1));
 		context.fillStyle = gradient;
 		context.fillRect(0, top, scaledWidth, scaledHeight);
-		const luma = rgbToLuma(meanRed, meanGreen, meanBlue);
+		const luma = rgbToLuma(bgRed, bgGreen, bgBlue);
 		context.fillStyle = luma >= 0.5 ? 'black' : '#eee';
 		context.fillText(signatureText, paddingX, canvasHeight - onePx);
+	}
+
+	function drawSignatureWhenReady(contextualInfo, sample) {
+		if (document.fonts.check(signatureFont)) {
+			drawSignature(contextualInfo, sample);
+		} else {
+			document.fonts.load(signatureFont).then(function () {
+				drawSignature(contextualInfo, sample);
+			});
+		}
 	}
 
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview, callback) {
@@ -648,16 +662,7 @@ function hasRandomness(enabled) {
 		if (generator.isShader) {
 			contextualInfo.drawGL(parseFloat(animPositionSlider.value), preview);
 			restoreCanvas(context);
-			if (preview === 0) {
-				if (document.fonts.check(signatureFont)) {
-					drawSignature(contextualInfo);
-				} else {
-					document.fonts.load(signatureFont).then(function () {
-						drawSignature(contextualInfo);
-					});
-				}
-			}
-			callback();
+			callback(contextualInfo);
 			document.body.classList.remove('cursor-progress');
 		} else {
 			random.reset();
@@ -676,16 +681,7 @@ function hasRandomness(enabled) {
 					totalUnits += unitsProcessed;
 					if (done) {
 						restoreCanvas(context);
-						if (preview === 0) {
-							if (document.fonts.check(signatureFont)) {
-								drawSignature(contextualInfo);
-							} else {
-								document.fonts.load(signatureFont).then(function () {
-									drawSignature(contextualInfo);
-								});
-							}
-						}
-						callback();
+						callback(contextualInfo);
 						if (totalUnits > 0) {
 							benchmark = Math.trunc(totalUnits / totalTime * 40);
 						}
@@ -752,13 +748,19 @@ function hasRandomness(enabled) {
 		context.save();
 	}
 
-	function drawBackgroundImage() {
+	function drawBackgroundImage(contextualInfo) {
 		if (backgroundImage !== undefined) {
-			const context = drawingContext.twoD;
+			const context = contextualInfo.twoD;
+			const canvas = context.canvas;
 			context.globalCompositeOperation = 'destination-over';
 			context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 			context.globalCompositeOperation = 'source-over';
 		}
+	}
+
+	function postDraw(contextualInfo) {
+		drawBackgroundImage(drawingContext);
+		drawSignatureWhenReady(contextualInfo, true);
 	}
 
 	function progressiveBackgroundGen(preview) {
@@ -771,22 +773,11 @@ function hasRandomness(enabled) {
 		context.clearRect(0, 0, width, height);
 		transformCanvas(context, width, height, scaledWidth, scaledHeight, rotation);
 		context.globalAlpha = opacity;
-		progressiveBackgroundDraw(bgGenerator, drawingContext, scaledWidth, scaledHeight, preview, drawBackgroundImage);
+		const afterProc = preview === 0 ? postDraw : drawBackgroundImage;
+		progressiveBackgroundDraw(bgGenerator, drawingContext, scaledWidth, scaledHeight, preview, afterProc);
 	}
 
-	generateBackground = function (preview) {
-		progressiveBackgroundGen(preview);
-		if (preview > 0) {
-			if (document.fonts.check(signatureFont)) {
-				drawSignature(drawingContext);
-			} else {
-				document.fonts.load(signatureFont).then(function () {
-					drawSignature(drawingContext);
-				});
-			}
-		}
-	}
-
+	generateBackground = progressiveBackgroundGen;
 	setBgProperty = drawingContext.setProperty.bind(drawingContext);
 	setBgPropertyElement = drawingContext.setPropertyElement.bind(drawingContext);
 
@@ -2341,12 +2332,12 @@ function hasRandomness(enabled) {
 		const renderWidth = interpolateValue(tweenData.startWidth, tweenData.endWidth, tweenPrime, false);
 		const renderHeight = interpolateValue(tweenData.startHeight, tweenData.endHeight, tweenPrime, false);
 		const blur = interpolateValue(startFrame.blur, endFrame.blur, tweenPrime, false);
-		let needDrawSignature = paintBackground || !forAnim;
+		let needDrawSignature = paintBackground || (!forAnim && preview === 0);
 		context.globalAlpha = interpolateValue(startFrame.opacity, endFrame.opacity, tweenPrime, false);
 		context.clearRect(0, 0, width, height);
 		transformCanvas(context, width, height, renderWidth, renderHeight, rotation);
 
-		function postDraw() {
+		function postDraw(contextualInfo) {
 			context.globalCompositeOperation = 'destination-over';
 			interpolateBackgroundImage(startFrame.backgroundImage, endFrame.backgroundImage, context, tween, loop);
 			if (paintBackground) {
@@ -2362,7 +2353,7 @@ function hasRandomness(enabled) {
 			}
 			context.globalCompositeOperation = 'source-over';
 			if (needDrawSignature) {
-				drawSignature(contextualInfo);
+				drawSignature(contextualInfo, true);
 			}
 		}
 
@@ -2370,7 +2361,7 @@ function hasRandomness(enabled) {
 			contextualInfo.setProperties(generator);
 			contextualInfo.drawGL(tweenPrime, preview);
 			restoreCanvas(context);
-			postDraw()
+			postDraw(contextualInfo)
 		} else if (forAnim) {
 			// Draw everything in one go when capturing video
 			random.reset();
@@ -2382,9 +2373,8 @@ function hasRandomness(enabled) {
 				done = redraw.next().done;
 			} while (!done);
 			restoreCanvas(context);
-			postDraw();
+			postDraw(contextualInfo);
 		} else {
-			needDrawSignature = false;
 			progressiveBackgroundDraw(generator, contextualInfo, renderWidth, renderHeight, preview, postDraw);
 		}
 	}
@@ -2765,7 +2755,7 @@ function hasRandomness(enabled) {
 	// Changing background colour.
 	document.getElementById('background-color').addEventListener('input', function (event) {
 		backgroundElement.style.backgroundColor = this.value;
-		drawSignature(drawingContext);
+		drawSignatureWhenReady(drawingContext, false);
 	});
 
 	opacitySlider.addEventListener('input', function (event) {

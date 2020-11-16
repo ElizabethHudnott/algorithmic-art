@@ -556,7 +556,9 @@ function hasRandomness(enabled) {
 	let signatureChanged = true;
 	let signatureWidth, signatureHeight, userDisplayName;
 	let signatureText = '';
-	const signatureFont = 'italic 20px "Pacifico", cursive';
+	const signatureFont = 'italic 20px Pacifico, cursive';
+	const wmFont = 'bold 30px sans-serif';
+	const wmText = 'https://mathematical-art.github.io';
 
 	function calcSignature() {
 		signatureText = '';
@@ -603,9 +605,11 @@ function hasRandomness(enabled) {
 			return;
 		}
 
+		const canvas = context.canvas;
+		let canvasWidth = canvas.width;
+		let canvasHeight = canvas.height;
 		const backgroundColor = backgroundElement.style.backgroundColor;
 		let [bgRed, bgGreen, bgBlue] = parseColor(backgroundColor)[1];
-		let canvasHeight = context.canvas.height;
 		let featherOpacity = 1;
 		if (sample) {
 			featherOpacity = 0.2;
@@ -628,6 +632,7 @@ function hasRandomness(enabled) {
 		}
 
 		const scale = contextualInfo.scale;
+		canvasWidth /= scale;
 		canvasHeight /= scale;
 		const fontSize = Math.ceil(20 / scale);
 		context.font = signatureFont.replace('20', fontSize);
@@ -644,7 +649,21 @@ function hasRandomness(enabled) {
 		context.fillRect(0, top, scaledWidth, scaledHeight);
 		const luma = rgbToLuma(bgRed, bgGreen, bgBlue);
 		context.fillStyle = luma >= 0.5 ? 'black' : '#eee';
-		context.fillText(signatureText, paddingX, canvasHeight - onePx);
+		const bottom = canvasHeight - onePx;
+		context.fillText(signatureText, paddingX, bottom);
+		context.font = wmFont.replace('20', fontSize);
+		context.textAlign = 'right';
+		context.lineWidth = 1;
+		if (luma > 0.5) {
+			context.fillStyle = '#000000b0';
+			context.strokeStyle = '#ffffffb0';
+		} else {
+			context.globalAlpha = 0.3 + 0.7 * luma;
+			context.fillStyle = 'white';
+			context.strokeStyle = 'black';
+		}
+		context.fillText(wmText, canvasWidth - paddingX, bottom);
+		context.strokeText(wmText, canvasWidth - paddingX, bottom);
 	}
 
 	function drawSignatureWhenReady(contextualInfo, sample) {

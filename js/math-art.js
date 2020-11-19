@@ -557,8 +557,10 @@ function hasRandomness(enabled) {
 	let signatureWidth, signatureHeight, userDisplayName;
 	let signatureText = '';
 	const signatureFont = 'italic 20px Pacifico, cursive';
-	const wmFont = 'bold 30px sans-serif';
+	const signaturePaddingX = 3;
+	const wmFont = '20px "Alfa Slab One", sans-serif';
 	const wmText = 'https://mathematical-art.github.io';
+	let wmWidth, wmHeight;
 
 	function calcSignature() {
 		signatureText = '';
@@ -584,7 +586,7 @@ function hasRandomness(enabled) {
 			context.textAlign = 'left';
 			context.textBaseline = 'bottom';
 			const metrics = context.measureText(signatureText);
-			signatureWidth = 2 * 3 + Math.ceil(metrics.actualBoundingBoxRight);
+			signatureWidth = 2 * signaturePaddingX + Math.ceil(metrics.actualBoundingBoxRight);
 			signatureHeight = 4 + 1 + Math.ceil(metrics.actualBoundingBoxAscent);
 		}
 		signatureBox.style.width = signatureWidth + 'px';
@@ -610,6 +612,7 @@ function hasRandomness(enabled) {
 		let canvasHeight = canvas.height;
 		const backgroundColor = backgroundElement.style.backgroundColor;
 		let [bgRed, bgGreen, bgBlue] = parseColor(backgroundColor)[1];
+		let boxBgRed = bgRed, boxBgGreen = bgGreen, boxBgBlue = bgBlue;
 		let featherOpacity = 1;
 		if (sample) {
 			featherOpacity = 0.2;
@@ -626,54 +629,82 @@ function hasRandomness(enabled) {
 				totalGreen += alpha * pixels[offset + 1] + bgAmount * bgGreen;
 				totalBlue += alpha * pixels[offset + 2] + bgAmount * bgBlue;
 			}
-			bgRed = totalRed / numSamples;
-			bgGreen = totalGreen / numSamples;
-			bgBlue = totalBlue / numSamples;
+			boxBgRed = totalRed / numSamples;
+			boxBgGreen = totalGreen / numSamples;
+			boxBgBlue = totalBlue / numSamples;
 		}
 
 		const scale = contextualInfo.scale;
-		canvasWidth /= scale;
-		canvasHeight /= scale;
+		const scaledWidth = canvasWidth / scale;
+		const scaledHeight = canvasHeight / scale;
 		const fontSize = Math.ceil(20 / scale);
 		context.font = signatureFont.replace('20', fontSize);
-		const scaledWidth = signatureWidth / scale;
-		const scaledHeight = signatureHeight / scale;
-		const top = canvasHeight - scaledHeight;
-		const paddingX = Math.round(3 / scale);
+		const sSignatureWidth = signatureWidth / scale;
+		const sSignatureHeight = signatureHeight / scale;
+		const top = scaledHeight - sSignatureHeight;
+		const paddingX = Math.round(signaturePaddingX / scale);
 		const paddingY = Math.round(4 / scale);
 		const onePx = 1 / scale;
 		const gradient = context.createLinearGradient(0, top, 0, top + paddingY);
-		gradient.addColorStop(0, rgba(bgRed, bgGreen, bgBlue, featherOpacity));
-		gradient.addColorStop(1, rgba(bgRed, bgGreen, bgBlue, 1));
+		gradient.addColorStop(0, rgba(boxBgRed, boxBgGreen, boxBgBlue, featherOpacity));
+		gradient.addColorStop(1, rgba(boxBgRed, boxBgGreen, boxBgBlue, 1));
 		context.fillStyle = gradient;
-		context.fillRect(0, top, scaledWidth, scaledHeight);
-		const luma = rgbToLuma(bgRed, bgGreen, bgBlue);
+		context.fillRect(0, top, sSignatureWidth, sSignatureHeight);
+		let luma = rgbToLuma(boxBgRed, boxBgGreen, boxBgBlue);
 		context.fillStyle = luma >= 0.5 ? 'black' : '#eee';
-		const bottom = canvasHeight - onePx;
+		const bottom = scaledHeight - onePx;
 		context.fillText(signatureText, paddingX, bottom);
+
+		if (sample) {
+			const pixels = context.getImageData(canvasWidth - wmWidth, canvasHeight - wmHeight, wmWidth, wmHeight).data;
+			let totalRed = 0, totalGreen = 0, totalBlue = 0;
+			const numSamples = 50;
+			for (let i = 0; i < numSamples; i++) {
+				const x = Math.trunc(Math.random() * wmWidth);
+				const y = Math.trunc(Math.random() * wmHeight);
+				const offset = (y * signatureWidth + x) * 4;
+				const alpha = pixels[offset + 3] / 255;
+				const bgAmount = 1 - alpha;
+				totalRed += alpha * pixels[offset] + bgAmount * bgRed;
+				totalGreen += alpha * pixels[offset + 1] + bgAmount * bgGreen;
+				totalBlue += alpha * pixels[offset + 2] + bgAmount * bgBlue;
+			}
+			boxBgRed = totalRed / numSamples;
+			boxBgGreen = totalGreen / numSamples;
+			boxBgBlue = totalBlue / numSamples;
+			luma = rgbToLuma(boxBgRed, boxBgGreen, boxBgBlue);
+		}
+
 		context.font = wmFont.replace('20', fontSize);
 		context.textAlign = 'right';
-		context.lineWidth = 1;
+		context.lineWidth = 2;
 		if (luma > 0.5) {
 			context.fillStyle = '#000000b0';
 			context.strokeStyle = '#ffffffb0';
 		} else {
-			context.globalAlpha = 0.3 + 0.7 * luma;
+			context.globalAlpha = 0.5 + 0.5 * luma;
 			context.fillStyle = 'white';
 			context.strokeStyle = 'black';
 		}
-		context.fillText(wmText, canvasWidth - paddingX, bottom);
-		context.strokeText(wmText, canvasWidth - paddingX, bottom);
+		context.fillText(wmText, scaledWidth - paddingX, bottom);
+		context.strokeText(wmText, scaledWidth - paddingX, bottom);
 	}
 
 	function drawSignatureWhenReady(contextualInfo, sample) {
-		if (document.fonts.check(signatureFont)) {
+		Promise.allSettled([
+			document.fonts.load(signatureFont),
+			document.fonts.load(wmFont).then(function () {
+				const context = drawingContext.twoD;
+				context.font = wmFont;
+				context.textAlign = 'right';
+				context.textBaseline = 'bottom';
+				const metrics = context.measureText(wmText);
+				wmWidth = Math.ceil(metrics.actualBoundingBoxLeft);
+				wmHeight = 1 + Math.ceil(metrics.actualBoundingBoxAscent);
+			}),
+		]).then(function () {
 			drawSignature(contextualInfo, sample);
-		} else {
-			document.fonts.load(signatureFont).then(function () {
-				drawSignature(contextualInfo, sample);
-			});
-		}
+		});
 	}
 
 	function progressiveBackgroundDraw(generator, contextualInfo, width, height, preview, callback) {

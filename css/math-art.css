@@ -313,29 +313,32 @@ th.col-form-label {
 
 .btn-black {
 	background-color: #000000f7;
+}
+
+.toolbar-btn {
 	border-radius: 0;
 	color: white;
 }
 
-button.btn-black:hover {
+button.toolbar-btn:hover {
 	background-color: white;
 	color: black;
 }
 
-.btn-group>.btn-black.dropdown-toggle-split {
+.btn-group>.toolbar-btn.dropdown-toggle-split {
 	margin-left: 0;
 }
 
-.btn-black.dropdown-toggle {
+.toolbar-btn.dropdown-toggle {
 	color: white;
 }
 
-.btn-black.dropdown-toggle-split[aria-expanded=true] {
+.toolbar-btn.dropdown-toggle-split[aria-expanded=true] {
 	background-color: #ffff80;
 	color: black;
 }
 
-.btn-black.dropdown-toggle[aria-expanded=false]:hover {
+.toolbar-btn.dropdown-toggle[aria-expanded=false]:hover {
 	color: black;
 }
 
@@ -497,7 +500,11 @@ button.btn-black:hover {
 	position: absolute;
 }
 
-#toolbar>button:first-of-type {
+#toolbar-main {
+	background: linear-gradient(to left, #000000f7 0 367px, 75%, #000000c8 600px);
+}
+
+#toolbar-main>button:first-of-type {
 	border-top-left-radius: 0.25rem;
 }
 
@@ -569,7 +576,7 @@ button.btn-black:hover {
 	border-width: 0;
 	box-shadow: #000000dd 1px 9px 17px 0px;
 	position: absolute;
-	bottom: max(2vw, 16px);
+	bottom: max(2vw, 22px);
 	right: max(2vw, 16px);
 	padding: 4px;
 }

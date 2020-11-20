@@ -47,6 +47,22 @@ export default function SierpinskiCarpet() {
 
 	this.optionsDocument = downloadFile('sierpinski-carpet.html', 'document').then(function (optionsDoc) {
 
+		optionsDoc.getElementById('carpet-image-opacity-link').addEventListener('click', function (event) {
+			const tab = $('#carpet-rendering-tab');
+			function scroll() {
+				setTimeout(function () {
+					document.getElementById('carpet-coloring-grid').scrollIntoView({
+						behavior: 'smooth',
+						block: 'start',
+						inline: 'start',
+					});
+				}, 0);
+				tab.off('shown.bs.tab', scroll);
+			}
+			tab.on('shown.bs.tab', scroll);
+			tab.tab('show');
+		});
+
 		function fullRedraw() {
 			generateBackground(0);
 		}
@@ -74,7 +90,7 @@ export default function SierpinskiCarpet() {
 			partitions[7] = [[0, 1], [2, 3, 6], [4, 5, 9], [7, 8]];		// Dominoes 3
 			partitions[8] = [[0, 3, 6], [1, 4, 7, 9], [2, 5, 8]];		// Columns
 			partitions[9] = [[0, 1, 2], [3, 4, 5, 9], [6, 7, 8]];		// Rows
-			partitions[10] = [[0, 8], [1, 3], [2, 4, 6, 9], [5, 7]];	// Diagonals
+			partitions[10] = [[1, 3, 8], [2, 4, 6, 9], [0, 5, 7]];		// Diagonals
 			partitions[11] = [[0, 2], [1, 3, 5], [4, 6, 7, 8, 9]];		// T-Shape
 			partitions[12] = [[0, 3], [1, 2, 8], [4, 5, 6, 7, 9]];		// S-Shape
 			for (let i = 0; i < partitions.length; i++) {

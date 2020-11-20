@@ -196,7 +196,7 @@ export default function Phyllotaxis() {
 			if (value > 0) {
 				me.petalStretch = value;
 				generateBackground(0);
-				const rotatable = value !== 1 || me.petalShape === 'i';
+				const rotatable = value !== 1 || me.petalShape !== 'e';
 				$('#phyllotaxis-rotation-row').collapse(rotatable ? 'show' : 'hide');
 			}
 		});
@@ -540,7 +540,7 @@ export default function Phyllotaxis() {
 				}
 			}
 
-			const rotatable = me.petalStretch !== 1 || shapeIsImage;
+			const rotatable = me.petalStretch !== 1 || shape !== 'e';
 			$('#phyllotaxis-rotation-row').collapse(rotatable ? 'show' : 'hide');
 
 			$('#phyllotaxis-hue-min, #phyllotaxis-saturation-min, #phyllotaxis-lightness-min').collapse(shapeIsImage ? 'hide' : 'show');

@@ -96,162 +96,164 @@
 	<img src="img/palette.png" width="56" height="56" alt="Palette">
 </button>
 
-<div class="btn-toolbar" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 2" hidden>
-	<div class="mt-auto mb-1 mr-2" style="max-height: 46px">
+<div class="d-flex" role="toolbar" aria-label="Toolbar" id="toolbar" style="z-index: 2" hidden>
+	<div class="d-inline mt-auto mb-1 mr-2" style="max-height: 46px">
 		<a href="https://www.patreon.com/bePatron?u=23440273" class="patreon" title="Become a patron">
 			<img src="img/patreon.svg" width="16" height="15" alt="Patreon">
 			<span class="ml-2">Become a patron</span>
 		</a>
 	</div>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch">
-		<img src="img/module.png" width="32" height="32" alt="Sketch">
-		<span class="overlay-label">Change Sketch</span>
-	</button>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#layers-modal" title="Layers">
-		<img src="img/layers.png" width="32" height="32" alt="Layers">
-		<span class="overlay-label">Layers</span>
-	</button>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#background-gen-modal" title="Change parameters">
-		<img width="32" height="32" src="img/gear_in.png" alt="Parameters">
-		<span class="overlay-label">Parameters</span>
-	</button>
-	<div class="btn-group" role="group" aria-label="Randomization controls" id="generate-btn-group">
-		<button type="button" class="btn btn-black" id="btn-generate-background" title="Randomize">
-			<img width="32" height="32" src="img/dice.png" alt="Dice">
-			<span class="overlay-label">Randomize</span>
+	<div class="btn-toolbar" id="toolbar-main">
+		<button type="button" class="btn toolbar-btn" data-toggle="modal" data-target="#sketches-modal" title="Choose another sketch">
+			<img src="img/module.png" width="32" height="32" alt="Sketch">
+			<span class="overlay-label">Change Sketch</span>
 		</button>
-		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Randomization options">
-			<span class="sr-only">Toggle randomization options</span>
+		<button type="button" class="btn toolbar-btn" data-toggle="modal" data-target="#layers-modal" title="Layers">
+			<img src="img/layers.png" width="32" height="32" alt="Layers">
+			<span class="overlay-label">Layers</span>
 		</button>
-		<div class="dropdown-menu dropdown-menu-right bg-black">
-			<form class="px-2" id="random-seed-form">
-				<div class="form-group">
-					<label for="random-seed">Seed</label>
-					<textarea class="form-control text-right" id="random-seed" rows="8" minlength="7" style="resize: none"></textarea>
-				</div>
-				<div class="text-right">
-					<button type="submit" class="btn btn-primary btn-sm">Set Seed</button>
-				</div>
-			</form>
+		<button type="button" class="btn toolbar-btn" data-toggle="modal" data-target="#background-gen-modal" title="Change parameters">
+			<img width="32" height="32" src="img/gear_in.png" alt="Parameters">
+			<span class="overlay-label">Parameters</span>
+		</button>
+		<div class="btn-group" role="group" aria-label="Randomization controls" id="generate-btn-group">
+			<button type="button" class="btn toolbar-btn" id="btn-generate-background" title="Randomize">
+				<img width="32" height="32" src="img/dice.png" alt="Dice">
+				<span class="overlay-label">Randomize</span>
+			</button>
+			<button type="button" class="btn toolbar-btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Randomization options">
+				<span class="sr-only">Toggle randomization options</span>
+			</button>
+			<div class="dropdown-menu dropdown-menu-right bg-black">
+				<form class="px-2" id="random-seed-form">
+					<div class="form-group">
+						<label for="random-seed">Seed</label>
+						<textarea class="form-control text-right" id="random-seed" rows="8" minlength="7" style="resize: none"></textarea>
+					</div>
+					<div class="text-right">
+						<button type="submit" class="btn btn-primary btn-sm">Set Seed</button>
+					</div>
+				</form>
+			</div>
 		</div>
-	</div>
-	<button type="button" class="btn btn-black" id="btn-start-frame" title="Set start frame">
-		<img width="32" height="32" src="img/timeline_marker_start.png" alt="Start Frame">
-		<span class="overlay-label">Start frame</span>
-	</button>
-	<button type="button" class="btn btn-black" id="btn-end-frame" title="Set end frame">
-		<img width="32" height="32" src="img/timeline_marker_end.png" alt="End Frame">
-		<span class="overlay-label">End frame</span>
-	</button>
-	<button type="button" class="btn btn-black" id="btn-both-frames" title="Set start &amp; end frames">
-		<img width="32" height="32" src="img/timeline_marker_both.png" alt="Both Frames">
-		<span class="overlay-label">Both frames</span>
-	</button>
-	<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
-		<button type="button" class="btn btn-black position-relative" id="btn-play" title="Play animation">
-			<img width="32" height="32" src="img/control_play_blue.png" alt="Play">
-			<img width="16" height="16" src="img/record.png" style="position: absolute; top: 4px; right: 5px" id="play-badge" hidden>
-			<span class="overlay-label">Play</span>
+		<button type="button" class="btn toolbar-btn" id="btn-start-frame" title="Set start frame">
+			<img width="32" height="32" src="img/timeline_marker_start.png" alt="Start Frame">
+			<span class="overlay-label">Start frame</span>
 		</button>
-		<button type="button" class="btn btn-black dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
-			<span class="sr-only">Toggle playback options</span>
- 		</button>
- 		<div class="dropdown-menu dropdown-menu-abs-right bg-black" style="width: min(100%, 500px)" id="anim-controls">
- 			<form class="px-2">
- 				<div class="form-row">
- 					<div class="col-7">
-	 					<label for="anim-position">Position</label>
- 					</div>
- 					<div class="col-2 text-right">
- 						<output id="anim-position-readout">10s</output>
- 					</div>
- 					<div class="col-3 pl-3">
-	 					<label for="anim-length">Length</label>
- 					</div>
- 				</div>
- 				<div class="form-row mb-2">
-	 				<div class="col-9 center-mark">
-	 					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="anim-position">
-	 				</div>
-	 				<div class="col-3 pl-3 pr-2">
-	 					<div class="input-group input-group-sm">
-	 						<input type="number" min="1" value="10" class="form-control text-right" id="anim-length" aria-describedby="anim-length-units">
-	 						<div class="input-group-append">
-	 							<span class="input-group-text bg-dark text-white" id="anim-length-units">s</span>
-	 						</div>
+		<button type="button" class="btn toolbar-btn" id="btn-end-frame" title="Set end frame">
+			<img width="32" height="32" src="img/timeline_marker_end.png" alt="End Frame">
+			<span class="overlay-label">End frame</span>
+		</button>
+		<button type="button" class="btn toolbar-btn" id="btn-both-frames" title="Set start &amp; end frames">
+			<img width="32" height="32" src="img/timeline_marker_both.png" alt="Both Frames">
+			<span class="overlay-label">Both frames</span>
+		</button>
+		<div class="btn-group position-static" role="group" aria-label="Animation controls" id="play-btn-group">
+			<button type="button" class="btn toolbar-btn position-relative" id="btn-play" title="Play animation">
+				<img width="32" height="32" src="img/control_play_blue.png" alt="Play">
+				<img width="16" height="16" src="img/record.png" style="position: absolute; top: 4px; right: 5px" id="play-badge" hidden>
+				<span class="overlay-label">Play</span>
+			</button>
+			<button type="button" class="btn toolbar-btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Animation options" id="btn-anim-controls">
+				<span class="sr-only">Toggle playback options</span>
+	 		</button>
+	 		<div class="dropdown-menu dropdown-menu-abs-right bg-black" style="width: min(100%, 500px)" id="anim-controls">
+	 			<form class="px-2">
+	 				<div class="form-row">
+	 					<div class="col-7">
+		 					<label for="anim-position">Position</label>
+	 					</div>
+	 					<div class="col-2 text-right">
+	 						<output id="anim-position-readout">10s</output>
+	 					</div>
+	 					<div class="col-3 pl-3">
+		 					<label for="anim-length">Length</label>
 	 					</div>
 	 				</div>
- 				</div>
- 				<div class="form-row" id="play-preview-row">
- 					<div class="col-5">
-						<div class="form-check mt-1">
-							<input class="form-check-input" type="radio" name="play-preview" id="play-preview-fast" value="1">
-							<label class="form-check-label small" for="play-preview-fast">
-								High performance preview
-							</label>
-						</div>
- 					</div>
- 					<div class="col-3">
-						<div class="form-check mt-1">
-							<input class="form-check-input" type="radio" name="play-preview" id="play-preview-detail" value="0">
-							<label class="form-check-label small" for="play-preview-detail">
-								Full detail
-							</label>
-						</div>
- 					</div>
- 					<div class="col-1 text-right">
- 						<button type="button" class="btn btn-sm" title="Rewind animation" id="btn-rewind">
- 							<img src="img/control_rewind_blue.png" width="24" height="24" alt="Rewind">
- 						</button>
- 					</div>
-	 				<div class="col-3 pl-3 pr-2">
-	 					<button type="button" class="btn btn-sm btn-dark w-100" id="btn-anim-opts" title="Advanced animation options">More&hellip;</button>
+	 				<div class="form-row mb-2">
+		 				<div class="col-9 center-mark">
+		 					<input type="range" min="0" max="1" step="any" value="1" class="form-control-range mt-2" id="anim-position">
+		 				</div>
+		 				<div class="col-3 pl-3 pr-2">
+		 					<div class="input-group input-group-sm">
+		 						<input type="number" min="1" value="10" class="form-control text-right" id="anim-length" aria-describedby="anim-length-units">
+		 						<div class="input-group-append">
+		 							<span class="input-group-text bg-dark text-white" id="anim-length-units">s</span>
+		 						</div>
+		 					</div>
+		 				</div>
 	 				</div>
- 				</div>
- 			</form>
- 		</div>
-  	</div>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
-		<img width="32" height="32" src="img/picture_save.png" alt="Download">
-		<span class="overlay-label">Save image</span>
-	</button>
-	<button type="button" class="btn btn-black" id="btn-video-opts" title="Create video">
-		<img width="32" height="32" src="img/film.png" alt="Video">
-		<span class="overlay-label">Video</span>
-	</button>
-	<div class="btn-group" id="save-dropdown" hidden>
-		<button type="button" class="btn btn-black" id="btn-save-form" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Save parameters">
-			<img width="32" height="32" src="img/diskette.png" alt="Save">
-			<span class="overlay-label">Save</span>
+	 				<div class="form-row" id="play-preview-row">
+	 					<div class="col-5">
+							<div class="form-check mt-1">
+								<input class="form-check-input" type="radio" name="play-preview" id="play-preview-fast" value="1">
+								<label class="form-check-label small" for="play-preview-fast">
+									High performance preview
+								</label>
+							</div>
+	 					</div>
+	 					<div class="col-3">
+							<div class="form-check mt-1">
+								<input class="form-check-input" type="radio" name="play-preview" id="play-preview-detail" value="0">
+								<label class="form-check-label small" for="play-preview-detail">
+									Full detail
+								</label>
+							</div>
+	 					</div>
+	 					<div class="col-1 text-right">
+	 						<button type="button" class="btn btn-sm" title="Rewind animation" id="btn-rewind">
+	 							<img src="img/control_rewind_blue.png" width="24" height="24" alt="Rewind">
+	 						</button>
+	 					</div>
+		 				<div class="col-3 pl-3 pr-2">
+		 					<button type="button" class="btn btn-sm btn-dark w-100" id="btn-anim-opts" title="Advanced animation options">More&hellip;</button>
+		 				</div>
+	 				</div>
+	 			</form>
+	 		</div>
+	  	</div>
+		<button type="button" class="btn toolbar-btn" data-toggle="modal" data-target="#save-pic-modal" title="Download picture">
+			<img width="32" height="32" src="img/picture_save.png" alt="Download">
+			<span class="overlay-label">Save image</span>
 		</button>
-		<div class="dropdown-menu dropdown-menu-right bg-black" aria-labelledby="btn-save-form" style="width: 375px">
-			<form class="px-2" id="save-form">
-				<div class="form-group">
-					<label for="work-title">Title</label>
-					<input type="text" required class="form-control form-control-sm" id="work-title" autocomplete="off" pattern="\s*\S\S.*" title="Must be at least 2 characters long.">
-				</div>
-				<div class="form-group">
-					<label for="work-keywords">Keywords</label>
-					<input type="text" class="form-control form-control-sm" id="work-keywords" aria-describedby="work-keywords-help">
-					<small id="work-keywords-help" class="form-text text-muted">
-						Separate your keywords using commas.
-					</small>
-				</div>
-				<output id="save-result"></output>
-				<div class="text-right">
-					<button type="submit" class="btn btn-primary btn-sm" id="btn-save">Save &amp; Share</button>
-				</div>
-			</form>
+		<button type="button" class="btn toolbar-btn" id="btn-video-opts" title="Create video">
+			<img width="32" height="32" src="img/film.png" alt="Video">
+			<span class="overlay-label">Video</span>
+		</button>
+		<div class="btn-group" id="save-dropdown" hidden>
+			<button type="button" class="btn toolbar-btn" id="btn-save-form" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Save parameters">
+				<img width="32" height="32" src="img/diskette.png" alt="Save">
+				<span class="overlay-label">Save</span>
+			</button>
+			<div class="dropdown-menu dropdown-menu-right bg-black" aria-labelledby="btn-save-form" style="width: 375px">
+				<form class="px-2" id="save-form">
+					<div class="form-group">
+						<label for="work-title">Title</label>
+						<input type="text" required class="form-control form-control-sm" id="work-title" autocomplete="off" pattern="\s*\S\S.*" title="Must be at least 2 characters long.">
+					</div>
+					<div class="form-group">
+						<label for="work-keywords">Keywords</label>
+						<input type="text" class="form-control form-control-sm" id="work-keywords" aria-describedby="work-keywords-help">
+						<small id="work-keywords-help" class="form-text text-muted">
+							Separate your keywords using commas.
+						</small>
+					</div>
+					<output id="save-result"></output>
+					<div class="text-right">
+						<button type="submit" class="btn btn-primary btn-sm" id="btn-save">Save &amp; Share</button>
+					</div>
+				</form>
+			</div>
 		</div>
+		<button type="button" class="btn toolbar-btn" id="btn-what-is-this" title="&quot;What's This?&quot; Help">
+			<img width="32" height="32" src="img/what-is-this.svg" alt="What's This?">
+			<span class="overlay-label">What's this?</span>
+		</button>
+		<button type="button" class="btn toolbar-btn" data-toggle="modal" data-target="#help-modal" title="Help">
+			<img width="32" height="32" src="img/help_32.png" alt="Help">
+			<span class="overlay-label">General help</span>
+		</button>
 	</div>
-	<button type="button" class="btn btn-black" id="btn-what-is-this" title="&quot;What's This?&quot; Help">
-		<img width="32" height="32" src="img/what-is-this.svg" alt="What's This?">
-		<span class="overlay-label">What's this?</span>
-	</button>
-	<button type="button" class="btn btn-black" data-toggle="modal" data-target="#help-modal" title="Help">
-		<img width="32" height="32" src="img/help_32.png" alt="Help">
-		<span class="overlay-label">General help</span>
-	</button>
 </div>
 
 <div class="modal modal-floating fade p-0" id="background-gen-modal" tabindex="-1" role="dialog" aria-labelledby="background-gen-modal-label" aria-hidden="true" data-backdrop="false">
@@ -765,36 +767,36 @@
 					<div class="tab-pane show active h-100" id="help-intro" role="tabpanel" aria-labelledby="help-intro-tab">
 						<h5>Welcome to Mathematical Art With Elizabeth!</h5>
 
-						<p>Mathematical art, also known as algorithmic art, generative art or creative coding, is using geometry to make art. I've created a collection of sketches, each of which produces a simple figure as a starting point for creation. Your task is to adjust the parameters to create something visually appealing. The finished piece will combine my programming, your choice of parameter settings, and in some cases pseudorandom aspects generated by the computer. Most activities are initiated using either the parameters window that will appear shortly or the buttons located in the bottom-right corner. On mobile devices, click on <img src="img/palette.png" width="37" height="37" alt="Palette"> to reveal other buttons. Click on <span class="btn btn-sm btn-black d-inline-block"><img src="img/help.png" alt="Help"></span> at any time to see this window again. Under <i>About this Sketch</i> at the top of this window you can read some introductory information about the currently selected sketch. Use the "What's this?" button <span class="btn btn-sm btn-black d-inline-block"><img src="img/what-is-this.svg" alt="What's This?" width="16"></span> to get help with a particular item.</p>
+						<p>Mathematical art, also known as algorithmic art, generative art or creative coding, is using geometry to make art. I've created a collection of sketches, each of which produces a simple figure as a starting point for creation. Your task is to adjust the parameters to create something visually appealing. The finished piece will combine my programming, your choice of parameter settings, and in some cases pseudorandom aspects generated by the computer. Most activities are initiated using either the parameters window that will appear shortly or the buttons located in the bottom-right corner. On mobile devices, click on <img src="img/palette.png" width="37" height="37" alt="Palette"> to reveal other buttons. Click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/help.png" alt="Help"></span> at any time to see this window again. Under <i>About this Sketch</i> at the top of this window you can read some introductory information about the currently selected sketch. Use the "What's this?" button <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/what-is-this.svg" alt="What's This?" width="16"></span> to get help with a particular item.</p>
 
 						<h5>Animation</h5>
-						Use the parameters window to edit the image. You may need to scroll down to see some parameters. When you're happy with the result then click to capture the image for use as either the start frame <span class="btn btn-sm btn-black"><img src="img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> or the end frame <span class="btn btn-sm btn-black d-inline-block"><img src="img/timeline_marker_end.png" alt="End Frame" width="16" height="16"></span>. That picture will become either the starting point or the finishing point of the animation respectively. After you have one frame marked for animation then change the parameters to design a second image that you'd like to appear at the other end of the animation. Mark this image as an animation frame too. Once you have both a start frame and an end frame marked then you're ready to play back your animation <span class="btn btn-sm btn-black d-inline-block"><img src="img/control_play_blue.png" alt="Play" width="16" height="16"></span>. You can make the animation longer or shorter by clicking on the arrow next to the play icon. With a subsequent click on the <span class="btn btn-sm btn-dark d-inline-block">More&hellip;</span> button you can find more advanced animation options.</p>
+						Use the parameters window to edit the image. You may need to scroll down to see some parameters. When you're happy with the result then click to capture the image for use as either the start frame <span class="btn btn-sm toolbar-btn btn-black"><img src="img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> or the end frame <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/timeline_marker_end.png" alt="End Frame" width="16" height="16"></span>. That picture will become either the starting point or the finishing point of the animation respectively. After you have one frame marked for animation then change the parameters to design a second image that you'd like to appear at the other end of the animation. Mark this image as an animation frame too. Once you have both a start frame and an end frame marked then you're ready to play back your animation <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/control_play_blue.png" alt="Play" width="16" height="16"></span>. You can make the animation longer or shorter by clicking on the arrow next to the play icon. With a subsequent click on the <span class="btn btn-sm btn-dark d-inline-block">More&hellip;</span> button you can find more advanced animation options.</p>
 
 						<h5>Saving</h5>
-						<p>To save your animation as a video file click on <span class="btn btn-sm btn-black d-inline-block"><img src="img/film.png" alt="Video" width="16" height="16"></span>. Or click <span class="btn btn-sm btn-black d-inline-block"><img src="img/picture_save.png" alt="Download" width="16" height="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner.</p>
+						<p>To save your animation as a video file click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/film.png" alt="Video" width="16" height="16"></span>. Or click <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/picture_save.png" alt="Download" width="16" height="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner.</p>
 
 						<h5>Other Icons</h5>
 						<dl class="row mx-1">
 							<dt class="col-1 mb-2">
-								<span class="btn btn-sm btn-black d-inline-block"><img src="img/module.png" alt="Sketch" width="16" height="16"></span>
+								<span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/module.png" alt="Sketch" width="16" height="16"></span>
 							</dt>
 							<dd class="col-11">
 								Let's you choose a different sketch to experiment with.
 							</dd>
 							<dt class="col-1 mb-2">
-								<span class="btn btn-sm btn-black d-inline-block"><img src="img/gear_in.png" alt="Parameters" width="16" height="16"></span>
+								<span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/gear_in.png" alt="Parameters" width="16" height="16"></span>
 							</dt>
 							<dd class="col-11">
 								Opens or closes the sketch parameters window.
 							</dd>
 							<dt class="col-1 mb-2">
-								<span class="btn btn-sm btn-black d-inline-block"><img src="img/dice.png" alt="Dice" width="16" height="16"></span>
+								<span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/dice.png" alt="Dice" width="16" height="16"></span>
 							</dt>
 							<dd class="col-11">
 								Creates a new image using a different set of random numbers (only available in certain sketches).
 							</dd>
 							<dt class="col-1 mb-2">
-								<span class="btn btn-sm btn-black d-inline-block"><img src="img/layers.png" width="16" height="16" alt="Layers"></span>
+								<span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/layers.png" width="16" height="16" alt="Layers"></span>
 							</dt>
 							<dd class="col-11">
 								Opens the layers window, which lets you place a background behind your creation. You can also rotate and resize the sketch layer from here.

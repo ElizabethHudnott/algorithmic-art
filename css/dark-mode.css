@@ -3,7 +3,7 @@
 	--form-color: hsl(220, 25%, 11%);
 }
 
-.btn-black, .modal-floating .modal-body>.nav-tabs {
+.btn-black, #toolbar-main, .modal-floating .modal-body>.nav-tabs {
 	background-color: var(--darkslate);
 }
 

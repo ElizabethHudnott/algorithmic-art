@@ -66,12 +66,11 @@
 <div class="tab-content">
 	<div class="tab-pane active" id="carpet-rendering" role="tabpanel" aria-labelledby="carpet-rendering-tab">
 		<fieldset id="carpet-colors">
-			<div class="form-row form-group">
-				<div class="col-1"></div>
-				<div class="col-3 col-form-label col-form-label-sm">
-					Colours &amp;
+			<div class="form-row">
+				<div class="col-4 col-form-label col-form-label-sm mb-2 text-right">
+					Colours &amp; Opacities
 				</div>
-				<div class="col-5 pl-2">
+				<div class="col-auto col-lg-6">
 					<select class="form-control form-control-sm" id="carpet-color-set" aria-description="Controls which colour palette is altered by the controls below">
 						<option value="b" selected>Background Colours</option>
 						<option value="f">Foreground Colours</option>
@@ -80,65 +79,62 @@
 			</div>
 
 			<div class="form-row">
-				<div class="col-1"></div>
-				<div class="col-3 col-form-label col-form-label-sm pt-0">
-					Opacities
-				</div>
-				<div class="col-2 text-center carpet-location-0 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-0 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center carpet-location-1 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-4 col-xl-2 carpet-location-1 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center carpet-location-2 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-4 col-xl-2 text-center carpet-location-2 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
 			</div>
 
 			<div class="form-row">
-				<div class="col-4"></div>
-				<div class="col-2 text-center carpet-location-3 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-3 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center carpet-location-4 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-4 col-xl-2 carpet-location-4 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
-				<div class="col-2 text-center carpet-location-5 py-3">
-					<input type="color" value="#ffffff"><br>
+				<div class="col-4 col-xl-2 carpet-location-5 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-6 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+				<div class="col-4 col-xl-2 carpet-location-7 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
+				</div>
+				<div class="col-4 col-xl-2 carpet-location-8 py-3">
+					<input type="color" value="#ffffff" class="w-100"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
 				</div>
 			</div>
 
 			<div class="form-row form-group">
-				<div class="col-4"></div>
-				<div class="col-2 text-center carpet-location-6 py-3">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-				<div class="col-2 text-center carpet-location-7 py-3">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-				<div class="col-2 text-center carpet-location-8 py-3">
-					<input type="color" value="#ffffff"><br>
-					<input type="range" min="0" max="1" step="0.004" value="0.5" class="form-control-range mt-2">
-				</div>
-			</div>
-
-			<div class="form-row form-group">
-				<div class="col-4"></div>
-				<label class="col-2 col-form-label col-form-label-sm pl-2 mt-1" for="carpet-root-color">
+				<div class="col-1 col-xl-4"></div>
+				<label class="col-3 col-xl-2 col-form-label col-form-label-sm mt-1" for="carpet-root-color">
 					Centre
 				</label>
-				<div class="col-2 text-center carpet-location-9 py-2">
-					<input type="color" value="#ffffff" id="carpet-root-color">
+				<div class="col-4 col-xl-2 carpet-location-9 py-2">
+					<input type="color" value="#ffffff" class="w-100" id="carpet-root-color">
 				</div>
-				<div class="col-2 carpet-location-9 py-2">
+				<div class="col-4 col-xl-2 carpet-location-9 py-2">
 					<input type="range" min="0" max="1" step="0.004" value="1" class="form-control-range mt-1">
 				</div>
 			</div>
@@ -154,7 +150,7 @@
 					<img src="../img/help.png" alt="Help">
 				</a>
 			</div>
-			<div class="col-5 pl-2">
+			<div class="col-5">
 				<select id="carpet-composition-op" class="form-control form-control-sm" aria-describedby="carpet-composition-bug" style="flex-grow: 3">
 					<option value="source-over">Source Over</option>
 					<option value="destination-over">Destination Over</option>
@@ -186,27 +182,27 @@
 		</div>
 		<div class="form-row mb-1">
 			<div class="col-4"></div>
-			<div class="col-8 pl-2">
+			<div class="col-8">
 				<small id="carpet-composition-bug" class="form-text text-muted">Many modes cause poor performance in Firefox.</small>
 			</div>
 		</div>
 		<div class="form-row mb-2">
-			<div class="col-4 col-form-label col-form-label-sm">
+			<div class="col-4 col-form-label col-form-label-sm text-right">
 				Background Opacities
 			</div>
-			<div class="col-2 pl-2">
+			<div class="col-2">
 				<div class="form-check mt-1">
 					<input type="radio" name="carpet-opacity-enable" value="2" checked class="form-check-input" id="carpet-opacity-on">
 					<label class="form-check-label small" for="carpet-opacity-on">On</label>
 				</div>
 			</div>
-			<div class="col-2">
+			<div class="col-auto col-lg-2">
 				<div class="form-check mt-1">
 					<input type="radio" name="carpet-opacity-enable" value="1" class="form-check-input" id="carpet-opacity-partial">
 					<label class="form-check-label small" for="carpet-opacity-partial">Partial</label>
 				</div>
 			</div>
-			<div class="col-3">
+			<div class="col-auto">
 				<div class="form-check mt-1">
 					<input type="radio" name="carpet-opacity-enable" value="0" class="form-check-input" id="carpet-opacity-off">
 					<label class="form-check-label small" for="carpet-opacity-off">Off (ignored)</label>
@@ -215,11 +211,11 @@
 		</div>
 		<fieldset id="carpet-coloring-grid">
 			<div class="form-row mb-2">
-				<div class="col-1"></div>
-				<label class="col-3 col-form-label col-form-label-sm" for="carpet-coloring-grid-param">
+		<div class="col-1"></div>
+					<label class="col-3 col-form-label col-form-label-sm" for="carpet-coloring-grid-param">
 					Parameter
 				</label>
-				<div class="col-5 pl-2">
+				<div class="col-6">
 					<select class="form-control form-control-sm" id="carpet-coloring-grid-param">
 						<option value="bd" selected>Blend Depth</option>
 						<option value="fe">Filling Emphasis</option>
@@ -227,38 +223,38 @@
 				</div>
 			</div>
 			<div class="form-row">
-				<div class="col-4"></div>
-				<div class="col-2 carpet-location-0 p-2">
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-0 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2 carpet-location-1 p-2">
+				<div class="col-4 col-xl-2 carpet-location-1 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2 carpet-location-2 p-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-			</div>
-			<div class="form-row">
-				<div class="col-4"></div>
-				<div class="col-2 carpet-location-3 p-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-				<div class="col-2 carpet-location-4 p-2">
-					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
-				</div>
-				<div class="col-2 carpet-location-5 p-2">
+				<div class="col-4 col-xl-2 carpet-location-2 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
 			</div>
 			<div class="form-row">
-				<div class="col-4"></div>
-				<div class="col-2 carpet-location-6 p-2">
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-3 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2 carpet-location-7 p-2">
+				<div class="col-4 col-xl-2 carpet-location-4 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
-				<div class="col-2 carpet-location-8 p-2">
+				<div class="col-4 col-xl-2 carpet-location-5 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="col-0 col-xl-4"></div>
+				<div class="col-4 col-xl-2 carpet-location-6 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-4 col-xl-2 carpet-location-7 p-2">
+					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
+				</div>
+				<div class="col-4 col-xl-2 carpet-location-8 p-2">
 					<input type="number" min="1" max="5" value="4" class="form-control form-control-sm">
 				</div>
 			</div>
@@ -340,7 +336,10 @@
 					Image Opacity
 				</label>
 				<div class="col-6">
-					<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-image-opacity">
+					<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-image-opacity" aria-describedby="carpet-image-opacity-note">
+					<small id="carpet-image-opacity-note" class="form-text text-muted">
+						Overidden in some areas, depending on <a href="#" id="carpet-image-opacity-link">filling emphasis</a>.
+					</small>
 				</div>
 			<div class="col-2">
 				<button type="button" class="btn btn-light py-0" data-reset="carpet-image-opacity" title="Reset image opacity">

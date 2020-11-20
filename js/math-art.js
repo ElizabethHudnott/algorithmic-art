@@ -1763,8 +1763,10 @@ function hasRandomness(enabled) {
 		if (window.innerWidth < 1024) {
 			if (!mobileLayout) {
 				// Switch to mobile layout
-				while (toolbar.children.length > 0) {
-					overlayContent.appendChild(toolbar.children[0]);
+				const buttons = toolbar.children[1].children;
+				overlayContent.appendChild(toolbar.children[0]);	// Donate button
+				while (buttons.length > 0) {
+					overlayContent.appendChild(buttons[0]);
 				}
 				document.getElementById('btn-floating-action').hidden = false;
 				mobileLayout = true;
@@ -1773,8 +1775,11 @@ function hasRandomness(enabled) {
 			if (mobileLayout) {
 				// Switch to desktop layout
 				overlay.classList.remove('show');
-				while (overlayContent.children.length > 0) {
-					toolbar.appendChild(overlayContent.children[0]);
+				const buttons = overlayContent.children;
+				toolbar.prepend(buttons[0]);	// Donate button
+				const buttonBox = toolbar.children[1];
+				while (buttons.length > 0) {
+					buttonBox.appendChild(buttons[0]);
 				}
 				document.getElementById('btn-floating-action').hidden = true;
 				mobileLayout = false;

@@ -2633,6 +2633,18 @@ function hasRandomness(enabled) {
 
 	seedInput.value = random.seed;
 
+	if (document.fullscreenEnabled) {
+		document.getElementById('btn-full-screen').addEventListener('click', function (event) {
+			if (document.fullscreenElement === null) {
+				document.documentElement.requestFullscreen({navigationUI: 'hide'});
+			} else {
+				document.exitFullscreen();
+			}
+		});
+	} else {
+		document.getElementById('btn-full-screen').hidden = true;
+	}
+
 	if (store !== undefined) {
 		document.getElementById('show-welcome').addEventListener('input', function (event) {
 			try {

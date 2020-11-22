@@ -3352,6 +3352,42 @@ function hasRandomness(enabled) {
 		currentResOption.selected = true;
 	}
 
+	const imageFormats = new Set();
+	imageFormats.add('png');
+
+	function checkImageFormats() {
+		if (imageFormats.size > 1) {
+			return;
+		}
+
+		const testCanvas = document.createElement('CANVAS');
+		testCanvas.width = 1;
+		testCanvas.height = 1;
+		for (let format of ['jpeg', 'webp']) {
+			const mime = 'image/' + format;
+			const url = testCanvas.toDataURL(mime);
+			if (url.startsWith('data:' + mime)) {
+				imageFormats.add(format);
+			}
+		}
+
+		const videoFormatInput = document.getElementById('video-format');
+		let formatDeleted = false;
+
+		if (!imageFormats.has('jpeg')) {
+			videoFormatInput.querySelector('option[value="jpg"]').remove();
+			formatDeleted = true;
+		}
+		if (!imageFormats.has('webp')) {
+			videoFormatInput.querySelector('option[value="webm"]').remove();
+			videoFormatInput.querySelector('option[value="webp"]').remove();
+			formatDeleted = true;
+		}
+		if (formatDeleted) {
+			setVideoFormat();
+		}
+	}
+
 	document.getElementById('btn-video-opts').addEventListener('click', function (event) {
 		if (document.getElementById('btn-render-video').disabled) {
 			// Video rendering already in progress.
@@ -3359,6 +3395,7 @@ function hasRandomness(enabled) {
 			return;
 		}
 		requireScript('lib/CCapture.webm.min.js');
+		checkImageFormats();
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
@@ -3379,14 +3416,21 @@ function hasRandomness(enabled) {
 		}
 	});
 
-
 	function loadCodecOnDemand(event) {
 		requireScript('lib/tar.min.js');
 		document.getElementById('video-format').removeEventListener('input', loadCodecOnDemand);
 		loadCodecOnDemand = undefined;
 	}
 
+	function setVideoFormat() {
+		const qualitySlider = document.getElementById('video-quality');
+		const lossy = document.getElementById('video-format').value !== 'png';
+		qualitySlider.disabled = !lossy;
+		videoQualityReadout.innerHTML = lossy ? qualitySlider.value + '%' : 'N/A';
+	}
+
 	document.getElementById('video-format').addEventListener('input', loadCodecOnDemand);
+	document.getElementById('video-format').addEventListener('input', setVideoFormat);
 
 	{
 		const notifyInput = document.getElementById('notify-video-render');
@@ -3478,13 +3522,6 @@ function hasRandomness(enabled) {
 	});
 
 	const videoQualityReadout = document.getElementById('video-quality-readout');
-
-	document.getElementById('video-format').addEventListener('input', function (event) {
-		const qualitySlider = document.getElementById('video-quality');
-		const lossy = this.value !== 'png';
-		qualitySlider.disabled = !lossy;
-		videoQualityReadout.innerHTML = lossy ? qualitySlider.value + '%' : 'N/A';
-	});
 
 	document.getElementById('video-quality').addEventListener('input', function (event) {
 		videoQualityReadout.innerHTML = this.value + '%';

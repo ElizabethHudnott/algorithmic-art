@@ -2317,7 +2317,7 @@ function hasRandomness(enabled) {
 		tempCanvas.height = context.canvas.height;
 		tempContext.drawImage(context.canvas, 0, 0);
 		context.filter = filter;
-		context.drawImage(tempCanvas, 0, 0);
+		context.drawImage(tempCanvas, 0, 0, width, height);
 		context.filter = '';
 	}
 
@@ -2547,7 +2547,13 @@ function hasRandomness(enabled) {
 		pauseButton.addEventListener('click', pauseResumeRendering);
 		pauseButton.hidden = false;
 
-		const downloads =  [requireScript('lib/CCapture.webm.min.js')];
+		const downloads =  [];
+		if (imageFormats.has('webp')) {
+			downloads.push(requireScript('lib/CCapture.webm.min.js'));
+		} else {
+			// Library only, no codecs
+			downloads.push(requireScript('lib/CCapture.download.min.js'));
+		}
 		if (properties.format !== 'webm') {
 			downloads.push(requireScript('lib/tar.min.js'));
 		}
@@ -3394,8 +3400,13 @@ function hasRandomness(enabled) {
 			$('#video-modal').modal('show');
 			return;
 		}
-		requireScript('lib/CCapture.webm.min.js');
 		checkImageFormats();
+		if (imageFormats.has('webp')) {
+			requireScript('lib/CCapture.webm.min.js');
+		} else {
+			// Library only, no codecs
+			requireScript('lib/CCapture.download.min.js');
+		}
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
 		const separateFrames = startFrame !== endFrame || ('tween' in bgGenerator);
@@ -3416,20 +3427,18 @@ function hasRandomness(enabled) {
 		}
 	});
 
-	function loadCodecOnDemand(event) {
-		requireScript('lib/tar.min.js');
-		document.getElementById('video-format').removeEventListener('input', loadCodecOnDemand);
-		loadCodecOnDemand = undefined;
-	}
-
 	function setVideoFormat() {
+		const format = document.getElementById('video-format').value;
 		const qualitySlider = document.getElementById('video-quality');
-		const lossy = document.getElementById('video-format').value !== 'png';
+		const lossy = format !== 'png';
 		qualitySlider.disabled = !lossy;
 		videoQualityReadout.innerHTML = lossy ? qualitySlider.value + '%' : 'N/A';
+
+		if (format !== 'webm') {
+			requireScript('lib/tar.min.js');
+		}
 	}
 
-	document.getElementById('video-format').addEventListener('input', loadCodecOnDemand);
 	document.getElementById('video-format').addEventListener('input', setVideoFormat);
 
 	{
@@ -3502,9 +3511,9 @@ function hasRandomness(enabled) {
 				canvas.hidden = true;
 				document.body.appendChild(captureCanvas);
 			}
-			const scale = videoHeight / screen.height;
+			const scale = videoHeight / window.innerHeight;
 			const drawWidth = videoWidth / scale;
-			const drawHeight = screen.height;
+			const drawHeight = window.innerHeight;
 			const contextualInfo = new DrawingContext(captureCanvas, videoWidth, videoHeight, scale);
 			contextualInfo.initializeShader(bgGenerator);
 			contextualInfo.copyTypes(drawingContext);

@@ -2553,10 +2553,9 @@ function hasRandomness(enabled) {
 		if (imageFormats.has('webp')) {
 			downloads.push(requireScript('lib/CCapture.webm.min.js'));
 		} else {
-			// Library only, no codecs
-			downloads.push(requireScript('lib/CCapture.download.min.js'));
+			downloads.push(requireScript('lib/CCapture.mjpg.min.js'));
 		}
-		if (properties.format !== 'webm') {
+		if (properties.format !== 'webm' && properties.format !== 'mjpg') {
 			downloads.push(requireScript('lib/tar.min.js'));
 		}
 
@@ -3390,6 +3389,14 @@ function hasRandomness(enabled) {
 			videoFormatInput.querySelector('option[value="webm"]').remove();
 			videoFormatInput.querySelector('option[value="webp"]').remove();
 			formatDeleted = true;
+
+			if (imageFormats.has('jpeg')) {
+				const option = document.createElement('OPTION');
+				option.value = 'mjpg';
+				option.innerHTML = 'MJPEG-AVI Video';
+				videoFormatInput.prepend(option);
+				videoFormatInput.value = 'mjpg';
+			}
 		}
 		if (formatDeleted) {
 			setVideoFormat();
@@ -3406,8 +3413,7 @@ function hasRandomness(enabled) {
 		if (imageFormats.has('webp')) {
 			requireScript('lib/CCapture.webm.min.js');
 		} else {
-			// Library only, no codecs
-			requireScript('lib/CCapture.download.min.js');
+			requireScript('lib/CCapture.mjpg.min.js');
 		}
 
 		let unsavedChanges = !currentFrame.isCurrentFrame();
@@ -3436,7 +3442,7 @@ function hasRandomness(enabled) {
 		qualitySlider.disabled = !lossy;
 		videoQualityReadout.innerHTML = lossy ? qualitySlider.value + '%' : 'N/A';
 
-		if (format !== 'webm') {
+		if (format !== 'webm' && format !== 'mjpg') {
 			requireScript('lib/tar.min.js');
 		}
 	}

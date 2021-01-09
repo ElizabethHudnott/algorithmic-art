@@ -814,7 +814,7 @@ function hasRandomness(enabled) {
 		drawSignatureWhenReady(contextualInfo, true);
 	}
 
-	function progressiveBackgroundGen(preview) {
+	function progressiveBackgroundGen(preview, afterProc) {
 		document.body.classList.add('cursor-progress');
 		const context = drawingContext.twoD;
 		restoreCanvas(context);
@@ -824,7 +824,7 @@ function hasRandomness(enabled) {
 		context.clearRect(0, 0, width, height);
 		transformCanvas(context, width, height, scaledWidth, scaledHeight, rotation);
 		context.globalAlpha = opacity;
-		const afterProc = preview === 0 ? postDraw : drawBackgroundImage;
+		afterProc = afterProc || postDraw;
 		progressiveBackgroundDraw(bgGenerator, drawingContext, scaledWidth, scaledHeight, preview, afterProc);
 	}
 
@@ -2834,7 +2834,7 @@ function hasRandomness(enabled) {
 
 	opacitySlider.addEventListener('input', function (event) {
 		opacity = parseFloat(this.value);
-		progressiveBackgroundGen(1);
+		progressiveBackgroundGen(1, drawBackgroundImage);
 	});
 
 	function opacityListener(event) {
@@ -2847,7 +2847,7 @@ function hasRandomness(enabled) {
 
 	rotationSlider.addEventListener('input', function (event) {
 		rotation = TWO_PI * parseFloat(this.value);
-		progressiveBackgroundGen(1);
+		progressiveBackgroundGen(1, drawBackgroundImage);
 	});
 
 	function rotationListener(event) {
@@ -2875,7 +2875,7 @@ function hasRandomness(enabled) {
 
 	scaleSlider.addEventListener('input', function (event) {
 		scale = parseFloat(this.value);
-		progressiveBackgroundGen(1);
+		progressiveBackgroundGen(1, drawBackgroundImage);
 	});
 
 	function scaleListener(event) {
@@ -3379,15 +3379,18 @@ function hasRandomness(enabled) {
 		}
 
 		const videoFormatInput = document.getElementById('video-format');
+		const picFormatInput = document.getElementById('pic-format');
 		let formatDeleted = false;
 
 		if (!imageFormats.has('jpeg')) {
 			videoFormatInput.querySelector('option[value="jpg"]').remove();
+			picFormatInput.querySelector('option[value="jpg"]').remove();
 			formatDeleted = true;
 		}
 		if (!imageFormats.has('webp')) {
 			videoFormatInput.querySelector('option[value="webm"]').remove();
 			videoFormatInput.querySelector('option[value="webp"]').remove();
+			picFormatInput.querySelector('option[value="webp"]').remove();
 			formatDeleted = true;
 
 			if (imageFormats.has('jpeg')) {
@@ -3450,32 +3453,44 @@ function hasRandomness(enabled) {
 	document.getElementById('video-format').addEventListener('input', setVideoFormat);
 
 	{
-		const notifyInput = document.getElementById('notify-video-render');
+		const notifyVideoInput = document.getElementById('notify-video-render');
+		const notifyPicInput = document.getElementById('notify-pic-render');
 		if (window.Notification) {
 			if (store !== undefined) {
-				notifyInput.checked =
+				notifyVideoInput.checked =
 					Notification.permission === 'granted' &&
-					store.getItem('notify-video-render') === 'true';
+					store.getItem('notify-render') === 'true';
+				notifyPicInput.checked = notifyVideoInput.checked;
 			}
 
-			notifyInput.addEventListener('input', function (event) {
+			function changeNotificationPref(event) {
+				document.getElementById('notify-video-render').checked = this.checked;
+				document.getElementById('notify-pic-render').checked = this.checked;
+
 				if (Notification.permission === 'granted') {
+
 					if (store !== undefined) {
-						store.setItem('notify-video-render', this.checked);
+						store.setItem('notify-render', this.checked);
 					}
+
 				} else if (this.checked) {
+
 					Notification.requestPermission().then(function (permission) {
 						if (permission === 'denied') {
 							document.getElementById('notify-video-render').checked = false;
+							document.getElementById('notify-pic-render').checked = false;
+
 						} else if (permission === 'granted' && store !== undefined) {
-							store.setItem('notify-video-render', document.getElementById('notify-video-render').checked);
+							store.setItem('notify-render', document.getElementById('notify-video-render').checked);
 						}
 					});
 				}
-			});
-
+			};
+			notifyVideoInput.addEventListener('input', changeNotificationPref);
+			notifyPicInput.addEventListener('input', changeNotificationPref);
 		} else {
-			notifyInput.hidden = true;
+			notifyVideoInput.hidden = true;
+			notifyPicInput.hidden = true;
 		}
 	}
 
@@ -3552,7 +3567,7 @@ function hasRandomness(enabled) {
 		}
 	});
 
-	document.getElementById('btn-download').addEventListener('click', function (event) {
+	document.getElementById('btn-render-pic').addEventListener('click', function (event) {
 		const downloadModal = document.getElementById('save-pic-modal');
 		const background = queryChecked(downloadModal, 'paper-type');
 		let saveCanvas;

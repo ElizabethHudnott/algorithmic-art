@@ -18,8 +18,8 @@
 		<select class="form-control form-control-sm" id="carpet-edit-mode">
 			<option value="0" selected>Individual Settings</option>
 			<option value="1">Same Value</option>
-			<option value="2">Diagonals &amp; Middles</option>
-			<option value="3">Cross &amp; Corners</option>
+			<option value="2">Cross</option>
+			<option value="3">X-Shape</option>
 			<option value="4">Inner &amp; Outer</option>
 			<option value="5">L-Shapes</option>
 			<option value="6">Matching L-Shapes</option>
@@ -341,11 +341,11 @@
 						Overidden in some areas, depending on <a href="#" id="carpet-image-opacity-link">filling emphasis</a>.
 					</small>
 				</div>
-			<div class="col-2">
-				<button type="button" class="btn btn-light py-0" data-reset="carpet-image-opacity" title="Reset image opacity">
-					<img src="../img/cross.png" alt="Reset">
-				</button>
-			</div>
+				<div class="col-2">
+					<button type="button" class="btn btn-light py-0" data-reset="carpet-image-opacity" title="Reset image opacity">
+						<img src="../img/cross.png" alt="Reset">
+					</button>
+				</div>
 			</div>
 		</div>
 		<div id="carpet-concentric-opts" class="collapse" aria-expanded="false">
@@ -424,9 +424,14 @@
 			<label class="col-3 col-form-label col-form-label-sm" for="carpet-overlap">
 				Overlap
 			</label>
-			<div class="col-9">
-				<input type="range" min="0" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-overlap">
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.002" value="0" class="form-control-range mt-2" id="carpet-overlap">
 			</div>
+			<div class="col-2">
+					<button type="button" class="btn btn-light py-0" data-reset="carpet-overlap" title="Reset overlap">
+						<img src="../img/cross.png" alt="Reset">
+					</button>
+				</div>
 		</div>
 		<div class="form-row form-group">
 			<fieldset class="col-6" id="carpet-recursion">

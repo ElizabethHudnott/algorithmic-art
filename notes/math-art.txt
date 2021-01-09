@@ -1,5 +1,5 @@
+Phyllotaxis: Make colour tab the default
 Carpet: Allow negative overlap
-Full screen option?
 
 Environment
 -----------
@@ -31,7 +31,6 @@ Anonymize button
 Add credits
 Add URL to signature
 Responsiveness issues
-	turning iPad from landscape to portrait loses modal partially off to the right
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider
 Ability to animate image parameters

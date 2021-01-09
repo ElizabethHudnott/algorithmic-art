@@ -716,31 +716,148 @@
 	<div class="modal-dialog" role="document">
 		<form id="export-form" class="modal-content">
 			<div class="modal-header">
-				<h6 class="modal-title" id="save-pic-modal-title">Download Picture</h6>
+				<h6 class="modal-title" id="save-pic-modal-title">Export Picture</h6>
 				<button type="button" class="window-gadget close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div class="modal-body form-row form-group">
-				<div class="col-1"></div>
-				<div class="col-11">
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color" checked>
-						<label class="form-check-label" for="paper-type-color">
-							Include background colour
-						</label>
+			<div class="modal-body">
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="pic-resolution-x">
+						Resolution
+					</label>
+					<div class="col-6">
+						<div class="input-group input-group-sm">
+							<input type="number" min="40" step="10" list="pic-resolution-x-px" class="form-control" id="pic-resolution-x">
+							<datalist id="pic-resolution-x-px">
+								<option>1920</option>
+								<option>1366</option>
+								<option>1280</option>
+								<option>1024</option>
+								<option>640</option>
+							</datalist>
+							<div class="input-group-prepend input-group-append">
+								<span class="input-group-text">&times;</span>
+							</div>
+							<input type="number" min="40" step="10" list="pic-resolution-y-px" class="form-control" id="pic-resolution-y">
+							<datalist id="pic-resolution-y-px">
+								<option>1080</option>
+								<option>768</option>
+								<option>720</option>
+								<option>480</option>
+								<option>360</option>
+							</datalist>
+						</div>
 					</div>
-					<div class="form-check">
-						<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent">
-						<label class="form-check-label" for="paper-type-transparent">
-							Transparent background
-						</label>
+					<div class="col-auto pl-0">
+						<select id="pic-resolution-units" class="form-control form-control-sm">
+							<option value="px">pixels</option>
+							<option value="cm">cm</option>
+							<option value="in">in</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="pic-dpi">
+						DPI
+					</label>
+					<div class="col-3">
+						<input type="number" min="50" step="50" value="300" disabled class="form-control form-control-sm" id="pic-dpi">
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="pic-format">
+						Format
+					</label>
+					<div class="col-3">
+						<select class="form-control form-control-sm" id="pic-format">
+							<option value="jpg">JPEG</option>
+							<option value="png" selected>PNG</option>
+							<option value="webp">WebP</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<label class="col-3 col-form-label col-form-label-sm" for="pic-quality">
+						Quality
+					</label>
+					<div class="col-7">
+						<input type="range" min="0" max="100" value="85" disabled class="form-control-range mt-2" id="pic-quality" aria-describedby="pic-quality-readout">
+					</div>
+					<div class="col-auto">
+						<output id="pic-quality-readout" class="small">N/A</output>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-3 col-form-label col-form-label-sm">
+						Rendering
+					</div>
+					<div class="col-8">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-render" id="pic-render-resize" value="0" checked>
+							<label class="form-check-label small" for="pic-render-resize">
+								Enlarge or reduce the currently displayed image
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-render" id="pic-render-redraw" value="1">
+							<label class="form-check-label small" for="pic-render-redraw">
+								Create an image as if the window was the this size
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-3 col-form-label col-form-label-sm">
+						Background
+					</div>
+					<div class="col-8">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="paper-type" id="paper-type-color" value="color" checked>
+							<label class="form-check-label small" for="paper-type-color">
+								Include background colour
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="paper-type" id="paper-type-transparent" value="transparent">
+							<label class="form-check-label small" for="paper-type-transparent">
+								Transparent background
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group align-items-center invisible">
+					<div class="col-3 col-form-label col-form-label-sm">
+						Progress
+					</div>
+					<div class="col-1">
+						<img src="img/record.png" width="16" height="16" loading="lazy" alt="Rendering" id="rendering-indicator">
+					</div>
+					<div class="col-auto col-form-label col-form-label-sm" id="pic-progreess">
+					</div>
+				</div>
+				<div class="form-row form-group">
+					<div class="col-3"></div>
+					<div class="col-8">
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="notify-pic-render">
+							<label class="form-check-label small" for="notify-pic-render">
+								Show a pop-up notification when finished.
+							</label>
+						</div>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-			  	<a class="btn btn-primary" href="#" id="btn-download" role="button">Download</a>
+				<button type="button" class="btn btn-secondary" id="btn-cancel-pic-render">
+					Close
+				</button>
+				<button type="button" class="btn btn-dark" hidden id="btn-pause-pic-render" style="width: 7em;"><img width="16" height="16" src="img/control_pause.png" class="mr-1">
+					Pause
+				</button>
+				<button type="button" class="btn btn-primary" id="btn-render-pic">
+					Export Picture
+				</button>
 			</div>
 		</form>
 	</div>
@@ -771,13 +888,13 @@
 					<div class="tab-pane show active h-100" id="help-intro" role="tabpanel" aria-labelledby="help-intro-tab">
 						<h5>Welcome to Mathematical Art With Elizabeth!</h5>
 
-						<p>Mathematical art, also known as algorithmic art, generative art or creative coding, is using geometry to make art. I've created a collection of sketches, each of which produces a simple figure as a starting point for creation. Your task is to adjust the parameters to create something visually appealing. The finished piece will combine my programming, your choice of parameter settings, and in some cases pseudorandom aspects generated by the computer. Most activities are initiated using either the parameters window that will appear shortly or the buttons located in the bottom-right corner. On mobile devices, click on <img src="img/palette.png" width="37" height="37" alt="Palette"> to reveal other buttons. Click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/help.png" alt="Help"></span> at any time to see this window again. Under <i>About this Sketch</i> at the top of this window you can read some introductory information about the currently selected sketch. Use the "What's this?" button <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/what-is-this.svg" alt="What's This?" width="16"></span> to get help with a particular item.</p>
+						<p>Mathematical art, also known as algorithmic art, generative art or creative coding is using geometry to make art. I've created a collection of sketches, each of which produces a simple figure as a starting point for creation. Your task is to adjust the parameters to create something visually appealing. The finished piece will combine my programming, your choice of parameter settings, and in some cases pseudorandom aspects generated by the computer. Most activities are initiated using either the parameters window (which will appear shortly) or the buttons located in the bottom-right corner. On mobile devices, click on <img src="img/palette.png" width="37" height="37" alt="Palette"> to reveal other buttons. Click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/help.png" alt="Help"></span> at any time to see this window again. Under <i>About this Sketch</i> at the top of this window you can read some introductory information about the current sketch. Use the "What's this?" button <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/what-is-this.svg" alt="What's This?" width="16"></span> to get help with a particular item.</p>
 
 						<h5>Animation</h5>
 						Use the parameters window to edit the image. You may need to scroll down to see some parameters. When you're happy with the result then click to capture the image for use as either the start frame <span class="btn btn-sm toolbar-btn btn-black"><img src="img/timeline_marker_start.png" alt="Start Frame" width="16" height="16"></span> or the end frame <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/timeline_marker_end.png" alt="End Frame" width="16" height="16"></span>. That picture will become either the starting point or the finishing point of the animation respectively. After you have one frame marked for animation then change the parameters to design a second image that you'd like to appear at the other end of the animation. Mark this image as an animation frame too. Once you have both a start frame and an end frame marked then you're ready to play back your animation <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/control_play_blue.png" alt="Play" width="16" height="16"></span>. You can make the animation longer or shorter by clicking on the arrow next to the play icon. With a subsequent click on the <span class="btn btn-sm btn-dark d-inline-block">More&hellip;</span> button you can find more advanced animation options.</p>
 
 						<h5>Saving</h5>
-						<p>To save your animation as a video file click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/film.png" alt="Video" width="16" height="16"></span>. Or click <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/picture_save.png" alt="Download" width="16" height="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner.</p>
+						<p>To save your animation as a video file click on <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/film.png" alt="Video" width="16" height="16"></span>. Alternatively, click <span class="btn btn-sm toolbar-btn btn-black d-inline-block"><img src="img/picture_save.png" alt="Download" width="16" height="16"></span> to save the current image as a photo. You can even add an artist's signature to your creations by clicking in the bottom-left corner of the main display.</p>
 
 						<h5>Other Icons</h5>
 						<dl class="row mx-1">
@@ -820,11 +937,11 @@
 								If you distribute images or videos produced by the software to others, including as part of a derivative work, then you must include the text "Made with <span id="site-url"></span>" in an 11pt font or larger and make it a hyperlink if possible.
 							</li>
 							<li class="mb-2">
-								All computer code is copyright &copy;&nbsp;Elizabeth Hudnott 2019–2020, except for third-party libraries found in /lib. All rights reserved.
+								All computer code is copyright &copy;&nbsp;Elizabeth Hudnott 2019–2021, except for third-party libraries found in /lib. All rights reserved.
 							</li>
 						</ol>
 						<p>
-							Contact me via <a href="https://www.facebook.com/MathArtLizzy" target="_blank" rel="noopener">Facebook</a> to arrange alternative licensing if you want to use images or videos for commercial purposes.
+							Contact me via the app's <a href="https://www.facebook.com/MathArtLizzy" target="_blank" rel="noopener">Facebook page</a> to arrange alternative licensing if you want to use images or videos for commercial purposes.
 						</p>
 
 						<p>The background images were produced by <a href="http://www.highresolutiontextures.com/hello-world" target="_blank" rel="noopener">highresolutiontextures.com</a> and other free sites. This site contains icons licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> from <a target="_blank" rel="noopener" href="http://www.fatcow.com/free-icons">fatcow.com</a> and <a target="_blank" rel="noopener" href="https://www.iconshock.com">iconshock</a>. You may use these backgrounds and icons in your own projects.</p>
@@ -844,7 +961,7 @@
 					</div>
 
 					<div class="tab-pane h-100" id="help-sketch" role="tabpanel" aria-labelledby="help-sketch-tab">
-						No sketches have been loaded yet.
+						No sketch has been loaded yet.
 					</div>
 
 				</div>

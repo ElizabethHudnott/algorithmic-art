@@ -161,7 +161,7 @@ export default function Phyllotaxis() {
 
 		optionsDoc.getElementById('phyllotaxis-skip').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
-			if (value >= 0) {
+			if (value > 0) {
 				me.skip = value;
 				generateBackground(0);
 			}

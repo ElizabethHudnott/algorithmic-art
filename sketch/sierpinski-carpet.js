@@ -80,8 +80,8 @@ export default function SierpinskiCarpet() {
 			editModes[1].fill([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);	// All same colour
 
 			const partitions = [];
-			partitions[0] = [[0, 2, 4, 6, 8, 9], [1, 3, 5, 7]];			// Diagonals & Middles
-			partitions[1] = [[0, 2, 6, 8], [1, 3, 4, 5, 7, 9]];			// Cross & Corners
+			partitions[0] = [[0, 2, 6, 8], [1, 3, 4, 5, 7, 9]];			// Cross
+			partitions[1] = [[0, 2, 4, 6, 8, 9], [1, 3, 5, 7]];			// X-Shape
 			partitions[2] = [[0, 1, 2, 3, 5, 6, 7, 8], [4, 9]];			// Inner & Outer
 			partitions[3] = [[0, 1, 3], [2, 6], [5, 7, 8], [4,9]];		// Two L-Shapes
 			partitions[4] = [[0, 1, 3, 5, 7, 8], [2, 6], [4,9]];		// Matching L-Shapes
@@ -317,14 +317,12 @@ export default function SierpinskiCarpet() {
 			return function (event) {
 				const color = colorControls[index].value;
 				const [r, g, b] = hexToRGBA(color);
-				const alpha = parseFloat(opacitySliders[index].value);
-				const colorWithAlpha = rgba(r, g, b, alpha);
 				const indicies = editModes[parseInt(editModeInput.value)][index];
 				for (let colorIndex of indicies) {
+					const alpha = parseFloat(opacitySliders[colorIndex].value);
+					const colorWithAlpha = rgba(r, g, b, alpha);
 					colorControls[colorIndex].value = color;
-					opacitySliders[colorIndex].value = alpha;
 					if (colorSetInput.value === 'f') {
-						me.foreOpacities[index] = alpha;
 						colorIndex += 20;
 					}
 					me.colors[colorIndex] = colorWithAlpha;
@@ -338,8 +336,27 @@ export default function SierpinskiCarpet() {
 			item.addEventListener('input', changeColor(index, 0));
 		});
 
+		function changeOpacity(index, preview) {
+			return function (event) {
+				const alpha = parseFloat(opacitySliders[index].value);
+				const indicies = editModes[parseInt(editModeInput.value)][index];
+				for (let colorIndex of indicies) {
+					const color = colorControls[colorIndex].value;
+					const [r, g, b] = hexToRGBA(color);
+					const colorWithAlpha = rgba(r, g, b, alpha);
+					opacitySliders[colorIndex].value = alpha;
+					if (colorSetInput.value === 'f') {
+						me.foreOpacities[index] = alpha;
+						colorIndex += 20;
+					}
+					me.colors[colorIndex] = colorWithAlpha;
+				}
+				generateBackground(preview);
+			};
+		}
+
 		for (let i = 0; i < opacitySliders.length; i++) {
-			opacitySliders[i].addEventListener('input', changeColor(i, 1));
+			opacitySliders[i].addEventListener('input', changeOpacity(i, 1));
 			opacitySliders[i].addEventListener('pointerup', fullRedraw);
 			opacitySliders[i].addEventListener('keyup', fullRedraw);
 		};
@@ -494,7 +511,7 @@ export default function SierpinskiCarpet() {
 				if (!me.recursive[i]) {
 					continue;
 				}
-				if (i === 4 && me.overlap > 0) {
+				if (i === 4 && me.overlap !== -1) {
 					numPieces++;
 					continue;
 				}
@@ -548,9 +565,7 @@ export default function SierpinskiCarpet() {
 			}
 			middleHeightInput.value = me.middleHeight;
 
-			if (value === 9) {
-				me.overlap = 0;
-			} else if (me.overlap === 0) {
+			if (value !== 9 && me.overlap <= 0) {
 				me.overlap = 0.5;
 			}
 			overlapInput.value = me.overlap;
@@ -944,7 +959,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	const overlap = this.overlap;
 	const colors = this.colors;
 	const filling = this.filling;
-	const bipartitePattern = middleWidth === 0 && middleHeight === 0 ? 8 : 2;
 
 	const left = Math.round(this.left * (canvasWidth - drawWidth));
 	const top = Math.round(this.top * (canvasHeight - drawHeight));
@@ -965,10 +979,13 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 	let applyOpacity = true;
 	const baseOpacity = context.globalAlpha;
 
-	const spacingNumerator = Math.min(
-		drawWidth * (1/3 + overlap / 6),
-		drawHeight * (1/3 + overlap / 6),
-	) / this.concentricDensity;
+	let spacingNumerator = Math.min(drawWidth, drawHeight);
+	if (overlap > 0) {
+		spacingNumerator *= (1/3 + overlap / 6);
+	} else {
+		spacingNumerator *= (1 + overlap) / 3;
+	}
+	spacingNumerator /= this.concentricDensity;
 
 	for (let depth = 0; depth <= maxDepth; depth++) {
 		const nextQueue = [];
@@ -1006,7 +1023,7 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				context.save();
 				tile.clip(context);
 			}
-			let patternLocation = (this.patternLocations & (2 ** (relationship % bipartitePattern))) !== 0;
+			let patternLocation = (this.patternLocations & (2 ** (relationship % 2))) !== 0;
 			if (relationship === 9) {
 				patternLocation = this.patternedCentre;
 			}
@@ -1024,10 +1041,8 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 
 			const remainingWidth = width * (1 - middleWidth);
 			width = width * middleWidth;
-			const width1 = width;
 			const remainingHeight = height * (1 - middleHeight);
 			height = height * middleHeight;
-			const height1 = height;
 			const width0 = Math.round(remainingWidth / 2 * lopsidednessX);
 			const height0 = Math.round(remainingHeight / 2 * lopsidednessY);
 			const x1 = x + width0;
@@ -1047,16 +1062,34 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 			const width2 = remainingWidth - width0;
 			const height2 = remainingHeight - height0;
 
-			const leftOverlap = width0 * (1 - middleWidth) / 2 * (2 - lopsidednessX) * overlap;
-			const rightOverlap = width2 * (1 - middleWidth) / 2 * lopsidednessX * overlap;
-			const topOverlap = height0 * (1 - middleHeight) / 2 * (2 - lopsidednessY) * overlap;
-			const bottomOverlap = height2 * (1 - middleHeight) / 2 * lopsidednessY * overlap;
-			const centreX = x1 - leftOverlap;
-			const centreY = y1 - topOverlap;
-			let centreWidth = width + leftOverlap + rightOverlap;
-			let centreHeight = height + topOverlap + bottomOverlap;
-			roundedX = Math.round(centreX);
-			roundedY = Math.round(centreY);
+			let leftOverlap, rightOverlap, topOverlap, bottomOverlap;
+			let centreX, centreY, centreWidth, centreHeight;
+			if (overlap > 0) {
+				leftOverlap = width0 * (1 - middleWidth) / 2 * (2 - lopsidednessX) * overlap;
+				rightOverlap = width2 * (1 - middleWidth) / 2 * lopsidednessX * overlap;
+				topOverlap = height0 * (1 - middleHeight) / 2 * (2 - lopsidednessY) * overlap;
+				bottomOverlap = height2 * (1 - middleHeight) / 2 * lopsidednessY * overlap;
+				centreX = x1 - leftOverlap;
+				centreY = y1 - topOverlap;
+				centreWidth = width + leftOverlap + rightOverlap;
+				centreHeight = height + topOverlap + bottomOverlap;
+				roundedX = Math.round(centreX);
+				roundedY = Math.round(centreY);
+				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
+				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
+			} else {
+				const filledSize = 1 + overlap;
+				centreWidth = filledSize * width;
+				centreHeight = filledSize * height;
+				centreX = x1 + width / 2 - centreWidth / 2;
+				centreY = y1 + height / 2 - centreHeight / 2;
+				roundedX = Math.round(centreX);
+				roundedY = Math.round(centreY);
+				const borderX = roundedX - x1;
+				roundedWidth = Math.round(width - 2 * borderX);
+				const borderY = roundedY - y1;
+				roundedHeight = Math.round(height - 2 * borderY);
+			}
 
 			if (centreWidth >= 1 || centreHeight >= 1) {
 				if (centreWidth < 1) {
@@ -1064,8 +1097,6 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 				} else if (centreHeight < 1) {
 					centreHeight = 1;
 				}
-				roundedWidth = Math.max(Math.round(centreWidth + centreX - roundedX), 1);
-				roundedHeight = Math.max(Math.round(centreHeight + centreY - roundedY), 1);
 				let clipPath;
 
 				if (useCutouts) {
@@ -1205,11 +1236,11 @@ SierpinskiCarpet.prototype.generate = function* (context, canvasWidth, canvasHei
 					centreTile.clipPath = clipPath;
 					nextQueue.push(centreTile);
 				}
+				// End of filling drawing
 			} else {
 				roundedWidth = 0;
 				roundedHeight = 0;
 			}
-
 			const overlapX2 = roundedX + roundedWidth;
 			const overlapY2 = roundedY + roundedHeight;
 

@@ -1,6 +1,10 @@
 Terminology
 	Edge matching puzzle
 
+Basic Parameters
+	Cell width
+	Cell height
+
 Anchor points:
 	Corners
 	Middle of edges
@@ -18,11 +22,26 @@ Colours
 Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
 
-Tile Sets 3, 4 & 5
-	Like tile sets 0, 1 & 2 but every anchor point is either connected to another anchor point or is rounded off with a nub.
+Tile Sets
+	No.	Reference	Shape	Filled
+	0	Corners 	Line 	No
+	1	Corners 	Curve 	No
+	2	Middles		Line 	No
+	3	Middles		Curve 	No
+	4	Corners 	Line 	Yes*
+	5	Corners 	Curve 	Yes*
+	6	Middles		Line 	Yes+
+	7	Middles		Curve 	Yes+
+	* The anchor points are actually the mid-points
+	+ The anchor points are actually the 1/3 and 2/3 points
 
-Tile Set 6 (Wang-esque) and Tile Set 7 (Spots)
+Tile Sets Variants
+	Draw / Don't draw path outlines
+	Round off the ends of lines by drawing into a neighbouring cell (or don't)
+
+Tile Set 3 (Wang-esque) and Tile Set 4 (Spots)
 	Background colour flows like the other colours
+	But no two colours can be the same
 
 Tsuro tiles
 	8 anchor points (1/3 and 2/3 along each edge)

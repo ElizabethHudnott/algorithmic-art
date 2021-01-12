@@ -8,6 +8,7 @@ Basic Parameters
 Anchor points:
 	Corners
 	Middle of edges
+	1/3 and 2/3 along each edge
 
 3 or 4 lines meeting at the corners of several tiles
 	Use probabilities to decide whether to use 1, 2, 3 or 4 colours (flow / don't flow)
@@ -17,7 +18,7 @@ Colours
 	Colour varies along the length of a line
 		Fixed hue (except when fading between hues at a t-junction)
 		Saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
-	Upper 8 basic colours are reduced brightness versions of the lower 8
+	VGA / retro style default palette
 
 Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
@@ -39,8 +40,8 @@ Tile Sets Variants
 	Draw / Don't draw path outlines
 	Round off the ends of lines by drawing into a neighbouring cell (or don't)
 
-Tile Set 3 (Wang-esque) and Tile Set 4 (Spots)
-	Background colour flows like the other colours
+Filled Tile Sets
+	Background colour flows like the other colours (or isn't used at all)
 	But no two colours can be the same
 
 Tsuro tiles

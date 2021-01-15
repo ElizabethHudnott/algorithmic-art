@@ -193,7 +193,7 @@ More systematic tile numberings (than currently in the folders)
 	Tile Set 7
 		8 decimal digit code
 		One shape digit per quadrant
-			0	Rectangle
+			0	Rectangle or continuation of half ellipse
 			1	Quarter circle facing inwards
 			2	Quarter circle facing outwards
 		One colour digit per quadrant (0-4)

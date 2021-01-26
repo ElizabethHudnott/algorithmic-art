@@ -22,6 +22,8 @@ Colours
 	Colour varies along the length of a line
 		Fixed hue (except when fading between hues at a t-junction)
 		Saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
+	OR across the width of a line (shaded like a pipe)
+	OR mix different hues from different tiles together
 	VGA / retro style default palette
 
 Tile 18 (cross)
@@ -192,9 +194,17 @@ More systematic tile numberings (than currently in the folders)
 
 	Tile Set 7
 		8 decimal digit code
-		One shape digit per quadrant
-			0	Rectangle or continuation of half ellipse
-			1	Quarter circle facing inwards
-			2	Quarter circle facing outwards
-		One colour digit per quadrant (0-4)
-			Areas not covered by a shape described above are drawn in Colour 0
+		One shape+rotation digit per quadrant
+			0	Nothing
+			1	Quarter circle, Orientation 0
+			2	Quarter circle, Orientation 1
+			3	Quarter circle, Orientation 2
+			4	Quarter circle, Orientation 3
+			5	Quarter ellipse, Orientation 0
+			6	Quarter ellipse, Orientation 1
+			7	Quarter ellipse, Orientation 2
+			8	Quarter ellipse, Orientation 3
+			9	Rectangle
+		Two colour digits per quadrant (0-7)
+			One for the area covered by the shape described.
+			One for its inverse shape / the background.

@@ -11,11 +11,14 @@ Anchor points:
 	1/3 and 2/3 along each edge*
 	* Notional positions that can be adjusted to any symmetric formation, e.g. 1/4 and 3/4
 
+0	1	2	3	4
+15				5
+14				6
+13				7
+12	11	10	9	8
+
 3 or 4 lines meeting at the corners of several tiles
 	Use probabilities to decide whether to use 1, 2, 3 or 4 colours (flow / don't flow)
-
-"A or B" style connections
-	E.g. For Tile Set 7 it should be able to connect a semicircle with just one quarter circle
 
 Colours
 	A chosen number of basic colours (1-16 plus background colour)
@@ -52,8 +55,14 @@ Tile Sets Variants
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
 	Probability parameter for flow/don't flow
-	Colours in the palette organized into contrasting pairs
-	Could assign colours and shapes based upon colours in a bitmap image (https://newscentral.africa/geometric-art-litema-sesotho/)
+	Modes
+		1 Random
+		2 Random but the same for each tile of the same type
+		3 Flowing
+		4 Assign colours and shapes based upon colours in a bitmap image (https://newscentral.africa/geometric-art-litema-sesotho/)
+	"A or B" style connections
+		E.g. For Tile Set 7 it should be able to connect a semicircle with just one quarter circle
+	Option to have the colours in the palette organized into contrasting pairs so the same colours always contrast each other.
 
 Filled Tile Sets
 	Background colour flows like the other colours (or isn't used at all)
@@ -64,7 +73,8 @@ Tsuro tiles
 	Anchor points joined in pairs
 
 Custom tileset
-	Uploaded from a multiple graphics files
+	Uploaded from multiple graphics files
+	Recolourable?
 
 Tile Selection Order
 	Outwards from the centre of the screen (so that it zooms from the centre)

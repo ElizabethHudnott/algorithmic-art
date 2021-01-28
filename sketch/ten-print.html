@@ -1,57 +1,47 @@
 <div class="form-row form-group">
-	<div class="col-1"></div>
-	<label class="col-3 col-form-label" for="ten-print-zoom">
-		Zoom Out
+	<label class="col-3 col-form-label col-form-label-sm" for="ten-print-side-length">
+		Size
 	</label>
-	<div class="col-7">
-		<input type="range" id="ten-print-zoom" min="0" max="10" step="0.1" value="1" class="form-control-range mt-2">
+	<div class="col-3">
+		<input type="number" min="1" value="25" id="ten-print-side-length" class="form-control form-control-sm">
+	</div>
+	<label class="col-3 col-form-label col-form-label-sm second-col" for="ten-print-cell-aspect">
+		Stretch
+	</label>
+	<div class="col-3">
+		<input type="number" min="0" value="1" step="0.1" id="ten-print-cell-aspect" class="form-control form-control-sm">
 	</div>
 </div>
 
 <div class="form-row form-group">
-	<div class="col-1"></div>
-	<label class="col-3 col-form-label" for="ten-print-angle">
-		Angle
-	</label>
-	<div class="col-7">
-		<input type="range" id="ten-print-angle" min="0" max="90" step="0.1" value="46.9" class="form-control-range mt-2">
-	</div>
-</div>
-
-<div class="form-row form-group">
-	<div class="col-1"></div>
-	<label class="col-3 col-form-label" for="ten-print-line-width">
+	<label class="col-3 col-form-label col-form-label-sm" for="ten-print-line-width">
 		Line Width
 	</label>
-	<div class="col-7">
+	<div class="col-9">
 		<input type="range" id="ten-print-line-width" min="0" max="1" step="0.01" value="0.12" class="form-control-range mt-2">
 	</div>
 </div>
 
 <div class="form-row form-group">
-	<div class="col-1"></div>
 	<label class="col-3 col-form-label" for="ten-print-gap-probability">
 		Gaps
 	</label>
-	<div class="col-7">
+	<div class="col-9">
 		<input type="range" id="ten-print-gap-probability" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2">
 	</div>
 </div>
 
 <div class="form-row form-group">
-	<div class="col-1"></div>
 	<label class="col-3 col-form-label" for="ten-print-probability">
 		Up Strokes
 	</label>
-	<div class="col-7">
+	<div class="col-9">
 		<input type="range" id="ten-print-probability" min="0" max="1" step="0.01" value="0.5" class="form-control-range mt-2">
 	</div>
 </div>
 
 <div class="form-row mb-3">
-	<div class="col-1"></div>
 	<div class="col-3">Colours</div>
-	<div class="col-1"></div>
 	<div class="col-3">
 		<input type="color" value="#887ecb">
 	</div>
@@ -61,7 +51,7 @@
 </div>
 
 <div class="form-row mb-3">
-	<div class="col-5"></div>
+	<div class="col-3"></div>
 	<div class="col-3">
 		<input type="color" value="#887ecb">
 	</div>

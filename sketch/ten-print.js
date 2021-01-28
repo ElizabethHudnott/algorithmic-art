@@ -8,14 +8,21 @@ export default function TenPrint() {
 	this.helpFile = 'help/ten-print.html';
 
 	this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {
-		optionsDoc.getElementById('ten-print-zoom').addEventListener('input', function (event) {
-			me.zoomOut = parseFloat(this.value);
-			generateBackground(1);
+
+		optionsDoc.getElementById('ten-print-side-length').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.sideLength = value;
+				generateBackground(0);
+			}
 		});
 
-		optionsDoc.getElementById('ten-print-angle').addEventListener('input', function (event) {
-			me.angle = parseFloat(this.value) * Math.PI / 180;
-			generateBackground(1);
+		optionsDoc.getElementById('ten-print-cell-aspect').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.cellAspect = value;
+				generateBackground(0);
+			}
 		});
 
 		optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
@@ -47,8 +54,8 @@ export default function TenPrint() {
 		return optionsDoc;
 	});
 
-	this.angle = Math.atan2(1, 0.936);
-	this.zoomOut = 1;
+	this.sideLength = 25;
+	this.cellAspect = 1;
 	// Probability of a cell being left blank
 	this.blankProbability = 0;
 	// Probability of a forward slash given not blank
@@ -65,20 +72,18 @@ TenPrint.prototype.animatable = {
 };
 
 TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
-	const cellsDownScreen = 25;
-	const tan = Math.tan(Math.max(this.angle, 0.0001));
-	const sqrTan = Math.min(Math.sqrt(tan), 1);
-	const zoom = this.zoomOut / sqrTan;
-
-	const heightProportion = canvasHeight / screen.height;
-	let cellsDownCanvas = heightProportion * cellsDownScreen * zoom;
-	const cellHeight = Math.min(Math.max(Math.round(canvasHeight / cellsDownCanvas), 2), canvasHeight);
-	cellsDownCanvas = Math.max(Math.round(canvasHeight / cellHeight), 1);
-
-	const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
-	const cellsAcrossCanvas = Math.max(Math.round(canvasWidth / cellWidth), 1);
-
-	console.log(`${cellWidth}x${cellHeight}`);
+	let cellWidth, cellHeight, cellsDownCanvas, cellsAcrossCanvas;
+	if (canvasWidth >= canvasHeight) {
+		cellHeight = Math.max(Math.trunc(canvasHeight / this.sideLength), 2);
+		cellsDownCanvas = Math.ceil(canvasHeight / cellHeight);
+		cellWidth = Math.max(Math.round(cellHeight * this.cellAspect), 2);
+		cellsAcrossCanvas = Math.ceil(canvasWidth / cellWidth);
+	} else {
+		cellWidth = Math.max(Math.round(canvasWidth / this.sideLength), 2);
+		cellsAcrossCanvas = Math.ceil(canvasWidth / cellWidth);
+		cellHeight = Math.max(Math.round(cellWidth / this.cellAspect), 2);
+		cellsDownCanvas = Math.ceil(canvasHeight / cellHeight);
+	}
 
 	const diagonalDist = Math.hypot(canvasWidth, canvasHeight);
 	const style1 = context.createRadialGradient(0, canvasHeight, 0, 0, canvasHeight, diagonalDist);
@@ -88,14 +93,14 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 	style2.addColorStop(0, this.colors[3]);
 	style2.addColorStop(1, this.colors[0]);
 
-	const lineWidth = Math.max(Math.round(this.strokeRatio * cellHeight / sqrTan) / 2, 0.5);
+	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.hypot(cellWidth, cellHeight)) / 2, 0.5);
 	const lineWidth1 = Math.trunc(lineWidth);
 	const lineWidth2 = Math.ceil(lineWidth);
 
 	let blankProbability = this.blankProbability;
 	let blankSpacing = blankProbability === 0 ? 0 : Math.max(Math.trunc(1 / blankProbability), 1);
 	let spacingShift;
-	if (blankProbability < 0.06 && this.zoomOut > 3) {
+	if (blankProbability < 0.06) {
 		blankSpacing = 1;
 		spacingShift = 0;
 	} else {

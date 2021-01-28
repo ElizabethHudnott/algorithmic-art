@@ -78,6 +78,8 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 	const cellWidth = Math.max(Math.min(Math.round(cellHeight / tan), 200000), 2);
 	const cellsAcrossCanvas = Math.max(Math.round(canvasWidth / cellWidth), 1);
 
+	console.log(`${cellWidth}x${cellHeight}`);
+
 	const diagonalDist = Math.hypot(canvasWidth, canvasHeight);
 	const style1 = context.createRadialGradient(0, canvasHeight, 0, 0, canvasHeight, diagonalDist);
 	style1.addColorStop(0, this.colors[2]);

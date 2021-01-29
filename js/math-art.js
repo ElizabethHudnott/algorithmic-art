@@ -1244,11 +1244,22 @@ function hasRandomness(enabled) {
 		if (controlType === 'range' || controlType === 'number') {
 			value = parseFloat(value);
 		}
-		const property = idToProperty(id, true);
-		if (bgGenerator.isShader) {
-			drawingContext.setProperty(bgGenerator, property, value);
+		let match = id.match(/-(\d+)$/);
+		let property = idToProperty(id, true);
+		if (!(property in bgGenerator) && match !== null) {
+			property = property.slice(0, -match[1].length);
+			const index = parseInt(match[1]);
+			if (bgGenerator.isShader) {
+				drawingContext.setPropertyElement(bgGenerator, property, index, value);
+			} else {
+				bgGenerator[property][index] = value;
+			}
 		} else {
-			bgGenerator[property] = value;
+			if (bgGenerator.isShader) {
+				drawingContext.setProperty(bgGenerator, property, value);
+			} else {
+				bgGenerator[property] = value;
+			}
 		}
 		progressiveBackgroundGen(0);
 	}

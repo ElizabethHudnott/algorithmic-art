@@ -1,41 +1,17 @@
-/**Inspired by Daniel Shiffman's Coding Challenge #76 (https://thecodingtrain.com/CodingChallenges/076-10print.html)
- * which he developed from the book 10 PRINT (https://10print.org/).
- */
-export default function TenPrint() {
+export default function TruchetTiles() {
 	const me = this;
 	this.title = '10 PRINT';
 	hasRandomness(true);
-	this.helpFile = 'help/ten-print.html';
+	this.helpFile = 'help/truchet-tiles.html';
 
-	this.optionsDocument = downloadFile('ten-print.html', 'document').then(function (optionsDoc) {
+	this.optionsDocument = downloadFile('truchet-tiles.html', 'document').then(function (optionsDoc) {
 
-		optionsDoc.getElementById('ten-print-side-length').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (value > 0) {
-				me.sideLength = value;
-				generateBackground(0);
-			}
-		});
-
-		optionsDoc.getElementById('ten-print-cell-aspect').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (value > 0) {
-				me.cellAspect = value;
-				generateBackground(0);
-			}
-		});
-
-		optionsDoc.getElementById('ten-print-line-width').addEventListener('input', function (event) {
-			me.strokeRatio = parseFloat(this.value);
-			generateBackground(1);
-		});
-
-		optionsDoc.getElementById('ten-print-gap-probability').addEventListener('input', function (event) {
+		optionsDoc.getElementById('tiles-gap-probability').addEventListener('input', function (event) {
 			me.blankProbability = parseFloat(this.value);
-			generateBackground(1);
+			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('ten-print-probability').addEventListener('input', function (event) {
+		optionsDoc.getElementById('tiles-probability').addEventListener('input', function (event) {
 			me.probability = parseFloat(this.value);
 			generateBackground(1);
 		});
@@ -43,7 +19,7 @@ export default function TenPrint() {
 		function changeColor(index) {
 			return function (event) {
 				me.colors[index] = this.value;
-				generateBackground(1);
+				generateBackground(0);
 			};
 		}
 
@@ -51,11 +27,69 @@ export default function TenPrint() {
 			item.addEventListener('input', changeColor(index));
 		});
 
+		optionsDoc.getElementById('tiles-side-length').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.sideLength = value;
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('tiles-cell-aspect').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.cellAspect = value;
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('tiles-line-width').addEventListener('input', function (event) {
+			me.strokeRatio = parseFloat(this.value);
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-shear-0').addEventListener('input', function (event) {
+			me.shear[0] = parseFloat(this.value);
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-shear-1').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (me.shear[0] === me.shear[1] / 2) {
+				me.shear[0] = value / 2;
+				document.getElementById('tiles-shear-0').value = value / 2;
+			}
+			me.shear[1] = value;
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-shear-2').addEventListener('input', function (event) {
+			me.shear[2] = parseFloat(this.value);
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-shear-3').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (me.shear[3] === me.shear[2] / 2) {
+				me.shear[2] = value / 2;
+				document.getElementById('tiles-shear-2').value = value / 2;
+			}
+			me.shear[3] = value;
+			generateBackground(0);
+		});
+
 		return optionsDoc;
 	});
 
 	this.sideLength = 25;
 	this.cellAspect = 1;
+	/*Shearing. Normal range of values is 0-1.
+	 * Element 0: X displacement for the middle
+	 * Element 1: X displacement for the bottom
+	 * Element 2: Y-Shear for the left half
+	 * Element 3: Y-Shear for the right half;
+	 */
+	this.shear = [0, 0, 0, 0];
 	// Probability of a cell being left blank
 	this.blankProbability = 0;
 	// Probability of a forward slash given not blank
@@ -66,13 +100,13 @@ export default function TenPrint() {
 	this.strokeRatio = 0.12;
 }
 
-TenPrint.prototype.animatable = {
+TruchetTiles.prototype.animatable = {
 	'continuous': [
 		'colors', 'strokeRatio'
 	]
 };
 
-TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
+TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let cellWidth, cellHeight, cellsDownCanvas, cellsAcrossCanvas;
 	if (canvasWidth >= canvasHeight) {
 		cellHeight = Math.max(Math.trunc(canvasHeight / this.sideLength), 2);
@@ -84,6 +118,29 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 		cellsAcrossCanvas = Math.ceil(canvasWidth / cellWidth);
 		cellHeight = Math.max(Math.round(cellWidth / this.cellAspect), 2);
 		cellsDownCanvas = Math.ceil(canvasHeight / cellHeight);
+	}
+
+	const shear = new Array(3);
+	shear[0] = this.shear[0] * cellWidth;
+	shear[1] = this.shear[1] * cellWidth - shear[0];
+	const totalShearX = shear[0] + shear[1];
+	shear[2] = this.shear[2] * cellHeight;
+	shear[3] = this.shear[3] * cellHeight - shear[2];
+	const totalShearY = shear[2] + shear[3];
+	let minX = -totalShearX * cellsDownCanvas;
+	let minY = -totalShearY * cellsAcrossCanvas;
+	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth);
+	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight);
+	minX = Math.min(minX, 0);
+	minY = Math.min(minY, 0);
+	//Chevrons
+	if ((shear[0] > 0 && shear[1] < 0) || (shear[0] < 0 && shear[1] > 0)) {
+		minX--;
+		cellsAcrossCanvas += 2;
+	}
+	if ((shear[2] > 0 && shear[3] < 0) || (shear[2] < 0 && shear[3] > 0)) {
+		minY--;
+		cellsDownCanvas += 2;
 	}
 
 	const tiles = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
@@ -170,12 +227,11 @@ TenPrint.prototype.generate = function* (context, canvasWidth, canvasHeight, pre
 		}
 	}
 
-	const shear = [0, 0, 0, 0];
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
-		const y = cellY * cellHeight;
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-			const x = cellX * cellWidth;
+			const x = minX + cellX * cellWidth + cellY * totalShearX;
+			const y = minY + cellY * cellHeight + cellX * totalShearY;
 			tileMapRow[cellX].draw(context, x, y, cellWidth, cellHeight, lineWidth, shear, this);
 		}
 	}
@@ -263,10 +319,7 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 }
 
 class BlankTile extends TileType {
-	static INSTANCE = new (function () {
-		this.tileType = new BlankTile();
-		this.flowColor = function () { };
-	});
+	static INSTANCE = new Tile(new BlankTile());
 
 	constructor() {
 		super(new Map());

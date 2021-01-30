@@ -1,6 +1,6 @@
 export default function TruchetTiles() {
 	const me = this;
-	this.title = '10 PRINT';
+	this.title = 'Tiling';
 	hasRandomness(true);
 	this.helpFile = 'help/truchet-tiles.html';
 
@@ -105,6 +105,58 @@ TruchetTiles.prototype.animatable = {
 		'colors', 'strokeRatio'
 	]
 };
+
+TruchetTiles.prototype.connectedTiles = function (x, y, port, width, height) {
+	const locations = [];
+	switch (port) {
+	case 0:
+		locations.push([x - 1, y, 4]);
+		locations.push([x, y - 1, 12]);
+		locations.push([x - 1, y - 1, 8]);
+		break;
+	case 1:
+	case 2:
+	case 3:
+		locations.push([x, y - 1, 12 - port]);
+		break;
+	case 4:
+		locations.push([x + 1, y, 0]);
+		locations.push([x, y - 1, 8]);
+		locations.push([x + 1, y - 1, 12]);
+		break;
+	case 5:
+	case 6:
+	case 7:
+		locations.push([x + 1, y, 20 - port]);
+		break;
+	case 8:
+		locations.push([x + 1, y, 12]);
+		locations.push([x, y + 1, 4]);
+		locations.push([x + 1, y + 1, 0]);
+		break;
+	case 9:
+	case 10:
+	case 11:
+		locations.push([x, y + 1, 12 - port]);
+		break;
+	case 12:
+		locations.push([x - 1, y, 8]);
+		locations.push([x, y + 1, 0]);
+		locations.push([x - 1, y + 1, 4]);
+		break;
+	default:
+		locations.push([x - 1, y, 20 - port]);
+	}
+	const filteredLocations = [];
+	for (let location of locations) {
+		const x = location[0];
+		const y = location[1];
+		if (x >= 0 && x < width && y >= 0 && y < height) {
+			filteredLocations.push(location);
+		}
+	}
+	return filteredLocations;
+}
 
 TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let cellWidth, cellHeight, cellsDownCanvas, cellsAcrossCanvas;
@@ -223,7 +275,32 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-			tileMapRow[cellX].randomizeColors(this.numColors);
+			const tile = tileMapRow[cellX];
+			for (let port of tile.ports()) {
+				const color = Math.trunc(random.next() * this.numColors);
+				let queue = [[cellX, cellY, port]];
+				do {
+					let newQueue = [];
+					for (let [x, y, inPort] of queue) {
+						const queuedTile = tileMap[y][x];
+						let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
+						for (let location of connected) {
+							const x2 = location[0];
+							const y2 = location[1];
+							const port = location[2];
+							if (!tileMap[y2][x2].isColored(port)) {
+								newQueue.push(location);
+							}
+						}
+						const outPorts = queuedTile.flowColor(inPort, color, 1);
+						for (let outPort of outPorts) {
+							connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
+							newQueue = newQueue.concat(connected);
+						}
+					}
+					queue = newQueue;
+				} while (queue.length > 0);
+			}
 		}
 	}
 
@@ -253,12 +330,10 @@ class TileType {
 			for (let connectee of connectees) {
 				let reverseConnections = connections.get(connectee);
 				if (reverseConnections === undefined) {
-					reverseConnections = [];
+					reverseConnections = new Set();
 					connections.set(connectee, reverseConnections);
 				}
-				if (!reverseConnections.includes(connector)) {
-					reverseConnections.push(connector);
-				}
+				reverseConnections.add(connector);
 			}
 		}
 	}
@@ -270,7 +345,11 @@ class Tile {
 		this.colors = new Map();
 	}
 
-	flowColor(inPort, color) {
+	isColored(port) {
+		return this.colors.has(port);
+	}
+
+	flowColor(inPort, color, probability) {
 		if (this.colors.has(inPort)) {
 			return [];
 		}
@@ -280,19 +359,18 @@ class Tile {
 		if (connected !== undefined) {
 			for (let outPort of connected) {
 				if (!this.colors.has(outPort)) {
-					this.colors.set(outPort, color);
-					outPorts.push(outPort);
+					if (random.next() < probability) {
+						this.colors.set(outPort, color);
+						outPorts.push(outPort);
+					}
 				}
 			}
 		}
 		return outPorts;
 	}
 
-	randomizeColors(numColors) {
-		for (let port of this.tileType.connections.keys()) {
-			const colorNum = Math.trunc(Math.random() * numColors);
-			this.colors.set(port, colorNum);
-		}
+	ports() {
+		return this.tileType.connections.keys();
 	}
 
 	draw(context, x, y, cellWidth, cellHeight, lineWidth, shear, generator) {
@@ -333,12 +411,15 @@ class BlankTile extends TileType {
 class DiagonalLineTile extends TileType {
 	constructor(str) {
 		const connections = new Map();
+		const destinations = new Set();
 		if (str === '0') {
 			// Forward slash
-			connections.set(4, [12]);
+			destinations.add(12);
+			connections.set(4, destinations);
 		} else {
 			// Backslash
-			connections.set(0, [8]);
+			destinations.add(8);
+			connections.set(0, destinations);
 		}
 		super(connections);
 		this.type = str;
@@ -369,3 +450,48 @@ class DiagonalLineTile extends TileType {
 	}
 
 }
+
+class MiddleLineTile extends TileType {
+	constructor(str) {
+		const connections = new Map();
+		for (let i = 0; i < 4; i++) {
+			if (str[i] !== '0') {
+				const destinations = new Set();
+				destinations.add(((i + 1) * 4 + 2) % 16);
+				connections.set(i * 4 + 2, destinations);
+			}
+		}
+		const intoCentre = new Set();
+		for (let i = 0; i < 4; i++) {
+			if (str[i + 4] !== '0') {
+				intoCentre.add(i);
+			}
+		}
+		for (let i of intoCentre) {
+			let connected = connections.get(i * 4 + 2);
+			if (connected === undefined) {
+				connected = new Set();
+				connections.set(i * 4 + 2, connected);
+			}
+			for (let j of intoCentre) {
+				if (i === j) {
+					continue;
+				}
+				if (str[i + 4] === str[j + 4]) {
+					connected.add(j * 4 + 2);
+				}
+			}
+		}
+		super(connections);
+		this.curved = parseInt(str.slice(-1), 16);
+	}
+
+	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
+		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
+		const lineWidth1 = Math.trunc(lineWidth);
+		const lineWidth2 = Math.ceil(lineWidth);
+
+	}
+
+}
+

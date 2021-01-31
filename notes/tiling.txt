@@ -54,7 +54,12 @@ Tile Sets Variants
 
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
-	Probability parameter for flow/don't flow
+	Probability parameters for flow/don't flow
+		Flow through a tile to another port / flow backwards from start point
+		Connections at tile corners (2 probability distributions)
+			Max Directions	Option 1	Option 2	Option 3
+			3				Straight 	Bent 		T-shape
+			4				Straight 	Bent 		Cross
 	Modes
 		1 Random
 		2 Random but the same for each tile of the same type

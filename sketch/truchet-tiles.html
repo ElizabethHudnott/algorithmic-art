@@ -9,6 +9,11 @@
 			Grid
 		</a>
 	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="tiles-color-tab" data-toggle="tab" href="#tiles-color" role="tab" aria-controls="tiles-color" aria-selected="false">
+			Colours
+		</a>
+	</li>
 </ul>
 
 <div class="tab-content">
@@ -29,24 +34,6 @@
 				<input type="range" id="tiles-probability" min="0" max="1" step="0.01" value="0.5" class="form-control-range mt-2">
 			</div>
 		</div>
-		<div class="form-row mb-3">
-			<div class="col-3 col-form-label col-form-label-sm">Colours</div>
-			<div class="col-3">
-				<input type="color" value="#887ecb">
-			</div>
-			<div class="col-3">
-				<input type="color" value="#887ecb">
-			</div>
-		</div>
-		<div class="form-row mb-3">
-			<div class="col-3"></div>
-			<div class="col-3">
-				<input type="color" value="#887ecb">
-			</div>
-			<div class="col-3">
-				<input type="color" value="#887ecb">
-			</div>
-		</div>
 	</div>
 
 	<div class="tab-pane" id="tiles-grid" role="tabpanel" aria-labelledby="tiles-grid-tab">
@@ -65,11 +52,11 @@
 			</div>
 		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="tiles-line-width">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio">
 				Line Width
 			</label>
 			<div class="col-9">
-				<input type="range" id="tiles-line-width" min="0" max="1" step="0.01" value="0.12" class="form-control-range mt-2">
+				<input type="range" id="tiles-stroke-ratio" min="0" max="1" step="0.01" value="0.12" class="form-control-range mt-2">
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -122,6 +109,35 @@
 				<button type="button" class="btn btn-light py-0" data-reset="tiles-shear-3" title="Reset right y-shift">
 					<img src="../img/cross.png" alt="Reset">
 				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="tab-pane" id="tiles-color" role="tabpanel" aria-labelledby="tiles-color-tab">
+		<div class="form-row mb-3">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-flow-probability">
+				Flow
+			</label>
+			<div class="col-9">
+				<input type="range" min="0" max="1" step="0.01" value="1" class="form-control-range mt-2" id="tiles-flow-probability">
+			</div>
+		</div>
+		<div class="form-row mb-3">
+			<div class="col-3 col-form-label col-form-label-sm">Colours</div>
+			<div class="col-3">
+				<input type="color" value="#887ecb">
+			</div>
+			<div class="col-3">
+				<input type="color" value="#887ecb">
+			</div>
+		</div>
+		<div class="form-row mb-3">
+			<div class="col-3"></div>
+			<div class="col-3">
+				<input type="color" value="#887ecb">
+			</div>
+			<div class="col-3">
+				<input type="color" value="#887ecb">
 			</div>
 		</div>
 	</div>

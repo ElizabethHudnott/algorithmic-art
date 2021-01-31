@@ -6,26 +6,17 @@ export default function TruchetTiles() {
 
 	this.optionsDocument = downloadFile('truchet-tiles.html', 'document').then(function (optionsDoc) {
 
-		optionsDoc.getElementById('tiles-gap-probability').addEventListener('input', function (event) {
-			me.blankProbability = parseFloat(this.value);
-			generateBackground(0);
-		});
-
-		optionsDoc.getElementById('tiles-probability').addEventListener('input', function (event) {
-			me.probability = parseFloat(this.value);
-			generateBackground(1);
-		});
-
-		function changeColor(index) {
-			return function (event) {
-				me.colors[index] = this.value;
+		function listenSlider(id, property) {
+			optionsDoc.getElementById(id).addEventListener('input', function (event) {
+				me[property] = parseFloat(this.value);
 				generateBackground(0);
-			};
+			});
 		}
 
-		optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
-			item.addEventListener('input', changeColor(index));
-		});
+		listenSlider('tiles-gap-probability', 'gapProbability');
+		listenSlider('tiles-probability', 'probability');
+		listenSlider('tiles-stroke-ratio', 'strokeRatio');
+		listenSlider('tiles-flow-probability', 'flowProbability');
 
 		optionsDoc.getElementById('tiles-side-length').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -41,11 +32,6 @@ export default function TruchetTiles() {
 				me.cellAspect = value;
 				generateBackground(0);
 			}
-		});
-
-		optionsDoc.getElementById('tiles-line-width').addEventListener('input', function (event) {
-			me.strokeRatio = parseFloat(this.value);
-			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('tiles-shear-0').addEventListener('input', function (event) {
@@ -78,6 +64,17 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
+		function changeColor(index) {
+			return function (event) {
+				me.colors[index] = this.value;
+				generateBackground(0);
+			};
+		}
+
+		optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
+			item.addEventListener('input', changeColor(index));
+		});
+
 		return optionsDoc;
 	});
 
@@ -90,19 +87,28 @@ export default function TruchetTiles() {
 	 * Element 3: Y-Shear for the right half;
 	 */
 	this.shear = [0, 0, 0, 0];
-	// Probability of a cell being left blank
-	this.blankProbability = 0;
-	// Probability of a forward slash given not blank
-	this.probability = 0.5;
-	this.colors = ['#887ecb', '#887ecb', '#887ecb', '#887ecb'];
-	this.numColors = 4;
 	// Stroke width as a proportion of the cell's area.
 	this.strokeRatio = 0.12;
+
+	// Probability of a cell being left blank
+	this.gapProbability = 0;
+	// Probability of a forward slash given not blank
+	this.probability = 0.5;
+
+	this.colors = ['#887ecb', '#887ecb', '#887ecb', '#887ecb'];
+	this.numColors = 4;
+	this.flowProbability = 1;
 }
 
 TruchetTiles.prototype.animatable = {
 	'continuous': [
-		'colors', 'strokeRatio'
+		'sideLength', 'cellAspect', 'shear', 'strokeRatio',
+		'gapProbability',
+		'colors',
+		'flowProbability',
+	],
+	'stepped': [
+		'numColors',
 	]
 };
 
@@ -158,6 +164,29 @@ TruchetTiles.prototype.connectedTiles = function (x, y, port, width, height) {
 	return filteredLocations;
 }
 
+TruchetTiles.prototype.colorPermutation = function* (excludeColors) {
+	const colors = [];
+	for (let i = 0; i < this.numColors; i++) {
+		if (!excludeColors.has(i)) {
+			colors.push(i);
+		}
+	}
+	const numColors = colors.length;
+	const permutationLength = Math.min(numColors, 3);
+	for (let i = 0; i < permutationLength; i++) {
+		const r = Math.trunc(random.next() * (numColors - i)) + i;
+		const temp = colors[i];
+		colors[i] = colors[r];
+		colors[r] = temp;
+		yield colors[i];
+	}
+	let i = 0;
+	while (true) {
+		yield colors[i % permutationLength];
+		i++
+	}
+}
+
 TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let cellWidth, cellHeight, cellsDownCanvas, cellsAcrossCanvas;
 	if (canvasWidth >= canvasHeight) {
@@ -199,10 +228,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const tileMap = new Array(cellsDownCanvas);
 	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.min(cellWidth, cellHeight)), 1);
 
-	let blankProbability = this.blankProbability;
-	let blankSpacing = blankProbability === 0 ? 0 : Math.max(Math.trunc(1 / blankProbability), 1);
+	let gapProbability = this.gapProbability;
+	let blankSpacing = gapProbability === 0 ? 0 : Math.max(Math.trunc(1 / gapProbability), 1);
 	let spacingShift;
-	if (blankProbability < 0.06) {
+	if (gapProbability < 0.06) {
 		blankSpacing = 1;
 		spacingShift = 0;
 	} else {
@@ -218,8 +247,8 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		}
 		spacingShift = bestSpacingShift;
 	}
-	blankProbability =  this.blankProbability * blankSpacing;
-	const maxBlankRun = Math.round(1 / (1 - this.blankProbability) + 0.49) - 1;
+	gapProbability =  this.gapProbability * blankSpacing;
+	const maxBlankRun = Math.round(1 / (1 - this.gapProbability) + 0.49) - 1;
 
 	let blankRunLength = 0;
 	let blankDiffusion = 0;
@@ -234,14 +263,14 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const cellNumber = cellX + cellY * spacingShift + 1;
 			const randomBlank = random.next();
-			if (cellNumber % blankSpacing === 0 &&  randomBlank < blankProbability) {
+			if (cellNumber % blankSpacing === 0 &&  randomBlank < gapProbability) {
 				if (blankRunLength < maxBlankRun) {
 					blankRunLength++;
 					blankDiffusion = 0;
 					tileMapRow[cellX] = BlankTile.INSTANCE;
 					continue;
 				} else {
-					blankDiffusion += blankProbability;
+					blankDiffusion += gapProbability;
 				}
 			}
 			if (blankDiffusion >= 1 && blankRunLength < maxBlankRun) {
@@ -278,31 +307,64 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			const tile = tileMapRow[cellX];
 			for (let port of tile.ports()) {
 				const color = Math.trunc(random.next() * this.numColors);
-				let queue = [[cellX, cellY, port]];
+				let stack = [[cellX, cellY, port, color]];
 				do {
-					let newQueue = [];
-					for (let [x, y, inPort] of queue) {
-						const queuedTile = tileMap[y][x];
-						let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
-						for (let location of connected) {
-							const x2 = location[0];
-							const y2 = location[1];
-							const port = location[2];
-							if (!tileMap[y2][x2].isColored(port)) {
-								newQueue.push(location);
+					const length = stack.length;
+					const [x, y, inPort, color] = stack[length - 1];
+					stack.splice(length - 1, 1);
+					const stackedTile = tileMap[y][x];
+					if (stackedTile.getColor(inPort) !== undefined) {
+						continue;
+					}
+					let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
+					if (random.next() < this.flowProbability) {
+						for (let [x2, y2, port2] of connected) {
+							if (tileMap[y2][x2].getColor(port2) !== undefined) {
+								stack.push([x2, y2, port2, color]);
 							}
 						}
-						const outPorts = queuedTile.flowColor(inPort, color, 1);
-						for (let outPort of outPorts) {
-							connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
-							newQueue = newQueue.concat(connected);
+					} else {
+						const excluded = new Set();
+						excluded.add(color);
+						for (let [x2, y2, port2] of connected) {
+							const color2 = tileMap[y2][x2].getColor(port2);
+							if (color2 !== undefined) {
+								excluded.add(color2);
+							}
+						}
+						const permutation = this.colorPermutation(excluded);
+						for (let [x2, y2, port2] of connected) {
+							if (tileMap[y2][x2].getColor(port2) !== undefined) {
+								stack.push([x2, y2, port2, permutation.next().value]);
+							}
 						}
 					}
-					queue = newQueue;
-				} while (queue.length > 0);
-			}
-		}
-	}
+					const outPorts = stackedTile.flowColor(inPort, color);
+					for (let outPort of outPorts) {
+						connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
+						if (random.next() < this.flowProbability) {
+							for (let [x2, y2, port2] of connected) {
+								stack.push([x2, y2, port2, color]);
+							}
+						} else {
+							const excluded = new Set();
+							excluded.add(color);
+							for (let [x2, y2, port2] of connected) {
+								const color2 = tileMap[y2][x2].getColor(port2);
+								if (color2 !== undefined) {
+									excluded.add(color2);
+								}
+							}
+							const permutation = this.colorPermutation(excluded);
+							for (let [x2, y2, port2] of connected) {
+								stack.push([x2, y2, port2, permutation.next().value]);
+							}
+						}
+					}
+				} while (stack.length > 0);
+			} // For each port
+		} // For each x
+	} // For each y
 
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
@@ -345,28 +407,24 @@ class Tile {
 		this.colors = new Map();
 	}
 
-	isColored(port) {
-		return this.colors.has(port);
+	getColor(port) {
+		return this.colors.get(port);
 	}
 
-	flowColor(inPort, color, probability) {
-		if (this.colors.has(inPort)) {
-			return [];
-		}
+	flowColor(inPort, color) {
+		const hadColor = this.colors.has(inPort);
 		this.colors.set(inPort, color);
 		const outPorts = [];
 		const connected = this.tileType.connections.get(inPort);
 		if (connected !== undefined) {
 			for (let outPort of connected) {
 				if (!this.colors.has(outPort)) {
-					if (random.next() < probability) {
-						this.colors.set(outPort, color);
-						outPorts.push(outPort);
-					}
+					this.colors.set(outPort, color);
+					outPorts.push(outPort);
 				}
 			}
 		}
-		return outPorts;
+		return hadColor ? [] : outPorts;
 	}
 
 	ports() {

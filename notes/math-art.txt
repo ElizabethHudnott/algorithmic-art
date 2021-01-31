@@ -55,6 +55,10 @@ User created sketches
 
 Existing Sketches
 -----------------
+Truchet Tiles
+	Bug when avoiding flowing colours
+		Not all permutations are valid when the graph loops back on itself
+
 Contours
 	Displace distribution graph
 	Presets

@@ -14,7 +14,6 @@ export default function TruchetTiles() {
 		}
 
 		listenSlider('tiles-gap-probability', 'gapProbability');
-		listenSlider('tiles-probability', 'probability');
 		listenSlider('tiles-stroke-ratio', 'strokeRatio');
 		listenSlider('tiles-flow-probability', 'flowProbability');
 
@@ -34,14 +33,23 @@ export default function TruchetTiles() {
 			}
 		});
 
+		let dualShearControl;
+
 		optionsDoc.getElementById('tiles-shear-0').addEventListener('input', function (event) {
 			me.shear[0] = parseFloat(this.value);
 			generateBackground(0);
 		});
 
+		function checkShear1(event) {
+			dualShearControl = me.shear[0] === me.shear[1] / 2;
+		}
+
+		optionsDoc.getElementById('tiles-shear-1').addEventListener('pointerdown', checkShear1);
+		optionsDoc.getElementById('tiles-shear-1').addEventListener('keydown', checkShear1);
+
 		optionsDoc.getElementById('tiles-shear-1').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (me.shear[0] === me.shear[1] / 2) {
+			if (dualShearControl) {
 				me.shear[0] = value / 2;
 				document.getElementById('tiles-shear-0').value = value / 2;
 			}
@@ -54,9 +62,16 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
+		function checkShear3(event) {
+			dualShearControl = me.shear[3] === me.shear[2] / 2;
+		}
+
+		optionsDoc.getElementById('tiles-shear-3').addEventListener('pointerdown', checkShear3);
+		optionsDoc.getElementById('tiles-shear-3').addEventListener('keydown', checkShear3);
+
 		optionsDoc.getElementById('tiles-shear-3').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (me.shear[3] === me.shear[2] / 2) {
+			if (dualShearControl) {
 				me.shear[2] = value / 2;
 				document.getElementById('tiles-shear-2').value = value / 2;
 			}
@@ -92,10 +107,8 @@ export default function TruchetTiles() {
 
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
-	// Probability of a forward slash given not blank
-	this.probability = 0.5;
 
-	this.colors = ['#887ecb', '#887ecb', '#887ecb', '#887ecb'];
+	this.colors = ['#e00000', '#007a00', '#0000b0', '#ffaa00'];	// #887ecb
 	this.numColors = 4;
 	this.flowProbability = 1;
 }
@@ -224,7 +237,16 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		cellsDownCanvas += 2;
 	}
 
-	const tiles = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
+	// const tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
+	const tileTypes = [
+		new MiddleLineTile('000010100'),	// Vertical line
+		new MiddleLineTile('000001010'),	// Horizontal line
+		new MiddleLineTile('000011100'),	// T-shape to the right
+		new MiddleLineTile('000001110'),	// T-shape downwards
+		new MiddleLineTile('000010110'),	// T-shape to the left
+		new MiddleLineTile('000011010'),	// T-shape upwards
+	];
+
 	const tileMap = new Array(cellsDownCanvas);
 	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.min(cellWidth, cellHeight)), 1);
 
@@ -282,15 +304,8 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 			blankRunLength = 0;
 
-			const p = random.next();
-
-			if (p < this.probability) {
-				// Forward slash
-				tileMapRow[cellX] = new Tile(tiles[0]);
-			} else {
-				// Backslash
-				tileMapRow[cellX] = new Tile(tiles[1]);
-			}
+			const tileTypeIndex = Math.trunc(random.next() * tileTypes.length);
+			tileMapRow[cellX] = new Tile(tileTypes[tileTypeIndex]);
 		}
 		unitsProcessed++;
 		if (unitsProcessed >= benchmark) {
@@ -319,7 +334,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 					let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
 					if (random.next() < this.flowProbability) {
 						for (let [x2, y2, port2] of connected) {
-							if (tileMap[y2][x2].getColor(port2) !== undefined) {
+							if (tileMap[y2][x2].getColor(port2) === undefined) {
 								stack.push([x2, y2, port2, color]);
 							}
 						}
@@ -334,7 +349,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 						}
 						const permutation = this.colorPermutation(excluded);
 						for (let [x2, y2, port2] of connected) {
-							if (tileMap[y2][x2].getColor(port2) !== undefined) {
+							if (tileMap[y2][x2].getColor(port2) === undefined) {
 								stack.push([x2, y2, port2, permutation.next().value]);
 							}
 						}
@@ -490,19 +505,19 @@ class DiagonalLineTile extends TileType {
 		context.beginPath();
 		if (this.type === '0') {
 			// Forward slash
-			context.fillStyle = generator.colors[tile.colors.get(4)];
 			let y = height - lineWidth1;
 			context.moveTo(...transform(0, height - lineWidth1));
 			context.lineTo(...transform(width, -lineWidth1))
 			context.lineTo(...transform(width, lineWidth2));
 			context.lineTo(...transform(0, height + lineWidth2));
+			context.fillStyle = generator.colors[tile.colors.get(4)];
 		} else {
 			// Backslash
-			context.fillStyle = generator.colors[tile.colors.get(0)];
 			context.moveTo(...transform(0, -lineWidth1));
 			context.lineTo(...transform(width, height - lineWidth1));
 			context.lineTo(...transform(width, height + lineWidth2));
 			context.lineTo(...transform(0, lineWidth2));
+			context.fillStyle = generator.colors[tile.colors.get(0)];
 		}
 		context.fill();
 	}
@@ -512,15 +527,20 @@ class DiagonalLineTile extends TileType {
 class MiddleLineTile extends TileType {
 	constructor(str) {
 		const connections = new Map();
+		const colors = new Array(8);
+		// First four characters represent diagonal lines
 		for (let i = 0; i < 4; i++) {
+			colors[i] = parseInt(str[i]);
 			if (str[i] !== '0') {
 				const destinations = new Set();
 				destinations.add(((i + 1) * 4 + 2) % 16);
 				connections.set(i * 4 + 2, destinations);
 			}
 		}
+		// Second four characters represent horizontal and vertical lines
 		const intoCentre = new Set();
 		for (let i = 0; i < 4; i++) {
+			colors[i + 4] = parseInt(str[i + 4]);
 			if (str[i + 4] !== '0') {
 				intoCentre.add(i);
 			}
@@ -541,14 +561,72 @@ class MiddleLineTile extends TileType {
 			}
 		}
 		super(connections);
+		this.colors = colors;
 		this.curved = parseInt(str.slice(-1), 16);
 	}
 
 	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
+		const centre = Math.trunc(width / 2);
+		const middle = Math.trunc(height / 2);
 		const lineWidth1 = Math.trunc(lineWidth);
 		const lineWidth2 = Math.ceil(lineWidth);
-
+		const topToCentre = this.colors[4];
+		const centreToBottom = this.colors[6];
+		const leftToCentre = this.colors[7];
+		const rightToCentre = this.colors[5];
+		if (topToCentre !== 0) {
+			let y = middle;
+			if (centreToBottom === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
+				y += lineWidth2;
+			}
+			context.beginPath();
+			context.moveTo(...transform(centre - lineWidth1, 0));
+			context.lineTo(...transform(centre + lineWidth2, 0));
+			context.lineTo(...transform(centre + lineWidth2, y));
+			context.lineTo(...transform(centre - lineWidth1, y));
+			context.fillStyle = generator.colors[tile.colors.get(2)];
+			context.fill();
+		}
+		if (centreToBottom !== 0) {
+			let y = middle;
+			if (topToCentre === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
+				y -= lineWidth1;
+			}
+			context.beginPath();
+			context.moveTo(...transform(centre - lineWidth1, y));
+			context.lineTo(...transform(centre + lineWidth2, y));
+			context.lineTo(...transform(centre + lineWidth2, height));
+			context.lineTo(...transform(centre - lineWidth1, height));
+			context.fillStyle = generator.colors[tile.colors.get(10)];
+			context.fill();
+		}
+		if (leftToCentre !== 0) {
+			let x = centre;
+			if (topToCentre !== 0 || centreToBottom !== 0) {
+				x -= lineWidth1;
+			}
+			context.beginPath();
+			context.moveTo(...transform(0, middle - lineWidth1));
+			context.lineTo(...transform(x, middle - lineWidth1));
+			context.lineTo(...transform(x, middle + lineWidth2));
+			context.lineTo(...transform(0, middle + lineWidth2));
+			context.fillStyle = generator.colors[tile.colors.get(14)];
+			context.fill();
+		}
+		if (rightToCentre !== 0) {
+			let x = centre;
+			if (topToCentre !== 0 || centreToBottom !== 0) {
+				x += lineWidth2;
+			}
+			context.beginPath();
+			context.moveTo(...transform(x, middle - lineWidth1));
+			context.lineTo(...transform(width, middle - lineWidth1));
+			context.lineTo(...transform(width, middle + lineWidth2));
+			context.lineTo(...transform(x, middle + lineWidth2));
+			context.fillStyle = generator.colors[tile.colors.get(6)];
+			context.fill();
+		}
 	}
 
 }

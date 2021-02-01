@@ -200,6 +200,32 @@ TruchetTiles.prototype.colorPermutation = function* (excludeColors) {
 	}
 }
 
+function chooseColor(histogram) {
+	const max = Math.max(...histogram);
+	if (max === 0) {
+		return Math.trunc(random.next() * histogram.length);
+	}
+	const inverse = new Array(histogram.length);
+	let total = 0;
+	for (let i = 0; i < histogram.length; i++) {
+		const value = histogram[i];
+		const inverseVal = max - value;
+		inverse[i] = inverseVal;
+		total += inverseVal;
+	}
+	if (total === 0) {
+		return Math.trunc(random.next() * histogram.length);
+	}
+	const r = random.next() * total;
+	let accumulated = 0;
+	for (let i = 0; i < inverse.length; i++) {
+		accumulated += inverse[i];
+		if (r < accumulated) {
+			return i;
+		}
+	}
+}
+
 TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	let cellWidth, cellHeight, cellsDownCanvas, cellsAcrossCanvas;
 	if (canvasWidth >= canvasHeight) {
@@ -223,18 +249,16 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const totalShearY = shear[2] + shear[3];
 	let minX = -totalShearX * cellsDownCanvas;
 	let minY = -totalShearY * cellsAcrossCanvas;
-	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth);
-	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight);
+	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth) + 1;
+	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight) + 1;
 	minX = Math.min(minX, 0);
 	minY = Math.min(minY, 0);
 	//Chevrons
-	if ((shear[0] > 0 && shear[1] < 0) || (shear[0] < 0 && shear[1] > 0)) {
+	if (shear[0] > 0) {
 		minX--;
-		cellsAcrossCanvas += 2;
 	}
-	if ((shear[2] > 0 && shear[3] < 0) || (shear[2] < 0 && shear[3] > 0)) {
+	if (shear[2] > 0) {
 		minY--;
-		cellsDownCanvas += 2;
 	}
 
 	// const tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
@@ -316,12 +340,15 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		}
 	}
 
+	const histogram = new Array(this.numColors);
+	histogram.fill(0);
+
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const tile = tileMapRow[cellX];
 			for (let port of tile.ports()) {
-				const color = Math.trunc(random.next() * this.numColors);
+				const color = chooseColor(histogram);
 				let stack = [[cellX, cellY, port, color]];
 				do {
 					const length = stack.length;
@@ -354,7 +381,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 							}
 						}
 					}
-					const outPorts = stackedTile.flowColor(inPort, color);
+					const outPorts = stackedTile.flowColor(inPort, color, histogram);
 					for (let outPort of outPorts) {
 						connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
 						if (random.next() < this.flowProbability) {
@@ -426,20 +453,28 @@ class Tile {
 		return this.colors.get(port);
 	}
 
-	flowColor(inPort, color) {
-		const hadColor = this.colors.has(inPort);
+	flowColor(inPort, color, histogram) {
+		const prevColor = this.colors.get(inPort);
 		this.colors.set(inPort, color);
+		let numColored = 1;
 		const outPorts = [];
 		const connected = this.tileType.connections.get(inPort);
 		if (connected !== undefined) {
 			for (let outPort of connected) {
 				if (!this.colors.has(outPort)) {
 					this.colors.set(outPort, color);
+					numColored++;
 					outPorts.push(outPort);
 				}
 			}
 		}
-		return hadColor ? [] : outPorts;
+		histogram[color] += numColored;
+		if (prevColor === undefined) {
+			return outPorts;
+		} else {
+			histogram[prevColor]--;
+			return [];
+		}
 	}
 
 	ports() {
@@ -576,28 +611,28 @@ class MiddleLineTile extends TileType {
 		const leftToCentre = this.colors[7];
 		const rightToCentre = this.colors[5];
 		if (topToCentre !== 0) {
-			let y = middle;
-			if (centreToBottom === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
-				y += lineWidth2;
-			}
 			context.beginPath();
 			context.moveTo(...transform(centre - lineWidth1, 0));
 			context.lineTo(...transform(centre + lineWidth2, 0));
-			context.lineTo(...transform(centre + lineWidth2, y));
-			context.lineTo(...transform(centre - lineWidth1, y));
+			context.lineTo(...transform(centre + lineWidth2, middle));
+			if (centreToBottom === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
+				context.lineTo(...transform(centre + lineWidth2, middle + lineWidth2));
+				context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
+			}
+			context.lineTo(...transform(centre - lineWidth1, middle));
 			context.fillStyle = generator.colors[tile.colors.get(2)];
 			context.fill();
 		}
 		if (centreToBottom !== 0) {
-			let y = middle;
-			if (topToCentre === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
-				y -= lineWidth1;
-			}
 			context.beginPath();
-			context.moveTo(...transform(centre - lineWidth1, y));
-			context.lineTo(...transform(centre + lineWidth2, y));
+			context.moveTo(...transform(centre - lineWidth1, height));
 			context.lineTo(...transform(centre + lineWidth2, height));
-			context.lineTo(...transform(centre - lineWidth1, height));
+			context.lineTo(...transform(centre + lineWidth2, middle));
+			if (topToCentre === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
+				context.lineTo(...transform(centre + lineWidth2, middle - lineWidth1));
+				context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
+			}
+			context.lineTo(...transform(centre - lineWidth1, middle));
 			context.fillStyle = generator.colors[tile.colors.get(10)];
 			context.fill();
 		}
@@ -609,6 +644,7 @@ class MiddleLineTile extends TileType {
 			context.beginPath();
 			context.moveTo(...transform(0, middle - lineWidth1));
 			context.lineTo(...transform(x, middle - lineWidth1));
+			context.lineTo(...transform(x, middle));
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(0, middle + lineWidth2));
 			context.fillStyle = generator.colors[tile.colors.get(14)];
@@ -624,6 +660,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(width, middle - lineWidth1));
 			context.lineTo(...transform(width, middle + lineWidth2));
 			context.lineTo(...transform(x, middle + lineWidth2));
+			context.lineTo(...transform(x, middle));
 			context.fillStyle = generator.colors[tile.colors.get(6)];
 			context.fill();
 		}

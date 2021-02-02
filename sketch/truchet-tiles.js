@@ -1,3 +1,5 @@
+const SQRT3 = Math.sqrt(3);
+
 export default function TruchetTiles() {
 	const me = this;
 	this.title = 'Tiling';
@@ -79,6 +81,26 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
+		optionsDoc.getElementById('tiles-shear-1-reset').addEventListener('click', function (event) {
+			if (me.shear[0] === me.shear[1] / 2) {
+				me.shear[0] = 0;
+				document.getElementById('tiles-shear-0').value = 0;
+			}
+			me.shear[1] = 0;
+			document.getElementById('tiles-shear-1').value = 0;
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-shear-3-reset').addEventListener('click', function (event) {
+			if (me.shear[2] === me.shear[3] / 2) {
+				me.shear[2] = 0;
+				document.getElementById('tiles-shear-2').value = 0;
+			}
+			me.shear[3] = 0;
+			document.getElementById('tiles-shear-3').value = 0;
+			generateBackground(0);
+		});
+
 		function changeColor(index) {
 			return function (event) {
 				me.colors[index] = this.value;
@@ -103,7 +125,7 @@ export default function TruchetTiles() {
 	 */
 	this.shear = [0, 0, 0, 0];
 	// Stroke width as a proportion of the cell's area.
-	this.strokeRatio = 0.12;
+	this.strokeRatio = 0.25;
 
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
@@ -269,6 +291,9 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		new MiddleLineTile('000001110'),	// T-shape downwards
 		new MiddleLineTile('000010110'),	// T-shape to the left
 		new MiddleLineTile('000011010'),	// T-shape upwards
+		new MiddleLineTile('100000000'),	// Top to left diagonal
+		new MiddleLineTile('100010100'),	// Vertical line + top to left diagonal
+		new MiddleLineTile('100001010'),	// Horizontal line + top to left diagonal
 	];
 
 	const tileMap = new Array(cellsDownCanvas);
@@ -440,6 +465,24 @@ class TileType {
 				reverseConnections.add(connector);
 			}
 		}
+		// Find the transitive closure
+		let added;
+		do {
+			added = false;
+			for (let [connector, connectees] of connections.entries()) {
+				for (let intermediate of connectees) {
+					const destinations = connections.get(intermediate);
+					if (destinations !== undefined) {
+						for (let destination of destinations) {
+							if (connector !== destination && !connectees.has(destination)) {
+								connectees.add(destination);
+								added = true;
+							}
+						}
+					}
+				}
+			}
+		} while (added === true);
 	}
 }
 
@@ -454,27 +497,19 @@ class Tile {
 	}
 
 	flowColor(inPort, color, histogram) {
-		const prevColor = this.colors.get(inPort);
 		this.colors.set(inPort, color);
 		let numColored = 1;
 		const outPorts = [];
 		const connected = this.tileType.connections.get(inPort);
 		if (connected !== undefined) {
 			for (let outPort of connected) {
-				if (!this.colors.has(outPort)) {
-					this.colors.set(outPort, color);
-					numColored++;
-					outPorts.push(outPort);
-				}
+				this.colors.set(outPort, color);
+				numColored++;
+				outPorts.push(outPort);
 			}
 		}
 		histogram[color] += numColored;
-		if (prevColor === undefined) {
-			return outPorts;
-		} else {
-			histogram[prevColor]--;
-			return [];
-		}
+		return outPorts;
 	}
 
 	ports() {
@@ -604,10 +639,10 @@ class MiddleLineTile extends TileType {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
 		const centre = Math.trunc(width / 2);
 		const middle = Math.trunc(height / 2);
-		const lineWidth1 = Math.trunc(lineWidth);
-		const lineWidth2 = Math.ceil(lineWidth);
+		const lineWidth1 = Math.trunc(lineWidth / 2);
+		const lineWidth2 = Math.ceil(lineWidth / 2);
 		const topToCentre = this.colors[4];
-		const centreToBottom = this.colors[6];
+		const bottomToCentre = this.colors[6];
 		const leftToCentre = this.colors[7];
 		const rightToCentre = this.colors[5];
 		if (topToCentre !== 0) {
@@ -615,30 +650,37 @@ class MiddleLineTile extends TileType {
 			context.moveTo(...transform(centre - lineWidth1, 0));
 			context.lineTo(...transform(centre + lineWidth2, 0));
 			context.lineTo(...transform(centre + lineWidth2, middle));
-			if (centreToBottom === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
-				context.lineTo(...transform(centre + lineWidth2, middle + lineWidth2));
-				context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
+			if (bottomToCentre === 0) {
+				if (leftToCentre !== 0 || rightToCentre !== 0) {
+					context.lineTo(...transform(centre + lineWidth2, middle + lineWidth2));
+					context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
+				}
+				context.lineTo(...transform(centre - lineWidth1, middle));
+				context.fillStyle = generator.colors[tile.colors.get(2)];
+				context.fill();
 			}
-			context.lineTo(...transform(centre - lineWidth1, middle));
-			context.fillStyle = generator.colors[tile.colors.get(2)];
-			context.fill();
 		}
-		if (centreToBottom !== 0) {
-			context.beginPath();
-			context.moveTo(...transform(centre - lineWidth1, height));
+		if (bottomToCentre !== 0) {
+			const extend = topToCentre === 0 && (leftToCentre !== 0 || rightToCentre !== 0);
+			if (topToCentre === 0) {
+				context.beginPath();
+				if (extend) {
+					context.moveTo(...transform(centre + lineWidth2, middle - lineWidth1));
+					context.lineTo(...transform(centre + lineWidth2, middle));
+				}
+			}
 			context.lineTo(...transform(centre + lineWidth2, height));
-			context.lineTo(...transform(centre + lineWidth2, middle));
-			if (topToCentre === 0 && (leftToCentre !== 0 || rightToCentre !== 0)) {
-				context.lineTo(...transform(centre + lineWidth2, middle - lineWidth1));
+			context.lineTo(...transform(centre - lineWidth1, height));
+			context.lineTo(...transform(centre - lineWidth1, middle));
+			if (extend) {
 				context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
 			}
-			context.lineTo(...transform(centre - lineWidth1, middle));
 			context.fillStyle = generator.colors[tile.colors.get(10)];
 			context.fill();
 		}
 		if (leftToCentre !== 0) {
 			let x = centre;
-			if (topToCentre !== 0 || centreToBottom !== 0) {
+			if (topToCentre !== 0 || bottomToCentre !== 0) {
 				x -= lineWidth1;
 			}
 			context.beginPath();
@@ -652,7 +694,7 @@ class MiddleLineTile extends TileType {
 		}
 		if (rightToCentre !== 0) {
 			let x = centre;
-			if (topToCentre !== 0 || centreToBottom !== 0) {
+			if (topToCentre !== 0 || bottomToCentre !== 0) {
 				x += lineWidth2;
 			}
 			context.beginPath();
@@ -662,6 +704,28 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(x, middle));
 			context.fillStyle = generator.colors[tile.colors.get(6)];
+			context.fill();
+		}
+		const gradient = height / width;
+		const topToRight = this.colors[0];
+		const leftToTop = this.colors[3];
+		if (topToRight) {
+			context.beginPath()
+			context.moveTo(...transform(centre + lineWidth2, 0));
+			context.lineTo(...transform(width, middle - lineWidth1));
+			if (rightToCentre !== 0) {
+				context.lineTo(...transform(width - lineWidth / gradient, middle - lineWidth1));
+			} else {
+				context.lineTo(...transform(width, middle + lineWidth2));
+			}
+			if (topToCentre !== 0) {
+				context.lineTo(...transform(centre + lineWidth2, lineWidth * gradient));
+			} else if (leftToTop !== 0) {
+				context.lineTo(...transform(centre, SQRT3 * lineWidth / 2));
+			} else {
+				context.lineTo(...transform(centre - lineWidth1, 0));
+			}
+			context.fillStyle = generator.colors[tile.colors.get(2)];
 			context.fill();
 		}
 	}

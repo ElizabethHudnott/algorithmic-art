@@ -1,3 +1,5 @@
+const C = 0.551915024494;
+
 export default function TruchetTiles() {
 	const me = this;
 	this.title = 'Tiling';
@@ -283,9 +285,9 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 	// const tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	const tileTypes = [
-		/*
 		new MiddleLineTile('000010100'),	// Vertical line
 		new MiddleLineTile('000001010'),	// Horizontal line
+		/*
 		new MiddleLineTile('000011100'),	// T-shape to the right
 		new MiddleLineTile('000001110'),	// T-shape downwards
 		new MiddleLineTile('000010110'),	// T-shape to the left
@@ -304,17 +306,19 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		new MiddleLineTile('000101010'),	// Horizontal line + left to top diagonal
 		new MiddleLineTile('010200000'),	// Two diagonals, forward facing
 		new MiddleLineTile('102000000'),	// Two diagonals, backward facing
-		*/
 		new MiddleLineTile('011000000'),	// Upward V
 		new MiddleLineTile('001100000'),	// Rightward V
 		new MiddleLineTile('100100000'),	// Downward V
 		new MiddleLineTile('110000000'),	// Leftward V
-		/*
 		new MiddleLineTile('010110100'),	// /|/
 		new MiddleLineTile('101001010'),	// \-\
 		new MiddleLineTile('101010100'),	// \|\
 		new MiddleLineTile('010101010'),	// /-/
 		*/
+		new MiddleLineTile('100000001'),	// Curve, upper right
+		new MiddleLineTile('010000002'),	// Curve, lower right
+		new MiddleLineTile('001000004'),	// Curve, lower left
+		new MiddleLineTile('000100008'),	// Curve, upper left
 	];
 
 	const tileMap = new Array(cellsDownCanvas);
@@ -736,18 +740,33 @@ class MiddleLineTile extends TileType {
 		if (topToRight) {
 			context.beginPath()
 			context.moveTo(...transform(centre + lineWidth2, 0));
-			context.lineTo(...transform(width, middle - lineWidth1));
-			if (rightToCentre !== 0) {
-				context.lineTo(...transform(width - lineWidth / gradient, middle - lineWidth1));
-			} else {
+			const [x, y] = transform(width, middle - lineWidth1);
+			if ((this.curved & 1) === 1) {
+				context.bezierCurveTo(
+					...transform(centre + lineWidth2, C * (middle - lineWidth1)),
+					...transform(width - C * (width / 2 - lineWidth2), middle - lineWidth1),
+					x, y
+				);
 				context.lineTo(...transform(width, middle + lineWidth2));
-			}
-			if (topToCentre !== 0) {
-				context.lineTo(...transform(centre + lineWidth2, lineWidth * gradient));
-			} else if (leftToTop !== 0) {
-				context.lineTo(...transform(centre, lineWidth / 2 * gradient2));
+				context.bezierCurveTo(
+					...transform(width - C * (width / 2 + lineWidth1), middle + lineWidth2),
+					...transform(centre - lineWidth1, C * (middle + lineWidth2)),
+					...transform(centre - lineWidth1, 0)
+				);
 			} else {
-				context.lineTo(...transform(centre - lineWidth1, 0));
+				context.lineTo(x, y);
+				if (rightToCentre !== 0) {
+					context.lineTo(...transform(width - lineWidth / gradient, middle - lineWidth1));
+				} else {
+					context.lineTo(...transform(width, middle + lineWidth2));
+				}
+				if (topToCentre !== 0) {
+					context.lineTo(...transform(centre + lineWidth2, lineWidth * gradient));
+				} else if (leftToTop !== 0) {
+					context.lineTo(...transform(centre, lineWidth / 2 * gradient2));
+				} else {
+					context.lineTo(...transform(centre - lineWidth1, 0));
+				}
 			}
 			context.fillStyle = generator.colors[tile.colors.get(2)];
 			context.fill();
@@ -755,18 +774,33 @@ class MiddleLineTile extends TileType {
 		if (rightToBottom) {
 			context.beginPath();
 			context.moveTo(...transform(width, middle + lineWidth2));
-			context.lineTo(...transform(centre + lineWidth2, height));
-			if (bottomToCentre !== 0) {
-				context.lineTo(...transform(centre + lineWidth2, height - lineWidth * gradient));
-			} else {
+			const [x, y] = transform(centre + lineWidth2, height);
+			if ((this.curved & 2) === 2) {
+				context.bezierCurveTo(
+					...transform(width - C * (width / 2 - lineWidth2), middle + lineWidth2),
+					...transform(centre + lineWidth2, height - C * (height / 2 - lineWidth2)),
+					x, y
+				);
 				context.lineTo(...transform(centre - lineWidth1, height));
-			}
-			if (rightToCentre !== 0) {
-				context.lineTo(...transform(width - lineWidth / gradient, middle + lineWidth2));
-			} else if (topToRight !== 0) {
-				context.lineTo(...transform(width - (lineWidth / 2) / gradient2, middle));
+				context.bezierCurveTo(
+					...transform(centre - lineWidth1, height - C * (height / 2 + lineWidth1)),
+					...transform(width - C * (width / 2 + lineWidth1), middle - lineWidth1),
+					...transform(width, middle - lineWidth1)
+				);
 			} else {
-				context.lineTo(...transform(width, middle - lineWidth1));
+				context.lineTo(x, y);
+				if (bottomToCentre !== 0) {
+					context.lineTo(...transform(centre + lineWidth2, height - lineWidth * gradient));
+				} else {
+					context.lineTo(...transform(centre - lineWidth1, height));
+				}
+				if (rightToCentre !== 0) {
+					context.lineTo(...transform(width - lineWidth / gradient, middle + lineWidth2));
+				} else if (topToRight !== 0) {
+					context.lineTo(...transform(width - (lineWidth / 2) / gradient2, middle));
+				} else {
+					context.lineTo(...transform(width, middle - lineWidth1));
+				}
 			}
 			context.fillStyle = generator.colors[tile.colors.get(6)];
 			context.fill();
@@ -774,18 +808,33 @@ class MiddleLineTile extends TileType {
 		if (bottomToLeft !== 0) {
 			context.beginPath();
 			context.moveTo(...transform(centre - lineWidth1, height));
-			context.lineTo(...transform(0, middle + lineWidth2));
-			if (leftToCentre !== 0) {
-				context.lineTo(...transform(lineWidth / gradient, middle + lineWidth2));
-			} else {
+			const [x, y] = transform(0, middle + lineWidth2);
+			if ((this.curved & 4) === 4) {
+				context.bezierCurveTo(
+					...transform(centre - lineWidth1, height - C * (height / 2 - lineWidth2)),
+					...transform(C * (centre - lineWidth1), middle + lineWidth2),
+					x, y
+				);
 				context.lineTo(...transform(0, middle - lineWidth1));
-			}
-			if (bottomToCentre !== 0) {
-				context.lineTo(...transform(centre - lineWidth1, height - lineWidth * gradient));
-			} else if (rightToBottom !== 0) {
-				context.lineTo(...transform(centre, height - lineWidth / 2 * gradient2));
+				context.bezierCurveTo(
+					...transform(C * (centre + lineWidth2), middle - lineWidth1),
+					...transform(centre + lineWidth2, height - C * (height / 2 + lineWidth1)),
+					...transform(centre + lineWidth2, height),
+				);
 			} else {
-				context.lineTo(...transform(centre + lineWidth2, height));
+				context.lineTo(x, y);
+				if (leftToCentre !== 0) {
+					context.lineTo(...transform(lineWidth / gradient, middle + lineWidth2));
+				} else {
+					context.lineTo(...transform(0, middle - lineWidth1));
+				}
+				if (bottomToCentre !== 0) {
+					context.lineTo(...transform(centre - lineWidth1, height - lineWidth * gradient));
+				} else if (rightToBottom !== 0) {
+					context.lineTo(...transform(centre, height - lineWidth / 2 * gradient2));
+				} else {
+					context.lineTo(...transform(centre + lineWidth2, height));
+				}
 			}
 			context.fillStyle = generator.colors[tile.colors.get(10)];
 			context.fill();
@@ -793,18 +842,33 @@ class MiddleLineTile extends TileType {
 		if (leftToTop !== 0) {
 			context.beginPath();
 			context.moveTo(...transform(0, middle - lineWidth1));
-			context.lineTo(...transform(centre - lineWidth1, 0));
-			if (topToCentre !== 0) {
-				context.lineTo(...transform(centre - lineWidth1, lineWidth * gradient));
-			} else {
+			const [x, y] = transform(centre - lineWidth1, 0);
+			if ((this.curved & 8) === 8) {
+				context.bezierCurveTo(
+					...transform(C * (centre - lineWidth1), middle - lineWidth1),
+					...transform(centre - lineWidth1, C * (middle - lineWidth1)),
+					x, y
+				);
 				context.lineTo(...transform(centre + lineWidth2, 0));
-			}
-			if (rightToCentre !== 0) {
-				context.lineTo(...transform(lineWidth / gradient, middle - lineWidth1));
-			} else if (bottomToLeft !== 0) {
-				context.lineTo(...transform((lineWidth / 2) / gradient2, middle));
+				context.bezierCurveTo(
+					...transform(centre + lineWidth2, C * (middle + lineWidth2)),
+					...transform(C * (centre + lineWidth2), middle + lineWidth2),
+					...transform(0, middle + lineWidth2)
+				);
 			} else {
-				context.lineTo(...transform(0, middle + lineWidth2));
+				context.lineTo(x, y);
+				if (topToCentre !== 0) {
+					context.lineTo(...transform(centre - lineWidth1, lineWidth * gradient));
+				} else {
+					context.lineTo(...transform(centre + lineWidth2, 0));
+				}
+				if (rightToCentre !== 0) {
+					context.lineTo(...transform(lineWidth / gradient, middle - lineWidth1));
+				} else if (bottomToLeft !== 0) {
+					context.lineTo(...transform((lineWidth / 2) / gradient2, middle));
+				} else {
+					context.lineTo(...transform(0, middle + lineWidth2));
+				}
 			}
 			context.fillStyle = generator.colors[tile.colors.get(14)];
 			context.fill();

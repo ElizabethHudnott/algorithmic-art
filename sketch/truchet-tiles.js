@@ -1,5 +1,3 @@
-const SQRT3 = Math.sqrt(3);
-
 export default function TruchetTiles() {
 	const me = this;
 	this.title = 'Tiling';
@@ -285,6 +283,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 	// const tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	const tileTypes = [
+		/*
 		new MiddleLineTile('000010100'),	// Vertical line
 		new MiddleLineTile('000001010'),	// Horizontal line
 		new MiddleLineTile('000011100'),	// T-shape to the right
@@ -294,6 +293,28 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		new MiddleLineTile('100000000'),	// Top to left diagonal
 		new MiddleLineTile('100010100'),	// Vertical line + top to left diagonal
 		new MiddleLineTile('100001010'),	// Horizontal line + top to left diagonal
+		new MiddleLineTile('010000000'),	// Right to bottom diagonal
+		new MiddleLineTile('010010100'),	// Vertical line + right to bottom diagonal
+		new MiddleLineTile('010001010'),	// Horizontal line + right to bottom diagonal
+		new MiddleLineTile('001000000'),	// Bottom to left diagonal
+		new MiddleLineTile('001010100'),	// Vertical line + bottom to left diagonal
+		new MiddleLineTile('001001010'),	// Horizontal line + bottom to left diagonal
+		new MiddleLineTile('000100000'),	// Left to top diagonal
+		new MiddleLineTile('000110100'),	// Vertical line + left to top diagonal
+		new MiddleLineTile('000101010'),	// Horizontal line + left to top diagonal
+		new MiddleLineTile('010200000'),	// Two diagonals, forward facing
+		new MiddleLineTile('102000000'),	// Two diagonals, backward facing
+		*/
+		new MiddleLineTile('011000000'),	// Upward V
+		new MiddleLineTile('001100000'),	// Rightward V
+		new MiddleLineTile('100100000'),	// Downward V
+		new MiddleLineTile('110000000'),	// Leftward V
+		/*
+		new MiddleLineTile('010110100'),	// /|/
+		new MiddleLineTile('101001010'),	// \-\
+		new MiddleLineTile('101010100'),	// \|\
+		new MiddleLineTile('010101010'),	// /-/
+		*/
 	];
 
 	const tileMap = new Array(cellsDownCanvas);
@@ -707,7 +728,10 @@ class MiddleLineTile extends TileType {
 			context.fill();
 		}
 		const gradient = height / width;
+		const gradient2 = (height + lineWidth) / (width + lineWidth);
 		const topToRight = this.colors[0];
+		const rightToBottom = this.colors[1];
+		const bottomToLeft = this.colors[2];
 		const leftToTop = this.colors[3];
 		if (topToRight) {
 			context.beginPath()
@@ -721,11 +745,68 @@ class MiddleLineTile extends TileType {
 			if (topToCentre !== 0) {
 				context.lineTo(...transform(centre + lineWidth2, lineWidth * gradient));
 			} else if (leftToTop !== 0) {
-				context.lineTo(...transform(centre, SQRT3 * lineWidth / 2));
+				context.lineTo(...transform(centre, lineWidth / 2 * gradient2));
 			} else {
 				context.lineTo(...transform(centre - lineWidth1, 0));
 			}
 			context.fillStyle = generator.colors[tile.colors.get(2)];
+			context.fill();
+		}
+		if (rightToBottom) {
+			context.beginPath();
+			context.moveTo(...transform(width, middle + lineWidth2));
+			context.lineTo(...transform(centre + lineWidth2, height));
+			if (bottomToCentre !== 0) {
+				context.lineTo(...transform(centre + lineWidth2, height - lineWidth * gradient));
+			} else {
+				context.lineTo(...transform(centre - lineWidth1, height));
+			}
+			if (rightToCentre !== 0) {
+				context.lineTo(...transform(width - lineWidth / gradient, middle + lineWidth2));
+			} else if (topToRight !== 0) {
+				context.lineTo(...transform(width - (lineWidth / 2) / gradient2, middle));
+			} else {
+				context.lineTo(...transform(width, middle - lineWidth1));
+			}
+			context.fillStyle = generator.colors[tile.colors.get(6)];
+			context.fill();
+		}
+		if (bottomToLeft !== 0) {
+			context.beginPath();
+			context.moveTo(...transform(centre - lineWidth1, height));
+			context.lineTo(...transform(0, middle + lineWidth2));
+			if (leftToCentre !== 0) {
+				context.lineTo(...transform(lineWidth / gradient, middle + lineWidth2));
+			} else {
+				context.lineTo(...transform(0, middle - lineWidth1));
+			}
+			if (bottomToCentre !== 0) {
+				context.lineTo(...transform(centre - lineWidth1, height - lineWidth * gradient));
+			} else if (rightToBottom !== 0) {
+				context.lineTo(...transform(centre, height - lineWidth / 2 * gradient2));
+			} else {
+				context.lineTo(...transform(centre + lineWidth2, height));
+			}
+			context.fillStyle = generator.colors[tile.colors.get(10)];
+			context.fill();
+		}
+		if (leftToTop !== 0) {
+			context.beginPath();
+			context.moveTo(...transform(0, middle - lineWidth1));
+			context.lineTo(...transform(centre - lineWidth1, 0));
+			if (topToCentre !== 0) {
+				context.lineTo(...transform(centre - lineWidth1, lineWidth * gradient));
+			} else {
+				context.lineTo(...transform(centre + lineWidth2, 0));
+			}
+			if (rightToCentre !== 0) {
+				context.lineTo(...transform(lineWidth / gradient, middle - lineWidth1));
+			} else if (bottomToLeft !== 0) {
+				context.lineTo(...transform((lineWidth / 2) / gradient2, middle));
+			} else {
+				context.lineTo(...transform(0, middle + lineWidth2));
+			}
+			context.fillStyle = generator.colors[tile.colors.get(14)];
 			context.fill();
 		}
 	}

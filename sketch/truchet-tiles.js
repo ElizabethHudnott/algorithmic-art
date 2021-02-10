@@ -35,27 +35,13 @@ export default function TruchetTiles() {
 			}
 		});
 
-		let dualShearControl;
-
 		optionsDoc.getElementById('tiles-shear-0').addEventListener('input', function (event) {
 			me.shear[0] = parseFloat(this.value);
 			generateBackground(0);
 		});
 
-		function checkShear1(event) {
-			dualShearControl = me.shear[0] === me.shear[1] / 2;
-		}
-
-		optionsDoc.getElementById('tiles-shear-1').addEventListener('pointerdown', checkShear1);
-		optionsDoc.getElementById('tiles-shear-1').addEventListener('keydown', checkShear1);
-
 		optionsDoc.getElementById('tiles-shear-1').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (dualShearControl) {
-				me.shear[0] = value / 2;
-				document.getElementById('tiles-shear-0').value = value / 2;
-			}
-			me.shear[1] = value;
+			me.shear[1] = parseFloat(this.value);
 			generateBackground(0);
 		});
 
@@ -64,40 +50,8 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
-		function checkShear3(event) {
-			dualShearControl = me.shear[3] === me.shear[2] / 2;
-		}
-
-		optionsDoc.getElementById('tiles-shear-3').addEventListener('pointerdown', checkShear3);
-		optionsDoc.getElementById('tiles-shear-3').addEventListener('keydown', checkShear3);
-
 		optionsDoc.getElementById('tiles-shear-3').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (dualShearControl) {
-				me.shear[2] = value / 2;
-				document.getElementById('tiles-shear-2').value = value / 2;
-			}
-			me.shear[3] = value;
-			generateBackground(0);
-		});
-
-		optionsDoc.getElementById('tiles-shear-1-reset').addEventListener('click', function (event) {
-			if (me.shear[0] === me.shear[1] / 2) {
-				me.shear[0] = 0;
-				document.getElementById('tiles-shear-0').value = 0;
-			}
-			me.shear[1] = 0;
-			document.getElementById('tiles-shear-1').value = 0;
-			generateBackground(0);
-		});
-
-		optionsDoc.getElementById('tiles-shear-3-reset').addEventListener('click', function (event) {
-			if (me.shear[2] === me.shear[3] / 2) {
-				me.shear[2] = 0;
-				document.getElementById('tiles-shear-2').value = 0;
-			}
-			me.shear[3] = 0;
-			document.getElementById('tiles-shear-3').value = 0;
+			me.shear[3] = parseFloat(this.value);
 			generateBackground(0);
 		});
 
@@ -314,11 +268,11 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		new MiddleLineTile('101001010'),	// \-\
 		new MiddleLineTile('101010100'),	// \|\
 		new MiddleLineTile('010101010'),	// /-/
+		*/
 		new MiddleLineTile('100000001'),	// Curve, upper right
 		new MiddleLineTile('010000002'),	// Curve, lower right
 		new MiddleLineTile('001000004'),	// Curve, lower left
 		new MiddleLineTile('000100008'),	// Curve, upper left
-		*/
 	];
 
 	const tileMap = new Array(cellsDownCanvas);

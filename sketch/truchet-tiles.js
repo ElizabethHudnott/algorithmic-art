@@ -287,11 +287,11 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const tileTypes = [
 		new MiddleLineTile('000010100'),	// Vertical line
 		new MiddleLineTile('000001010'),	// Horizontal line
-		/*
 		new MiddleLineTile('000011100'),	// T-shape to the right
 		new MiddleLineTile('000001110'),	// T-shape downwards
 		new MiddleLineTile('000010110'),	// T-shape to the left
 		new MiddleLineTile('000011010'),	// T-shape upwards
+		/*
 		new MiddleLineTile('100000000'),	// Top to left diagonal
 		new MiddleLineTile('100010100'),	// Vertical line + top to left diagonal
 		new MiddleLineTile('100001010'),	// Horizontal line + top to left diagonal
@@ -314,11 +314,11 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		new MiddleLineTile('101001010'),	// \-\
 		new MiddleLineTile('101010100'),	// \|\
 		new MiddleLineTile('010101010'),	// /-/
-		*/
 		new MiddleLineTile('100000001'),	// Curve, upper right
 		new MiddleLineTile('010000002'),	// Curve, lower right
 		new MiddleLineTile('001000004'),	// Curve, lower left
 		new MiddleLineTile('000100008'),	// Curve, upper left
+		*/
 	];
 
 	const tileMap = new Array(cellsDownCanvas);

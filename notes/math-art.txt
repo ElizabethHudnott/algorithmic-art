@@ -58,6 +58,7 @@ Existing Sketches
 Truchet Tiles
 	Bug when avoiding flowing colours
 		Not all permutations are valid when the graph loops back on itself
+	Bug when rotating in resize to fit mode
 
 Contours
 	Displace distribution graph

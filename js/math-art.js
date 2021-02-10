@@ -761,7 +761,7 @@ function hasRandomness(enabled) {
 				if (scaleMode === ScaleMode.CONTAIN) {
 					length = Math.min(width, height) / Math.SQRT2;
 				} else {
-					/* This equation looks good: length = (width + height) / Math.SQRT2
+					/* This alternative equation looks good: length = (width + height) / Math.SQRT2
 					 * Length to completely fill the screen = Math.hypot(width, height)
 					 */
 					length = Math.hypot(width, height);
@@ -789,7 +789,7 @@ function hasRandomness(enabled) {
 
 
 	function transformCanvas(context, width, height, renderWidth, renderHeight, rotation) {
-		context.translate(Math.trunc(renderWidth / 2), Math.trunc(renderHeight / 2));
+		context.translate(Math.trunc(width / 2), Math.trunc(height / 2));
 		context.rotate(rotation);
 		context.translate(Math.trunc(-renderWidth / 2), Math.trunc(-renderHeight / 2));
 	}

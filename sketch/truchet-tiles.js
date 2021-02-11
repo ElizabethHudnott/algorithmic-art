@@ -125,9 +125,9 @@ export default function TruchetTiles() {
 		new MiddleLineTile('000010110'),	// T-shape to the left
 		new MiddleLineTile('000011010'),	// T-shape upwards
 		/*
-		new MiddleLineTile('100000000'),	// Top to left diagonal
-		new MiddleLineTile('100010100'),	// Vertical line + top to left diagonal
-		new MiddleLineTile('100001010'),	// Horizontal line + top to left diagonal
+		new MiddleLineTile('100000000'),	// Top to right diagonal
+		new MiddleLineTile('100010100'),	// Vertical line + top to right diagonal
+		new MiddleLineTile('100001010'),	// Horizontal line + top to right diagonal
 		new MiddleLineTile('010000000'),	// Right to bottom diagonal
 		new MiddleLineTile('010010100'),	// Vertical line + right to bottom diagonal
 		new MiddleLineTile('010001010'),	// Horizontal line + right to bottom diagonal
@@ -679,13 +679,27 @@ class MiddleLineTile extends TileType {
 		} else {
 			index = y < halfLength ? 0 : 1;
 		}
-		const oldStr = this.str;
-		let newStr;
-		if (oldStr[index] === '0') {
-			newStr = oldStr.slice(0, index) + String(color + 1) + oldStr.slice(index + 1);
+		let curved = this.curved;
+		let newChar;
+		if (this.str[index] === '0') {
+			// Transition not present to straight.
+			newChar = String(color + 1);
+		} else if (index < 4) {
+			const wasCurved = (curved & (1 << index)) !== 0;
+			if (wasCurved) {
+				// Transition curved to not present.
+				newChar = '0';
+				curved = curved - (1 << index);
+			} else {
+				// Transition straight to curved.
+				newChar = this.str[index];
+				curved = curved + (1 << index);
+			}
 		} else {
-			newStr = oldStr.slice(0, index) + '0' + oldStr.slice(index + 1);
+			// Transition straight to not present.
+			newChar = '0';
 		}
+		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, -1) + curved.toString(16);
 		return new MiddleLineTile(newStr);
 	}
 

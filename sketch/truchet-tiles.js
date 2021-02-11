@@ -460,7 +460,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 class TileType {
 	constructor(connections) {
-		// Maps a port number to an array of port numbers
+		// Maps a port number to an set of port numbers
 		this.connections = connections;
 		for (let [connector, connectees] of Array.from(connections.entries())) {
 			for (let connectee of connectees) {
@@ -501,6 +501,7 @@ class TileType {
 class Tile {
 	constructor(tileType, colors) {
 		this.tileType = tileType;
+		// Maps port -> color
 		this.colors = colors || new Map();
 	}
 
@@ -612,40 +613,48 @@ class MiddleLineTile extends TileType {
 		const connections = new Map();
 		const colors = new Array(8);
 		const defaultColors = new Map();
+		const colorMap = new Map();
 		// First four characters represent diagonal lines
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i]);
 			colors[i] = color;
 			if (str[i] !== '0') {
-				const destinations = new Set();
-				destinations.add(((i + 1) * 4 + 2) % 16);
-				connections.set(i * 4 + 2, destinations);
+				let mapping = colorMap.get(color);
+				if (mapping === undefined) {
+					mapping = new Set();
+					colorMap.set(color, mapping);
+				}
+				mapping.add(i * 4 + 2);
+				mapping.add(((i + 1) * 4 + 2) % 16);
 				defaultColors.set(i * 4 + 2, color - 1);
 				defaultColors.set((i + 1) * 4 + 2, color - 1);
 			}
 		}
 		// Second four characters represent horizontal and vertical lines
-		const intoCentre = new Set();
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i + 4]);
 			colors[i + 4] = color;
 			if (str[i + 4] !== '0') {
-				intoCentre.add(i);
+				let mapping = colorMap.get(color);
+				if (mapping === undefined) {
+					mapping = new Set();
+					colorMap.set(color, mapping);
+				}
+				mapping.add(i * 4 + 2);
 				defaultColors.set(i * 4 + 2, color - 1);
 			}
 		}
-		for (let i of intoCentre) {
-			let connected = connections.get(i * 4 + 2);
-			if (connected === undefined) {
-				connected = new Set();
-				connections.set(i * 4 + 2, connected);
-			}
-			for (let j of intoCentre) {
-				if (i === j) {
-					continue;
-				}
-				if (str[i + 4] === str[j + 4]) {
-					connected.add(j * 4 + 2);
+		for (let [color, ports] of colorMap.entries()) {
+			for (let port1 of ports) {
+				for (let port2 of ports) {
+					if (port1 !== port2) {
+						let destinations = connections.get(port1);
+						if (destinations === undefined) {
+							destinations = new Set();
+							connections.set(port1, destinations);
+						}
+						destinations.add(port2);
+					}
 				}
 			}
 		}

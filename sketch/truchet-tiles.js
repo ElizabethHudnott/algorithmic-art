@@ -33,6 +33,11 @@ export default function TruchetTiles() {
 
 		drawPreview();
 
+		optionsDoc.getElementById('tiles-tile-num').addEventListener('input', function (event) {
+			currentTileNum = parseInt(this.value);
+			drawPreview();
+		});
+
 		designCanvas.addEventListener('pointerdown', function (event) {
 			const lineWidth = Math.min(Math.max(me.strokeRatio * PREVIEW_SIZE, 42), 72);
 			const currentTile = me.tileTypes[currentTileNum];
@@ -124,30 +129,6 @@ export default function TruchetTiles() {
 		new MiddleLineTile('000001110'),	// T-shape downwards
 		new MiddleLineTile('000010110'),	// T-shape to the left
 		new MiddleLineTile('000011010'),	// T-shape upwards
-		/*
-		new MiddleLineTile('100000000'),	// Top to right diagonal
-		new MiddleLineTile('100010100'),	// Vertical line + top to right diagonal
-		new MiddleLineTile('100001010'),	// Horizontal line + top to right diagonal
-		new MiddleLineTile('010000000'),	// Right to bottom diagonal
-		new MiddleLineTile('010010100'),	// Vertical line + right to bottom diagonal
-		new MiddleLineTile('010001010'),	// Horizontal line + right to bottom diagonal
-		new MiddleLineTile('001000000'),	// Bottom to left diagonal
-		new MiddleLineTile('001010100'),	// Vertical line + bottom to left diagonal
-		new MiddleLineTile('001001010'),	// Horizontal line + bottom to left diagonal
-		new MiddleLineTile('000100000'),	// Left to top diagonal
-		new MiddleLineTile('000110100'),	// Vertical line + left to top diagonal
-		new MiddleLineTile('000101010'),	// Horizontal line + left to top diagonal
-		new MiddleLineTile('010200000'),	// Two diagonals, forward facing
-		new MiddleLineTile('102000000'),	// Two diagonals, backward facing
-		new MiddleLineTile('011000000'),	// Upward V
-		new MiddleLineTile('001100000'),	// Rightward V
-		new MiddleLineTile('100100000'),	// Downward V
-		new MiddleLineTile('110000000'),	// Leftward V
-		new MiddleLineTile('010110100'),	// /|/
-		new MiddleLineTile('101001010'),	// \-\
-		new MiddleLineTile('101010100'),	// \|\
-		new MiddleLineTile('010101010'),	// /-/
-		*/
 		new MiddleLineTile('100000001'),	// Curve, upper right
 		new MiddleLineTile('010000002'),	// Curve, lower right
 		new MiddleLineTile('001000004'),	// Curve, lower left

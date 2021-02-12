@@ -38,7 +38,33 @@ export default function TruchetTiles() {
 			drawPreview();
 		});
 
-		designCanvas.addEventListener('pointerdown', function (event) {
+
+		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
+			currentTileNum = me.tileTypes.length;
+			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000');
+			drawPreview();
+			const tileNumInput = document.getElementById('tiles-tile-num');
+			const option = document.createElement('OPTION');
+			option.innerHTML = currentTileNum;
+			tileNumInput.appendChild(option);
+			tileNumInput.value = currentTileNum;
+			document.getElementById('tiles-del-tile').disabled = false;
+		});
+
+		optionsDoc.getElementById('tiles-del-tile').addEventListener('click', function (event) {
+			me.tileTypes.splice(currentTileNum, 1);
+			this.disabled = me.tileTypes.length === 1;
+			if (currentTileNum > 0) {
+				currentTileNum--;
+				document.getElementById('tiles-tile-num').value = currentTileNum;
+			}
+			drawPreview();
+			const options = document.getElementById('tiles-tile-num').children;
+			options[options.length - 1].remove();
+			generateBackground(0);
+		});
+
+		designCanvas.addEventListener('click', function (event) {
 			const lineWidth = Math.min(Math.max(me.strokeRatio * PREVIEW_SIZE, 42), 72);
 			const currentTile = me.tileTypes[currentTileNum];
 			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth, currentColor);

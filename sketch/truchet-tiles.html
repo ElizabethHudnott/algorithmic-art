@@ -19,11 +19,11 @@
 <div class="tab-content">
 	<div class="tab-pane active" id="tiles-inventory" role="tabpanel" aria-labelledby="tiles-inventory-tab">
 		<div class="form-row mb-2">
-			<label class="col-3 col-form-label col-form-label-sm" for="tiles-tile-num">
+			<label class="col-3 col-form-label col-form-label-sm mt-2" for="tiles-tile-num">
 				Tile Number
 			</label>
 			<div class="col-2">
-				<select class="form-control form-control-sm" id="tiles-tile-num">
+				<select class="form-control form-control-sm mt-2" id="tiles-tile-num">
 					<option selected>0</option>
 					<option>1</option>
 					<option>2</option>
@@ -36,11 +36,21 @@
 					<option>9</option>
 				</select>
 			</div>
+			<div class="col-auto">
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-light" title="New design" id="tiles-add-tile">
+						<img src="../img/plus_light_blue.png" width="16" height="16" alt="Add">
+					</button>
+					<button type="button" class="btn btn-light" title="Delete design" id="tiles-del-tile">
+						<img src="../img/delete.png" width="16" height="16" alt="Delete">
+					</button>
+				</div>
+			</div>
 		</div>
 		<div class="form-row mb-2">
 			<div class="col-3"></div>
 			<div class="col-9 pl-2">
-				<canvas width="256" height="256" id="tiles-design" style="background-color: #999999"></canvas>
+				<canvas width="256" height="256" id="tiles-design" style="background-color: #999999" title="Tile designer"></canvas>
 			</div>
 		</div>
 		<div class="form-row form-group">

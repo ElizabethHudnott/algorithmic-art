@@ -23,18 +23,7 @@
 				Tile Number
 			</label>
 			<div class="col-2">
-				<select class="form-control form-control-sm mt-2" id="tiles-tile-num">
-					<option selected>0</option>
-					<option>1</option>
-					<option>2</option>
-					<option>3</option>
-					<option>4</option>
-					<option>5</option>
-					<option>6</option>
-					<option>7</option>
-					<option>8</option>
-					<option>9</option>
-				</select>
+				<input type="number" min="0" max="9" value="0" class="form-control form-control-sm mt-2" id="tiles-tile-num">
 			</div>
 			<div class="col-auto">
 				<div class="btn-group" role="group">
@@ -51,6 +40,14 @@
 			<div class="col-3"></div>
 			<div class="col-9 pl-2">
 				<canvas width="256" height="256" id="tiles-design" style="background-color: #999999" title="Tile designer"></canvas>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-tile-frequency">
+				Tile Frequency
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" value="1" class="form-control form-control-sm" id="tiles-tile-frequency">
 			</div>
 		</div>
 		<div class="form-row form-group">

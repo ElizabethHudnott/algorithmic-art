@@ -34,33 +34,39 @@ export default function TruchetTiles() {
 		drawPreview();
 
 		optionsDoc.getElementById('tiles-tile-num').addEventListener('input', function (event) {
-			currentTileNum = parseInt(this.value);
-			drawPreview();
+			const value = parseInt(this.value);
+			if (value >= 0 && value < me.tileTypes.length) {
+				currentTileNum = value;
+				drawPreview();
+				document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
+			}
 		});
 
 
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
 			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000');
+			me.tileFrequencies[currentTileNum] = 1;
 			drawPreview();
 			const tileNumInput = document.getElementById('tiles-tile-num');
-			const option = document.createElement('OPTION');
-			option.innerHTML = currentTileNum;
-			tileNumInput.appendChild(option);
 			tileNumInput.value = currentTileNum;
+			tileNumInput.max = currentTileNum;
 			document.getElementById('tiles-del-tile').disabled = false;
+			document.getElementById('tiles-tile-frequency').value = 1;
 		});
 
 		optionsDoc.getElementById('tiles-del-tile').addEventListener('click', function (event) {
 			me.tileTypes.splice(currentTileNum, 1);
-			this.disabled = me.tileTypes.length === 1;
+			me.tileFrequencies.splice(currentTileNum, 1);
+			const tileNumInput = document.getElementById('tiles-tile-num');
 			if (currentTileNum > 0) {
 				currentTileNum--;
-				document.getElementById('tiles-tile-num').value = currentTileNum;
+				tileNumInput.value = currentTileNum;
 			}
+			tileNumInput.max = me.tileTypes.length - 1;
+			this.disabled = me.tileTypes.length === 1;
+			document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
 			drawPreview();
-			const options = document.getElementById('tiles-tile-num').children;
-			options[options.length - 1].remove();
 			generateBackground(0);
 		});
 
@@ -69,6 +75,14 @@ export default function TruchetTiles() {
 			const currentTile = me.tileTypes[currentTileNum];
 			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth, currentColor);
 			drawPreview();
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-tile-frequency').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				me.tileFrequencies[currentTileNum] = value;
+			}
 			generateBackground(0);
 		});
 
@@ -160,6 +174,8 @@ export default function TruchetTiles() {
 		new MiddleLineTile('001000004'),	// Curve, lower left
 		new MiddleLineTile('000100008'),	// Curve, upper left
 	];
+
+	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 }
 
 TruchetTiles.prototype.animatable = {
@@ -310,6 +326,13 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		minY--;
 	}
 
+	let tileFrequenciesTotal = 0;
+	const tileCDF = new Array(this.tileFrequencies.length);
+	for (let i = 0; i < tileCDF.length; i++) {
+		tileFrequenciesTotal += this.tileFrequencies[i];
+		tileCDF[i] = tileFrequenciesTotal;
+	}
+
 	const tileMap = new Array(cellsDownCanvas);
 	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.min(cellWidth, cellHeight)), 1);
 
@@ -367,7 +390,11 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 			blankRunLength = 0;
 
-			const tileTypeIndex = Math.trunc(random.next() * this.tileTypes.length);
+			const p = random.next() * tileFrequenciesTotal;
+			let tileTypeIndex = this.tileTypes.length - 1;
+			while (tileTypeIndex > 0 && tileCDF[tileTypeIndex - 1] >= p) {
+				tileTypeIndex--;
+			}
 			tileMapRow[cellX] = new Tile(this.tileTypes[tileTypeIndex]);
 		}
 		unitsProcessed++;

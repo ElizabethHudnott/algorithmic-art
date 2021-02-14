@@ -62,7 +62,7 @@ Colour Assignment
 			4				Straight 	Bent 		Cross
 	Modes
 		1 Random
-		2 Random but the same for each tile of the same type
+		2 Same for each tile of the same type
 		3 Flowing
 		4 Assign colours and shapes based upon colours in a bitmap image (https://newscentral.africa/geometric-art-litema-sesotho/)
 	"A or B" style connections

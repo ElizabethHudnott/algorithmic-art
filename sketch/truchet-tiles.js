@@ -190,53 +190,35 @@ TruchetTiles.prototype.animatable = {
 	]
 };
 
+/** Connections from a port on one tile to ports on neighbouring tiles.
+ *	Format: output port -> collection of delta x, delta y, input port number triples
+ */
+TruchetTiles.connections = new Array(16);
+TruchetTiles.connections[ 0] = [ [-1,  0,  4], [ 0, -1, 12], [-1, -1,  8]	];
+TruchetTiles.connections[ 1] = [ [ 0, -1, 11]								];
+TruchetTiles.connections[ 2] = [ [ 0, -1, 10]								];
+TruchetTiles.connections[ 3] = [ [ 0, -1,  9]								];
+TruchetTiles.connections[ 4] = [ [ 1,  0,  0], [ 0, -1,  8], [ 1, -1, 12]	];
+TruchetTiles.connections[ 5] = [ [ 1,  0, 15]								];
+TruchetTiles.connections[ 6] = [ [ 1,  0, 14]								];
+TruchetTiles.connections[ 7] = [ [ 1,  0, 13]								];
+TruchetTiles.connections[ 8] = [ [ 1,  0, 12], [ 0,  1,  4], [ 1,  1,  0]	];
+TruchetTiles.connections[ 9] = [ [ 0,  1,  3]								];
+TruchetTiles.connections[10] = [ [ 0,  1,  2]								];
+TruchetTiles.connections[11] = [ [ 0,  1,  1]								];
+TruchetTiles.connections[12] = [ [-1,  0,  8], [ 0,  1,  0], [-1,  1,  4]	];
+TruchetTiles.connections[13] = [ [-1,  0,  7]								];
+TruchetTiles.connections[14] = [ [-1,  0,  6]								];
+TruchetTiles.connections[15] = [ [-1,  0,  5]								];
+
 TruchetTiles.prototype.connectedTiles = function (x, y, port, width, height) {
-	const locations = [];
-	switch (port) {
-	case 0:
-		locations.push([x - 1, y, 4]);
-		locations.push([x, y - 1, 12]);
-		locations.push([x - 1, y - 1, 8]);
-		break;
-	case 1:
-	case 2:
-	case 3:
-		locations.push([x, y - 1, 12 - port]);
-		break;
-	case 4:
-		locations.push([x + 1, y, 0]);
-		locations.push([x, y - 1, 8]);
-		locations.push([x + 1, y - 1, 12]);
-		break;
-	case 5:
-	case 6:
-	case 7:
-		locations.push([x + 1, y, 20 - port]);
-		break;
-	case 8:
-		locations.push([x + 1, y, 12]);
-		locations.push([x, y + 1, 4]);
-		locations.push([x + 1, y + 1, 0]);
-		break;
-	case 9:
-	case 10:
-	case 11:
-		locations.push([x, y + 1, 12 - port]);
-		break;
-	case 12:
-		locations.push([x - 1, y, 8]);
-		locations.push([x, y + 1, 0]);
-		locations.push([x - 1, y + 1, 4]);
-		break;
-	default:
-		locations.push([x - 1, y, 20 - port]);
-	}
+	const connections = TruchetTiles.connections[port];
 	const filteredLocations = [];
-	for (let location of locations) {
-		const x = location[0];
-		const y = location[1];
-		if (x >= 0 && x < width && y >= 0 && y < height) {
-			filteredLocations.push(location);
+	for (let connection of connections) {
+		const locationX = x + connection[0];
+		const locationY = y + connection[1];
+		if (locationX >= 0 && locationX < width && locationY >= 0 && locationY < height) {
+			filteredLocations.push([locationX, locationY, connection[2]]);
 		}
 	}
 	return filteredLocations;

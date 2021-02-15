@@ -157,8 +157,18 @@ export default function TruchetTiles() {
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
 
-	this.colors = ['#e00000', '#007a00', '#0000b0', '#ffaa00'];	// #887ecb
-	this.numColors = 4;
+	this.colors = [
+		'hsl(  0, 100%, 43%)',	// Red
+		'hsl(120, 100%, 28%)',	// Green
+		'hsl(240, 100%, 34%)',	// Blue
+		'hsl( 45, 100%, 50%)',	// Yellow
+		'hsl(195,  90%, 51%)',	// Azure
+		'hsl(248,  43%, 65%)',	// Light purple
+		'hsl(  0,   0%, 25%)',	// Charcoal grey
+		'hsl( 30, 100%, 18%)',	// Brown
+		'hsl(  0,   8%, 61%)',	// Light grey
+	];
+	this.numColors = this.colors.length;
 	this.flowProbability = 1;
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];

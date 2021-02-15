@@ -158,17 +158,23 @@ export default function TruchetTiles() {
 	this.gapProbability = 0;
 
 	this.colors = [
-		'hsl(  0, 100%, 43%)',	// Red
-		'hsl(120, 100%, 28%)',	// Green
-		'hsl(240, 100%, 34%)',	// Blue
-		'hsl( 45, 100%, 50%)',	// Yellow
-		'hsl(195,  90%, 51%)',	// Azure
-		'hsl(248,  43%, 65%)',	// Light purple
-		'hsl(  0,   0%, 25%)',	// Charcoal grey
-		'hsl( 30, 100%, 18%)',	// Brown
-		'hsl(  0,   8%, 61%)',	// Light grey
+		'hsl(  4,  86%, 54%)',	// Red
+		'hsl(148, 100%, 27%)',	// Green
+		'hsl(222,  90%, 32%)',	// Blue
+		'hsl( 49,  95%, 50%)',	// Yellow
+		'hsl(180,  85%, 40%)',	// Turquoise
+		'hsl(345,   6%, 18%)',	// Charcoal Grey
+		'hsl(262,  42%, 49%)',	// Purple
+		'hsl(346,  94%, 83%)',	// Pink
+		'hsl( 94,  63%, 52%)',	// Lime
+		'hsl(201,  87%, 42%)',	// Azure
+		'hsl( 26,  90%, 56%)',	// Orange
+		'hsl(205,   6%, 59%)',	// Grey
+		'hsl(323,  99%, 26%)',	// Grape
+		'hsl(327,  77%, 56%)',	// Magenta
+		'hsl( 30, 100%, 26%)',	// Brown
 	];
-	this.numColors = this.colors.length;
+	this.numColors = 4;
 	this.flowProbability = 1;
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];

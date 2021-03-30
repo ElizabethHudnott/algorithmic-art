@@ -103,7 +103,16 @@ Modes of pattern codeword interpretation (in addition to fully random option)
 		Mirroring options (optional):
 			Horizontal: enter the required patterns manually
 			Vertical: 01|23|45 becomes 01|23|45|4'5'|2'3'|0'|1' where 0' is the vertically flipped version of tile 0
-	Repeat X, Permutate Y
+			------
+			Mirror Horizontally
+			Swap digits: 1&4, 2&3, 6&8
+			Swap bits: 1s & 8s, 2s & 4s
+
+			Mirror Vertically
+			Swap digits: 1&2, 3&4, 5&7
+			Swap bits: 1s & 2s, 4s & 8s
+			------
+	Repeat X, Permute Y
 		1 Begin with a random pattern.
 		2 Repeat the pattern horizontally.
 		3 Switch to a different random pattern when beginning a new row until each pattern has been used once.
@@ -111,14 +120,14 @@ Modes of pattern codeword interpretation (in addition to fully random option)
 		5 Keep selecting different patterns until every pattern has been used again.
 		6 Keep repeating steps 4 & 5.
 		Vertical mirroring option: mirror rows and then repeat instead of Steps 4-6
-	Permutate X, Repeat Y
-		Same as Repeat X, Permutate Y but X and Y are switched (including the length of the patterns running down the screen)
-	Permutate X, Permutate Y
+	Permute X, Repeat Y
+		Same as Repeat X, Permute Y but X and Y are switched (including the length of the patterns running down the screen)
+	Permute X, Permute Y
 		1 Begin with a random pattern.
 		2 Choose different patterns until each pattern has been used once or the end of the row is reached
 		3 If the end of the row has not been reached then repeat the entire sequence of patterns until the end of the row is reached.
 		4 Begin the next row with a random pattern different from the first pattern used on the first row
-		5 Keep choosing patterns randomly until each pattern has been used once on the second row or the end of the second row is reached. Use patterns that weren't used on the first row before reusing other patterns.
+		5 Keep choosing patterns randomly until each pattern has been used once on the second row or the end of the second row is reached. Use patterns that weren't used on the first row before reusing other patterns. Try not to begin the same pattern at the same offset as on the row immediately above.
 		6 Once every pattern has been used as the first pattern on one of the rows completed so far then repeat the entire structure generated up until that point.
 		Vertical mirroring option: Insert Step 5a to vertically mirror everything generated so far before repeating it.
 	Context-Free (or sensitive?) Grammar
@@ -133,13 +142,22 @@ Modes of pattern codeword interpretation (in addition to fully random option)
 		When we begin a new row and a new pattern at the same time then start from a random offset within the pattern, not necessarily the first tile in the pattern.
 
 Modifications to the Mode of repetition
+	Offsets
+		For the repeating modes, each column or line can be offset by one or more spaces (like fitting Tetris blocks together).
 	Probabilities for mutation. Two types:
 		Probability of mutating into a rotated or flipped version of the tile in the pattern.
 		Probability of mutating into any other type of tile, randomly selected.
-	Symmetry enforcement. Two values (for left & right and top & bottom), each one of:
-		No symmetry
-		Reflective symmetry
-		Rotational symmetry (twofold, or fourfold if both are set)
+	Symmetry enforcement
+		Two shape fields:
+			F|0	No prescribed symmetry
+			F|1 Mirrored horizontally
+			F|2	Mirrored horizontally and vertically
+			F|3	Mirrored vertically
+			T|0 Twofold rotational symmetry
+			T|1 Twofold rotational symmetry with horizontal mirroring
+			T|2	Twofold rotational symmetry with vertical mirroring
+			T|3	Fourfold rotational symmetry
+		A field that controls symmetrical versus explicitly different colours
 
 Mouse Interactions
 	Click to change tiles. Two modes.
@@ -174,7 +192,7 @@ Animations
 		Divide the screen up into groups of columns and groups of rows of a chosen width and height (in cells)
 		Randomly choose an x-offset and a y-offset
 			E.g. 6 columns with a screen 30 cells wide and an x-offset of 1 means that when we slide up or down we slide column numbers 1, 7, 13,...
-			Change the offsets a specified number of times during the animation.
+			Change the offsets and directions a specified number of times during the animation.
 
 	Control points of curves flexing (oscillating back and forth)
 		can draw outside of the cell
@@ -214,6 +232,7 @@ Tile Shapes
 	Brick wall variants of the above
 	Hexagonal (serpentiles)
 	https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons
+	Fracture parameter: https://www.amazon.co.uk/Fractured-societies-coming-apart-together/dp/0008463964
 
 Tile designer UI
 

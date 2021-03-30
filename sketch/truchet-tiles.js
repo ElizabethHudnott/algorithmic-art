@@ -373,7 +373,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 				if (blankRunLength < maxBlankRun) {
 					blankRunLength++;
 					blankDiffusion = 0;
-					tileMapRow[cellX] = BlankTile.INSTANCE;
+					tileMapRow[cellX] = BLANK_TILE;
 					continue;
 				} else {
 					blankDiffusion += gapProbability;
@@ -382,7 +382,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			if (blankDiffusion >= 1 && blankRunLength < maxBlankRun) {
 				blankRunLength++;
 				blankDiffusion--;
-				tileMapRow[cellX] = BlankTile.INSTANCE;
+				tileMapRow[cellX] = BLANK_TILE;
 				continue;
 			}
 
@@ -585,7 +585,6 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 }
 
 class BlankTile extends TileType {
-	static INSTANCE = new Tile(new BlankTile());
 
 	constructor() {
 		super(new Map());
@@ -595,6 +594,8 @@ class BlankTile extends TileType {
 		// Nothing to draw
 	}
 }
+
+const BLANK_TILE = new Tile(new BlankTile());
 
 class DiagonalLineTile extends TileType {
 	constructor(str) {
@@ -641,6 +642,11 @@ class DiagonalLineTile extends TileType {
 }
 
 class MiddleLineTile extends TileType {
+	/**
+	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
+	 * Second 4 digits: straight lines: up, right, down, left
+	 * Last digit bits: 1 = upper right, 2 = lower right, 4 = lower left, 8 = upper left
+	 */
 	constructor(str) {
 		const connections = new Map();
 		const colors = new Array(8);

@@ -179,10 +179,10 @@ class RandomNumberGenerator {
 
 	constructor(seed) {
 		if (seed === undefined) {
-			this.a = Math.floor(Math.random() * 4294967295);
-			this.b = Math.floor(Math.random() * 4294967295);
-			this.c = Math.floor(Math.random() * 4294967295);
-			this.d = Math.floor(Math.random() * 4294967295);
+			this.a = Math.floor(Math.random() * 4294967296);
+			this.b = Math.floor(Math.random() * 4294967296);
+			this.c = Math.floor(Math.random() * 4294967296);
+			this.d = Math.floor(Math.random() * 4294967296);
 			seed = this.a + '\n' + this.b + '\n' + this.c + '\n' + this.d;
 		} else {
 			const strings = seed.split('\n', 4);
@@ -427,10 +427,10 @@ function idToProperty(id, hasPrefix) {
 	if (hasPrefix) {
 		words.splice(0, 1);
 	}
-	 for (let i = 1; i < words.length; i++) {
-	 	const word = words[i];
-	 	words[i] = word[0].toUpperCase() + word.slice(1);
-	 }
+	for (let i = 1; i < words.length; i++) {
+		const word = words[i];
+		words[i] = word[0].toUpperCase() + word.slice(1);
+	}
 	 return words.join('');
 }
 

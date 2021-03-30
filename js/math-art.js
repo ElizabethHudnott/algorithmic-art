@@ -891,7 +891,7 @@ function hasRandomness(enabled) {
 			this.xy = new Map();
 			this.pairedStepped = new Map();
 			if (arguments.length === 0) {
-				// Used by the fromObject method
+				// Used by the frameDataFromObject function
 				this.backgroundColor = '#ffffff';
 				this.backgroundImage = undefined;
 				this.opacity = 1;
@@ -981,60 +981,6 @@ function hasRandomness(enabled) {
 			data.blur = this.blur;
 			data.seed = this.random.seed;
 			return data;
-		}
-
-		static fromObject(data, generator) {
-			const frame = new FrameData();
-			const animatable = generator.animatable;
-			if (animatable !== undefined) {
-				const values = data.properties;
-				const continuous = animatable.continuous;
-				if (continuous !== undefined) {
-					for (let property of continuous) {
-						if (property in values) {
-							frame.continuous.set(property, values[property]);
-						}
-					}
-				}
-				const stepped = animatable.stepped;
-				if (stepped !== undefined) {
-					for (let property of stepped) {
-						if (property in values) {
-							frame.stepped.set(property, values[property]);
-						}
-					}
-				}
-				const maps = ['pairedContinuous', 'xy', 'pairedStepped'];
-				for (let mapName of maps) {
-					const list = animatable[mapName];
-					if (list !== undefined) {
-						const map = frame[mapName];
-						for (let [property1, property2] of list) {
-							if (property1 in values) {
-								map.set(property1, values[property1]);
-							}
-							if (property2 in values) {
-								map.set(property2, values[property2]);
-							}
-						}
-					}
-				}
-			}
-			frame.backgroundColor = data.backgroundColor;
-			if ('backgroundImageURL' in data) {
-				const image = new Image();
-				image.src = data.backgroundImageURL;
-				frame.backgroundImage = image;
-			}
-			frame.rotation = data.rotation;
-			frame.opacity = data.opacity;
-			frame.scale = data.scale;
-			frame.scaleMode = data.scaleMode;
-			frame.blur = data.blur;
-			if ('seed' in data) {
-				frame.random = new RandomNumberGenerator(data.seed);
-			}
-			return frame;
 		}
 
 		isCurrentFrame() {
@@ -1187,6 +1133,60 @@ function hasRandomness(enabled) {
 
 	function currentFrameData() {
 		return new FrameData(bgGenerator, rotation, backgroundElement, backgroundImage);
+	}
+
+	function frameDataFromObject(data, generator) {
+		const frame = new FrameData();
+		const animatable = generator.animatable;
+		if (animatable !== undefined) {
+			const values = data.properties;
+			const continuous = animatable.continuous;
+			if (continuous !== undefined) {
+				for (let property of continuous) {
+					if (property in values) {
+						frame.continuous.set(property, values[property]);
+					}
+				}
+			}
+			const stepped = animatable.stepped;
+			if (stepped !== undefined) {
+				for (let property of stepped) {
+					if (property in values) {
+						frame.stepped.set(property, values[property]);
+					}
+				}
+			}
+			const maps = ['pairedContinuous', 'xy', 'pairedStepped'];
+			for (let mapName of maps) {
+				const list = animatable[mapName];
+				if (list !== undefined) {
+					const map = frame[mapName];
+					for (let [property1, property2] of list) {
+						if (property1 in values) {
+							map.set(property1, values[property1]);
+						}
+						if (property2 in values) {
+							map.set(property2, values[property2]);
+						}
+					}
+				}
+			}
+		}
+		frame.backgroundColor = data.backgroundColor;
+		if ('backgroundImageURL' in data) {
+			const image = new Image();
+			image.src = data.backgroundImageURL;
+			frame.backgroundImage = image;
+		}
+		frame.rotation = data.rotation;
+		frame.opacity = data.opacity;
+		frame.scale = data.scale;
+		frame.scaleMode = data.scaleMode;
+		frame.blur = data.blur;
+		if ('seed' in data) {
+			frame.random = new RandomNumberGenerator(data.seed);
+		}
+		return frame;
 	}
 
 	function hideAlert(jquery) {
@@ -1744,11 +1744,11 @@ function hasRandomness(enabled) {
 			const doc = await response.json();
 			if (doc) {
 				await switchGenerator(doc.sketch, false);
-				startFrame = FrameData.fromObject(doc.startFrame, bgGenerator);
+				startFrame = frameDataFromObject(doc.startFrame, bgGenerator);
 				currentFrame = startFrame;
 				random = startFrame.random;
 				if ('endFrame' in doc) {
-					endFrame = FrameData.fromObject(doc.endFrame, bgGenerator);
+					endFrame = frameDataFromObject(doc.endFrame, bgGenerator);
 				} else {
 					endFrame = startFrame;
 				}

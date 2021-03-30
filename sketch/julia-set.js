@@ -387,11 +387,11 @@ export default function JuliaSet() {
 			button.classList.add('btn');
 			button.addEventListener('click', selectColor);
 			button.addEventListener('contextmenu', rightClickColor);
-			const color = palette[i];
 			paletteUI.appendChild(div);
 			updateSwatch(i);
 		}
 		paletteUI.children[0].children[0].classList.add('active');
+		updateColorSliders();
 
 		let redrawTimeout;
 		function previewColor() {
@@ -407,7 +407,6 @@ export default function JuliaSet() {
 		}
 		{
 			const activePalette = me[paletteProperty];
-			hueSlider.value = activePalette[0][ColorComponents.HUE];
 			hueSlider.addEventListener('input', function (event) {
 				activePalette[colorSelectionStart][ColorComponents.HUE] = parseFloat(this.value) % 1;
 				previewColor();
@@ -415,7 +414,6 @@ export default function JuliaSet() {
 			hueSlider.addEventListener('pointerup', setColor);
 			hueSlider.addEventListener('keyup', setColor);
 
-			saturationSlider.value = activePalette[0][ColorComponents.SATURATION];
 			saturationSlider.addEventListener('input', function (event) {
 				activePalette[colorSelectionStart][ColorComponents.SATURATION] = parseFloat(this.value);
 				previewColor();
@@ -423,7 +421,6 @@ export default function JuliaSet() {
 			saturationSlider.addEventListener('pointerup', setColor);
 			saturationSlider.addEventListener('keyup', setColor);
 
-			lightnessSlider.value = activePalette[0][ColorComponents.LIGHTNESS];
 			lightnessSlider.addEventListener('input', function (event) {
 				activePalette[colorSelectionStart][ColorComponents.LIGHTNESS] = parseFloat(this.value);
 				previewColor();
@@ -431,7 +428,6 @@ export default function JuliaSet() {
 			lightnessSlider.addEventListener('pointerup', setColor);
 			lightnessSlider.addEventListener('keyup', setColor);
 
-			opacitySlider.value = activePalette[0][ColorComponents.OPACITY];
 			opacitySlider.addEventListener('input', function (event) {
 				activePalette[colorSelectionStart][ColorComponents.OPACITY] = parseFloat(this.value);
 				previewColor();

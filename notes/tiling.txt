@@ -1,10 +1,6 @@
 Terminology
 	Edge matching puzzle
 
-Basic Parameters
-	Cell width
-	Cell height
-
 Anchor points:
 	Corners
 	Middle of edges
@@ -21,12 +17,11 @@ Anchor points:
 	Use probabilities to decide whether to use 1, 2, 3 or 4 colours (flow / don't flow)
 
 Colours
-	A chosen number of basic colours (1-16 plus background colour)
+	A chosen number of basic colours (1-15 plus background colour)
 	Colour varies along the length of a line
 		Fixed hue (except when fading between hues at a junction)
 		Saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
 	OR across the width of a line (shaded like a pipe)
-	VGA / retro style default palette
 
 Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
@@ -46,7 +41,6 @@ Tile Sets
 
 Choose a selection of tiles
 	Can be from multiple different tile sets
-	Assign a probability of being chosen to each one.
 
 Tile Sets Variants
 	Draw / Don't draw path outlines
@@ -55,16 +49,18 @@ Tile Sets Variants
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
 	Probability parameters for flow/don't flow
-		Flow through a tile to another port / flow backwards from start point
+		General flow through a tile to another port / flow backwards from start point
 		Connections at tile corners (2 probability distributions)
 			Max Directions	Option 1	Option 2	Option 3
 			3				Straight 	Bent 		T-shape
 			4				Straight 	Bent 		Cross
 	Modes
-		1 Random
+		1 Flow / No flow
 		2 Same for each tile of the same type
-		3 Flowing
-		4 Assign colours and shapes based upon colours in a bitmap image (https://newscentral.africa/geometric-art-litema-sesotho/)
+		3 Assign colours and shapes based upon colours in a bitmap image (https://newscentral.africa/geometric-art-litema-sesotho/)
+		* Divide the palette into groups of N colours ( N in 1..ceil(numColors/2) ) for the purposes of Flow / No Flow and for flowing the property that varies along the length.
+			* Possible one group with fewer colours
+			* N must be at least 2 if the flow probability isn't 1
 	"A or B" style connections
 		E.g. For Tile Set 7 it should be able to connect a semicircle with just one quarter circle
 	Option to have the colours in the palette organized into contrasting pairs so the same colours always contrast each other.

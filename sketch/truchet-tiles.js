@@ -9,6 +9,13 @@ export default function TruchetTiles() {
 
 	this.optionsDocument = downloadFile('truchet-tiles.html', 'document').then(function (optionsDoc) {
 
+		let redrawTimeout;
+
+		function redraw() {
+			generateBackground(0);
+			redrawTimeout = undefined;
+		}
+
 		function listenSlider(id, property) {
 			optionsDoc.getElementById(id).addEventListener('input', function (event) {
 				me[property] = parseFloat(this.value);
@@ -128,16 +135,100 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
-		function changeColor(index) {
-			return function (event) {
-				me.colors[index] = this.value;
-				generateBackground(0);
-			};
+		const paletteUI = optionsDoc.getElementById('tiles-palette');
+		const hueSlider = optionsDoc.getElementById('tiles-hue');
+		const saturationSlider = optionsDoc.getElementById('tiles-saturation');
+		const lightnessSlider = optionsDoc.getElementById('tiles-lightness');
+		const opacitySlider = optionsDoc.getElementById('tiles-opacity');
+		let editColorIndex = 0;
+
+		function updateColorSliders() {
+			const color = me.colors[editColorIndex];
+			hueSlider.value = color[0];
+			saturationSlider.value = color[1];
+			lightnessSlider.value = color[2];
+			opacitySlider.value = color[3];
 		}
 
-		optionsDoc.querySelectorAll('input[type=color]').forEach(function (item, index) {
-			item.addEventListener('input', changeColor(index));
+		function selectColor(event) {
+			paletteUI.children[editColorIndex].children[0].classList.remove('active');
+			editColorIndex = parseInt(event.target.dataset.index);
+			paletteUI.children[editColorIndex].children[0].classList.add('active');
+			updateColorSliders();
+		}
+
+		function updateSwatch(index) {
+			const color = me.colors[index];
+			const button = paletteUI.children[index].children[0];
+			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
+		}
+
+		{
+			const spacer = paletteUI.children[0];
+			for (let i = 0; i < 15; i++) {
+				const div = optionsDoc.createElement('DIV');
+				div.hidden = i >= me.numColors;
+				const button = optionsDoc.createElement('BUTTON');
+				div.appendChild(button);
+				button.type = 'button';
+				button.name = 'tiles-swatch';
+				button.dataset.index = i;
+				button.classList.add('btn');
+				button.addEventListener('click', selectColor);
+				paletteUI.insertBefore(div, spacer);
+				updateSwatch(i);
+			}
+			paletteUI.children[0].children[0].classList.add('active');
+			updateColorSliders();
+		}
+
+		optionsDoc.getElementById('tiles-num-colors').addEventListener('input', function (event) {
+			const numColors = parseInt(this.value);
+			if (numColors > 0) {
+				for (let i = 0; i < 15; i++) {
+					paletteUI.children[i].hidden = i >= numColors;
+				}
+				// Show/hide spacer
+				paletteUI.children[15].hidden = numColors <= 8;
+				me.numColors = numColors;
+				generateBackground(0);
+			}
 		});
+
+		function previewColor() {
+			updateSwatch(editColorIndex);
+			if (redrawTimeout === undefined) {
+				redrawTimeout = setTimeout(redraw, 100);
+			}
+		}
+
+		hueSlider.addEventListener('input', function (event) {
+			me.colors[editColorIndex][0] = parseFloat(this.value);
+			previewColor();
+		});
+		hueSlider.addEventListener('pointerup', redraw);
+		hueSlider.addEventListener('keyup', redraw);
+
+		saturationSlider.addEventListener('input', function (event) {
+			me.colors[editColorIndex][1] = parseFloat(this.value);
+			previewColor();
+		});
+		saturationSlider.addEventListener('pointerup', redraw);
+		saturationSlider.addEventListener('keyup', redraw);
+
+		lightnessSlider.addEventListener('input', function (event) {
+			me.colors[editColorIndex][2] = parseFloat(this.value);
+			previewColor();
+		});
+		lightnessSlider.addEventListener('pointerup', redraw);
+		lightnessSlider.addEventListener('keyup', redraw);
+
+		opacitySlider.addEventListener('input', function (event) {
+			me.colors[editColorIndex][3] = parseFloat(this.value);
+			previewColor();
+		});
+		opacitySlider.addEventListener('pointerup', redraw);
+		opacitySlider.addEventListener('keyup', redraw);
 
 		return optionsDoc;
 	});
@@ -158,21 +249,21 @@ export default function TruchetTiles() {
 	this.gapProbability = 0;
 
 	this.colors = [
-		'hsl(  4,  86%, 54%)',	// Red
-		'hsl(148, 100%, 27%)',	// Green
-		'hsl(222,  90%, 32%)',	// Blue
-		'hsl( 49,  95%, 50%)',	// Yellow
-		'hsl(180,  85%, 40%)',	// Turquoise
-		'hsl(345,   6%, 18%)',	// Charcoal Grey
-		'hsl(262,  42%, 49%)',	// Purple
-		'hsl(346,  94%, 83%)',	// Pink
-		'hsl( 94,  63%, 52%)',	// Lime
-		'hsl(201,  87%, 42%)',	// Azure
-		'hsl( 26,  90%, 56%)',	// Orange
-		'hsl(205,   6%, 59%)',	// Grey
-		'hsl(323,  99%, 26%)',	// Grape
-		'hsl(327,  77%, 56%)',	// Magenta
-		'hsl( 30, 100%, 26%)',	// Brown
+		[  4/360,  0.86, 0.54, 1],	// Red
+		[148/360,  1   , 0.27, 1],	// Green
+		[222/360,  0.90, 0.32, 1],	// Blue
+		[ 49/360,  0.95, 0.50, 1],	// Yellow
+		[180/360,  0.85, 0.40, 1],	// Turquoise
+		[345/360,   0.6, 0.18, 1],	// Charcoal Grey
+		[262/360,  0.42, 0.49, 1],	// Purple
+		[346/360,  0.94, 0.83, 1],	// Pink
+		[ 94/360,  0.63, 0.52, 1],	// Lime
+		[201/360,  0.87, 0.42, 1],	// Azure
+		[ 26/360,  0.90, 0.56, 1],	// Orange
+		[205/360,   0.6, 0.59, 1],	// Grey
+		[323/360,  0.99, 0.26, 1],	// Grape
+		[327/360,  0.77, 0.56, 1],	// Magenta
+		[ 30/360,  1   , 0.26, 1],	// Brown
 	];
 	this.numColors = 4;
 	this.flowProbability = 1;
@@ -205,6 +296,11 @@ TruchetTiles.prototype.animatable = {
 		'numColors',
 	]
 };
+
+TruchetTiles.prototype.getColor = function (index) {
+	const color = this.colors[index];
+	return hsla(color[0] * 360, color[1], color[2], color[3]);
+}
 
 /** Connections from a port on one tile to ports on neighbouring tiles.
  *	Format: output port -> collection of delta x, delta y, input port number triples
@@ -627,14 +723,14 @@ class DiagonalLineTile extends TileType {
 			context.lineTo(...transform(width, -lineWidth1))
 			context.lineTo(...transform(width, lineWidth2));
 			context.lineTo(...transform(0, height + lineWidth2));
-			context.fillStyle = generator.colors[tile.colors.get(4)];
+			context.fillStyle = generator.getColor(tile.colors.get(4));
 		} else {
 			// Backslash
 			context.moveTo(...transform(0, -lineWidth1));
 			context.lineTo(...transform(width, height - lineWidth1));
 			context.lineTo(...transform(width, height + lineWidth2));
 			context.lineTo(...transform(0, lineWidth2));
-			context.fillStyle = generator.colors[tile.colors.get(0)];
+			context.fillStyle = generator.getColor(tile.colors.get(0));
 		}
 		context.fill();
 	}
@@ -762,7 +858,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
 				}
 				context.lineTo(...transform(centre - lineWidth1, middle));
-				context.fillStyle = generator.colors[tile.colors.get(2)];
+				context.fillStyle = generator.getColor(tile.colors.get(2));
 				context.fill();
 			}
 		}
@@ -778,7 +874,7 @@ class MiddleLineTile extends TileType {
 			if (topToCentre === 0) {
 				context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
 			}
-			context.fillStyle = generator.colors[tile.colors.get(10)];
+			context.fillStyle = generator.getColor(tile.colors.get(10));
 			context.fill();
 		}
 		if (leftToCentre !== 0) {
@@ -792,7 +888,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(x, middle));
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(0, middle + lineWidth2));
-			context.fillStyle = generator.colors[tile.colors.get(14)];
+			context.fillStyle = generator.getColor(tile.colors.get(14));
 			context.fill();
 		}
 		if (rightToCentre !== 0) {
@@ -806,7 +902,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(width, middle + lineWidth2));
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(x, middle));
-			context.fillStyle = generator.colors[tile.colors.get(6)];
+			context.fillStyle = generator.getColor(tile.colors.get(6));
 			context.fill();
 		}
 		const gradient = height / width;
@@ -846,7 +942,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre - lineWidth1, 0));
 				}
 			}
-			context.fillStyle = generator.colors[tile.colors.get(2)];
+			context.fillStyle = generator.getColor(tile.colors.get(2));
 			context.fill();
 		}
 		if (rightToBottom) {
@@ -880,7 +976,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(width, middle - lineWidth1));
 				}
 			}
-			context.fillStyle = generator.colors[tile.colors.get(6)];
+			context.fillStyle = generator.getColor(tile.colors.get(6));
 			context.fill();
 		}
 		if (bottomToLeft !== 0) {
@@ -914,7 +1010,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre + lineWidth2, height));
 				}
 			}
-			context.fillStyle = generator.colors[tile.colors.get(10)];
+			context.fillStyle = generator.getColor(tile.colors.get(10));
 			context.fill();
 		}
 		if (leftToTop !== 0) {
@@ -948,7 +1044,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(0, middle + lineWidth2));
 				}
 			}
-			context.fillStyle = generator.colors[tile.colors.get(14)];
+			context.fillStyle = generator.getColor(tile.colors.get(14));
 			context.fill();
 		}
 	}

@@ -432,12 +432,19 @@ button.toolbar-btn:hover {
 }
 
 .palette>div {
+	margin: 3px 2px;
+	padding: 0;
+	min-width: 42px;
+	height: 42px;
+}
+
+.palette>div:not(.spacer) {
 	background-image: url("../img/checkerboard.png");
 	flex-grow: 1;
-	width: 15px;
-	height: 15px;
-	margin: 2px 3px 2px 0;
-	padding: 0;
+}
+
+.palette>.spacer {
+	flex-grow: 10000;
 }
 
 .palette .btn {
@@ -450,8 +457,8 @@ button.toolbar-btn:hover {
 	vertical-align: top;
 }
 
-.palette .active {
-	outline: solid 2px white;
+.palette .active, .palette .active:focus:not(:focus-visible) {
+	outline: solid 3px white;
 }
 
 .sketch-title {

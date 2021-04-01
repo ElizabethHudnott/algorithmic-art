@@ -26,10 +26,12 @@ export default function TruchetTiles() {
 		listenSlider('tiles-gap-probability', 'gapProbability');
 		listenSlider('tiles-flow-probability', 'flowProbability');
 
+		let editColorIndex = 0;
+		let designColorIndex = 0;
+
 		const designCanvas = optionsDoc.getElementById('tiles-design');
 		const designContext = designCanvas.getContext('2d');
 		let currentTileNum = 0;
-		let currentColor = 0;
 
 		function drawPreview() {
 			const lineWidth = Math.round(Math.max(me.strokeRatio * PREVIEW_SIZE, 1));
@@ -80,7 +82,7 @@ export default function TruchetTiles() {
 		designCanvas.addEventListener('click', function (event) {
 			const lineWidth = Math.min(Math.max(me.strokeRatio * PREVIEW_SIZE, 42), 72);
 			const currentTile = me.tileTypes[currentTileNum];
-			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth, currentColor);
+			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth, designColorIndex);
 			drawPreview();
 			generateBackground(0);
 		});
@@ -136,11 +138,11 @@ export default function TruchetTiles() {
 		});
 
 		const paletteUI = optionsDoc.getElementById('tiles-palette');
+		const designColors = optionsDoc.getElementById('tiles-design-colors');
 		const hueSlider = optionsDoc.getElementById('tiles-hue');
 		const saturationSlider = optionsDoc.getElementById('tiles-saturation');
 		const lightnessSlider = optionsDoc.getElementById('tiles-lightness');
 		const opacitySlider = optionsDoc.getElementById('tiles-opacity');
-		let editColorIndex = 0;
 
 		function updateColorSliders() {
 			const color = me.colors[editColorIndex];
@@ -150,32 +152,55 @@ export default function TruchetTiles() {
 			opacitySlider.value = color[3];
 		}
 
-		function selectColor(event) {
+		function selectEditColor(event) {
 			paletteUI.children[editColorIndex].children[0].classList.remove('active');
 			editColorIndex = parseInt(event.target.dataset.index);
 			paletteUI.children[editColorIndex].children[0].classList.add('active');
 			updateColorSliders();
 		}
 
+		function selectDesignColor(event) {
+			designColors.children[designColorIndex].children[0].classList.remove('active');
+			designColorIndex = parseInt(event.target.dataset.index);
+			designColors.children[designColorIndex].children[0].classList.add('active');
+		}
+
 		function updateSwatch(index) {
 			const color = me.colors[index];
-			const button = paletteUI.children[index].children[0];
+			let button = paletteUI.children[index].children[0];
 			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
+			if (index < 9) {
+				button = designColors.children[index].children[0];
+				button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+				drawPreview();
+			}
 		}
 
 		{
 			const spacer = paletteUI.children[0];
 			for (let i = 0; i < 15; i++) {
-				const div = optionsDoc.createElement('DIV');
+				let div = optionsDoc.createElement('DIV');
 				div.hidden = i >= me.numColors;
-				const button = optionsDoc.createElement('BUTTON');
+				let button = optionsDoc.createElement('BUTTON');
 				div.appendChild(button);
 				button.type = 'button';
 				button.name = 'tiles-swatch';
 				button.dataset.index = i;
 				button.classList.add('btn');
-				button.addEventListener('click', selectColor);
+				button.addEventListener('click', selectEditColor);
 				paletteUI.insertBefore(div, spacer);
+
+				if (i < 9) {
+					div = optionsDoc.createElement('DIV');
+					button = optionsDoc.createElement('BUTTON');
+					div.appendChild(button);
+					button.type = 'button';
+					button.name = 'tiles-design-color';
+					button.dataset.index = i;
+					button.classList.add('btn');
+					button.addEventListener('click', selectDesignColor);
+					designColors.appendChild(div);
+				}
 				updateSwatch(i);
 			}
 			paletteUI.children[0].children[0].classList.add('active');
@@ -637,6 +662,14 @@ class Tile {
 		return this.colors.get(port);
 	}
 
+	getLineColor(port1, port2) {
+		if (port2 !== undefined && this.tileType.connections.get(port2).size === 0) {
+			return this.colors.get(port2);
+		} else {
+			return this.colors.get(port1);
+		}
+	}
+
 	flowColor(inPort, color, histogram) {
 		this.colors.set(inPort, color);
 		let numColored = 1;
@@ -723,14 +756,14 @@ class DiagonalLineTile extends TileType {
 			context.lineTo(...transform(width, -lineWidth1))
 			context.lineTo(...transform(width, lineWidth2));
 			context.lineTo(...transform(0, height + lineWidth2));
-			context.fillStyle = generator.getColor(tile.colors.get(4));
+			context.fillStyle = generator.getColor(tile.getLineColor(4, 12));
 		} else {
 			// Backslash
 			context.moveTo(...transform(0, -lineWidth1));
 			context.lineTo(...transform(width, height - lineWidth1));
 			context.lineTo(...transform(width, height + lineWidth2));
 			context.lineTo(...transform(0, lineWidth2));
-			context.fillStyle = generator.getColor(tile.colors.get(0));
+			context.fillStyle = generator.getColor(tile.getLineColor(0, 8));
 		}
 		context.fill();
 	}
@@ -748,22 +781,7 @@ class MiddleLineTile extends TileType {
 		const colors = new Array(8);
 		const defaultColors = new Map();
 		const colorMap = new Map();
-		// First four characters represent diagonal lines
-		for (let i = 0; i < 4; i++) {
-			const color = parseInt(str[i]);
-			colors[i] = color;
-			if (str[i] !== '0') {
-				let mapping = colorMap.get(color);
-				if (mapping === undefined) {
-					mapping = new Set();
-					colorMap.set(color, mapping);
-				}
-				mapping.add(i * 4 + 2);
-				mapping.add(((i + 1) * 4 + 2) % 16);
-				defaultColors.set(i * 4 + 2, color - 1);
-				defaultColors.set((i + 1) * 4 + 2, color - 1);
-			}
-		}
+		const usedPorts = new Set();
 		// Second four characters represent horizontal and vertical lines
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i + 4]);
@@ -774,20 +792,50 @@ class MiddleLineTile extends TileType {
 					mapping = new Set();
 					colorMap.set(color, mapping);
 				}
-				mapping.add(i * 4 + 2);
-				defaultColors.set(i * 4 + 2, color - 1);
+				const source = i * 4 + 2;
+				mapping.add(source);
+				usedPorts.add(source)
+				defaultColors.set(source, color - 1);
+			}
+		}
+		// First four characters represent diagonal lines
+		for (let i = 0; i < 4; i++) {
+			const color = parseInt(str[i]);
+			colors[i] = color;
+			if (str[i] !== '0') {
+				let mapping = colorMap.get(color);
+				if (mapping === undefined) {
+					mapping = new Set();
+					colorMap.set(color, mapping);
+				}
+				const source = i * 4 + 2;
+				if (!usedPorts.has(source)) {
+					mapping.add(source);
+					usedPorts.add(source);
+					defaultColors.set(source, color - 1);
+				}
+				const destination = ((i + 1) * 4 + 2) % 16;
+				if (!usedPorts.has(destination)) {
+					mapping.add(destination);
+					usedPorts.add(destination);
+					defaultColors.set(destination, color - 1);
+				}
 			}
 		}
 		for (let [color, ports] of colorMap.entries()) {
 			for (let port1 of ports) {
-				for (let port2 of ports) {
-					if (port1 !== port2) {
-						let destinations = connections.get(port1);
-						if (destinations === undefined) {
-							destinations = new Set();
-							connections.set(port1, destinations);
+				if (ports.size === 1) {
+					connections.set(port1, new Set());
+				} else {
+					for (let port2 of ports) {
+						if (port1 !== port2) {
+							let destinations = connections.get(port1);
+							if (destinations === undefined) {
+								destinations = new Set();
+								connections.set(port1, destinations);
+							}
+							destinations.add(port2);
 						}
-						destinations.add(port2);
 					}
 				}
 			}
@@ -814,24 +862,24 @@ class MiddleLineTile extends TileType {
 			index = y < halfLength ? 0 : 1;
 		}
 		let curved = this.curved;
-		let newChar;
-		if (this.str[index] === '0') {
-			// Transition not present to straight.
-			newChar = String(color + 1);
-		} else if (index < 4) {
-			const wasCurved = (curved & (1 << index)) !== 0;
-			if (wasCurved) {
-				// Transition curved to not present.
-				newChar = '0';
-				curved = curved - (1 << index);
+		// By default transition not present to straight or to a new colour.
+		let newChar = String(color + 1);
+		if (this.str[index] !== '0' && this.str[index] === newChar) {
+			if (index < 4) {
+				const wasCurved = (curved & (1 << index)) !== 0;
+				if (wasCurved) {
+					// Transition curved to not present.
+					newChar = '0';
+					curved = curved - (1 << index);
+				} else {
+					// Transition straight to curved.
+					newChar = this.str[index];
+					curved = curved + (1 << index);
+				}
 			} else {
-				// Transition straight to curved.
-				newChar = this.str[index];
-				curved = curved + (1 << index);
+				// Transition straight to not present.
+				newChar = '0';
 			}
-		} else {
-			// Transition straight to not present.
-			newChar = '0';
 		}
 		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, -1) + curved.toString(16);
 		return new MiddleLineTile(newStr);
@@ -858,7 +906,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
 				}
 				context.lineTo(...transform(centre - lineWidth1, middle));
-				context.fillStyle = generator.getColor(tile.colors.get(2));
+				context.fillStyle = generator.getColor(tile.getColor(2));
 				context.fill();
 			}
 		}
@@ -874,7 +922,7 @@ class MiddleLineTile extends TileType {
 			if (topToCentre === 0) {
 				context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
 			}
-			context.fillStyle = generator.getColor(tile.colors.get(10));
+			context.fillStyle = generator.getColor(tile.getColor(10));
 			context.fill();
 		}
 		if (leftToCentre !== 0) {
@@ -888,7 +936,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(x, middle));
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(0, middle + lineWidth2));
-			context.fillStyle = generator.getColor(tile.colors.get(14));
+			context.fillStyle = generator.getColor(tile.getColor(14));
 			context.fill();
 		}
 		if (rightToCentre !== 0) {
@@ -902,7 +950,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(width, middle + lineWidth2));
 			context.lineTo(...transform(x, middle + lineWidth2));
 			context.lineTo(...transform(x, middle));
-			context.fillStyle = generator.getColor(tile.colors.get(6));
+			context.fillStyle = generator.getColor(tile.getColor(6));
 			context.fill();
 		}
 		const gradient = height / width;
@@ -942,7 +990,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre - lineWidth1, 0));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.colors.get(2));
+			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
 			context.fill();
 		}
 		if (rightToBottom) {
@@ -976,7 +1024,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(width, middle - lineWidth1));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.colors.get(6));
+			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
 			context.fill();
 		}
 		if (bottomToLeft !== 0) {
@@ -1010,7 +1058,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(centre + lineWidth2, height));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.colors.get(10));
+			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
 			context.fill();
 		}
 		if (leftToTop !== 0) {
@@ -1044,7 +1092,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(0, middle + lineWidth2));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.colors.get(14));
+			context.fillStyle = generator.getColor(tile.getLineColor(14, 2));
 			context.fill();
 		}
 	}

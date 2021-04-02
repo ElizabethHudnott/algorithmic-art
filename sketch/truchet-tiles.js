@@ -138,6 +138,36 @@ export default function TruchetTiles() {
 		});
 
 		const paletteUI = optionsDoc.getElementById('tiles-palette');
+
+		function setNumColors() {
+			const numColors = parseInt(document.getElementById('tiles-num-colors').value);
+			if (numColors > 0) {
+				for (let i = 0; i < 15; i++) {
+					paletteUI.children[i].hidden = i >= numColors;
+				}
+				// Show/hide spacer
+				paletteUI.children[15].hidden = numColors <= 8;
+				me.numColors = numColors;
+				generateBackground(0);
+			}
+		}
+
+		optionsDoc.getElementById('tiles-color-mode').addEventListener('input', function (event) {
+			const section = document.getElementById('tiles-color-flow');
+			if (this.value === 'r') {
+				$(section).collapse('show');
+			} else {
+				$(section).collapse('hide');
+				document.getElementById('tiles-num-colors').value = 9;
+				setNumColors();
+			}
+			me.colorMode = this.value;
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-num-colors').addEventListener('input', setNumColors);
+
+
 		const designColors = optionsDoc.getElementById('tiles-design-colors');
 		const hueSlider = optionsDoc.getElementById('tiles-hue');
 		const saturationSlider = optionsDoc.getElementById('tiles-saturation');
@@ -208,19 +238,6 @@ export default function TruchetTiles() {
 			updateColorSliders();
 		}
 
-		optionsDoc.getElementById('tiles-num-colors').addEventListener('input', function (event) {
-			const numColors = parseInt(this.value);
-			if (numColors > 0) {
-				for (let i = 0; i < 15; i++) {
-					paletteUI.children[i].hidden = i >= numColors;
-				}
-				// Show/hide spacer
-				paletteUI.children[15].hidden = numColors <= 8;
-				me.numColors = numColors;
-				generateBackground(0);
-			}
-		});
-
 		function previewColor() {
 			updateSwatch(editColorIndex);
 			if (redrawTimeout === undefined) {
@@ -274,6 +291,10 @@ export default function TruchetTiles() {
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
 
+	this.colorMode = 'd';
+	this.flowProbability = 1;
+	this.numColors = 9;
+
 	this.colors = [
 		[  4/360,  0.86, 0.54, 1],	// Red
 		[148/360,  1   , 0.27, 1],	// Green
@@ -291,24 +312,20 @@ export default function TruchetTiles() {
 		[327/360,  0.77, 0.56, 1],	// Magenta
 		[ 30/360,  1   , 0.26, 1],	// Brown
 	];
-	this.numColors = 4;
-	this.flowProbability = 1;
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	this.tileTypes = [
-		new MiddleLineTile('000010100'),	// Vertical line
-		new MiddleLineTile('000001010'),	// Horizontal line
-		new MiddleLineTile('000011100'),	// T-shape to the right
-		new MiddleLineTile('000001110'),	// T-shape downwards
+		new MiddleLineTile('000033300'),	// T-shape to the right
+		new MiddleLineTile('000004440'),	// T-shape downwards
 		new MiddleLineTile('000010110'),	// T-shape to the left
-		new MiddleLineTile('000011010'),	// T-shape upwards
+		new MiddleLineTile('000022020'),	// T-shape upwards
 		new MiddleLineTile('100000001'),	// Curve, upper right
-		new MiddleLineTile('010000002'),	// Curve, lower right
-		new MiddleLineTile('001000004'),	// Curve, lower left
-		new MiddleLineTile('000100008'),	// Curve, upper left
+		new MiddleLineTile('020000002'),	// Curve, lower right
+		new MiddleLineTile('003000004'),	// Curve, lower left
+		new MiddleLineTile('000400008'),	// Curve, upper left
 	];
 
-	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
 }
 
 TruchetTiles.prototype.animatable = {
@@ -515,7 +532,17 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			while (tileTypeIndex > 0 && tileCDF[tileTypeIndex - 1] >= p) {
 				tileTypeIndex--;
 			}
-			tileMapRow[cellX] = new Tile(this.tileTypes[tileTypeIndex]);
+			let tile;
+			switch (this.colorMode) {
+			case 'd':
+				tile = this.tileTypes[tileTypeIndex].preview;
+				break;
+
+			case 'r':
+				tile = new Tile(this.tileTypes[tileTypeIndex]);
+				break;
+			}
+			tileMapRow[cellX] = tile;
 		}
 		unitsProcessed++;
 		if (unitsProcessed >= benchmark) {
@@ -526,53 +553,31 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		}
 	}
 
-	const histogram = new Array(this.numColors);
-	histogram.fill(0);
+	if (this.colorMode === 'r') {
+		const histogram = new Array(this.numColors);
+		histogram.fill(0);
 
-	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
-		const tileMapRow = tileMap[cellY];
-		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-			const tile = tileMapRow[cellX];
-			for (let port of tile.ports()) {
-				const color = chooseColor(histogram);
-				let stack = [[cellX, cellY, port, color]];
-				do {
-					const length = stack.length;
-					const [x, y, inPort, color] = stack[length - 1];
-					stack.splice(length - 1, 1);
-					const stackedTile = tileMap[y][x];
-					if (stackedTile.getColor(inPort) !== undefined) {
-						continue;
-					}
-					let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
-					if (random.next() < this.flowProbability) {
-						for (let [x2, y2, port2] of connected) {
-							if (tileMap[y2][x2].getColor(port2) === undefined) {
-								stack.push([x2, y2, port2, color]);
-							}
+		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
+			const tileMapRow = tileMap[cellY];
+			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
+				const tile = tileMapRow[cellX];
+				for (let port of tile.ports()) {
+					const color = chooseColor(histogram);
+					let stack = [[cellX, cellY, port, color]];
+					do {
+						const length = stack.length;
+						const [x, y, inPort, color] = stack[length - 1];
+						stack.splice(length - 1, 1);
+						const stackedTile = tileMap[y][x];
+						if (stackedTile.getColor(inPort) !== undefined) {
+							continue;
 						}
-					} else {
-						const excluded = new Set();
-						excluded.add(color);
-						for (let [x2, y2, port2] of connected) {
-							const color2 = tileMap[y2][x2].getColor(port2);
-							if (color2 !== undefined) {
-								excluded.add(color2);
-							}
-						}
-						const permutation = this.colorPermutation(excluded);
-						for (let [x2, y2, port2] of connected) {
-							if (tileMap[y2][x2].getColor(port2) === undefined) {
-								stack.push([x2, y2, port2, permutation.next().value]);
-							}
-						}
-					}
-					const outPorts = stackedTile.flowColor(inPort, color, histogram);
-					for (let outPort of outPorts) {
-						connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
+						let connected = this.connectedTiles(x, y, inPort, cellsAcrossCanvas, cellsDownCanvas);
 						if (random.next() < this.flowProbability) {
 							for (let [x2, y2, port2] of connected) {
-								stack.push([x2, y2, port2, color]);
+								if (tileMap[y2][x2].getColor(port2) === undefined) {
+									stack.push([x2, y2, port2, color]);
+								}
 							}
 						} else {
 							const excluded = new Set();
@@ -585,14 +590,38 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 							}
 							const permutation = this.colorPermutation(excluded);
 							for (let [x2, y2, port2] of connected) {
-								stack.push([x2, y2, port2, permutation.next().value]);
+								if (tileMap[y2][x2].getColor(port2) === undefined) {
+									stack.push([x2, y2, port2, permutation.next().value]);
+								}
 							}
 						}
-					}
-				} while (stack.length > 0);
-			} // For each port
-		} // For each x
-	} // For each y
+						const outPorts = stackedTile.flowColor(inPort, color, histogram);
+						for (let outPort of outPorts) {
+							connected = this.connectedTiles(x, y, outPort, cellsAcrossCanvas, cellsDownCanvas);
+							if (random.next() < this.flowProbability) {
+								for (let [x2, y2, port2] of connected) {
+									stack.push([x2, y2, port2, color]);
+								}
+							} else {
+								const excluded = new Set();
+								excluded.add(color);
+								for (let [x2, y2, port2] of connected) {
+									const color2 = tileMap[y2][x2].getColor(port2);
+									if (color2 !== undefined) {
+										excluded.add(color2);
+									}
+								}
+								const permutation = this.colorPermutation(excluded);
+								for (let [x2, y2, port2] of connected) {
+									stack.push([x2, y2, port2, permutation.next().value]);
+								}
+							}
+						}
+					} while (stack.length > 0);
+				} // For each port
+			} // For each x
+		} // For each y
+	} // End of colour flowing
 
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
@@ -626,24 +655,6 @@ class TileType {
 				reverseConnections.add(connector);
 			}
 		}
-		// Find the transitive closure
-		let added;
-		do {
-			added = false;
-			for (let [connector, connectees] of connections.entries()) {
-				for (let intermediate of connectees) {
-					const destinations = connections.get(intermediate);
-					if (destinations !== undefined) {
-						for (let destination of destinations) {
-							if (connector !== destination && !connectees.has(destination)) {
-								connectees.add(destination);
-								added = true;
-							}
-						}
-					}
-				}
-			}
-		} while (added === true);
 	}
 
 	drawPreview(context, lineWidth, generator) {
@@ -664,7 +675,7 @@ class Tile {
 	}
 
 	getLineColor(port1, port2) {
-		if (port2 !== undefined && this.tileType.connections.get(port2).size === 0) {
+		if (this.tileType.connections.get(port2).size === 0) {
 			return this.colors.get(port2);
 		} else {
 			return this.colors.get(port1);
@@ -798,6 +809,13 @@ class ShapeSet {
 
 const shapesMap = new Map();
 {
+	/* 1st digit represents a possible line from the top to the centre.
+	 * 2nd digit right to centre, 3rd bottom to centre, 4th left to centre.
+	 * Each digit is either 0 if that line is not present, or the sum of the values of the
+	 * lines that have the same colour as itself (including itself).
+	 * The weights are 1 = line from top to centre has the same colour as the current line,
+	 * 2 = line from right to centre, 4 = bottom to centre, 8 = left to centre.
+	 */
 	shapesMap.set('0000', new ShapeSet());
 	shapesMap.set('0008', new ShapeSet(null, null, null, [1, 1]));
 	shapesMap.set('0200', new ShapeSet(null, [0, 0]));

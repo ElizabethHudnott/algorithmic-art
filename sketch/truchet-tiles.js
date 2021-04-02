@@ -204,6 +204,7 @@ export default function TruchetTiles() {
 				updateSwatch(i);
 			}
 			paletteUI.children[0].children[0].classList.add('active');
+			designColors.children[0].children[0].classList.add('active');
 			updateColorSliders();
 		}
 
@@ -770,6 +771,98 @@ class DiagonalLineTile extends TileType {
 
 }
 
+class ShapeSet {
+	constructor(top, right, bottom, left) {
+		if (top) {
+			this.topYLeft = top[0];
+			this.topYRight = top[1];
+			this.topX = top[2] || 0;
+		}
+		if (right) {
+			this.rightXTop = right[0];
+			this.rightXBottom = right[1];
+			this.rightY = right[2] || 0;
+		}
+		if (bottom) {
+			this.bottomYLeft = bottom[0];
+			this.bottomYRight = bottom[1];
+			this.bottomX = bottom[2] || 0;
+		}
+		if (left) {
+			this.leftXTop = left[0];
+			this.leftXBottom = left[1];
+			this.leftY = left[2] || 0;
+		}
+	}
+}
+
+const shapesMap = new Map();
+{
+	shapesMap.set('0000', new ShapeSet());
+	shapesMap.set('0008', new ShapeSet(null, null, null, [1, 1]));
+	shapesMap.set('0200', new ShapeSet(null, [0, 0]));
+	shapesMap.set('0040', new ShapeSet(null, null, [0, 0]));
+	shapesMap.set('1000', new ShapeSet([1, 1]));
+	shapesMap.set('0a0a', new ShapeSet(null, [1, 1], null, [1, 1]));
+	shapesMap.set('5050', new ShapeSet([1, 1], null, [1, 1]));
+	shapesMap.set('9009', new ShapeSet([0, 0], null, null, [1, 1]));
+	shapesMap.set('3300', new ShapeSet([0, 0], [0, 0]));
+	shapesMap.set('0660', new ShapeSet(null, [0, 0], [1, 1]));
+	shapesMap.set('00cc', new ShapeSet(null, null, [0, 0], [0, 0]));
+	shapesMap.set('0208', new ShapeSet(null, [1, 0], null, [1, 0]));
+	shapesMap.set('1040', new ShapeSet([1, 0], null, [1, 0]));
+	shapesMap.set('1008', new ShapeSet([0, 1], null, null, [0, 1]));
+	shapesMap.set('1200', new ShapeSet([1,0], [1, 0]));
+	shapesMap.set('0240', new ShapeSet(null, [0, 1], [0, 1]));
+	shapesMap.set('0048', new ShapeSet(null, null, [1, 0], [1, 0]));
+	shapesMap.set('d0dd', new ShapeSet([1, 1], null, [1, 1], [0, 0]));
+	shapesMap.set('7770', new ShapeSet([1, 1], [1, 1], [1, 1]));
+	shapesMap.set('bb0b', new ShapeSet([1, 1], [1, 1], null, [0, 0]));
+	shapesMap.set('0eee', new ShapeSet(null, [1, 1], [0, 0], [0, 0]));
+	shapesMap.set('10cc', new ShapeSet([0, 1], null, [0, 1], [0, 0]));
+	shapesMap.set('1660', new ShapeSet([1, 0], [1, 1], [1, 0]));
+	shapesMap.set('9209', new ShapeSet([1, 0], [1, 0], null, [0, 0]));
+	shapesMap.set('02cc', new ShapeSet(null, [0, 1], [0, 1], [0, 0]));
+	shapesMap.set('9049', new ShapeSet([1, 0], null, [1, 0], [0, 0]));
+	shapesMap.set('3340', new ShapeSet([0, 1], [1, 1], [0, 1]));
+	shapesMap.set('3308', new ShapeSet([0, 1], [1, 1], null, [0, 1]));
+	shapesMap.set('0668', new ShapeSet(null, [1, 1], [1, 0], [1, 0]));
+	shapesMap.set('5058', new ShapeSet([1, 1], null, [1, 1], [0, 0]));
+	shapesMap.set('5250', new ShapeSet([1, 1], [1, 1], [1, 1]));
+	shapesMap.set('1a0a', new ShapeSet([0, 0], [1, 1], null, [1, 1]));
+	shapesMap.set('0a4a', new ShapeSet(null, [1, 1], [1, 1], [1, 1]));
+	const cross = new ShapeSet([1, 1], [1, 1], [1, 1], [0, 0]);
+	shapesMap.set('ffff', cross);
+	shapesMap.set('d2dd', cross);
+	shapesMap.set('7778', cross);
+	shapesMap.set('bb4b', cross);
+	shapesMap.set('1eee', new ShapeSet([0, 0], [1, 1], [0, 0], [0, 0]));
+	shapesMap.set('5a5a', cross); // Over-under
+	shapesMap.set('5258', cross);
+	shapesMap.set('9669', new ShapeSet([1, 0], [1, 0], [1, 1], [0, 0]));
+	shapesMap.set('33cc', new ShapeSet([0, 1], [1, 1], [0, 1], [0, 0]));
+	shapesMap.set('1a4a', new ShapeSet([0, 0], [1, 1], [1, 1], [1, 1]));
+	shapesMap.set('1248', new ShapeSet([0.5, 0, 0.5], [0.5, 1, 0.5], [0.5, 1, 0.5], [0.5, 0, 0.5]));
+
+	shapesMap.set('9249', new ShapeSet([1, 1], [1, 1], [1, 1], [0, 0]));
+	shapesMap.set('12cc', new ShapeSet([0, 0], [1, 1], [0, 0], [0, 0]));
+	shapesMap.set('3348', new ShapeSet([1, 1], [1, 1], [1, 1], [0, 0]));
+	shapesMap.set('1668', new ShapeSet([0, 0], [1, 1], [0, 0], [0, 0]));
+
+	/* Alternatives
+	shapesMap.set('9249', new ShapeSet([1, 0], [0.5, 1, 0.5], [0.5, 1, 0.5], [0, 0]));
+	shapesMap.set('12cc', new ShapeSet([0.5, 0, 0.5], [0.5, 1, 0.5], [0, 1], [0, 0]));
+	shapesMap.set('3348', new ShapeSet([0, 1], [1, 1], [0.5, 1, 0.5], [0.5, 0, 0.5]));
+	shapesMap.set('1668', new ShapeSet([0.5, 0, 0.5], [1, 0], [1, 1], [0.5, 0, 0.5]));
+	*/
+
+	shapesMap.set('1048', new ShapeSet([0, 0.5], null, [1, 0.5], [1, 0, 0.5]));
+	shapesMap.set('1240', new ShapeSet([0.5, 0], [0, 1, 0.5], [0.5, 1]));
+	shapesMap.set('1208', new ShapeSet([1, 0, 0.5], [1, 0.5], null, [0, 0.5]));
+	shapesMap.set('0248', new ShapeSet(null, [0.5, 1], [0, 1, 0.5], [0.5, 0]));
+}
+
+
 class MiddleLineTile extends TileType {
 	/**
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
@@ -778,14 +871,12 @@ class MiddleLineTile extends TileType {
 	 */
 	constructor(str) {
 		const connections = new Map();
-		const colors = new Array(8);
 		const defaultColors = new Map();
 		const colorMap = new Map();
 		const usedPorts = new Set();
 		// Second four characters represent horizontal and vertical lines
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i + 4]);
-			colors[i + 4] = color;
 			if (str[i + 4] !== '0') {
 				let mapping = colorMap.get(color);
 				if (mapping === undefined) {
@@ -801,7 +892,6 @@ class MiddleLineTile extends TileType {
 		// First four characters represent diagonal lines
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i]);
-			colors[i] = color;
 			if (str[i] !== '0') {
 				let mapping = colorMap.get(color);
 				if (mapping === undefined) {
@@ -841,7 +931,6 @@ class MiddleLineTile extends TileType {
 			}
 		}
 		super(connections);
-		this.colors = colors;
 		this.curved = parseInt(str.slice(-1), 16);
 		this.preview = new Tile(this, defaultColors);
 		this.str = str;
@@ -891,74 +980,88 @@ class MiddleLineTile extends TileType {
 		const middle = Math.trunc(height / 2);
 		const lineWidth1 = Math.trunc(lineWidth / 2);
 		const lineWidth2 = Math.ceil(lineWidth / 2);
-		const topToCentre = this.colors[4];
-		const bottomToCentre = this.colors[6];
-		const leftToCentre = this.colors[7];
-		const rightToCentre = this.colors[5];
-		if (topToCentre !== 0) {
-			context.beginPath();
-			context.moveTo(...transform(centre - lineWidth1, 0));
-			context.lineTo(...transform(centre + lineWidth2, 0));
-			context.lineTo(...transform(centre + lineWidth2, middle));
-			if (bottomToCentre === 0) {
-				if (leftToCentre !== 0 || rightToCentre !== 0) {
-					context.lineTo(...transform(centre + lineWidth2, middle + lineWidth2));
-					context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
+		const gradient = height / width;
+		const gradient2 = (height + lineWidth) / (width + lineWidth);
+
+		const topToRight = this.str[0] !== '0';
+		const rightToBottom = this.str[1] !== '0';
+		const bottomToLeft = this.str[2] !== '0';
+		const leftToTop = this.str[3] !== '0';
+		const topToCentre = this.str[4] !== '0';
+		const rightToCentre = this.str[5] !== '0';
+		const bottomToCentre = this.str[6] !== '0';
+		const leftToCentre = this.str[7] !== '0';
+
+		const matchingColors = [0, 0, 0, 0];
+		for (let i = 0; i < 4; i++) {
+			if (this.str[4 + i] !== '0') {
+				const color = tile.getColor(i * 4 + 2);
+				for (let j = 0; j < 4; j++) {
+					if (this.str[4 + j] !== '0' && tile.getColor(j * 4 + 2) === color) {
+						matchingColors[i] += 1 << j
+					}
 				}
-				context.lineTo(...transform(centre - lineWidth1, middle));
-				context.fillStyle = generator.getColor(tile.getColor(2));
-				context.fill();
 			}
 		}
-		if (bottomToCentre !== 0) {
-			if (topToCentre === 0) {
-				context.beginPath();
-				context.moveTo(...transform(centre + lineWidth2, middle - lineWidth1));
-				context.lineTo(...transform(centre + lineWidth2, middle));
+		const shapeStr = matchingColors[0].toString(16) + matchingColors[1].toString(16) +
+			matchingColors[2].toString(16) + matchingColors[3].toString(16);
+		const shapes = shapesMap.get(shapeStr);
+
+		function portion(amount, middle) {
+			switch (amount) {
+			case 0:
+				return middle - lineWidth1;
+			case 0.5:
+				return middle;
+			case 1:
+				return middle + lineWidth2;
 			}
+		}
+
+		if (topToCentre) {
+			context.beginPath();
+			context.moveTo(...transform(centre - lineWidth1, 0));
+			context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
+			context.lineTo(...transform(portion(shapes.topX, centre), portion(shapes.topYLeft, middle)));
+			context.lineTo(...transform(centre + lineWidth2, portion(shapes.topYRight, middle)));
+			context.lineTo(...transform(centre + lineWidth2, 0));
+			context.fillStyle = generator.getColor(tile.getColor(2));
+			context.fill();
+		}
+
+		if (bottomToCentre) {
+			context.beginPath();
+			context.moveTo(...transform(centre - lineWidth1, height));
+			context.lineTo(...transform(centre - lineWidth1, middle + lineWidth2));
+			context.lineTo(...transform(portion(shapes.bottomX, centre), portion(shapes.bottomYLeft, middle)));
+			context.lineTo(...transform(centre + lineWidth2, portion(shapes.bottomYRight, middle)));
 			context.lineTo(...transform(centre + lineWidth2, height));
-			context.lineTo(...transform(centre - lineWidth1, height));
-			context.lineTo(...transform(centre - lineWidth1, middle));
-			if (topToCentre === 0) {
-				context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
-			}
 			context.fillStyle = generator.getColor(tile.getColor(10));
 			context.fill();
 		}
-		if (leftToCentre !== 0) {
-			let x = centre;
-			if (topToCentre !== 0 || bottomToCentre !== 0) {
-				x -= lineWidth1;
-			}
+
+		if (leftToCentre) {
 			context.beginPath();
 			context.moveTo(...transform(0, middle - lineWidth1));
-			context.lineTo(...transform(x, middle - lineWidth1));
-			context.lineTo(...transform(x, middle));
-			context.lineTo(...transform(x, middle + lineWidth2));
+			context.lineTo(...transform(centre - lineWidth1, middle - lineWidth1));
+			context.lineTo(...transform(portion(shapes.leftXTop, centre), portion(shapes.leftY, middle)));
+			context.lineTo(...transform(portion(shapes.leftXBottom, centre), middle + lineWidth2));
 			context.lineTo(...transform(0, middle + lineWidth2));
 			context.fillStyle = generator.getColor(tile.getColor(14));
 			context.fill();
 		}
-		if (rightToCentre !== 0) {
-			let x = centre;
-			if (topToCentre !== 0 || bottomToCentre !== 0) {
-				x += lineWidth2;
-			}
+
+		if (rightToCentre) {
 			context.beginPath();
-			context.moveTo(...transform(x, middle - lineWidth1));
-			context.lineTo(...transform(width, middle - lineWidth1));
+			context.moveTo(...transform(width, middle - lineWidth1));
+			context.lineTo(...transform(middle + lineWidth2, middle - lineWidth1));
+			context.lineTo(...transform(portion(shapes.rightXTop, centre), portion(shapes.rightY, middle)));
+			context.lineTo(...transform(portion(shapes.rightXBottom, centre), middle + lineWidth2));
 			context.lineTo(...transform(width, middle + lineWidth2));
-			context.lineTo(...transform(x, middle + lineWidth2));
-			context.lineTo(...transform(x, middle));
 			context.fillStyle = generator.getColor(tile.getColor(6));
 			context.fill();
 		}
-		const gradient = height / width;
-		const gradient2 = (height + lineWidth) / (width + lineWidth);
-		const topToRight = this.colors[0];
-		const rightToBottom = this.colors[1];
-		const bottomToLeft = this.colors[2];
-		const leftToTop = this.colors[3];
+
 		if (topToRight) {
 			context.beginPath()
 			context.moveTo(...transform(centre + lineWidth2, 0));
@@ -977,14 +1080,14 @@ class MiddleLineTile extends TileType {
 				);
 			} else {
 				context.lineTo(x, y);
-				if (rightToCentre !== 0) {
+				if (rightToCentre) {
 					context.lineTo(...transform(width - lineWidth / gradient, middle - lineWidth1));
 				} else {
 					context.lineTo(...transform(width, middle + lineWidth2));
 				}
-				if (topToCentre !== 0) {
+				if (topToCentre) {
 					context.lineTo(...transform(centre + lineWidth2, lineWidth * gradient));
-				} else if (leftToTop !== 0) {
+				} else if (leftToTop) {
 					context.lineTo(...transform(centre, lineWidth / 2 * gradient2));
 				} else {
 					context.lineTo(...transform(centre - lineWidth1, 0));
@@ -993,6 +1096,7 @@ class MiddleLineTile extends TileType {
 			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
 			context.fill();
 		}
+
 		if (rightToBottom) {
 			context.beginPath();
 			context.moveTo(...transform(width, middle + lineWidth2));
@@ -1011,14 +1115,14 @@ class MiddleLineTile extends TileType {
 				);
 			} else {
 				context.lineTo(x, y);
-				if (bottomToCentre !== 0) {
+				if (bottomToCentre) {
 					context.lineTo(...transform(centre + lineWidth2, height - lineWidth * gradient));
 				} else {
 					context.lineTo(...transform(centre - lineWidth1, height));
 				}
-				if (rightToCentre !== 0) {
+				if (rightToCentre) {
 					context.lineTo(...transform(width - lineWidth / gradient, middle + lineWidth2));
-				} else if (topToRight !== 0) {
+				} else if (topToRight) {
 					context.lineTo(...transform(width - (lineWidth / 2) / gradient2, middle));
 				} else {
 					context.lineTo(...transform(width, middle - lineWidth1));
@@ -1027,7 +1131,8 @@ class MiddleLineTile extends TileType {
 			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
 			context.fill();
 		}
-		if (bottomToLeft !== 0) {
+
+		if (bottomToLeft) {
 			context.beginPath();
 			context.moveTo(...transform(centre - lineWidth1, height));
 			const [x, y] = transform(0, middle + lineWidth2);
@@ -1045,14 +1150,14 @@ class MiddleLineTile extends TileType {
 				);
 			} else {
 				context.lineTo(x, y);
-				if (leftToCentre !== 0) {
+				if (leftToCentre) {
 					context.lineTo(...transform(lineWidth / gradient, middle + lineWidth2));
 				} else {
 					context.lineTo(...transform(0, middle - lineWidth1));
 				}
-				if (bottomToCentre !== 0) {
+				if (bottomToCentre) {
 					context.lineTo(...transform(centre - lineWidth1, height - lineWidth * gradient));
-				} else if (rightToBottom !== 0) {
+				} else if (rightToBottom) {
 					context.lineTo(...transform(centre, height - lineWidth / 2 * gradient2));
 				} else {
 					context.lineTo(...transform(centre + lineWidth2, height));
@@ -1061,7 +1166,8 @@ class MiddleLineTile extends TileType {
 			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
 			context.fill();
 		}
-		if (leftToTop !== 0) {
+
+		if (leftToTop) {
 			context.beginPath();
 			context.moveTo(...transform(0, middle - lineWidth1));
 			const [x, y] = transform(centre - lineWidth1, 0);
@@ -1079,14 +1185,14 @@ class MiddleLineTile extends TileType {
 				);
 			} else {
 				context.lineTo(x, y);
-				if (topToCentre !== 0) {
+				if (topToCentre) {
 					context.lineTo(...transform(centre - lineWidth1, lineWidth * gradient));
 				} else {
 					context.lineTo(...transform(centre + lineWidth2, 0));
 				}
-				if (leftToCentre !== 0) {
+				if (leftToCentre) {
 					context.lineTo(...transform(lineWidth / gradient, middle - lineWidth1));
-				} else if (bottomToLeft !== 0) {
+				} else if (bottomToLeft) {
 					context.lineTo(...transform((lineWidth / 2) / gradient2, middle));
 				} else {
 					context.lineTo(...transform(0, middle + lineWidth2));

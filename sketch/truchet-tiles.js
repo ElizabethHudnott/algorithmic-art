@@ -657,6 +657,10 @@ class TileType {
 		}
 	}
 
+	getLineColor(port1, port2, colors) {
+		return colors.get(port1);
+	}
+
 	drawPreview(context, lineWidth, generator) {
 		this.draw(context, this.preview, 0, 0, PREVIEW_SIZE, PREVIEW_SIZE, lineWidth, [0, 0, 0, 0], generator);
 	}
@@ -675,11 +679,7 @@ class Tile {
 	}
 
 	getLineColor(port1, port2) {
-		if (this.tileType.connections.get(port2).size === 0) {
-			return this.colors.get(port2);
-		} else {
-			return this.colors.get(port1);
-		}
+		return this.tileType.getLineColor(port1, port2, this.colors);
 	}
 
 	flowColor(inPort, color, histogram) {
@@ -753,7 +753,7 @@ class DiagonalLineTile extends TileType {
 		}
 		super(connections);
 		this.type = str;
-		//TODO add preview(), mutate()
+		//TODO add .preview, mutate()
 	}
 
 	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
@@ -990,6 +990,24 @@ class MiddleLineTile extends TileType {
 		}
 		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, -1) + curved.toString(16);
 		return new MiddleLineTile(newStr);
+	}
+
+	getLineColor(port1, port2, colors) {
+		const index1 = (port1 - 2) / 4;
+		const index2 = index1 + 4;
+		const index3 = (index1 + 3) % 4;
+		const str = this.str;
+		const designColor1 = str[index1];
+		const designColor2 = str[index2];
+		const designColor3 = str[index3];
+		if (
+			(designColor2 !== '0' && designColor2 !== designColor1) ||
+			(designColor3 !== '0' && designColor3 !== designColor1)
+		) {
+			return colors.get(port2);
+		} else {
+			return colors.get(port1);
+		}
 	}
 
 	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {

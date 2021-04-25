@@ -24,7 +24,6 @@ export default function TruchetTiles() {
 		}
 
 		listenSlider('tiles-gap-probability', 'gapProbability');
-		listenSlider('tiles-flow-probability', 'flowProbability');
 
 		let editColorIndex = 0;
 		let designColorIndex = 0;
@@ -89,7 +88,7 @@ export default function TruchetTiles() {
 
 		optionsDoc.getElementById('tiles-tile-frequency').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
-			if (value > 0) {
+			if (value >= 0) {
 				me.tileFrequencies[currentTileNum] = value;
 			}
 			generateBackground(0);
@@ -137,35 +136,78 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
-		const paletteUI = optionsDoc.getElementById('tiles-palette');
-
-		function setNumColors() {
-			const numColors = parseInt(document.getElementById('tiles-num-colors').value);
-			if (numColors > 0) {
-				for (let i = 0; i < 15; i++) {
-					paletteUI.children[i].hidden = i >= numColors;
-				}
-				// Show/hide spacer
-				paletteUI.children[15].hidden = numColors <= 8;
-				me.numColors = numColors;
-				generateBackground(0);
-			}
-		}
-
 		optionsDoc.getElementById('tiles-color-mode').addEventListener('input', function (event) {
 			const section = document.getElementById('tiles-color-flow');
 			if (this.value === 'r') {
 				$(section).collapse('show');
 			} else {
 				$(section).collapse('hide');
-				document.getElementById('tiles-num-colors').value = 9;
+				numColorsInput.value = 9;
 				setNumColors();
 			}
 			me.colorMode = this.value;
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('tiles-num-colors').addEventListener('input', setNumColors);
+		const flowSlider = optionsDoc.getElementById('tiles-flow-probability');
+		const numColorsInput = optionsDoc.getElementById('tiles-num-colors');
+		const colorGroupInput = optionsDoc.getElementById('tiles-color-group-size');
+		const paletteUI = optionsDoc.getElementById('tiles-palette');
+
+		flowSlider.addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			me.flowProbability = value;
+			if (value < 1) {
+				const groupSize = Math.max(me.colorGroupSize, 2);
+				me.colorGroupSize = groupSize;
+				colorGroupInput.value = groupSize;
+				const numColors = Math.max(me.numColors, 2);
+				me.numColors = numColors;
+				numColorsInput.value = numColors;
+			}
+			generateBackground(0);
+		});
+
+		function setNumColors() {
+			const numColors = parseInt(numColorsInput.value);
+			if (numColors > 0 && numColors <= 15) {
+				for (let i = 0; i < 15; i++) {
+					paletteUI.children[i].hidden = i >= numColors;
+				}
+				// Show/hide spacer
+				paletteUI.children[15].hidden = numColors <= 8;
+				me.numColors = numColors;
+				if (numColors === 1) {
+					me.flowProbability = 1;
+					flowSlider.value = 1;
+					me.colorGroupSize = 1;
+					colorGroupInput.disabled = true;
+					colorGroupInput.value = 1;
+				} else {
+					colorGroupInput.disabled = false;
+					const maxGroupSize = Math.max(Math.ceil(numColors / 2), 2);
+					const groupSize = Math.min(me.colorGroupSize, maxGroupSize);
+					me.colorGroupSize = groupSize;
+					colorGroupInput.value = groupSize;
+					colorGroupInput.max = maxGroupSize;
+				}
+				generateBackground(0);
+			}
+		}
+
+		numColorsInput.addEventListener('input', setNumColors);
+
+		colorGroupInput.addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value > 0 && value <= this.max) {
+				me.colorGroupSize = value;
+				if (value === 1) {
+					me.flowProbability = 1;
+					flowSlider.value = 1;
+				}
+				generateBackground(0);
+			}
+		});
 
 
 		const designColors = optionsDoc.getElementById('tiles-design-colors');
@@ -276,25 +318,32 @@ export default function TruchetTiles() {
 		return optionsDoc;
 	});
 
-	this.sideLength = 25;
-	this.cellAspect = 1;
-	/*Shearing. Normal range of values is 0-1.
-	 * Element 0: X displacement for the middle
-	 * Element 1: X displacement for the bottom
-	 * Element 2: Y-Shear for the left half
-	 * Element 3: Y-Shear for the right half;
-	 */
-	this.shear = [0, 0, 0, 0];
+	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
+	this.tileTypes = [
+		new MiddleLineTile('000033300'),	// T-shape to the right
+		new MiddleLineTile('000004440'),	// T-shape downwards
+		new MiddleLineTile('000010110'),	// T-shape to the left
+		new MiddleLineTile('000022020'),	// T-shape upwards
+		new MiddleLineTile('100000001'),	// Curve, upper right
+		new MiddleLineTile('020000002'),	// Curve, lower right
+		new MiddleLineTile('003000004'),	// Curve, lower left
+		new MiddleLineTile('000400008'),	// Curve, upper left
+	];
+
+	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
+
 	// Stroke width as a proportion of the cell's area.
 	this.strokeRatio = 0.25;
 
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
 
-	this.colorMode = 'd';
+	this.colorMode = 'd';	// Coloured as they appear in the tile designer
 	this.flowProbability = 1;
 	this.numColors = 9;
+	this.colorGroupSize = 1;
 
+	// HSLA format (0..1 range)
 	this.colors = [
 		[  4/360,  0.86, 0.54, 1],	// Red
 		[148/360,  1   , 0.27, 1],	// Green
@@ -313,30 +362,27 @@ export default function TruchetTiles() {
 		[ 30/360,  1   , 0.26, 1],	// Brown
 	];
 
-	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
-	this.tileTypes = [
-		new MiddleLineTile('000033300'),	// T-shape to the right
-		new MiddleLineTile('000004440'),	// T-shape downwards
-		new MiddleLineTile('000010110'),	// T-shape to the left
-		new MiddleLineTile('000022020'),	// T-shape upwards
-		new MiddleLineTile('100000001'),	// Curve, upper right
-		new MiddleLineTile('020000002'),	// Curve, lower right
-		new MiddleLineTile('003000004'),	// Curve, lower left
-		new MiddleLineTile('000400008'),	// Curve, upper left
-	];
+	this.sideLength = 25;
+	this.cellAspect = 1;
+	/*Shearing. Normal range of values is 0-1.
+	 * Element 0: X displacement for the middle
+	 * Element 1: X displacement for the bottom
+	 * Element 2: Y-Shear for the left half
+	 * Element 3: Y-Shear for the right half;
+	 */
+	this.shear = [0, 0, 0, 0];
 
-	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
 }
 
 TruchetTiles.prototype.animatable = {
 	'continuous': [
-		'sideLength', 'cellAspect', 'shear', 'strokeRatio',
-		'gapProbability',
-		'colors',
-		'flowProbability',
+		'tileFrequencies', 'strokeRatio', 'gapProbability',
+		'colors', 'flowProbability',
+		'sideLength', 'cellAspect', 'shear',
 	],
 	'stepped': [
-		'numColors',
+		'tileTypes',
+		'colorMode', 'numColors', 'colorGroupSize',
 	]
 };
 
@@ -379,23 +425,34 @@ TruchetTiles.prototype.connectedTiles = function (x, y, port, width, height) {
 	return filteredLocations;
 }
 
-TruchetTiles.prototype.colorPermutation = function* (excludeColors) {
+TruchetTiles.prototype.colorPermutation = function* (currentColor, excludeColors) {
+	const groupSize = this.colorGroupSize;
+	const groupNumber = Math.trunc(currentColor / groupSize);
+	const minColor = groupNumber * groupSize;
+	const maxColor = Math.min((groupNumber + 1) * groupSize, this.numColors) - 1;
+
 	const colors = [];
-	for (let i = 0; i < this.numColors; i++) {
+	for (let i = minColor; i <= maxColor; i++) {
 		if (!excludeColors.has(i)) {
 			colors.push(i);
 		}
 	}
-	const numColors = colors.length;
+	let numColors = colors.length;
+	if (numColors === 0) {
+		colors.push(currentColor);
+		numColors = 1;
+	}
 	const permutationLength = Math.min(numColors, 3);
-	for (let i = 0; i < permutationLength; i++) {
+	let i;
+	for (i = 0; i < permutationLength; i++) {
 		const r = Math.trunc(random.next() * (numColors - i)) + i;
 		const temp = colors[i];
 		colors[i] = colors[r];
 		colors[r] = temp;
 		yield colors[i];
 	}
-	let i = 0;
+	// Cycle if less than 3 colours
+	i = 0;
 	while (true) {
 		yield colors[i % permutationLength];
 		i++
@@ -529,7 +586,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 			const p = random.next() * tileFrequenciesTotal;
 			let tileTypeIndex = this.tileTypes.length - 1;
-			while (tileTypeIndex > 0 && tileCDF[tileTypeIndex - 1] >= p) {
+			while (
+				tileTypeIndex > 0 &&
+				(tileCDF[tileTypeIndex - 1] >= p || this.tileFrequencies[tileTypeIndex] === 0)
+			) {
 				tileTypeIndex--;
 			}
 			let tile;
@@ -588,7 +648,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 									excluded.add(color2);
 								}
 							}
-							const permutation = this.colorPermutation(excluded);
+							const permutation = this.colorPermutation(color, excluded);
 							for (let [x2, y2, port2] of connected) {
 								if (tileMap[y2][x2].getColor(port2) === undefined) {
 									stack.push([x2, y2, port2, permutation.next().value]);
@@ -611,7 +671,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 										excluded.add(color2);
 									}
 								}
-								const permutation = this.colorPermutation(excluded);
+								const permutation = this.colorPermutation(color, excluded);
 								for (let [x2, y2, port2] of connected) {
 									stack.push([x2, y2, port2, permutation.next().value]);
 								}

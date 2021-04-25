@@ -365,6 +365,9 @@ function rgbToLuma(r, g, b) {
 	return (r * 0.213 + g * 0.715 + b * 0.072) / 255;
 }
 
+/**
+ * N.B. Components of the result are in the range 0-1 for use with WebGL.
+ */
 function hslaToRGBA(h, s, l, alpha) {
 	const a = s * Math.min(l, 1 - l);
 
@@ -377,39 +380,34 @@ function hslaToRGBA(h, s, l, alpha) {
 }
 
 function srgbToLAB(r, g, b, alpha) {
-	// First convert from sRGB to CIE XYZ
+	// From https://www.w3.org/TR/css-color-4/#color-conversion-code
+	// Convert from normal sRGB to its linear version
 	const gamma = 2.4;
 	r = r <= 0.04045 ? r / 12.92 : ((r + 0.055) / 1.055) ** gamma;
 	g = g <= 0.04045 ? g / 12.92 : ((g + 0.055) / 1.055) ** gamma;
 	b = b <= 0.04045 ? b / 12.92 : ((b + 0.055) / 1.055) ** gamma;
+	// Convert from linear sRGB to CIE XYZ
 	const x = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
 	const y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
 	const z = 0.0193339 * r + 0.1191920 * g + 0.9503041 * b;
 
-	// Now convert from XYZ to LAB
-	// These three values assume a D50 standard illuminant (approx 5000k color temperature)
-	const xn = 96.4212;
-	const yn = 100;
-	const zn = 82.5188;
+	// Convert from XYZ to LAB
+	const epsilon = 216 / 24389;	// 6^3 / 29^3
+	const k = 24389 / 27;			// 29^3 / 3^3
+	const white = [0.96422, 1.00000, 0.82521]; // D50 reference white
 
-	const delta = 6 / 29;
-	const threeDeltaSquared = 108 / 841;
-	const deltaCubed = 216 / 24389;
+	// Scale relative to reference white
+	const xyz = [x / white[0], y / white[1], z / white[2]];
 
-	function f(t) {
-		if (t > deltaCubed) {
-			return t ** (1/3);
-		} else {
-			return t / threeDeltaSquared + 4 / 29;
-		}
-	}
+	// now compute f
+	const f = xyz.map(value => value > epilson ? Math.cbrt(value) : (k * value + 16) / 116);
 
-	const fy = f(y / yn);
-	const l = 116 * fy - 16;
-	const a = 500 * (f(x / xn) - fy);
-	b = 200 * (fy - f(z / zn));
-
-	return [l, a ,b, alpha];
+	return [
+		(116 * f[1]) - 16, 	 // L
+		500 * (f[0] - f[1]), // a
+		200 * (f[1] - f[2]),  // b
+		alpha
+	];
 }
 
 /** Optional chaining polyfill

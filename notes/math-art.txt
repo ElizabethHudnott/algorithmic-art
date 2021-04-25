@@ -1,3 +1,4 @@
+desynchronized canvas?
 Phyllotaxis: Make colour tab the default
 Carpet: Allow negative overlap
 

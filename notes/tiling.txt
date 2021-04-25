@@ -23,6 +23,8 @@ Colours
 		Saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
 	OR across the width of a line (shaded like a pipe)
 
+Multiple layers? Background tile patterns?
+
 Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
 

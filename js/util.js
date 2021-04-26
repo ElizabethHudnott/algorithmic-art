@@ -410,6 +410,34 @@ function srgbToLAB(r, g, b, alpha) {
 	];
 }
 
+/**
+ * Derives a colour from the first argument but matches the luminosity to the second argument.
+ */
+function matchLuma(rgba1, rgb2) {
+	const luma1 = rgba1[0] * 0.213 + rgba1[1] * 0.715 + rgba1[2] * 0.072;
+	const luma2 = rgb2[0] * 0.213 + rgb2[1] * 0.715 + rgb2[2] * 0.072;
+	const ratio = luma2 / luma1;
+	let r = rgba1[0] * ratio;
+	let g = rgba1[1] * ratio;
+	let b = rgba1[2] * ratio;
+	let white = 0;
+	if (r > 255) {
+		white = (r - 255) * 0.213;
+	}
+	if (g > 255) {
+		white += (g - 255) * 0.715;
+	}
+	if (b > 255) {
+		white += b * 0.072;
+	}
+	return [
+		Math.min(r + white, 255),
+		Math.min(g + white, 255),
+		Math.min(b + white, 255),
+		rgba1[3]
+	];
+}
+
 /** Optional chaining polyfill
  */
 function optional(obj, property) {

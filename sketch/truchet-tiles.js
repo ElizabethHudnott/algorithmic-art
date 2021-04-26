@@ -240,10 +240,10 @@ export default function TruchetTiles() {
 		function updateSwatch(index) {
 			const color = me.colors[index];
 			let button = paletteUI.children[index].children[0];
-			button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], color[3]);
+			button.style.backgroundColor = hsla(color[0], color[1], color[2], color[3]);
 			if (index < 9) {
 				button = designColors.children[index].children[0];
-				button.style.backgroundColor = hsla(color[0] * 360, color[1], color[2], 1);
+				button.style.backgroundColor = hsla(color[0], color[1], color[2], 1);
 				drawPreview();
 			}
 		}
@@ -343,23 +343,23 @@ export default function TruchetTiles() {
 	this.numColors = 9;
 	this.colorGroupSize = 1;
 
-	// HSLA format (0..1 range)
+	// HSLA format (0-360 hue, 0..1 saturation and lightness)
 	this.colors = [
-		[  4/360,  0.86, 0.54, 1],	// Red
-		[148/360,  1   , 0.27, 1],	// Green
-		[222/360,  0.90, 0.32, 1],	// Blue
-		[ 49/360,  0.95, 0.50, 1],	// Yellow
-		[180/360,  0.85, 0.40, 1],	// Turquoise
-		[345/360,   0.6, 0.18, 1],	// Charcoal Grey
-		[262/360,  0.42, 0.49, 1],	// Purple
-		[346/360,  0.94, 0.83, 1],	// Pink
-		[ 94/360,  0.63, 0.52, 1],	// Lime
-		[201/360,  0.87, 0.42, 1],	// Azure
-		[ 26/360,  0.90, 0.56, 1],	// Orange
-		[205/360,   0.6, 0.59, 1],	// Grey
-		[323/360,  0.99, 0.26, 1],	// Grape
-		[327/360,  0.77, 0.56, 1],	// Magenta
-		[ 30/360,  1   , 0.26, 1],	// Brown
+		[  4,  0.86, 0.54, 1],	// Red
+		[148,  1   , 0.27, 1],	// Green
+		[222,  0.90, 0.32, 1],	// Blue
+		[ 49,  0.95, 0.50, 1],	// Yellow
+		[180,  0.85, 0.40, 1],	// Turquoise
+		[345,   0.6, 0.18, 1],	// Charcoal Grey
+		[262,  0.42, 0.49, 1],	// Purple
+		[346,  0.94, 0.83, 1],	// Pink
+		[ 94,  0.63, 0.52, 1],	// Lime
+		[201,  0.87, 0.42, 1],	// Azure
+		[ 26,  0.90, 0.56, 1],	// Orange
+		[205,   0.6, 0.59, 1],	// Grey
+		[323,  0.99, 0.26, 1],	// Grape
+		[327,  0.77, 0.56, 1],	// Magenta
+		[ 30,  1   , 0.26, 1],	// Brown
 	];
 
 	this.sideLength = 25;
@@ -388,7 +388,7 @@ TruchetTiles.prototype.animatable = {
 
 TruchetTiles.prototype.getColor = function (index) {
 	const color = this.colors[index];
-	return hsla(color[0] * 360, color[1], color[2], color[3]);
+	return hsla(color[0], color[1], color[2], color[3]);
 }
 
 /** Connections from a port on one tile to ports on neighbouring tiles.

@@ -167,8 +167,8 @@ Above & left, right and below placement conditions
 	Based on whether the other tile has an output at a particular anchor point
 	May sometimes return true when a condition is not satisfied (randomness)
 	Condition checking can be enabled or disabled on a per tile type basis
-	permittedTiling(above, right, below, left)
-		Arguments are tile types or special values for when a tile hasn't been placed yet (undefined) or if the position is off screen (fake tile has everything is connected)
+	permittedTiling(aboveLeft, above, aboveRight, left)
+		Arguments are tile types or undefined if the position is off screen
 
 Special Renderings
 	Randomize curve control points per tile

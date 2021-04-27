@@ -48,6 +48,7 @@ export default function TruchetTiles() {
 			document.getElementById('tiles-tile-num').value = currentTileNum;
 			document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
 			const currentTileType = me.tileTypes[currentTileNum];
+			document.getElementById('tiles-check-special-constraints').checked = currentTileType.checkSpecialConstraints;
 			document.getElementById('tiles-min-connections').value = currentTileType.minConnections;
 			document.getElementById('tiles-max-connections').value = currentTileType.maxConnections;
 		}
@@ -62,7 +63,7 @@ export default function TruchetTiles() {
 
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
-			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000');
+			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 0, 4, false);
 			me.tileFrequencies[currentTileNum] = 1;
 			showTile();
 			document.getElementById('tiles-tile-num').max = currentTileNum;
@@ -94,6 +95,11 @@ export default function TruchetTiles() {
 			if (value >= 0) {
 				me.tileFrequencies[currentTileNum] = value;
 			}
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-check-special-constraints').addEventListener('input', function (event) {
+			me.tileTypes[currentTileNum].checkSpecialConstraints = this.checked;
 			generateBackground(0);
 		});
 
@@ -339,14 +345,14 @@ export default function TruchetTiles() {
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	this.tileTypes = [
-		new MiddleLineTile('000033300', 3, 4),	// T-shape to the right
-		new MiddleLineTile('000004440', 3, 4),	// T-shape downwards
-		new MiddleLineTile('000010110', 3, 4),	// T-shape to the left
-		new MiddleLineTile('000022020', 3, 4),	// T-shape upwards
-		new MiddleLineTile('100000001', 1, 4),	// Curve, upper right
-		new MiddleLineTile('020000002', 1, 4),	// Curve, lower right
-		new MiddleLineTile('003000004', 1, 4),	// Curve, lower left
-		new MiddleLineTile('000400008', 1, 4),	// Curve, upper left
+		new MiddleLineTile('000033300', 3, 4, true),	// T-shape to the right
+		new MiddleLineTile('000004440', 3, 4, true),	// T-shape downwards
+		new MiddleLineTile('000010110', 3, 4, true),	// T-shape to the left
+		new MiddleLineTile('000022020', 3, 4, true),	// T-shape upwards
+		new MiddleLineTile('100000001', 1, 4, false),	// Curve, upper right
+		new MiddleLineTile('020000002', 1, 4, false),	// Curve, lower right
+		new MiddleLineTile('003000004', 1, 4, false),	// Curve, lower left
+		new MiddleLineTile('000400008', 1, 4, false),	// Curve, upper left
 	];
 
 	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];

@@ -1,7 +1,7 @@
 import {TileType} from './common.js';
 
 export default class DiagonalLineTile extends TileType {
-	constructor(str) {
+	constructor(str, minConnections, maxConnections, checkSpecialConstraints) {
 		const connections = new Map();
 		const destinations = new Set();
 		if (str === '0') {
@@ -13,7 +13,7 @@ export default class DiagonalLineTile extends TileType {
 			destinations.add(8);
 			connections.set(0, destinations);
 		}
-		super(connections);
+		super(connections, minConnections, maxConnections, checkSpecialConstraints);
 		this.type = str;
 	}
 

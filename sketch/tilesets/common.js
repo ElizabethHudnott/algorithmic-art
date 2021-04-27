@@ -51,7 +51,7 @@ function tileMapLookup(map, x, y, width, height) {
 }
 
 class TileType {
-	constructor(connections, minConnections, maxConnections) {
+	constructor(connections, minConnections, maxConnections, checkSpecialConstraints) {
 		// Maps a port number to an set of port numbers
 		this.connections = connections;
 		for (let [connector, connectees] of Array.from(connections.entries())) {
@@ -66,6 +66,7 @@ class TileType {
 		}
 		this.minConnections = minConnections;
 		this.maxConnections = maxConnections;
+		this.checkSpecialConstraints = checkSpecialConstraints;
 	}
 
 	getLineColor(port1, port2, colors) {
@@ -74,6 +75,10 @@ class TileType {
 
 	hasPort(port) {
 		return this.connections.has(port);
+	}
+
+	mutate(x, y, lineWidth, previewSize, color) {
+		return this;
 	}
 
 	permittedTiling(map, x, y, width, height) {
@@ -101,9 +106,17 @@ class TileType {
 		if (this.minConnections === 1 && offScreenConnections && maxPossibleConnections < 2) {
 			return false;
 		} else {
-			return maxPossibleConnections >= this.minConnections &&
+			const localConnectivityOK =
+				maxPossibleConnections >= this.minConnections &&
 				minPossibleConnections <= this.maxConnections;
+			const specialConstraintsOK = !this.checkSpecialConstraints ||
+				this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections);
+			return localConnectivityOK && specialConstraintsOK;
 		}
+	}
+
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+		return true;
 	}
 
 	ports() {

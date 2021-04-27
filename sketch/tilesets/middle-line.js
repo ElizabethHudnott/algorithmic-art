@@ -105,7 +105,7 @@ export default class MiddleLineTile extends TileType {
 	 * Second 4 digits: straight lines: up, right, down, left
 	 * Ninth digit bits: 1 = upper right, 2 = lower right, 4 = lower left, 8 = upper left
 	 */
-	constructor(str, minConnections, maxConnections) {
+	constructor(str, minConnections, maxConnections, checkSpecialConstraints) {
 		const connections = new Map();
 		const defaultColors = new Map();
 		const colorMap = new Map();
@@ -166,10 +166,45 @@ export default class MiddleLineTile extends TileType {
 				}
 			}
 		}
-		super(connections, minConnections, maxConnections);
+		super(connections, minConnections, maxConnections, checkSpecialConstraints);
 		this.curved = parseInt(str[8], 16);
 		this.str = str;
 		this.preview = new Tile(this, defaultColors);
+	}
+
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+		const hasUpOutput = this.hasPort(2);
+		const hasRightOutput = this.hasPort(6);
+		const hasDownOutput = this.hasPort(10);
+		const hasLeftOutput = this.hasPort(14);
+
+		if (
+			this.minConnections < 2 ||
+			(!hasUpOutput && !hasDownOutput) ||
+			(!hasLeftOutput && !hasRightOutput)
+		) {
+			return true;
+		}
+
+		let connectedUp = false, connectedRight = false, connectedDown = false, connectedLeft = false;
+		let tile, outcome;
+		if (hasUpOutput) {
+			[tile, outcome] = tileMapLookup(map, x, y - 1, width, height);
+			connectedUp = outcome !== Placement.TILE || tile.hasPort(10);
+		}
+		if (hasRightOutput) {
+			[tile, outcome] = tileMapLookup(map, x + 1, y, width, height);
+			connectedRight = outcome !== Placement.TILE || tile.hasPort(14);
+		}
+		if (hasDownOutput) {
+			[tile, outcome] = tileMapLookup(map, x, y + 1, width, height);
+			connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
+		}
+		if (hasLeftOutput) {
+			[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
+			connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
+		}
+		return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
 	}
 
 	mutate(x, y, lineWidth, previewSize, color) {
@@ -207,7 +242,7 @@ export default class MiddleLineTile extends TileType {
 			}
 		}
 		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, 8) + curved.toString(16) + this.str.slice(9);
-		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections);
+		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
 	}
 
 	getLineColor(port1, port2, colors) {

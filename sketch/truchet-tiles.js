@@ -1,4 +1,4 @@
-import {Tile, BLANK_TILE} from './tilesets/common.js';
+import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS} from './tilesets/common.js';
 import MiddleLineTile from './tilesets/middle-line.js';
 
 let previewSize;
@@ -37,47 +37,47 @@ export default function TruchetTiles() {
 
 		function drawPreview() {
 			const lineWidth = Math.round(Math.max(me.strokeRatio * previewSize, 1));
-			const shear = [0, 0, 0, 0];
 			designContext.clearRect(0, 0, previewSize, previewSize);
 			me.tileTypes[currentTileNum].drawPreview(designContext, lineWidth, previewSize, me);
 		}
 
 		drawPreview();
 
+		function showTile() {
+			drawPreview();
+			document.getElementById('tiles-tile-num').value = currentTileNum;
+			document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
+			const currentTileType = me.tileTypes[currentTileNum];
+			document.getElementById('tiles-min-connections').value = currentTileType.minConnections;
+			document.getElementById('tiles-max-connections').value = currentTileType.maxConnections;
+		}
+
 		optionsDoc.getElementById('tiles-tile-num').addEventListener('input', function (event) {
 			const value = parseInt(this.value);
 			if (value >= 0 && value < me.tileTypes.length) {
 				currentTileNum = value;
-				drawPreview();
-				document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
+				showTile();
 			}
 		});
-
 
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
 			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000');
 			me.tileFrequencies[currentTileNum] = 1;
-			drawPreview();
-			const tileNumInput = document.getElementById('tiles-tile-num');
-			tileNumInput.value = currentTileNum;
-			tileNumInput.max = currentTileNum;
+			showTile();
+			document.getElementById('tiles-tile-num').max = currentTileNum;
 			document.getElementById('tiles-del-tile').disabled = false;
-			document.getElementById('tiles-tile-frequency').value = 1;
 		});
 
 		optionsDoc.getElementById('tiles-del-tile').addEventListener('click', function (event) {
 			me.tileTypes.splice(currentTileNum, 1);
 			me.tileFrequencies.splice(currentTileNum, 1);
-			const tileNumInput = document.getElementById('tiles-tile-num');
 			if (currentTileNum > 0) {
 				currentTileNum--;
-				tileNumInput.value = currentTileNum;
 			}
-			tileNumInput.max = me.tileTypes.length - 1;
+			showTile();
+			document.getElementById('tiles-tile-num').max = me.tileTypes.length - 1;
 			this.disabled = me.tileTypes.length === 1;
-			document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
-			drawPreview();
 			generateBackground(0);
 		});
 
@@ -93,6 +93,22 @@ export default function TruchetTiles() {
 			const value = parseFloat(this.value);
 			if (value >= 0) {
 				me.tileFrequencies[currentTileNum] = value;
+			}
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-min-connections').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				me.tileTypes[currentTileNum].minConnections = value;
+			}
+			generateBackground(0);
+		});
+
+		optionsDoc.getElementById('tiles-max-connections').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 0) {
+				me.tileTypes[currentTileNum].maxConnections = value;
 			}
 			generateBackground(0);
 		});
@@ -323,14 +339,14 @@ export default function TruchetTiles() {
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	this.tileTypes = [
-		new MiddleLineTile('0000333003'),	// T-shape to the right
-		new MiddleLineTile('0000044403'),	// T-shape downwards
-		new MiddleLineTile('0000101103'),	// T-shape to the left
-		new MiddleLineTile('0000220203'),	// T-shape upwards
-		new MiddleLineTile('1000000011'),	// Curve, upper right
-		new MiddleLineTile('0200000021'),	// Curve, lower right
-		new MiddleLineTile('0030000041'),	// Curve, lower left
-		new MiddleLineTile('0004000081'),	// Curve, upper left
+		new MiddleLineTile('000033300', 3, 4),	// T-shape to the right
+		new MiddleLineTile('000004440', 3, 4),	// T-shape downwards
+		new MiddleLineTile('000010110', 3, 4),	// T-shape to the left
+		new MiddleLineTile('000022020', 3, 4),	// T-shape upwards
+		new MiddleLineTile('100000001', 1, 4),	// Curve, upper right
+		new MiddleLineTile('020000002', 1, 4),	// Curve, lower right
+		new MiddleLineTile('003000004', 1, 4),	// Curve, lower left
+		new MiddleLineTile('000400008', 1, 4),	// Curve, upper left
 	];
 
 	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
@@ -394,30 +410,8 @@ TruchetTiles.prototype.getColor = function (index) {
 	return hsla(color[0], color[1], color[2], color[3]);
 }
 
-/** Connections from a port on one tile to ports on neighbouring tiles.
- *	Format: output port -> collection of tile map delta x, tile map delta y, input port
- *	number triples
- */
-TruchetTiles.connections = new Array(16);
-TruchetTiles.connections[ 0] = [ [-1,  0,  4], [ 0, -1, 12], [-1, -1,  8]	];
-TruchetTiles.connections[ 1] = [ [ 0, -1, 11]								];
-TruchetTiles.connections[ 2] = [ [ 0, -1, 10]								];
-TruchetTiles.connections[ 3] = [ [ 0, -1,  9]								];
-TruchetTiles.connections[ 4] = [ [ 1,  0,  0], [ 0, -1,  8], [ 1, -1, 12]	];
-TruchetTiles.connections[ 5] = [ [ 1,  0, 15]								];
-TruchetTiles.connections[ 6] = [ [ 1,  0, 14]								];
-TruchetTiles.connections[ 7] = [ [ 1,  0, 13]								];
-TruchetTiles.connections[ 8] = [ [ 1,  0, 12], [ 0,  1,  4], [ 1,  1,  0]	];
-TruchetTiles.connections[ 9] = [ [ 0,  1,  3]								];
-TruchetTiles.connections[10] = [ [ 0,  1,  2]								];
-TruchetTiles.connections[11] = [ [ 0,  1,  1]								];
-TruchetTiles.connections[12] = [ [-1,  0,  8], [ 0,  1,  0], [-1,  1,  4]	];
-TruchetTiles.connections[13] = [ [-1,  0,  7]								];
-TruchetTiles.connections[14] = [ [-1,  0,  6]								];
-TruchetTiles.connections[15] = [ [-1,  0,  5]								];
-
 TruchetTiles.prototype.connectedTiles = function (x, y, port, width, height) {
-	const connections = TruchetTiles.connections[port];
+	const connections = POSSIBLE_CONNECTIONS[port];
 	const filteredLocations = [];
 	for (let connection of connections) {
 		const locationX = x + connection[0];
@@ -600,7 +594,6 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 				let tileTypeIndex = this.tileTypes.length - 1;
 				while (tileTypeIndex > 0 && (
 					tileCDF[tileTypeIndex - 1] >= p ||
-					tileFrequencies[tileTypeIndex] === 0 ||
 					attemptedTypes.has(tileTypeIndex)
 				)) {
 					tileTypeIndex--;
@@ -618,26 +611,25 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 					break;
 				}
 				tileMapRow[cellX] = tile;
-				permitted = tile.permittedTiling(tileMap, cellX, cellY);
+				permitted = tile.permittedTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
 				let otherTile;
 				if (cellY > 0 && permitted) {
 					if (cellX > 0) {
 						otherTile = tileMap[cellY - 1][cellX - 1];
-						permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY - 1);
+						permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
 					}
 					otherTile = tileMap[cellY - 1][cellX];
-					permitted = permitted && otherTile.permittedTiling(tileMap, cellX, cellY - 1);
+					permitted = permitted && otherTile.permittedTiling(tileMap, cellX, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
 					if (cellX < cellsAcrossCanvas - 1 && permitted) {
 						otherTile = tileMap[cellY - 1][cellX + 1];
-						permitted = otherTile.permittedTiling(tileMap, cellX + 1, cellY - 1);
+						permitted = otherTile.permittedTiling(tileMap, cellX + 1, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
 					}
 				}
 				if (cellX > 0 && permitted) {
 					otherTile = tileMap[cellY][cellX - 1];
-					permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY);
+					permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
 				}
 			} while (!permitted && attemptedTypes.size < this.tileTypes.length);
-
 		} // next cellX
 
 		unitsProcessed++;

@@ -1,4 +1,4 @@
-import {TileType, Tile, BLANK_TILE, coordinateTransform, tileMapLookup} from './common.js';
+import {TileType, Tile, BLANK_TILE, coordinateTransform, Placement, tileMapLookup} from './common.js';
 const C = 0.551915024494;
 
 class ShapeSet {
@@ -99,15 +99,13 @@ const shapesMap = new Map();
 	shapesMap.set('0248', new ShapeSet(null, [0.5, 1], [0, 1, 0.5], [0.5, 0]));
 }
 
-
 export default class MiddleLineTile extends TileType {
 	/**
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
 	 * Second 4 digits: straight lines: up, right, down, left
 	 * Ninth digit bits: 1 = upper right, 2 = lower right, 4 = lower left, 8 = upper left
-	 * Tenth digit: Minimum number of connections (0-4)
 	 */
-	constructor(str) {
+	constructor(str, minConnections, maxConnections) {
 		const connections = new Map();
 		const defaultColors = new Map();
 		const colorMap = new Map();
@@ -168,11 +166,10 @@ export default class MiddleLineTile extends TileType {
 				}
 			}
 		}
-		super(connections);
+		super(connections, minConnections, maxConnections);
 		this.curved = parseInt(str[8], 16);
-		this.minConnections = parseInt(str[9]);
-		this.preview = new Tile(this, defaultColors);
 		this.str = str;
+		this.preview = new Tile(this, defaultColors);
 	}
 
 	mutate(x, y, lineWidth, previewSize, color) {
@@ -209,8 +206,8 @@ export default class MiddleLineTile extends TileType {
 				newChar = '0';
 			}
 		}
-		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, 8) + curved.toString(16) + this.minConnections;
-		return new MiddleLineTile(newStr);
+		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, 8) + curved.toString(16) + this.str.slice(9);
+		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections);
 	}
 
 	getLineColor(port1, port2, colors) {
@@ -229,36 +226,6 @@ export default class MiddleLineTile extends TileType {
 		} else {
 			return colors.get(port1);
 		}
-	}
-
-	permittedTiling(map, x, y) {
-		const outputs = this.connections;
-		let numConnections = 0;
-		if (outputs.has(2)) {
-			const tileAbove = tileMapLookup(map, x, y - 1);
-			if (tileAbove === undefined || (tileAbove !== BLANK_TILE && tileAbove.hasPort(10))) {
-				numConnections++;
-			}
-		}
-		if (outputs.has(6)) {
-			const tileRight = tileMapLookup(map, x + 1, y);
-			if (tileRight === undefined || (tileRight !== BLANK_TILE && tileRight.hasPort(14))) {
-				numConnections++;
-			}
-		}
-		if (outputs.has(10)) {
-			const tileBelow = tileMapLookup(map, x, y + 1);
-			if (tileBelow === undefined || (tileBelow !== BLANK_TILE && tileBelow.hasPort(2))) {
-				numConnections++;
-			}
-		}
-		if (outputs.has(14)) {
-			const tileLeft = tileMapLookup(map, x - 1, y);
-			if (tileLeft === undefined || (tileLeft !== BLANK_TILE && tileLeft.hasPort(6))) {
-				numConnections++;
-			}
-		}
-		return numConnections >= this.minConnections;
 	}
 
 	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {

@@ -6,8 +6,52 @@
 	12	11	10	9	8
  */
 
+/** Connections from a port on one tile to ports on neighbouring tiles.
+ *	Format: output port -> collection of tile map delta x, tile map delta y, input port
+ *	number triples
+ */
+const POSSIBLE_CONNECTIONS = new Array(16);
+POSSIBLE_CONNECTIONS[ 0] = [ [-1,  0,  4], [ 0, -1, 12], [-1, -1,  8]	];
+POSSIBLE_CONNECTIONS[ 1] = [ [ 0, -1, 11]								];
+POSSIBLE_CONNECTIONS[ 2] = [ [ 0, -1, 10]								];
+POSSIBLE_CONNECTIONS[ 3] = [ [ 0, -1,  9]								];
+POSSIBLE_CONNECTIONS[ 4] = [ [ 1,  0,  0], [ 0, -1,  8], [ 1, -1, 12]	];
+POSSIBLE_CONNECTIONS[ 5] = [ [ 1,  0, 15]								];
+POSSIBLE_CONNECTIONS[ 6] = [ [ 1,  0, 14]								];
+POSSIBLE_CONNECTIONS[ 7] = [ [ 1,  0, 13]								];
+POSSIBLE_CONNECTIONS[ 8] = [ [ 1,  0, 12], [ 0,  1,  4], [ 1,  1,  0]	];
+POSSIBLE_CONNECTIONS[ 9] = [ [ 0,  1,  3]								];
+POSSIBLE_CONNECTIONS[10] = [ [ 0,  1,  2]								];
+POSSIBLE_CONNECTIONS[11] = [ [ 0,  1,  1]								];
+POSSIBLE_CONNECTIONS[12] = [ [-1,  0,  8], [ 0,  1,  0], [-1,  1,  4]	];
+POSSIBLE_CONNECTIONS[13] = [ [-1,  0,  7]								];
+POSSIBLE_CONNECTIONS[14] = [ [-1,  0,  6]								];
+POSSIBLE_CONNECTIONS[15] = [ [-1,  0,  5]								];
+
+const Placement = Object.freeze({
+	TILE: 0,
+	OFF_SCREEN: 1,
+	EMPTY: 2,
+})
+
+function tileMapLookup(map, x, y, width, height) {
+	if (x < 0 || x >= width || y < 0 || y >= height) {
+		return [undefined, Placement.OFF_SCREEN];
+	}
+	const row = map[y];
+	if (row === undefined) {
+		return [undefined, Placement.EMPTY];
+	}
+	const tile = row[x];
+	if (tile === undefined) {
+		return [undefined, Placement.EMPTY];
+	} else {
+		return [tile, Placement.TILE];
+	}
+}
+
 class TileType {
-	constructor(connections) {
+	constructor(connections, minConnections, maxConnections) {
 		// Maps a port number to an set of port numbers
 		this.connections = connections;
 		for (let [connector, connectees] of Array.from(connections.entries())) {
@@ -20,6 +64,8 @@ class TileType {
 				reverseConnections.add(connector);
 			}
 		}
+		this.minConnections = minConnections;
+		this.maxConnections = maxConnections;
 	}
 
 	getLineColor(port1, port2, colors) {
@@ -30,8 +76,34 @@ class TileType {
 		return this.connections.has(port);
 	}
 
-	permittedTiling(tileMap, x, y) {
-		return true;
+	permittedTiling(map, x, y, width, height) {
+		let minPossibleConnections = 0;
+		let maxPossibleConnections = this.connections.size;
+		let offScreenConnections = false;
+		for (let outPort of this.connections.keys()) {
+			for (let [dx, dy, inPort] of POSSIBLE_CONNECTIONS[outPort]) {
+				const [tile, outcome] = tileMapLookup(map, x + dx, y + dy, width, height);
+				switch (outcome) {
+				case Placement.OFF_SCREEN:
+					minPossibleConnections++;
+					offScreenConnections = true;
+					break;
+				case Placement.TILE:
+					if (tile.hasPort(inPort)) {
+						minPossibleConnections++;
+					} else {
+						maxPossibleConnections--;
+					}
+					break;
+				}
+			}
+		}
+		if (this.minConnections === 1 && offScreenConnections && maxPossibleConnections < 2) {
+			return false;
+		} else {
+			return maxPossibleConnections >= this.minConnections &&
+				minPossibleConnections <= this.maxConnections;
+		}
 	}
 
 	ports() {
@@ -96,7 +168,7 @@ class Tile {
 class BlankTile extends TileType {
 
 	constructor() {
-		super(new Map());
+		super(new Map(), 0, 4);
 	}
 
 	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
@@ -123,13 +195,4 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 	return [xReference + transformedX, yReference + transformedY];
 }
 
-function tileMapLookup(map, x, y) {
-	const row = map[y];
-	if (row === undefined) {
-		return undefined;
-	} else {
-		return row[x];
-	}
-}
-
-export {TileType, Tile, BLANK_TILE, coordinateTransform, tileMapLookup};
+export {TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, coordinateTransform, Placement, tileMapLookup};

@@ -59,19 +59,25 @@
 			</div>
 		</div>
 		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-min-connections">
+				Min Connections
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="16" value="3" class="form-control form-control-sm" id="tiles-min-connections">
+			</div>
+			<label class="col-3 text-right col-form-label col-form-label-sm" for="tiles-max-connections">
+				Max Connections
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="16" value="4" class="form-control form-control-sm" id="tiles-max-connections">
+			</div>
+		</div>
+		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio">
 				Line Width
 			</label>
 			<div class="col-9">
 				<input type="range" id="tiles-stroke-ratio" min="0" max="1" step="0.01" value="0.25" class="form-control-range mt-2">
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="tiles-gap-probability">
-				Gaps
-			</label>
-			<div class="col-9">
-				<input type="range" id="tiles-gap-probability" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2">
 			</div>
 		</div>
 	</div>
@@ -171,6 +177,14 @@
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="1" step="0.05" id="tiles-cell-aspect" class="form-control form-control-sm">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-gap-probability">
+				Gaps
+			</label>
+			<div class="col-9">
+				<input type="range" id="tiles-gap-probability" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2">
 			</div>
 		</div>
 		<div class="form-row form-group">

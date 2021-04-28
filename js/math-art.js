@@ -11,7 +11,7 @@ if (!globalThis.debug) {
 	globalThis.debug = {};
 }
 debug.video = false;
-debug.help = document.location.hostname === 'localhost';
+debug.htmlChecks = document.location.hostname === 'localhost';
 
 let store;
 try {
@@ -1321,12 +1321,23 @@ function hasRandomness(enabled) {
 		history.replaceState(null, '', envURL.toString());
 	}
 
-	function findBrokenHelp() {
-		for (let helpElement of helpDoc.body.children) {
-			const id = helpElement.id;
-			const element = document.getElementById(id);
-			if (element === null) {
-				console.warn('Help exists for ' + id + ' but no such element is present.');
+	function findBrokenHTML() {
+		// Find mislabelled help entries
+		if (helpDoc) {
+			for (let helpElement of helpDoc.body.children) {
+				const id = helpElement.id;
+				const element = document.getElementById(id);
+				if (element === null) {
+					console.warn('Help exists for ' + id + ' but no such element is present.');
+				}
+			}
+		}
+
+		// Find mismatched labels
+		for (let label of document.getElementsByTagName('label')) {
+			const id = label.htmlFor;
+			if (id && document.getElementById(id) === null) {
+				console.warn('<label for="' + id + '"> found but no control with that id is present.');
 			}
 		}
 	}
@@ -1718,12 +1729,12 @@ function hasRandomness(enabled) {
 				if (intro !== null) {
 					helpArea.appendChild(intro);
 				}
-				if (debug.help) {
-					findBrokenHelp();
-				}
 			} catch (e) {
 				console.error(e);
 			}
+		}
+		if (debug.htmlChecks) {
+			findBrokenHTML();
 		}
 	}
 

@@ -191,6 +191,58 @@ class BlankTile extends TileType {
 
 const BLANK_TILE = new Tile(new BlankTile());
 
+function chooseTile(tileTypes, cdf, frequenciesTotal, attemptedTypes, colorMode) {
+	const p = random.next() * frequenciesTotal;
+	let tileTypeIndex = tileTypes.length - 1;
+	while (tileTypeIndex > 0 && (
+		cdf[tileTypeIndex - 1] >= p ||
+		attemptedTypes.has(tileTypeIndex)
+	)) {
+		tileTypeIndex--;
+	}
+
+	attemptedTypes.add(tileTypeIndex);
+	let tile;
+	switch (colorMode) {
+	case 'd':
+		return tileTypes[tileTypeIndex].preview;
+	case 'r':
+		return new Tile(this.tileTypes[tileTypeIndex]);
+	}
+}
+
+function checkTiling(tileMap, x, y, width, height) {
+	let tile = tileMap[y][x];
+	if (!tile.permittedTiling(tileMap, x, y, width, height)) {
+		return false;
+	}
+	if (y > 0) {
+		if (x > 0) {
+			tile = tileMap[y - 1][x - 1];
+			if (!tile.permittedTiling(tileMap, x - 1, y - 1, width, height)) {
+				return false;
+			}
+		}
+		tile = tileMap[y - 1][x];
+		if (!tile.permittedTiling(tileMap, x, y - 1, width, height)) {
+			return false;
+		}
+		if (x < width - 1) {
+			tile = tileMap[y - 1][x + 1];
+			if (!tile.permittedTiling(tileMap, x + 1, y - 1, width, height)) {
+				return false;
+			}
+		}
+	}
+	if (x > 0) {
+		tile = tileMap[y][x - 1];
+		if (!tile.permittedTiling(tileMap, x - 1, y, width, height)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 function coordinateTransform(xReference, yReference, width, height, shear, relativeX, relativeY) {
 	const halfWidth = width / 2;
 	const halfHeight = height / 2;
@@ -208,4 +260,7 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 	return [xReference + transformedX, yReference + transformedY];
 }
 
-export {TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, coordinateTransform, Placement, tileMapLookup};
+export {
+	TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile,
+	coordinateTransform, Placement, tileMapLookup
+};

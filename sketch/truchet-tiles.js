@@ -1,4 +1,4 @@
-import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS} from './tilesets/common.js';
+import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile} from './tilesets/common.js';
 import MiddleLineTile from './tilesets/middle-line.js';
 
 let previewSize;
@@ -596,45 +596,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			}
 			let permitted;
 			do {
-				const p = random.next() * tileFrequenciesTotal;
-				let tileTypeIndex = this.tileTypes.length - 1;
-				while (tileTypeIndex > 0 && (
-					tileCDF[tileTypeIndex - 1] >= p ||
-					attemptedTypes.has(tileTypeIndex)
-				)) {
-					tileTypeIndex--;
-				}
-
-				attemptedTypes.add(tileTypeIndex);
-				let tile;
-				switch (this.colorMode) {
-				case 'd':
-					tile = this.tileTypes[tileTypeIndex].preview;
-					break;
-
-				case 'r':
-					tile = new Tile(this.tileTypes[tileTypeIndex]);
-					break;
-				}
+				const tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attemptedTypes, this.colorMode);
 				tileMapRow[cellX] = tile;
-				permitted = tile.permittedTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
-				let otherTile;
-				if (cellY > 0 && permitted) {
-					if (cellX > 0) {
-						otherTile = tileMap[cellY - 1][cellX - 1];
-						permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
-					}
-					otherTile = tileMap[cellY - 1][cellX];
-					permitted = permitted && otherTile.permittedTiling(tileMap, cellX, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
-					if (cellX < cellsAcrossCanvas - 1 && permitted) {
-						otherTile = tileMap[cellY - 1][cellX + 1];
-						permitted = otherTile.permittedTiling(tileMap, cellX + 1, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
-					}
-				}
-				if (cellX > 0 && permitted) {
-					otherTile = tileMap[cellY][cellX - 1];
-					permitted = otherTile.permittedTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
-				}
+				permitted = checkTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
+
 			} while (!permitted && attemptedTypes.size < this.tileTypes.length);
 		} // next cellX
 

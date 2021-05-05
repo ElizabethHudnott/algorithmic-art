@@ -81,12 +81,14 @@ class TileType {
 		return this;
 	}
 
-	permittedTiling(map, x, y, width, height) {
+	permittedTiling(map, x, y, width, height, dxNew, dyNew) {
 		let minPossibleConnections = 0;
 		let maxPossibleConnections = this.connections.size;
 		let offScreenConnections = false;
+		let affected = dxNew === 0 && dyNew === 0;
 		for (let outPort of this.connections.keys()) {
 			for (let [dx, dy, inPort] of POSSIBLE_CONNECTIONS[outPort]) {
+				affected = affected || (dx === dxNew && dy === dyNew);
 				const [tile, outcome] = tileMapLookup(map, x + dx, y + dy, width, height);
 				switch (outcome) {
 				case Placement.OFF_SCREEN:
@@ -104,14 +106,14 @@ class TileType {
 			}
 		}
 		if (this.minConnections === 1 && offScreenConnections && maxPossibleConnections < 2) {
-			return false;
+			return !affected;
 		} else {
 			const localConnectivityOK =
 				maxPossibleConnections >= this.minConnections &&
 				minPossibleConnections <= this.maxConnections;
 			const specialConstraintsOK = !this.checkSpecialConstraints ||
 				this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections);
-			return localConnectivityOK && specialConstraintsOK;
+			return (localConnectivityOK && specialConstraintsOK) || !affected;
 		}
 	}
 
@@ -164,8 +166,8 @@ class Tile {
 		return this.tileType.hasPort(port);
 	}
 
-	permittedTiling(tileMap, x, y) {
-		return this.tileType.permittedTiling(tileMap, x, y);
+	permittedTiling(tileMap, x, y, width, height, dxNew, dyNew) {
+		return this.tileType.permittedTiling(tileMap, x, y, width, height, dxNew, dyNew);
 	}
 
 	ports() {
@@ -207,36 +209,36 @@ function chooseTile(tileTypes, cdf, frequenciesTotal, attemptedTypes, colorMode)
 	case 'd':
 		return tileTypes[tileTypeIndex].preview;
 	case 'r':
-		return new Tile(this.tileTypes[tileTypeIndex]);
+		return new Tile(tileTypes[tileTypeIndex]);
 	}
 }
 
 function checkTiling(tileMap, x, y, width, height) {
 	let tile = tileMap[y][x];
-	if (!tile.permittedTiling(tileMap, x, y, width, height)) {
+	if (!tile.permittedTiling(tileMap, x, y, width, height, 0, 0)) {
 		return false;
 	}
 	if (y > 0) {
 		if (x > 0) {
 			tile = tileMap[y - 1][x - 1];
-			if (!tile.permittedTiling(tileMap, x - 1, y - 1, width, height)) {
+			if (!tile.permittedTiling(tileMap, x - 1, y - 1, width, height, 1, 1)) {
 				return false;
 			}
 		}
 		tile = tileMap[y - 1][x];
-		if (!tile.permittedTiling(tileMap, x, y - 1, width, height)) {
+		if (!tile.permittedTiling(tileMap, x, y - 1, width, height, 0, 1)) {
 			return false;
 		}
 		if (x < width - 1) {
 			tile = tileMap[y - 1][x + 1];
-			if (!tile.permittedTiling(tileMap, x + 1, y - 1, width, height)) {
+			if (!tile.permittedTiling(tileMap, x + 1, y - 1, width, height, -1, 1)) {
 				return false;
 			}
 		}
 	}
 	if (x > 0) {
 		tile = tileMap[y][x - 1];
-		if (!tile.permittedTiling(tileMap, x - 1, y, width, height)) {
+		if (!tile.permittedTiling(tileMap, x - 1, y, width, height, 1, 0)) {
 			return false;
 		}
 	}

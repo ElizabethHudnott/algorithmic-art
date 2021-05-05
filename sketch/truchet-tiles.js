@@ -531,6 +531,13 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		tileFrequenciesTotal += tileFrequencies[i];
 		tileCDF[i] = tileFrequenciesTotal;
 	}
+	const unusedTileTypes = new Set();
+	for (let i = 0; i < tileFrequencies.length; i++) {
+		if (tileFrequencies[i] === 0) {
+			unusedTileTypes.add(i);
+		}
+	}
+	const numTileTypes = this.tileTypes.length;
 
 	const tileMap = new Array(cellsDownCanvas);
 	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.min(cellWidth, cellHeight)), 1);
@@ -559,8 +566,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 	let blankRunLength = 0;
 	let blankDiffusion = 0;
+
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = new Array(cellsAcrossCanvas);
+		const currentRowAttempts = [];
 		tileMap[cellY] = tileMapRow;
 
 		if (blankSpacing > 1) {
@@ -588,29 +597,41 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			}
 
 			blankRunLength = 0;
-			const attemptedTypes = new Set();
-			for (let i = 0; i < tileFrequencies.length; i++) {
-				if (tileFrequencies[i] === 0) {
-					attemptedTypes.add(i);
+
+			let attempts, leftAttempts;
+			leftAttempts = currentRowAttempts[cellX - 1];
+			let permitted;
+			let changeLeft;
+			do {
+				attempts = new Set(unusedTileTypes);
+				do {
+					const tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attempts, this.colorMode);
+					tileMapRow[cellX] = tile;
+					permitted = checkTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
+
+				} while (!permitted && attempts.size < numTileTypes);
+
+				changeLeft = !permitted && leftAttempts !== undefined && leftAttempts.size < numTileTypes;
+				if (changeLeft) {
+					tileMapRow[cellX] = undefined;
+					do {
+						const leftTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, leftAttempts, this.colorMode);
+						tileMapRow[cellX - 1] = leftTile;
+						permitted = checkTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
+					} while (!permitted && leftAttempts.size < numTileTypes);
+				}
+			} while (changeLeft);
+			currentRowAttempts[cellX] = attempts;
+
+			unitsProcessed++;
+			if (unitsProcessed >= benchmark) {
+				const now = calcBenchmark();
+				if (now >= yieldTime) {
+					yield;
 				}
 			}
-			let permitted;
-			do {
-				const tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attemptedTypes, this.colorMode);
-				tileMapRow[cellX] = tile;
-				permitted = checkTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
-
-			} while (!permitted && attemptedTypes.size < this.tileTypes.length);
 		} // next cellX
-
-		unitsProcessed++;
-		if (unitsProcessed >= benchmark) {
-			const now = calcBenchmark();
-			if (now >= yieldTime) {
-				yield;
-			}
-		}
-	}
+	} // next cellY
 
 	if (this.colorMode === 'r') {
 		const histogram = new Array(this.numColors);

@@ -216,6 +216,9 @@ export default function TruchetTiles() {
 					colorGroupInput.value = groupSize;
 					colorGroupInput.max = maxGroupSize;
 				}
+				if (editColorIndex > numColors - 1) {
+					selectEditColor(numColors - 1);
+				}
 				generateBackground(0);
 			}
 		}
@@ -249,9 +252,13 @@ export default function TruchetTiles() {
 			opacitySlider.value = color[3];
 		}
 
-		function selectEditColor(event) {
+		function selectEditColor(eventOrNumber) {
 			paletteUI.children[editColorIndex].children[0].classList.remove('active');
-			editColorIndex = parseInt(event.target.dataset.index);
+			if (typeof(eventOrNumber) === 'number') {
+				editColorIndex = eventOrNumber;
+			} else {
+				editColorIndex = parseInt(eventOrNumber.target.dataset.index);
+			}
 			paletteUI.children[editColorIndex].children[0].classList.add('active');
 			updateColorSliders();
 		}
@@ -566,6 +573,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 	let blankRunLength = 0;
 	let blankDiffusion = 0;
+	let previousRowAttempts = [];
 
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = new Array(cellsAcrossCanvas);
@@ -598,29 +606,71 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 
 			blankRunLength = 0;
 
-			let attempts, leftAttempts;
+			// TODO generalize to handle diagonal connections
+			let attempts, leftAttempts, upperAttempts;
 			leftAttempts = currentRowAttempts[cellX - 1];
-			let permitted;
-			let changeLeft;
+			upperAttempts = previousRowAttempts[cellX];
+			let permitted, leftPermitted;
+			let changeLeft, changeUpper;
 			do {
-				attempts = new Set(unusedTileTypes);
+				const oldLeftTile = tileMapRow[cellX - 1];
+				let tile;
 				do {
-					const tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attempts, this.colorMode);
-					tileMapRow[cellX] = tile;
-					permitted = checkTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
+					leftPermitted = true;
+					attempts = new Set(unusedTileTypes);
+					do {
+						tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attempts, this.colorMode);
+						tileMapRow[cellX] = tile;
+						permitted = checkTiling(tileMap, cellX, cellY, cellsAcrossCanvas, cellsDownCanvas);
 
-				} while (!permitted && attempts.size < numTileTypes);
+					} while (!permitted && attempts.size < numTileTypes);
 
-				changeLeft = !permitted && leftAttempts !== undefined && leftAttempts.size < numTileTypes;
-				if (changeLeft) {
+					changeLeft = !permitted && leftAttempts !== undefined && leftAttempts.size < numTileTypes;
+					if (changeLeft) {
+						tileMapRow[cellX] = undefined;
+						do {
+							const leftTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, leftAttempts, this.colorMode);
+							tileMapRow[cellX - 1] = leftTile;
+							leftPermitted = checkTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
+						} while (!leftPermitted && leftAttempts.size < numTileTypes);
+					}
+				} while (changeLeft && leftPermitted);
+				changeUpper = !leftPermitted && upperAttempts !== undefined && upperAttempts.size < numTileTypes;
+				if (changeUpper) {
+					const oldUpperTile = tileMap[cellY - 1][cellX];
 					tileMapRow[cellX] = undefined;
 					do {
-						const leftTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, leftAttempts, this.colorMode);
-						tileMapRow[cellX - 1] = leftTile;
-						permitted = checkTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
-					} while (!permitted && leftAttempts.size < numTileTypes);
+						if (cellX > 0) {
+							tileMapRow[cellX - 1] = undefined;
+							leftAttempts = new Set(unusedTileTypes);
+							currentRowAttempts[cellX - 1] = leftAttempts;
+						}
+						const upperTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, upperAttempts, this.colorMode);
+						tileMap[cellY - 1][cellX] = upperTile;
+						permitted = checkTiling(tileMap, cellX, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
+						if (cellX > 0) {
+							do {
+								const leftTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, leftAttempts, this.colorMode);
+								tileMapRow[cellX - 1] = leftTile;
+								permitted = checkTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
+							} while (!permitted && leftAttempts.size < numTileTypes);
+						}
+					} while (!permitted && upperAttempts.size < numTileTypes);
+
+					if (!permitted) {
+						// Give up but restore previous partial solution
+						tileMap[cellY - 1][cellX] = oldUpperTile;
+						if (cellX > 0) {
+							tileMapRow[cellX - 1] = oldLeftTile;
+						}
+					}
+
+				} else if (!leftPermitted) {
+					// Give up
+					tileMapRow[cellX] = tile;
 				}
-			} while (changeLeft);
+
+			} while (changeUpper);
 			currentRowAttempts[cellX] = attempts;
 
 			unitsProcessed++;
@@ -631,6 +681,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 				}
 			}
 		} // next cellX
+		previousRowAttempts = currentRowAttempts;
 	} // next cellY
 
 	if (this.colorMode === 'r') {

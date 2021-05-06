@@ -194,13 +194,23 @@ class BlankTile extends TileType {
 const BLANK_TILE = new Tile(new BlankTile());
 
 function chooseTile(tileTypes, cdf, frequenciesTotal, attemptedTypes, colorMode) {
+	const maxTileType = tileTypes.length - 1;
 	const p = random.next() * frequenciesTotal;
-	let tileTypeIndex = tileTypes.length - 1;
-	while (tileTypeIndex > 0 && (
-		cdf[tileTypeIndex - 1] >= p ||
-		attemptedTypes.has(tileTypeIndex)
-	)) {
+	let tileTypeIndex = maxTileType;
+	while (tileTypeIndex > 0 && cdf[tileTypeIndex - 1] >= p) {
 		tileTypeIndex--;
+	}
+
+	let firstChoice = tileTypeIndex;
+	while (tileTypeIndex > 0 && attemptedTypes.has(tileTypeIndex)) {
+		tileTypeIndex--;
+	}
+
+	if (attemptedTypes.has(tileTypeIndex)) {
+		tileTypeIndex = firstChoice;
+		while (tileTypeIndex < maxTileType && attemptedTypes.has(tileTypeIndex)) {
+			tileTypeIndex++;
+		}
 	}
 
 	attemptedTypes.add(tileTypeIndex);

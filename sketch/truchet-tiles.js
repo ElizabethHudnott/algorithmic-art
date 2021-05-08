@@ -1,5 +1,5 @@
 import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile} from './tilesets/common.js';
-import MiddleLineTile from './tilesets/middle-line.js';
+import {MiddleLineTile, Diamond as PipeDiamond} from './tilesets/middle-line.js';
 
 let previewSize;
 

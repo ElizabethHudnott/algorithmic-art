@@ -47,6 +47,7 @@ Choose a selection of tiles
 Tile Sets Variants
 	Draw / Don't draw path outlines
 	Round off the ends of lines by drawing into a neighbouring cell (or don't)
+	Different horizontal and vertical line widths
 
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
@@ -100,15 +101,16 @@ Modes of pattern codeword interpretation (in addition to fully random option)
 		Once every pattern has been used then return to the first one.
 		Mirroring options (optional):
 			Horizontal: enter the required patterns manually
-			Vertical: 01|23|45 becomes 01|23|45|4'5'|2'3'|0'|1' where 0' is the vertically flipped version of tile 0
+			Vertical: 01|23|45 becomes 01|23|45|4'5'|2'3'|0'1' where 0' is the vertically flipped version of tile 0
 			------
-			Mirror Horizontally
-			Swap digits: 1&4, 2&3, 6&8
-			Swap bits: 1s & 8s, 2s & 4s
+			Implications for middle line tile set:
+				Mirror Horizontally
+				Swap digits: 1&4, 2&3, 6&8
+				Swap bits: 1s & 8s, 2s & 4s
 
-			Mirror Vertically
-			Swap digits: 1&2, 3&4, 5&7
-			Swap bits: 1s & 2s, 4s & 8s
+				Mirror Vertically
+				Swap digits: 1&2, 3&4, 5&7
+				Swap bits: 1s & 2s, 4s & 8s
 			------
 	Repeat X, Permute Y
 		1 Begin with a random pattern.
@@ -165,10 +167,11 @@ Mouse Interactions
 Above & left, right and below placement conditions
 	Only used in fully random mode
 	Based on whether the other tile has an output at a particular anchor point
+		Add checkboxes to tile designer UI to require/prevent/undecided connections at particular anchor points
 	May sometimes return true when a condition is not satisfied (randomness)
 	Condition checking can be enabled or disabled on a per tile type basis
-	permittedTiling(aboveLeft, above, aboveRight, left)
-		Arguments are tile types or undefined if the position is off screen
+	Minimum path length condition
+
 
 Special Renderings
 	Randomize curve control points per tile

@@ -86,7 +86,7 @@ const shapesMap = new Map();
 	shapesMap.set('3348', new ShapeSet([1, 1], [1, 1], [1, 1], [0, 0]));
 	shapesMap.set('1668', new ShapeSet([0, 0], [1, 1], [0, 0], [0, 0]));
 
-	/* Alternatives with diagonal lines in the centre
+	/* Alternatives with diagonal lines in the centre (V-shaped)
 	shapesMap.set('9249', new ShapeSet([1, 0], [0.5, 1, 0.5], [0.5, 1, 0.5], [0, 0]));
 	shapesMap.set('12cc', new ShapeSet([0.5, 0, 0.5], [0.5, 1, 0.5], [0, 1], [0, 0]));
 	shapesMap.set('3348', new ShapeSet([0, 1], [1, 1], [0.5, 1, 0.5], [0.5, 0, 0.5]));
@@ -99,7 +99,7 @@ const shapesMap = new Map();
 	shapesMap.set('0248', new ShapeSet(null, [0.5, 1], [0, 1, 0.5], [0.5, 0]));
 }
 
-export default class MiddleLineTile extends TileType {
+class MiddleLineTile extends TileType {
 	/**
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
 	 * Second 4 digits: straight lines: up, right, down, left
@@ -493,3 +493,47 @@ export default class MiddleLineTile extends TileType {
 	}
 
 }
+
+const diamondConnections = new Map();
+diamondConnections.set( 2, new Set([6, 10, 14]));
+diamondConnections.set( 6, new Set([2, 10, 14]));
+diamondConnections.set(10, new Set([2,  6, 14]));
+diamondConnections.set(14, new Set([2,  6, 10]));
+const diamondColors = new Map();
+diamondColors.set(2, 5);
+diamondColors.set(6, 5);
+diamondColors.set(10, 5);
+diamondColors.set(14, 5);
+
+class Diamond extends TileType {
+	constructor(minConnections, maxConnections, checkSpecialConstraints) {
+		super(diamondConnections, minConnections, maxConnections, checkSpecialConstraints);
+		this.preview = new Tile(this, diamondColors);
+	}
+
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+		if (this.minConnections < 2) {
+			return true;
+		}
+		let connectedUp = false, connectedRight = false, connectedDown = false, connectedLeft = false;
+		let [tile, outcome] = tileMapLookup(map, x, y - 1, width, height);
+		connectedUp = outcome !== Placement.TILE || tile.hasPort(10);
+		[tile, outcome] = tileMapLookup(map, x + 1, y, width, height);
+		connectedRight = outcome !== Placement.TILE || tile.hasPort(14);
+		[tile, outcome] = tileMapLookup(map, x, y + 1, width, height);
+		connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
+		[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
+		connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
+		return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+	}
+
+	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
+		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
+		const centre = Math.trunc(width / 2);
+		const middle = Math.trunc(height / 2);
+		const lineWidth1 = Math.trunc(lineWidth / 2);
+		const lineWidth2 = Math.ceil(lineWidth / 2);
+	}
+}
+
+export {MiddleLineTile, Diamond};

@@ -10,7 +10,7 @@ export default function TruchetTiles() {
 	this.helpFile = 'help/truchet-tiles.html';
 
 	this.optionsDocument = downloadFile('truchet-tiles.html', 'document').then(function (optionsDoc) {
-
+		let numLineWidths = 1;
 		let redrawTimeout;
 
 		function redraw() {
@@ -36,9 +36,9 @@ export default function TruchetTiles() {
 		let currentTileNum = 0;
 
 		function drawPreview() {
-			const lineWidth = Math.round(Math.max(me.strokeRatio * previewSize, 1));
-			designContext.clearRect(0, 0, previewSize, previewSize);
-			me.tileTypes[currentTileNum].drawPreview(designContext, lineWidth, previewSize, me);
+			const lineWidth1 = Math.round(Math.max(me.strokeRatio1 * previewSize, 1));
+			const lineWidth2 = Math.round(Math.max(me.strokeRatio2 * previewSize, 1));
+			me.tileTypes[currentTileNum].drawPreview(designContext, previewSize, previewSize, lineWidth1, lineWidth2, me);
 		}
 
 		drawPreview();
@@ -83,9 +83,10 @@ export default function TruchetTiles() {
 		});
 
 		designCanvas.addEventListener('click', function (event) {
-			const lineWidth = Math.min(Math.max(me.strokeRatio * previewSize, 42), 72);
+			const lineWidth1 = Math.min(Math.max(me.strokeRatio1 * previewSize, 42), 72);
+			const lineWidth2 = Math.min(Math.max(me.strokeRatio2 * previewSize, 42), 72);
 			const currentTile = me.tileTypes[currentTileNum];
-			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth, previewSize, designColorIndex);
+			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth1, lineWidth2, previewSize, designColorIndex);
 			drawPreview();
 			generateBackground(0);
 		});
@@ -119,8 +120,34 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('tiles-stroke-ratio').addEventListener('input', function (event) {
-			me.strokeRatio = parseFloat(this.value);
+		optionsDoc.getElementById('tiles-line-widths-1').addEventListener('input', function (event) {
+			$('#tiles-line-width-2').collapse('hide');
+			document.getElementById('tiles-line-width-label').hidden = true;
+			me.strokeRatio2 = me.strokeRatio1;
+			generateBackground(0);
+			drawPreview();
+			numLineWidths = 1;
+		});
+
+		optionsDoc.getElementById('tiles-line-widths-2').addEventListener('input', function (event) {
+			document.getElementById('tiles-stroke-ratio2').value = me.strokeRatio2;
+			$('#tiles-line-width-2').collapse('show');
+			document.getElementById('tiles-line-width-label').hidden = false;
+			numLineWidths = 2;
+		});
+
+		optionsDoc.getElementById('tiles-stroke-ratio1').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			me.strokeRatio1 = value;
+			if (numLineWidths === 1) {
+				me.strokeRatio2 = value;
+			}
+			generateBackground(0);
+			drawPreview();
+		});
+
+		optionsDoc.getElementById('tiles-stroke-ratio2').addEventListener('input', function (event) {
+			me.strokeRatio2 = parseFloat(this.value);
 			generateBackground(0);
 			drawPreview();
 		});
@@ -364,8 +391,9 @@ export default function TruchetTiles() {
 
 	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
 
-	// Stroke width as a proportion of the cell's area.
-	this.strokeRatio = 0.25;
+	// Stroke widths as a proportion of the cell's width or height.
+	this.strokeRatio1 = 0.25;
+	this.strokeRatio2 = 0.25;
 
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
@@ -408,7 +436,7 @@ export default function TruchetTiles() {
 
 TruchetTiles.prototype.animatable = {
 	'continuous': [
-		'tileFrequencies', 'strokeRatio', 'gapProbability',
+		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'gapProbability',
 		'colors', 'flowProbability',
 		'sideLength', 'cellAspect', 'shear',
 	],
@@ -547,7 +575,8 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const numTileTypes = this.tileTypes.length;
 
 	const tileMap = new Array(cellsDownCanvas);
-	const lineWidth = Math.max(Math.round(this.strokeRatio * Math.min(cellWidth, cellHeight)), 1);
+	const lineWidth1 = Math.max(Math.round(this.strokeRatio1 * cellWidth), 1);
+	const lineWidth2 = Math.max(Math.round(this.strokeRatio2 * cellHeight), 1);
 
 	let gapProbability = this.gapProbability;
 	let blankSpacing = gapProbability === 0 ? 0 : Math.max(Math.trunc(1 / gapProbability), 1);
@@ -759,7 +788,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const x = minX + cellX * cellWidth + cellY * totalShearX;
 			const y = minY + cellY * cellHeight + cellX * totalShearY;
-			tileMapRow[cellX].draw(context, x, y, cellWidth, cellHeight, lineWidth, shear, this);
+			tileMapRow[cellX].draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this);
 		}
 	}
 }

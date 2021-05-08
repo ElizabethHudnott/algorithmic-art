@@ -236,6 +236,7 @@ Tile Shapes
 	Fracture parameter: https://www.amazon.co.uk/Fractured-societies-coming-apart-together/dp/0008463964
 
 Tile designer UI
+	Resize preview to give correct aspect ratio
 
 More systematic tile numberings (than currently in the folders)
 	Covers most (not all) tile designs

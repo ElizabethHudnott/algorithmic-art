@@ -32,7 +32,7 @@ const Placement = Object.freeze({
 	TILE: 0,
 	OFF_SCREEN: 1,
 	EMPTY: 2,
-})
+});
 
 function tileMapLookup(map, x, y, width, height) {
 	if (x < 0 || x >= width || y < 0 || y >= height) {
@@ -77,7 +77,7 @@ class TileType {
 		return this.connections.has(port);
 	}
 
-	mutate(x, y, lineWidth, previewSize, color) {
+	mutate(x, y, lineWidth1, lineWidth2, previewSize, color) {
 		return this;
 	}
 
@@ -125,8 +125,9 @@ class TileType {
 		return this.connections.keys();
 	}
 
-	drawPreview(context, lineWidth, previewSize, generator) {
-		this.draw(context, this.preview, 0, 0, previewSize, previewSize, lineWidth, [0, 0, 0, 0], generator);
+	drawPreview(context, width, height, lineWidth1, lineWidth2, generator) {
+		context.clearRect(0, 0, width, height);
+		this.draw(context, this.preview, 0, 0, width, height, lineWidth1, lineWidth2, [0, 0, 0, 0], generator);
 	}
 
 }
@@ -174,8 +175,8 @@ class Tile {
 		return this.tileType.ports();
 	}
 
-	draw(context, x, y, cellWidth, cellHeight, lineWidth, shear, generator) {
-		this.tileType.draw(context, this, x, y, cellWidth, cellHeight, lineWidth, shear, generator);
+	draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator) {
+		this.tileType.draw(context, this, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator);
 	}
 
 }
@@ -186,7 +187,7 @@ class BlankTile extends TileType {
 		super(new Map(), 0, 4);
 	}
 
-	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
+	draw(context, tile, left, top, width, height, lineWidth1, lineWidth2, shear, generator) {
 		// Nothing to draw
 	}
 }

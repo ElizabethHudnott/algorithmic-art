@@ -77,26 +77,49 @@
 				</div>
 			</div>
 		</div>
-		<div class="form-row form-group">
+		<div class="form-row mb-2">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-min-connections">
 				Min Connections
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" max="16" value="3" class="form-control form-control-sm" id="tiles-min-connections">
 			</div>
-			<label class="col-3col-form-label col-form-label-sm" for="tiles-max-connections">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-max-connections">
 				Max Connections
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" max="16" value="4" class="form-control form-control-sm" id="tiles-max-connections">
 			</div>
 		</div>
+		<div class="form-row">
+			<div class="col-3"></div>
+			<div class="col-9">
+				<div class="form-check form-check-inline">
+					<input type="radio" name="tiles-line-widths" class="form-check-input" id="tiles-line-widths-1" checked>
+					<label class="form-check-label small mr-4" for="tiles-line-widths-1">
+						Single line width
+					</label>
+					<input type="radio" name="tiles-line-widths" class="form-check-input" id="tiles-line-widths-2">
+					<label class="form-check-label small" for="tiles-line-widths-2">
+						Two line widths
+					</label>
+				</div>
+			</div>
+		</div>
 		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio">
-				Line Width
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio1">
+				Line Width <span id="tiles-line-width-label" hidden>&LeftRightArrow;</span>
 			</label>
 			<div class="col-9">
-				<input type="range" id="tiles-stroke-ratio" min="0" max="1" step="0.01" value="0.25" class="form-control-range mt-2">
+				<input type="range" id="tiles-stroke-ratio1" min="0" max="1" step="0.01" value="0.25" class="form-control-range mt-2">
+			</div>
+		</div>
+		<div class="form-row form-group collapse" id="tiles-line-width-2">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio2">
+				Line Width &updownarrow;
+			</label>
+			<div class="col-9">
+				<input type="range" id="tiles-stroke-ratio2" min="0" max="1" step="0.01" value="0.25" class="form-control-range mt-2">
 			</div>
 		</div>
 	</div>

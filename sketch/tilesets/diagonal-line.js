@@ -19,25 +19,27 @@ export default class DiagonalLineTile extends TileType {
 
 	//TODO add .preview, .mutate()
 
-	draw(context, tile, left, top, width, height, lineWidth, shear, generator) {
+	draw(context, tile, left, top, width, height, lineWidthBack, lineWidthFore, shear, generator) {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
-		const lineWidth1 = Math.trunc(lineWidth);
-		const lineWidth2 = Math.ceil(lineWidth);
+		const lWidthBackT = Math.trunc(lineWidthBack / 2);
+		const lWidthBackB = Math.ceil(lineWidthBack / 2);
+		const lWidthForeT = Math.trunc(lineWidthFore / 2);
+		const lWidthForeB = Math.ceil(lineWidthFore / 2);
 		context.beginPath();
 		if (this.type === '0') {
 			// Forward slash
 			let y = height - lineWidth1;
-			context.moveTo(...transform(0, height - lineWidth1));
-			context.lineTo(...transform(width, -lineWidth1))
-			context.lineTo(...transform(width, lineWidth2));
-			context.lineTo(...transform(0, height + lineWidth2));
+			context.moveTo(...transform(0, height - lWidthForeT));
+			context.lineTo(...transform(width, -lWidthForeT))
+			context.lineTo(...transform(width, lWidthForeB));
+			context.lineTo(...transform(0, height + lWidthForeB));
 			context.fillStyle = generator.getColor(tile.getLineColor(4, 12));
 		} else {
 			// Backslash
-			context.moveTo(...transform(0, -lineWidth1));
-			context.lineTo(...transform(width, height - lineWidth1));
-			context.lineTo(...transform(width, height + lineWidth2));
-			context.lineTo(...transform(0, lineWidth2));
+			context.moveTo(...transform(0, -lWidthBackT));
+			context.lineTo(...transform(width, height - lWidthBackT));
+			context.lineTo(...transform(width, height + lWidthBackB));
+			context.lineTo(...transform(0, lWidthBackB));
 			context.fillStyle = generator.getColor(tile.getLineColor(0, 8));
 		}
 		context.fill();

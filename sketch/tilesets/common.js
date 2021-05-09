@@ -77,7 +77,7 @@ class TileType {
 		return this.connections.has(port);
 	}
 
-	mutate(x, y, lineWidth1, lineWidth2, previewSize, color) {
+	mutate(x, y, previewWidth, previewHeight, lineWidth1, lineWidth2, color) {
 		return this;
 	}
 

@@ -208,21 +208,22 @@ class MiddleLineTile extends TileType {
 		return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
 	}
 
-	mutate(x, y, lineWidthH, lineWidthV, previewSize, color) {
-		const halfLength = previewSize / 2;
-		const minH = halfLength - lineWidthH / 2;
-		const maxH = halfLength + lineWidthH / 2;
-		const minV = halfLength - lineWidthV / 2;
-		const maxV = halfLength + lineWidthV / 2;
+	mutate(x, y, previewWidth, previewHeight, lineWidthH, lineWidthV, color) {
+		const halfWidth = previewWidth / 2;
+		const halfHeight = previewHeight / 2;
+		const minH = halfWidth - lineWidthH / 2;
+		const maxH = halfWidth + lineWidthH / 2;
+		const minV = halfHeight - lineWidthV / 2;
+		const maxV = halfHeight + lineWidthV / 2;
 		let index;
 		if (x >= minH && x <= maxH) {
-			index = y < halfLength ? 4 : 6;
+			index = y < halfHeight ? 4 : 6;
 		} else if (y >= minV && y <= maxV) {
-			index = x < halfLength ? 7 : 5;
-		} else if (x < halfLength) {
-			index = y < halfLength ? 3 : 2;
+			index = x < halfWidth ? 7 : 5;
+		} else if (x < halfWidth) {
+			index = y < halfHeight ? 3 : 2;
 		} else {
-			index = y < halfLength ? 0 : 1;
+			index = y < halfHeight ? 0 : 1;
 		}
 		let curved = this.curved;
 		// By default transition not present to straight or to a new colour.

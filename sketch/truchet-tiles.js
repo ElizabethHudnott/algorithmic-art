@@ -1,8 +1,6 @@
 import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile} from './tilesets/common.js';
 import {MiddleLineTile, Diamond as PipeDiamond} from './tilesets/middle-line.js';
 
-let previewSize;
-
 export default function TruchetTiles() {
 	const me = this;
 	this.title = 'Tiling';
@@ -31,14 +29,15 @@ export default function TruchetTiles() {
 		let designColorIndex = 0;
 
 		const designCanvas = optionsDoc.getElementById('tiles-design');
-		previewSize = designCanvas.width;
+		let previewWidth = designCanvas.width;
+		let previewHeight = designCanvas.height;
 		const designContext = designCanvas.getContext('2d');
 		let currentTileNum = 0;
 
 		function drawPreview() {
-			const lineWidth1 = Math.round(Math.max(me.strokeRatio1 * previewSize, 1));
-			const lineWidth2 = Math.round(Math.max(me.strokeRatio2 * previewSize, 1));
-			me.tileTypes[currentTileNum].drawPreview(designContext, previewSize, previewSize, lineWidth1, lineWidth2, me);
+			const lineWidth1 = Math.round(Math.max(me.strokeRatio1 * previewWidth, 1));
+			const lineWidth2 = Math.round(Math.max(me.strokeRatio2 * previewHeight, 1));
+			me.tileTypes[currentTileNum].drawPreview(designContext, previewWidth, previewHeight, lineWidth1, lineWidth2, me);
 		}
 
 		drawPreview();
@@ -83,10 +82,10 @@ export default function TruchetTiles() {
 		});
 
 		designCanvas.addEventListener('click', function (event) {
-			const lineWidth1 = Math.min(Math.max(me.strokeRatio1 * previewSize, 42), 72);
-			const lineWidth2 = Math.min(Math.max(me.strokeRatio2 * previewSize, 42), 72);
+			const lineWidth1 = Math.min(Math.max(me.strokeRatio1 * previewWidth, 42), 72);
+			const lineWidth2 = Math.min(Math.max(me.strokeRatio2 * previewHeight, 42), 72);
 			const currentTile = me.tileTypes[currentTileNum];
-			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, lineWidth1, lineWidth2, previewSize, designColorIndex);
+			me.tileTypes[currentTileNum] = currentTile.mutate(event.offsetX, event.offsetY, previewWidth, previewHeight, lineWidth1, lineWidth2, designColorIndex);
 			drawPreview();
 			generateBackground(0);
 		});
@@ -165,6 +164,17 @@ export default function TruchetTiles() {
 			if (value > 0) {
 				me.cellAspect = value;
 				generateBackground(0);
+				if (value >= 1) {
+					previewWidth = 252 * value;
+					previewHeight = 252;
+				} else {
+					previewWidth = 252;
+					previewHeight = Math.round(previewWidth / value);
+				}
+				designCanvas.style.width = 'min(' + previewWidth + 'px, 100%)';
+				designCanvas.width = previewWidth;
+				designCanvas.height = previewHeight;
+				drawPreview();
 			}
 		});
 

@@ -19,11 +19,12 @@ Anchor points:
 Colours
 	A chosen number of basic colours (1-15 plus background colour)
 	Colour varies along the length of a line
-		Fixed hue (except when fading between hues at a junction)
-		Saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
+		Normally fixed hue (except when fading between hues at a junction)
+		Hue or saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
 	OR across the width of a line (shaded like a pipe)
 
-Multiple layers? Background tile patterns?
+Multiple layers
+	Background tile patterns
 
 Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
@@ -47,12 +48,11 @@ Choose a selection of tiles
 Tile Sets Variants
 	Draw / Don't draw path outlines
 	Round off the ends of lines by drawing into a neighbouring cell (or don't)
-	Different horizontal and vertical line widths
 
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
 	Probability parameters for flow/don't flow
-		General flow through a tile to another port / flow backwards from start point
+		Generally flow through a tile to another port / flow backwards from start point
 		Connections at tile corners (2 probability distributions)
 			Max Directions	Option 1	Option 2	Option 3
 			3				Straight 	Bent 		T-shape
@@ -171,6 +171,7 @@ Above & left, right and below placement conditions
 	May sometimes return true when a condition is not satisfied (randomness)
 	Condition checking can be enabled or disabled on a per tile type basis
 	Minimum path length condition
+	Incorporate blank tiles into the logic
 
 
 Special Renderings
@@ -235,9 +236,6 @@ Tile Shapes
 	https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons
 	Fracture parameter: https://www.amazon.co.uk/Fractured-societies-coming-apart-together/dp/0008463964
 
-Tile designer UI
-	Resize preview to give correct aspect ratio
-
 More systematic tile numberings (than currently in the folders)
 	Covers most (not all) tile designs
 
@@ -245,9 +243,9 @@ More systematic tile numberings (than currently in the folders)
 		Each edge of the cell has 2 potential edges
 			A line from the middle of the edge to the centre
 			A line from the middle of that edge to the middle of the next edge
-		Each potential edge is assigned one of eight values
+		Each potential edge is assigned one of ten values
 			0	No line drawn
-			1-8	The index of the colour used to draw the line
+			1-9	The index of the colour used to draw the line
 		8 digit decimal code plus 4 additional bits (1 hexadecimal digit) to indicate if edges of the second kind are straight or curved
 
 	Tile Set 4

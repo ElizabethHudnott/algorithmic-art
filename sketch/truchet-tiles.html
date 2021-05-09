@@ -51,9 +51,8 @@
 			</div>
 		</div>
 		<div class="form-row mb-2">
-			<div class="col-3"></div>
-			<div class="col-9 pl-2">
-				<canvas width="256" height="256" id="tiles-design" style="background-color: #999999" title="Tile designer"></canvas>
+			<div class="col-12 text-center">
+				<canvas width="252" height="252" id="tiles-design" style="background-color: #999999" title="Tile designer"></canvas>
 			</div>
 		</div>
 		<div class="form-row form-group">
@@ -77,7 +76,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="form-row mb-2">
+		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-min-connections">
 				Min Connections
 			</label>
@@ -91,7 +90,7 @@
 				<input type="number" min="0" max="16" value="4" class="form-control form-control-sm" id="tiles-max-connections">
 			</div>
 		</div>
-		<div class="form-row">
+		<div class="form-row mb-1">
 			<div class="col-3"></div>
 			<div class="col-9">
 				<div class="form-check form-check-inline">
@@ -106,7 +105,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="form-row form-group">
+		<div class="form-row mb-1">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio1">
 				Line Width <span id="tiles-line-width-label" hidden>&LeftRightArrow;</span>
 			</label>
@@ -114,7 +113,7 @@
 				<input type="range" id="tiles-stroke-ratio1" min="0" max="1" step="0.01" value="0.25" class="form-control-range mt-2">
 			</div>
 		</div>
-		<div class="form-row form-group collapse" id="tiles-line-width-2">
+		<div class="form-row collapse" id="tiles-line-width-2">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-stroke-ratio2">
 				Line Width &updownarrow;
 			</label>

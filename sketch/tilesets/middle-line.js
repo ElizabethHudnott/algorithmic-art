@@ -41,8 +41,8 @@ const shapesMap = new Map();
 	shapesMap.set('0200', new ShapeSet(null, [0, 0]));
 	shapesMap.set('0040', new ShapeSet(null, null, [0, 0]));
 	shapesMap.set('1000', new ShapeSet([2, 2]));
-	shapesMap.set('0a0a', new ShapeSet(null, [2, 2], null, [2, 2]));
-	shapesMap.set('5050', new ShapeSet([2, 2], null, [2, 2]));
+	shapesMap.set('0a0a', new ShapeSet(null, [1, 1], null, [1, 1]));
+	shapesMap.set('5050', new ShapeSet([1, 1], null, [1, 1]));
 	shapesMap.set('9009', new ShapeSet([0, 0], null, null, [2, 2]));
 	shapesMap.set('3300', new ShapeSet([0, 0], [0, 0]));
 	shapesMap.set('0660', new ShapeSet(null, [0, 0], [2, 2]));
@@ -58,34 +58,33 @@ const shapesMap = new Map();
 	shapesMap.set('bb0b', new ShapeSet([0, 0, 1], [1, 1], null, [1, 1]));
 	shapesMap.set('0eee', new ShapeSet(null, [1, 1], [2, 2, 1], [1, 1]));
 	shapesMap.set('10cc', new ShapeSet([0, 2], null, [0, 2], [0, 0]));
-	shapesMap.set('1660', new ShapeSet([2, 0], [2, 2], [2, 0]));
+	shapesMap.set('1660', new ShapeSet([2, 0], [2, 0], [2, 0]));
 	shapesMap.set('9209', new ShapeSet([2, 0], [2, 0], null, [0, 0]));
 	shapesMap.set('02cc', new ShapeSet(null, [0, 2], [0, 2], [0, 0]));
 	shapesMap.set('9049', new ShapeSet([2, 0], null, [2, 0], [0, 0]));
-	shapesMap.set('3340', new ShapeSet([0, 2], [2, 2], [0, 2]));
-	shapesMap.set('3308', new ShapeSet([0, 2], [2, 2], null, [0, 2]));
-	shapesMap.set('0668', new ShapeSet(null, [2, 2], [2, 0], [2, 0]));
+	shapesMap.set('3340', new ShapeSet([0, 0], [0, 2], [0, 2]));
+	shapesMap.set('3308', new ShapeSet([0, 0], [0, 2], null, [0, 2]));
+	shapesMap.set('0668', new ShapeSet(null, [2, 0], [2, 0], [2, 0]));
 	shapesMap.set('5058', new ShapeSet([1, 1], null, [1, 1], [0, 0, 1]));
 	shapesMap.set('5250', new ShapeSet([1, 1], [2, 2, 1], [1, 1]));
 	shapesMap.set('1a0a', new ShapeSet([0, 0, 1], [1, 1], null, [1, 1]));
 	shapesMap.set('0a4a', new ShapeSet(null, [1, 1], [2, 2, 1], [1, 1]));
-	const cross = new ShapeSet([2, 2], [2, 2], [2, 2], [0, 0]);
-	shapesMap.set('ffff', cross);
-	shapesMap.set('d2dd', cross);
-	shapesMap.set('7778', cross);
-	shapesMap.set('bb4b', cross);
-	shapesMap.set('1eee', new ShapeSet([0, 0], [2, 2], [0, 0], [0, 0]));
-	shapesMap.set('5a5a', cross); // Over-under
-	shapesMap.set('5258', cross);
-	shapesMap.set('9669', new ShapeSet([2, 0], [2, 0], [2, 2], [0, 0]));
-	shapesMap.set('33cc', new ShapeSet([0, 2], [2, 2], [0, 2], [0, 0]));
-	shapesMap.set('1a4a', new ShapeSet([0, 0], [2, 2], [2, 2], [2, 2]));
+	shapesMap.set('ffff', new ShapeSet([1, 0, 1], [1, 2, 1], [1, 2, 1], [1, 0, 1]));
+	shapesMap.set('d2dd', new ShapeSet([1, 1], [2, 2, 1], [1, 1], [0, 0, 1]));
+	shapesMap.set('7778', new ShapeSet([0, 0], [0, 2], [0, 2], [0, 0]));
+	shapesMap.set('bb4b', new ShapeSet([0, 0, 1], [1, 1], [2, 2, 1], [1, 1]));
+	shapesMap.set('1eee', new ShapeSet([0, 0], [2, 0], [0, 0], [0, 0]));
+	shapesMap.set('5a5a', new ShapeSet([1, 1], [2, 2, 1], [1, 1], [0, 0, 1])); // Over-under
+	shapesMap.set('5258', new ShapeSet([2, 2], [2, 2], [2, 2], [0, 0]));
+	shapesMap.set('9669', new ShapeSet([2, 0], [2, 0], [2, 0], [0, 0]));
+	shapesMap.set('33cc', new ShapeSet([0, 2], [0, 2], [0, 2], [0, 0]));
+	shapesMap.set('1a4a', new ShapeSet([0, 0, 1], [1, 1], [2, 2, 1], [1, 1]));
 	shapesMap.set('1248', new ShapeSet([1, 0, 1], [1, 2, 1], [1, 2, 1], [1, 0, 1]));
 
 	shapesMap.set('9249', new ShapeSet([2, 2], [2, 2], [2, 2], [0, 0]));
 	shapesMap.set('12cc', new ShapeSet([0, 0], [2, 2], [0, 0], [0, 0]));
 	shapesMap.set('3348', new ShapeSet([2, 2], [2, 2], [2, 2], [0, 0]));
-	shapesMap.set('1668', new ShapeSet([0, 0], [2, 2], [0, 0], [0, 0]));
+	shapesMap.set('1668', new ShapeSet([0, 0], [0, 2], [0, 2], [0, 0]));
 
 	/* Alternatives with diagonal lines in the centre (V-shaped)
 	shapesMap.set('9249', new ShapeSet([2, 0], [1, 2, 1], [1, 2, 1], [0, 0]));
@@ -275,10 +274,8 @@ class MiddleLineTile extends TileType {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
 		const CENTRE = Math.trunc(width / 2);
 		const MIDDLE = Math.trunc(height / 2);
-		const lineWidthL = Math.trunc(lineWidthH / 2);
-		const lineWidthR = Math.ceil(lineWidthH / 2);
-		const lineWidthT = Math.trunc(lineWidthV / 2);
-		const lineWidthB = Math.ceil(lineWidthV / 2);
+		const lineWidthLR = lineWidthH / 2;		// Half of the line width left or right
+		const lineWidthTB = lineWidthV / 2;		// Half of the line width top or bottom
 		const gradient = height / width;
 		const gradient2 = (height + lineWidthV) / (width + lineWidthH);
 
@@ -306,11 +303,11 @@ class MiddleLineTile extends TileType {
 			matchingColors[2].toString(16) + matchingColors[3].toString(16);
 		const shapes = shapesMap.get(shapeStr);
 
-		const LINE_LEFT = CENTRE - lineWidthL;
-		const LINE_RIGHT = CENTRE + lineWidthR;
+		const LINE_LEFT = CENTRE - lineWidthLR;
+		const LINE_RIGHT = CENTRE + lineWidthLR;
 		const portionH = [LINE_LEFT, CENTRE, LINE_RIGHT];
-		const LINE_TOP = MIDDLE - lineWidthT;
-		const LINE_BOTTOM = MIDDLE + lineWidthB;
+		const LINE_TOP = MIDDLE - lineWidthTB;
+		const LINE_BOTTOM = MIDDLE + lineWidthTB;
 		const portionV = [LINE_TOP, MIDDLE, LINE_BOTTOM];
 
 		if (topToCentre) {
@@ -364,12 +361,12 @@ class MiddleLineTile extends TileType {
 			if ((this.curved & 1) === 1) {
 				context.bezierCurveTo(
 					...transform(LINE_RIGHT, C * LINE_TOP),
-					...transform(width - C * (width / 2 - lineWidthR), LINE_TOP),
+					...transform(width - C * (width / 2 - lineWidthLR), LINE_TOP),
 					x, y
 				);
 				context.lineTo(...transform(width, LINE_BOTTOM));
 				context.bezierCurveTo(
-					...transform(width - C * (width / 2 + lineWidthL), LINE_BOTTOM),
+					...transform(width - C * (width / 2 + lineWidthLR), LINE_BOTTOM),
 					...transform(LINE_LEFT, C * LINE_BOTTOM),
 					...transform(LINE_LEFT, 0)
 				);
@@ -398,14 +395,14 @@ class MiddleLineTile extends TileType {
 			const [x, y] = transform(LINE_RIGHT, height);
 			if ((this.curved & 2) === 2) {
 				context.bezierCurveTo(
-					...transform(width - C * (width / 2 - lineWidthR), LINE_BOTTOM),
-					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthB)),
+					...transform(width - C * (width / 2 - lineWidthLR), LINE_BOTTOM),
+					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthTB)),
 					x, y
 				);
 				context.lineTo(...transform(LINE_LEFT, height));
 				context.bezierCurveTo(
-					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthT)),
-					...transform(width - C * (width / 2 + lineWidthL), LINE_TOP),
+					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthTB)),
+					...transform(width - C * (width / 2 + lineWidthLR), LINE_TOP),
 					...transform(width, LINE_TOP)
 				);
 			} else {
@@ -433,14 +430,14 @@ class MiddleLineTile extends TileType {
 			const [x, y] = transform(0, LINE_BOTTOM);
 			if ((this.curved & 4) === 4) {
 				context.bezierCurveTo(
-					...transform(LINE_LEFT, height - C * (height / 2 - lineWidthB)),
+					...transform(LINE_LEFT, height - C * (height / 2 - lineWidthTB)),
 					...transform(C * LINE_LEFT, LINE_BOTTOM),
 					x, y
 				);
 				context.lineTo(...transform(0, LINE_TOP));
 				context.bezierCurveTo(
 					...transform(C * LINE_RIGHT, LINE_TOP),
-					...transform(LINE_RIGHT, height - C * (height / 2 + lineWidthT)),
+					...transform(LINE_RIGHT, height - C * (height / 2 + lineWidthTB)),
 					...transform(LINE_RIGHT, height),
 				);
 			} else {

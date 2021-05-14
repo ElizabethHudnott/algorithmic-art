@@ -172,6 +172,7 @@ Above & left, right and below placement conditions
 	Condition checking can be enabled or disabled on a per tile type basis
 	Minimum path length condition
 	Incorporate blank tiles into the logic
+	Opportunity to invert special constraints
 
 
 Special Renderings

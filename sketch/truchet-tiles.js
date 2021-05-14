@@ -1,4 +1,4 @@
-import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile} from './tilesets/common.js';
+import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform} from './tilesets/common.js';
 import {MiddleLineTile, Diamond as PipeDiamond} from './tilesets/middle-line.js';
 
 export default function TruchetTiles() {
@@ -24,6 +24,8 @@ export default function TruchetTiles() {
 		}
 
 		listenSlider('tiles-gap-probability', 'gapProbability');
+		listenSlider('tiles-grid-opacity', 'gridOpacity');
+		listenSlider('tiles-grid-color', 'gridColor');
 
 		let editColorIndex = 0;
 		let designColorIndex = 0;
@@ -62,8 +64,8 @@ export default function TruchetTiles() {
 
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
-			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 0, 4, false);
-			me.tileFrequencies[currentTileNum] = 1;
+			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 1, 4, false);
+			me.tileFrequencies[currentTileNum] = 6;
 			showTile();
 			document.getElementById('tiles-tile-num').max = currentTileNum;
 			document.getElementById('tiles-del-tile').disabled = false;
@@ -384,6 +386,14 @@ export default function TruchetTiles() {
 		opacitySlider.addEventListener('pointerup', redraw);
 		opacitySlider.addEventListener('keyup', redraw);
 
+		optionsDoc.getElementById('tiles-grid-width').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0) {
+				me.gridWidth = value;
+				generateBackground(0);
+			}
+		});
+
 		return optionsDoc;
 	});
 
@@ -399,7 +409,7 @@ export default function TruchetTiles() {
 		new MiddleLineTile('000400008', 1, 4, false),	// Curve, upper left
 	];
 
-	this.tileFrequencies = [1, 1, 1, 1, 1, 1, 1, 1];
+	this.tileFrequencies = [6, 6, 6, 6, 6, 6, 6, 6];
 
 	// Stroke widths as a proportion of the cell's width or height.
 	this.strokeRatio1 = 0.25;
@@ -434,6 +444,10 @@ export default function TruchetTiles() {
 
 	this.sideLength = 25;
 	this.cellAspect = 1;
+	this.gridColor = 100;
+	this.gridOpacity = 0;
+	this.gridWidth = 1;
+
 	/*Shearing. Normal range of values is 0-1.
 	 * Element 0: X displacement for the middle
 	 * Element 1: X displacement for the bottom
@@ -448,7 +462,7 @@ TruchetTiles.prototype.animatable = {
 	'continuous': [
 		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'gapProbability',
 		'colors', 'flowProbability',
-		'sideLength', 'cellAspect', 'shear',
+		'sideLength', 'cellAspect', 'gridColor', 'gridOpacity', 'gridWidth', 'shear',
 	],
 	'stepped': [
 		'tileTypes',
@@ -800,6 +814,46 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			const y = minY + cellY * cellHeight + cellX * totalShearY;
 			tileMapRow[cellX].draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this);
 		}
+	}
+
+	if (this.gridWidth > 0) {
+		// TODO handle different anchor points
+		context.beginPath();
+		const halfLineWidth1 = lineWidth1 / 2;
+		const halfLineWidth2 = lineWidth2 / 2;
+		const halfCellWidth = cellWidth / 2;
+		const halfCellHeight = cellHeight / 2;
+		context.lineWidth = this.gridWidth;
+		if (this.gridWidth % 2 === 1) {
+			context.translate(0.5, 0.5);
+		}
+		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
+			let x = Math.round(minX + cellY * totalShearX);
+			let y = Math.round(minY + (cellY + 1) * cellHeight);
+			context.moveTo(x, y);
+			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
+				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
+				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth - halfLineWidth1, cellHeight));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth + halfLineWidth1, cellHeight));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
+			}
+		}
+		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
+			let x = Math.round(minX + (cellX + 1) * cellWidth);
+			let y = Math.round(minY + cellX * totalShearY);
+			context.moveTo(x, y);
+			for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
+				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
+				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight - halfLineWidth2));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight + halfLineWidth2));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
+			}
+		}
+		const gridIntensity = this.gridColor;
+		context.strokeStyle = rgba(gridIntensity, gridIntensity, gridIntensity, this.gridOpacity);
+		context.stroke();
 	}
 }
 

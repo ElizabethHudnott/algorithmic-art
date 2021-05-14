@@ -817,7 +817,6 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	}
 
 	if (this.gridWidth > 0) {
-		// TODO handle different anchor points
 		context.beginPath();
 		const halfLineWidth1 = lineWidth1 / 2;
 		const halfLineWidth2 = lineWidth2 / 2;
@@ -834,8 +833,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
 				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth - halfLineWidth1, cellHeight));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth + halfLineWidth1, cellHeight));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth, cellHeight));
 				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
 			}
 		}
@@ -846,8 +844,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
 				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight - halfLineWidth2));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight + halfLineWidth2));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight));
 				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
 			}
 		}

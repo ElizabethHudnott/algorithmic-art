@@ -317,6 +317,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.topX], portionV[shapes.topYLeft]));
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.topYRight]));
 			context.lineTo(...transform(LINE_RIGHT, 0));
+			context.lineTo(...transform(CENTRE, 0));
 			context.fillStyle = generator.getColor(tile.getColor(2));
 			context.fill();
 		}
@@ -328,6 +329,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.bottomX], portionV[shapes.bottomYLeft]));
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.bottomYRight]));
 			context.lineTo(...transform(LINE_RIGHT, height));
+			context.lineTo(...transform(CENTRE, height));
 			context.fillStyle = generator.getColor(tile.getColor(10));
 			context.fill();
 		}
@@ -339,6 +341,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.leftXTop], portionV[shapes.leftY]));
 			context.lineTo(...transform(portionH[shapes.leftXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(0, LINE_BOTTOM));
+			context.lineTo(...transform(0, MIDDLE));
 			context.fillStyle = generator.getColor(tile.getColor(14));
 			context.fill();
 		}
@@ -350,6 +353,7 @@ class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.rightXTop], portionV[shapes.rightY]));
 			context.lineTo(...transform(portionH[shapes.rightXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(width, LINE_BOTTOM));
+			context.lineTo(...transform(width, MIDDLE));
 			context.fillStyle = generator.getColor(tile.getColor(6));
 			context.fill();
 		}
@@ -364,17 +368,20 @@ class MiddleLineTile extends TileType {
 					...transform(width - C * (width / 2 - lineWidthLR), LINE_TOP),
 					x, y
 				);
+				context.lineTo(...transform(width, MIDDLE));
 				context.lineTo(...transform(width, LINE_BOTTOM));
 				context.bezierCurveTo(
 					...transform(width - C * (width / 2 + lineWidthLR), LINE_BOTTOM),
 					...transform(LINE_LEFT, C * LINE_BOTTOM),
 					...transform(LINE_LEFT, 0)
 				);
+				context.lineTo(...transform(CENTRE, 0));
 			} else {
 				context.lineTo(x, y);
 				if (rightToCentre) {
 					context.lineTo(...transform(width - lineWidthV / gradient, LINE_TOP));
 				} else {
+					context.lineTo(...transform(width, MIDDLE));
 					context.lineTo(...transform(width, LINE_BOTTOM));
 				}
 				if (topToCentre) {
@@ -383,6 +390,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(CENTRE, lineWidthH / 2 * gradient2));
 				} else {
 					context.lineTo(...transform(LINE_LEFT, 0));
+					context.lineTo(...transform(CENTRE, 0));
 				}
 			}
 			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
@@ -399,17 +407,20 @@ class MiddleLineTile extends TileType {
 					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthTB)),
 					x, y
 				);
+				context.lineTo(...transform(CENTRE, height));
 				context.lineTo(...transform(LINE_LEFT, height));
 				context.bezierCurveTo(
 					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthTB)),
 					...transform(width - C * (width / 2 + lineWidthLR), LINE_TOP),
 					...transform(width, LINE_TOP)
 				);
+				context.lineTo(...transform(width, MIDDLE));
 			} else {
 				context.lineTo(x, y);
 				if (bottomToCentre) {
 					context.lineTo(...transform(LINE_RIGHT, height - lineWidthH * gradient));
 				} else {
+					context.lineTo(...transform(CENTRE, height));
 					context.lineTo(...transform(LINE_LEFT, height));
 				}
 				if (rightToCentre) {
@@ -418,6 +429,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(width - (lineWidthV / 2) / gradient2, MIDDLE));
 				} else {
 					context.lineTo(...transform(width, LINE_TOP));
+					context.lineTo(...transform(width, MIDDLE));
 				}
 			}
 			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
@@ -434,17 +446,20 @@ class MiddleLineTile extends TileType {
 					...transform(C * LINE_LEFT, LINE_BOTTOM),
 					x, y
 				);
+				context.lineTo(...transform(0, MIDDLE));
 				context.lineTo(...transform(0, LINE_TOP));
 				context.bezierCurveTo(
 					...transform(C * LINE_RIGHT, LINE_TOP),
 					...transform(LINE_RIGHT, height - C * (height / 2 + lineWidthTB)),
 					...transform(LINE_RIGHT, height),
 				);
+				context.lineTo(...transform(CENTRE, height));
 			} else {
 				context.lineTo(x, y);
 				if (leftToCentre) {
 					context.lineTo(...transform(lineWidthV / gradient, LINE_BOTTOM));
 				} else {
+					context.lineTo(...transform(0, MIDDLE));
 					context.lineTo(...transform(0, LINE_TOP));
 				}
 				if (bottomToCentre) {
@@ -453,6 +468,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform(CENTRE, height - lineWidthH / 2 * gradient2));
 				} else {
 					context.lineTo(...transform(LINE_RIGHT, height));
+					context.lineTo(...transform(CENTRE, height));
 				}
 			}
 			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
@@ -469,17 +485,20 @@ class MiddleLineTile extends TileType {
 					...transform(LINE_LEFT, C * LINE_TOP),
 					x, y
 				);
+				context.lineTo(...transform(CENTRE, 0));
 				context.lineTo(...transform(LINE_RIGHT, 0));
 				context.bezierCurveTo(
 					...transform(LINE_RIGHT, C * LINE_BOTTOM),
 					...transform(C * LINE_RIGHT, LINE_BOTTOM),
 					...transform(0, LINE_BOTTOM)
 				);
+				context.lineTo(...transform(0, MIDDLE));
 			} else {
 				context.lineTo(x, y);
 				if (topToCentre) {
 					context.lineTo(...transform(LINE_LEFT, lineWidthH * gradient));
 				} else {
+					context.lineTo(...transform(CENTRE, 0));
 					context.lineTo(...transform(LINE_RIGHT, 0));
 				}
 				if (leftToCentre) {
@@ -488,6 +507,7 @@ class MiddleLineTile extends TileType {
 					context.lineTo(...transform((lineWidthV / 2) / gradient2, MIDDLE));
 				} else {
 					context.lineTo(...transform(0, LINE_BOTTOM));
+					context.lineTo(...transform(0, MIDDLE));
 				}
 			}
 			context.fillStyle = generator.getColor(tile.getLineColor(14, 2));

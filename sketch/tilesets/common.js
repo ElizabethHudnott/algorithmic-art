@@ -34,6 +34,12 @@ const Placement = Object.freeze({
 	EMPTY: 2,
 });
 
+const ConstraintLogic = Object.freeze({
+	TRUE: 1,
+	FALSE: 0,
+	DONT_CARE: 2,
+});
+
 function tileMapLookup(map, x, y, width, height) {
 	if (x < 0 || x >= width || y < 0 || y >= height) {
 		return [undefined, Placement.OFF_SCREEN];
@@ -111,13 +117,14 @@ class TileType {
 			const localConnectivityOK =
 				maxPossibleConnections >= this.minConnections &&
 				minPossibleConnections <= this.maxConnections;
-			const specialConstraintsOK = !this.checkSpecialConstraints ||
-				this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections);
+			const checkSpecial = this.checkSpecialConstraints;
+			const specialConstraintsOK = checkSpecial === ConstraintLogic.DONT_CARE ||
+				this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, checkSpecial === ConstraintLogic.FALSE);
 			return (localConnectivityOK && specialConstraintsOK) || !affected;
 		}
 	}
 
-	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
 		return true;
 	}
 
@@ -275,5 +282,5 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 
 export {
 	TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile,
-	coordinateTransform, Placement, tileMapLookup
+	coordinateTransform, Placement, ConstraintLogic, tileMapLookup
 };

@@ -65,16 +65,6 @@
 			<div class="col-3">
 				<input type="number" min="0" value="6" class="form-control form-control-sm" id="tiles-tile-frequency">
 			</div>
-			<div class="col-auto">
-				<div class="mt-1">
-					<div class="form-check">
-						<input type="checkbox" class="form-check-input" checked id="tiles-check-special-constraints">
-						<label class="form-check-label small" for="tiles-check-special-constraints">
-							Apply special constraints
-						</label>
-					</div>
-				</div>
-			</div>
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-min-connections">
@@ -90,9 +80,30 @@
 				<input type="number" min="0" max="16" value="4" class="form-control form-control-sm" id="tiles-max-connections">
 			</div>
 		</div>
+		<div class="form-row form-group" id="tiles-special-constraints">
+			<div class="col-4 col-form-label col-form-label-sm">
+				Special Constraints
+			</div>
+			<div class="col-auto">
+				<div class="form-check form-check-inline mt-1">
+					<input type="radio" name="tiles-special-constraints" class="form-check-input" id="tiles-special-constraints-satisfied" value="1" checked>
+					<label class="form-check-label small mr-4" for="tiles-special-constraints-satisfied">
+						Satisfied
+					</label>
+					<input type="radio" name="tiles-special-constraints" class="form-check-input" id="tiles-special-constraints-dissatisfied" value="0">
+					<label class="form-check-label small mr-4" for="tiles-special-constraints-dissatisfied">
+						Not satisfied
+					</label>
+					<input type="radio" name="tiles-special-constraints" class="form-check-input" id="tiles-special-constraints-dont-care" value="2">
+					<label class="form-check-label small" for="tiles-special-constraints-dont-care">
+						Don't care
+					</label>
+				</div>
+			</div>
+		</div>
 		<div class="form-row mb-1">
-			<div class="col-3"></div>
-			<div class="col-9">
+			<div class="col-4"></div>
+			<div class="col-8">
 				<div class="form-check form-check-inline">
 					<input type="radio" name="tiles-line-widths" class="form-check-input" id="tiles-line-widths-1" checked>
 					<label class="form-check-label small mr-4" for="tiles-line-widths-1">

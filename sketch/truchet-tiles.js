@@ -1,4 +1,4 @@
-import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform} from './tilesets/common.js';
+import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform, ConstraintLogic} from './tilesets/common.js';
 import {MiddleLineTile, Diamond as PipeDiamond} from './tilesets/middle-line.js';
 
 export default function TruchetTiles() {
@@ -49,7 +49,7 @@ export default function TruchetTiles() {
 			document.getElementById('tiles-tile-num').value = currentTileNum;
 			document.getElementById('tiles-tile-frequency').value = me.tileFrequencies[currentTileNum];
 			const currentTileType = me.tileTypes[currentTileNum];
-			document.getElementById('tiles-check-special-constraints').checked = currentTileType.checkSpecialConstraints;
+			checkInput(document.getElementById('tiles-special-constraints'), 'tiles-special-constraints', currentTileType.checkSpecialConstraints);
 			document.getElementById('tiles-min-connections').value = currentTileType.minConnections;
 			document.getElementById('tiles-max-connections').value = currentTileType.maxConnections;
 		}
@@ -64,7 +64,7 @@ export default function TruchetTiles() {
 
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
-			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 1, 4, false);
+			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 1, 4, ConstraintLogic.DONT_CARE);
 			me.tileFrequencies[currentTileNum] = 6;
 			showTile();
 			document.getElementById('tiles-tile-num').max = currentTileNum;
@@ -100,10 +100,14 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('tiles-check-special-constraints').addEventListener('input', function (event) {
-			me.tileTypes[currentTileNum].checkSpecialConstraints = this.checked;
+		function specialConstraintsOption(event) {
+			me.tileTypes[currentTileNum].checkSpecialConstraints = parseInt(this.value);
 			generateBackground(0);
-		});
+		}
+
+		for (let option of optionsDoc.getElementById('tiles-special-constraints').getElementsByTagName('input')) {
+			option.addEventListener('input', specialConstraintsOption);
+		}
 
 		optionsDoc.getElementById('tiles-min-connections').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -399,14 +403,14 @@ export default function TruchetTiles() {
 
 	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	this.tileTypes = [
-		new MiddleLineTile('000033300', 3, 4, true),	// T-shape to the right
-		new MiddleLineTile('000004440', 3, 4, true),	// T-shape downwards
-		new MiddleLineTile('000010110', 3, 4, true),	// T-shape to the left
-		new MiddleLineTile('000022020', 3, 4, true),	// T-shape upwards
-		new MiddleLineTile('100000001', 1, 4, false),	// Curve, upper right
-		new MiddleLineTile('020000002', 1, 4, false),	// Curve, lower right
-		new MiddleLineTile('003000004', 1, 4, false),	// Curve, lower left
-		new MiddleLineTile('000400008', 1, 4, false),	// Curve, upper left
+		new MiddleLineTile('000033300', 3, 4, ConstraintLogic.TRUE),	// T-shape to the right
+		new MiddleLineTile('000004440', 3, 4, ConstraintLogic.TRUE),	// T-shape downwards
+		new MiddleLineTile('000010110', 3, 4, ConstraintLogic.TRUE),	// T-shape to the left
+		new MiddleLineTile('000022020', 3, 4, ConstraintLogic.TRUE),	// T-shape upwards
+		new MiddleLineTile('100000001', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper right
+		new MiddleLineTile('020000002', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower right
+		new MiddleLineTile('003000004', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower left
+		new MiddleLineTile('000400008', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
 	];
 
 	this.tileFrequencies = [6, 6, 6, 6, 6, 6, 6, 6];
@@ -663,13 +667,12 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			let attempts, leftAttempts, upperAttempts;
 			leftAttempts = currentRowAttempts[cellX - 1];
 			upperAttempts = previousRowAttempts[cellX];
-			let permitted, leftPermitted;
+			let permitted, leftPermitted = true;
 			let changeLeft, changeUpper;
 			do {
 				const oldLeftTile = tileMapRow[cellX - 1];
 				let tile;
 				do {
-					leftPermitted = true;
 					attempts = new Set(unusedTileTypes);
 					do {
 						tile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, attempts, this.colorMode);
@@ -688,7 +691,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 						} while (!leftPermitted && leftAttempts.size < numTileTypes);
 					}
 				} while (changeLeft && leftPermitted);
-				changeUpper = !leftPermitted && upperAttempts !== undefined && upperAttempts.size < numTileTypes;
+				changeUpper = !permitted && upperAttempts !== undefined && upperAttempts.size < numTileTypes;
 				if (changeUpper) {
 					const oldUpperTile = tileMap[cellY - 1][cellX];
 					tileMapRow[cellX] = undefined;

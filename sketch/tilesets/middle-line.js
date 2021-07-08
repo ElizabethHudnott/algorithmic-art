@@ -172,7 +172,7 @@ class MiddleLineTile extends TileType {
 		this.preview = new Tile(this, defaultColors);
 	}
 
-	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
 		const hasUpOutput = this.hasPort(2);
 		const hasRightOutput = this.hasPort(6);
 		const hasDownOutput = this.hasPort(10);
@@ -187,24 +187,40 @@ class MiddleLineTile extends TileType {
 		}
 
 		let connectedUp = false, connectedRight = false, connectedDown = false, connectedLeft = false;
+		let notConnectedUp = true, notConnectedRight = true, notConnectedDown = true, notConnectedLeft = true;
 		let tile, outcome;
 		if (hasUpOutput) {
 			[tile, outcome] = tileMapLookup(map, x, y - 1, width, height);
 			connectedUp = outcome !== Placement.TILE || tile.hasPort(10);
+			notConnectedUp = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(10));
 		}
 		if (hasRightOutput) {
 			[tile, outcome] = tileMapLookup(map, x + 1, y, width, height);
 			connectedRight = outcome !== Placement.TILE || tile.hasPort(14);
+			notConnectedRight = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(14));
 		}
 		if (hasDownOutput) {
 			[tile, outcome] = tileMapLookup(map, x, y + 1, width, height);
 			connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
+			notConnectedDown = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(2));
 		}
 		if (hasLeftOutput) {
 			[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
 			connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
+			notConnectedLeft = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(6));
 		}
-		return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+
+		if (!invert) {
+			return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+		}
+
+		if (connectedLeft || connectedRight) {
+			return notConnectedUp && notConnectedDown;
+		} else if (connectedUp || connectedDown) {
+			return notConnectedLeft && notConnectedRight;
+		} else {
+			return true;
+		}
 	}
 
 	mutate(x, y, previewWidth, previewHeight, lineWidthH, lineWidthV, color) {
@@ -514,7 +530,7 @@ class Diamond extends TileType {
 		this.preview = new Tile(this, diamondColors);
 	}
 
-	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections) {
+	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
 		if (this.minConnections < 2) {
 			return true;
 		}
@@ -527,7 +543,11 @@ class Diamond extends TileType {
 		connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
 		[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
 		connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
-		return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+		let satisfied = (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+		if (invert) {
+			satisfied = !satisfied;
+		}
+		return satisfied;
 	}
 
 	draw(context, tile, left, top, width, height, lineWidthH, lineWidthV, shear, generator) {

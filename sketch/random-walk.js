@@ -5,6 +5,8 @@ export default function RandomWalk() {
 
 	this.rows = 26;
 	this.stretch = 1;
+	this.borderX = 0.5;
+	this.borderY = 0.5;
 }
 
 const Direction = Object.freeze({
@@ -17,10 +19,10 @@ const Direction = Object.freeze({
 RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, preview) {
 	const numRows = this.rows;
 	const numColumns = Math.round((screen.width / screen.height) * (canvasWidth / screen.width) * (numRows - 1) / this.stretch) + 1;
-	const visited = new Array(numColumns);
+	const explored = new Array(numColumns);
 	for (let i = 0; i < numColumns; i++) {
 		const column = new Array(numRows);
-		visited[i] = column;
+		explored[i] = column;
 		for (let j = 0; j < numRows; j++) {
 			column[j] = [false, false, false, false];
 		}
@@ -28,67 +30,125 @@ RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, p
 		column[numRows - 1][Direction.DOWN] = true;
 	}
 	for (let j = 0; j < numRows; j++) {
-		visited[0][j][Direction.LEFT] = true;
-		visited[numColumns - 1][j][Direction.RIGHT] = true;
+		explored[0][j][Direction.LEFT] = true;
+		explored[numColumns - 1][j][Direction.RIGHT] = true;
 	}
 
-	const startColumn = Math.ceil(numColumns / 2);
-	const startRow = Math.trunc(numRows / 2);
-	const path = walk(visited, startColumn, startRow);
+	const path = condensePath(walk(explored));
 
-	const cellWidth = canvasWidth / (numColumns - 1);
-	const cellHeight = canvasHeight / (numRows - 1);
+	const cellWidth = canvasWidth / (numColumns - 1 + 2 * this.borderX);
+	const cellHeight = canvasHeight / (numRows - 1 + 2 * this.borderY);
+	context.translate(Math.round(this.borderX * cellWidth), Math.round(this.borderY * cellHeight));
+	const [startColumn, startRow] = path[0];
+	let startX = Math.round(startColumn * cellWidth);
+	let startY = Math.round(startRow * cellHeight);
 
-	let x = Math.trunc(startColumn * cellWidth);
-	let y = Math.trunc(startRow * cellHeight);
 	context.beginPath();
-	context.moveTo(x, y);
+	context.moveTo(startX, startY);
+	const numCurves = Math.trunc((path.length - 1) / 3);
+	for (let i = 0; i < numCurves; i++) {
+		const [cellX1, cellY1] = path[i * 3 + 1];
+		const x1 = cellX1 * cellWidth;
+		const y1 = cellY1 * cellHeight;
+
+		const [cellX2, cellY2] = path[i * 3 + 2];
+		const x2 = cellX2 * cellWidth;
+		const y2 = cellY2 * cellHeight;
+
+		const [cellX3, cellY3] = path[i * 3 + 3];
+		const x3 = Math.round(cellX3 * cellWidth);
+		const y3 = Math.round(cellY3 * cellHeight);
+		context.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+	}
+	context.fillStyle = '#88f';
+	context.fill();
+
+	context.beginPath();
+	context.moveTo(startX, startY);
 	for (let i = 1; i < path.length; i++) {
 		const [cellX, cellY] = path[i];
-		x = Math.trunc(cellX * cellWidth);
-		y = Math.trunc(cellY * cellHeight);
+		const x = Math.round(cellX * cellWidth);
+		const y = Math.round(cellY * cellHeight);
 		context.lineTo(x, y);
 	}
+	context.strokeStyle = '#000a';
 	context.lineWidth = 2;
 	context.stroke();
 }
 
-function addToPath(visited, path, column, row) {
+function condensePath(path) {
+	let [x1, y1] = path[0];
+	let [x2, y2] = path[1];
+	let dx = x2 - x1;
+	let dy = y2 - y1;
+	const newPath = [path[0], path[1]];
+	let index = 1;
+	for (let i = 2; i < path.length; i++) {
+		x1 = x2;
+		y1 = y2;
+		[x2, y2] = path[i];
+		let newDx = x2 - x1;
+		let newDy = y2 - y1;
+		if (newDx !== dx || newDy !== dy) {
+			index++;
+		}
+		newPath[index] = path[i];
+		dx = newDx;
+		dy = newDy;
+	}
+	return newPath;
+}
+
+function addToPath(explored, path, column, row) {
 	path.push([column, row]);
 	if (column > 0) {
-		visited[column - 1][row][Direction.RIGHT] = true;
+		explored[column - 1][row][Direction.RIGHT] = true;
 	}
-	if (column < visited.length - 1) {
-		visited[column + 1][row][Direction.LEFT] = true;
+	if (column < explored.length - 1) {
+		explored[column + 1][row][Direction.LEFT] = true;
 	}
 	if (row > 0) {
-		visited[column][row - 1][Direction.DOWN] = true;
+		explored[column][row - 1][Direction.DOWN] = true;
 	}
-	if (row < visited[0].length - 1) {
-		visited[column][row + 1][Direction.UP] = true;
+	if (row < explored[0].length - 1) {
+		explored[column][row + 1][Direction.UP] = true;
 	}
 }
 
-function walk(visited, column, row) {
-	const numColumns = visited.length;
-	const numRows = visited[0].length;
+function shiftLeft(explored, path) {
+
+}
+
+function shiftUp(explored, path) {
+
+}
+
+function shiftDown(explored, path) {
+
+}
+
+function walk(explored) {
+	const numColumns = explored.length;
+	const numRows = explored[0].length;
 	const maxLength = numColumns * numRows;
 
 	let backtracks = 0;
 	const path = [];
-	const startColumn = column;
-	const startRow = row;
-	addToPath(visited, path, column, row);
-	let longestPath = path;
+	const startColumn = Math.trunc(numColumns / 2); //numColumns - 1;
+	const startRow = Math.trunc(numRows / 2);
+	let column = startColumn, row = startRow;
+	let minCol = startColumn, minRow = startRow, maxRow = startRow;
+	addToPath(explored, path, column, row);
+	let preferredPath = path, preferedPathClosed = false;
 
 	while (true) {
 
 		const possibleDirs = [];
-		const visitedDirs = visited[column][row];
-		const canGoUp = !visitedDirs[Direction.UP];
-		const canGoDown = !visitedDirs[Direction.DOWN];
-		const canGoLeft = !visitedDirs[Direction.LEFT];
-		const canGoRight = !visitedDirs[Direction.RIGHT];
+		const exploredDirs = explored[column][row];
+		const canGoUp = !exploredDirs[Direction.UP];
+		const canGoDown = !exploredDirs[Direction.DOWN];
+		const canGoLeft = !exploredDirs[Direction.LEFT];
+		const canGoRight = !exploredDirs[Direction.RIGHT];
 
 		// 0 = line going left, 1 = line going right
 		const xParity = Math.abs(row - startRow) % 2;
@@ -132,7 +192,7 @@ function walk(visited, column, row) {
 
 		} else if (numOptions === 0) {
 			for (let i = 0; i < 4; i++) {
-				if (!visitedDirs[i]) {
+				if (!exploredDirs[i]) {
 					possibleDirs.push(i);
 				}
 			}
@@ -144,46 +204,59 @@ function walk(visited, column, row) {
 				(column === startColumn) && (row === startRow - 1 || row === startRow + 1) ||
 				(row === startRow && (column === startColumn - 1 || column === startColumn + 1))
 			) {
-				// Form a loop and stop
-				path.push([startColumn, startRow]);
-				return path;
+				// Form a loop
+				if (!preferedPathClosed || preferredPath.length < path.length + 1) {
+					preferredPath = path.slice();
+					preferredPath.push([startColumn, startRow]);
+					preferedPathClosed = true;
+				}
 			}
-			if (path.length === maxLength || backtracks === 1000000) {
-				// Visited everywhere (or out of time) so stop
-				return longestPath;
+			if (path.length === maxLength || backtracks === 300000) {
+				// explored everywhere (or out of time) so stop
+				return preferredPath;
 			}
 
 			// Backtrack
-			if (longestPath === path) {
-				longestPath = path.slice();
+			if (preferredPath === path) {
+				preferredPath = path.slice();
 			}
 			// Allow neighbouring cells to explore this cell
 			if (column > 0) {
-				visited[column - 1][row][Direction.RIGHT] = false;
+				explored[column - 1][row][Direction.RIGHT] = false;
 			}
-			if (column < visited.length - 1) {
-				visited[column + 1][row][Direction.LEFT] = false;
+			if (column < explored.length - 1) {
+				explored[column + 1][row][Direction.LEFT] = false;
 			}
 			if (row > 0) {
-				visited[column][row - 1][Direction.DOWN] = false;
+				explored[column][row - 1][Direction.DOWN] = false;
 			}
-			if (row < visited[0].length - 1) {
-				visited[column][row + 1][Direction.UP] = false;
+			if (row < explored[0].length - 1) {
+				explored[column][row + 1][Direction.UP] = false;
+			}
+			path.pop();
+			if (column === minCol || row === minRow || row === maxRow) {
+				[minCol, minRow] = path[0];
+				maxRow = minRow;
+				for (let i = 1; i < path.length; i++) {
+					const [aCol, aRow] = path[i];
+					minCol = Math.min(minCol, aCol);
+					minRow = Math.min(minRow, aRow);
+					maxRow = Math.max(maxRow, aRow);
+				}
 			}
 			// Don't explore this route again
-			path.pop();
 			const [prevColumn, prevRow] = path[path.length - 1];
 			const dx = column - prevColumn;
 			const dy = row - prevRow;
 			if (dx === 1) {
 				// If we went right then don't head rightwards from the cell on the left again.
-				visited[column - 1][row][Direction.RIGHT] = true;
+				explored[column - 1][row][Direction.RIGHT] = true;
 			} else if (dx === -1) {
-				visited[column + 1][row][Direction.LEFT] = true;
+				explored[column + 1][row][Direction.LEFT] = true;
 			} else if (dy === 1) {
-				visited[column][row - 1][Direction.DOWN] = true;
+				explored[column][row - 1][Direction.DOWN] = true;
 			} else {
-				visited[column][row + 1][Direction.UP] = true;
+				explored[column][row + 1][Direction.UP] = true;
 			}
 			column = prevColumn;
 			row = prevRow;
@@ -206,9 +279,16 @@ function walk(visited, column, row) {
 			column++;
 		}
 
-		addToPath(visited, path, column, row);
-		if (path.length > longestPath.length) {
-			longestPath = path;
+		addToPath(explored, path, column, row);
+		if (column < minCol) {
+			minCol = column;
+		} else if (row < minRow) {
+			minRow = row;
+		} else if (row > maxRow) {
+			maxRow = row;
+		}
+		if (!preferedPathClosed && path.length > preferredPath.length) {
+			preferredPath = path;
 		}
 	}
 }

@@ -7,6 +7,8 @@ export default function RandomWalk() {
 	this.stretch = 1;
 	this.borderX = 0.5;
 	this.borderY = 0.5;
+	this.perturbationX = 0.9;
+	this.perturbationY = 0.9;
 }
 
 const Direction = Object.freeze({
@@ -32,6 +34,31 @@ RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, p
 	for (let j = 0; j < numRows; j++) {
 		explored[0][j][Direction.LEFT] = true;
 		explored[numColumns - 1][j][Direction.RIGHT] = true;
+	}
+
+	const perturbations = new Array(numColumns);
+	for (let i = 0; i < numColumns; i++) {
+		const column = new Array(numRows);
+		perturbations[i] = column;
+		for (let j = 0; j < numRows; j++) {
+			let perturbationX;
+			if (i === 0) {
+
+			} else if (i === numColumns - 1) {
+
+			} else {
+
+			}
+			let perturbationY;
+			if (j === 0) {
+
+			} else if (j === numRows - 1) {
+
+			} else {
+
+			}
+			column[j] = [perturbationX, perturbationY];
+		}
 	}
 
 	const path = condensePath(walk(explored));
@@ -60,6 +87,17 @@ RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, p
 		const y3 = Math.round(cellY3 * cellHeight);
 		context.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 	}
+	const [lastCellX, lastCellY] = path[path.length - 1];
+	context.lineTo(Math.round(lastCellX * cellWidth), Math.round(lastCellY * cellHeight));
+	if (lastCellX === 0) {
+		context.lineTo(0, startY);
+	} else if (lastCellX === numColumns - 1) {
+		context.lineTo(Math.round(lastCellX * cellWidth), startY);
+	} else if (lastCellY === 0) {
+		context.lineTo(startX, 0);
+	} else if (lastCellY === numRows - 1) {
+		context.lineTo(startX, Math.round(lastCellY * cellHeight));
+	}
 	context.fillStyle = '#88f';
 	context.fill();
 
@@ -71,7 +109,7 @@ RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, p
 		const y = Math.round(cellY * cellHeight);
 		context.lineTo(x, y);
 	}
-	context.strokeStyle = '#000a';
+	context.strokeStyle = '#777';
 	context.lineWidth = 2;
 	context.stroke();
 }
@@ -91,10 +129,10 @@ function condensePath(path) {
 		let newDy = y2 - y1;
 		if (newDx !== dx || newDy !== dy) {
 			index++;
+			dx = newDx;
+			dy = newDy;
 		}
 		newPath[index] = path[i];
-		dx = newDx;
-		dy = newDy;
 	}
 	return newPath;
 }
@@ -115,16 +153,93 @@ function addToPath(explored, path, column, row) {
 	}
 }
 
-function shiftLeft(explored, path) {
+function shiftLeft(explored, path, preferredPath) {
+	explored.shift();	// Delete leftmost column
+	// Add new column on the right
+	const numRows = explored[0].length;
+	const newColumn = new Array(numRows);
+	explored.push(newColumn);
 
+	const firstColumn = explored[0];
+	const penultimateColNum = explored.length - 2;
+	const penultimateColumn = explored[penultimateColNum];
+
+	for (let j = 0; j < numRows; j++) {
+		newColumn[j] = [false, false, false, true];		// Cannot explore further right
+		penultimateColumn[j][Direction.RIGHT] = false;	// Can now go right from here
+		firstColumn[j][Direction.LEFT] = true;	 		// Can no longer go left from here
+	}
+	newColumn[0][Direction.UP] = true;
+	newColumn[numRows - 1][Direction.DOWN] = true;
+
+	for (let i = 0; i < path.length; i++) {
+		path[i][0]--;
+		const [x, y] = path[i];
+		if (x === penultimateColNum) {
+			newColumn[y][Direction.LEFT] = true; // Cannot go left onto existing path
+		}
+	}
+	if (path !== preferredPath) {
+		for (let i = 0; i < preferredPath.length; i++) {
+			preferredPath[i][0]--;
+		}
+	}
 }
 
-function shiftUp(explored, path) {
+function shiftUp(explored, path, preferredPath) {
+	const numColumns = explored.length;
+	const maxRowNum = explored[0].length - 1;
 
+	for (let i = 0; i < numColumns; i++) {
+		const column = explored[i];
+		column.shift();									// Remove 1st row.
+		column.push([false, true, false, false]);		// Cannot explore further down
+		column[maxRowNum - 1][Direction.DOWN] = false;	// Can now go down from here
+		column[0][Direction.UP] = true;					// Can no longer go up from here
+	}
+	explored[0][maxRowNum][Direction.LEFT] = true;
+	explored[numColumns - 1][maxRowNum][Direction.RIGHT] = true;
+
+	for (let i = 0; i < path.length; i++) {
+		path[i][1]--;
+		const [x, y] = path[i];
+		if (y === maxRowNum - 1) {
+			explored[x][maxRowNum][Direction.UP] = true; // Cannot go up onto existing path
+		}
+	}
+	if (path !== preferredPath) {
+		for (let i = 0; i < preferredPath.length; i++) {
+			preferredPath[i][1]--;
+		}
+	}
 }
 
-function shiftDown(explored, path) {
+function shiftDown(explored, path, preferredPath) {
+	const numColumns = explored.length;
+	const maxRowNum = explored[0].length - 1;
 
+	for (let i = 0; i < numColumns; i++) {
+		const column = explored[i];
+		column.pop();									// Remove last row
+		column.unshift([true, false, false, false]);	// Cannot explore further up
+		column[1][Direction.UP] = false;				// Can now go up from here
+		column[maxRowNum][Direction.DOWN] = true;		// Can no longer go down from here
+	}
+	explored[0][0][Direction.LEFT] = true;
+	explored[numColumns - 1][0][Direction.RIGHT] = true;
+
+	for (let i = 0; i < path.length; i++) {
+		path[i][1]++;
+		const [x, y] = path[i];
+		if (y === 1) {
+			explored[x][0][Direction.DOWN] = true;		// Cannot go down onto existing path
+		}
+	}
+	if (path !== preferredPath) {
+		for (let i = 0; i < preferredPath.length; i++) {
+			preferredPath[i][1]++;
+		}
+	}
 }
 
 function walk(explored) {
@@ -134,8 +249,8 @@ function walk(explored) {
 
 	let backtracks = 0;
 	const path = [];
-	const startColumn = Math.trunc(numColumns / 2); //numColumns - 1;
-	const startRow = Math.trunc(numRows / 2);
+	let startColumn = numColumns - 1;
+	let startRow = Math.trunc(numRows / 2);
 	let column = startColumn, row = startRow;
 	let minCol = startColumn, minRow = startRow, maxRow = startRow;
 	addToPath(explored, path, column, row);
@@ -145,15 +260,18 @@ function walk(explored) {
 
 		const possibleDirs = [];
 		const exploredDirs = explored[column][row];
-		const canGoUp = !exploredDirs[Direction.UP];
-		const canGoDown = !exploredDirs[Direction.DOWN];
+		const canGoUp = !exploredDirs[Direction.UP] ||
+			(row === 0 && maxRow < numRows - 1);
+		const canGoDown = !exploredDirs[Direction.DOWN] ||
+			(row === numRows - 1 && minRow > 0);
 		const canGoLeft = !exploredDirs[Direction.LEFT];
-		const canGoRight = !exploredDirs[Direction.RIGHT];
+		const canGoRight = !exploredDirs[Direction.RIGHT] ||
+			(column === numColumns - 1 && minCol > 0);
 
 		// 0 = line going left, 1 = line going right
 		const xParity = Math.abs(row - startRow) % 2;
 		// 0 = line going up, 1 = line going down
-		const yParity = column % 2;
+		const yParity = Math.abs(column - startColumn) % 2;
 
 		if (xParity === 0 && canGoLeft) {
 			possibleDirs.push(Direction.LEFT);
@@ -165,9 +283,11 @@ function walk(explored) {
 		} else if (yParity === 1 && canGoDown) {
 			possibleDirs.push(Direction.DOWN);
 		}
-
 		let numOptions = possibleDirs.length;
+
 		if (numOptions > 1 && column > startColumn) {
+
+			// Avoid returning to the start point prematurely.
 			let index;
 			const rowDist = row - startRow;
 			if (rowDist === 0 && canGoLeft) {
@@ -178,7 +298,7 @@ function walk(explored) {
 				index = possibleDirs.indexOf(Direction.UP);
 			}
 
-			if (index !== undefined) {
+			if (index >= 0) {
 				possibleDirs.splice(index, 1);
 				numOptions--;
 			}
@@ -191,12 +311,14 @@ function walk(explored) {
 			}
 
 		} else if (numOptions === 0) {
+
 			for (let i = 0; i < 4; i++) {
 				if (!exploredDirs[i]) {
 					possibleDirs.push(i);
 				}
 			}
 			numOptions = possibleDirs.length;
+
 		}
 
 		if (numOptions === 0) {
@@ -211,8 +333,8 @@ function walk(explored) {
 					preferedPathClosed = true;
 				}
 			}
-			if (path.length === maxLength || backtracks === 300000) {
-				// explored everywhere (or out of time) so stop
+			if (path.length === maxLength || backtracks === 200000) {
+				// Explored everywhere (or out of time) so stop.
 				return preferredPath;
 			}
 
@@ -220,6 +342,7 @@ function walk(explored) {
 			if (preferredPath === path) {
 				preferredPath = path.slice();
 			}
+			path.pop();
 			// Allow neighbouring cells to explore this cell
 			if (column > 0) {
 				explored[column - 1][row][Direction.RIGHT] = false;
@@ -233,7 +356,6 @@ function walk(explored) {
 			if (row < explored[0].length - 1) {
 				explored[column][row + 1][Direction.UP] = false;
 			}
-			path.pop();
 			if (column === minCol || row === minRow || row === maxRow) {
 				[minCol, minRow] = path[0];
 				maxRow = minRow;
@@ -262,7 +384,7 @@ function walk(explored) {
 			row = prevRow;
 			backtracks++;
 			continue;
-		}
+		} // End of backtracking
 
 		const direction = possibleDirs[Math.trunc(random.next() * numOptions)];
 		switch (direction) {
@@ -279,6 +401,23 @@ function walk(explored) {
 			column++;
 		}
 
+		if (column === numColumns) {
+			shiftLeft(explored, path, preferredPath);
+			column--;
+			startColumn--;
+			minCol--;
+		}
+		if (row === -1) {
+			shiftDown(explored, path, preferredPath);
+			row++;
+			startRow++;
+			maxRow++;
+		} else if (row === numRows) {
+			shiftUp(explored, path, preferredPath);
+			row--;
+			startRow--;
+			minRow--;
+		}
 		addToPath(explored, path, column, row);
 		if (column < minCol) {
 			minCol = column;

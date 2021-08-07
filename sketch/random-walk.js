@@ -87,17 +87,6 @@ RandomWalk.prototype.generate = function* (context, canvasWidth, canvasHeight, p
 		const y3 = Math.round(cellY3 * cellHeight);
 		context.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 	}
-	const [lastCellX, lastCellY] = path[path.length - 1];
-	context.lineTo(Math.round(lastCellX * cellWidth), Math.round(lastCellY * cellHeight));
-	if (lastCellX === 0) {
-		context.lineTo(0, startY);
-	} else if (lastCellX === numColumns - 1) {
-		context.lineTo(Math.round(lastCellX * cellWidth), startY);
-	} else if (lastCellY === 0) {
-		context.lineTo(startX, 0);
-	} else if (lastCellY === numRows - 1) {
-		context.lineTo(startX, Math.round(lastCellY * cellHeight));
-	}
 	context.fillStyle = '#88f';
 	context.fill();
 
@@ -317,8 +306,29 @@ function walk(explored) {
 					possibleDirs.push(i);
 				}
 			}
-			numOptions = possibleDirs.length;
 
+			if (possibleDirs.length === 0) {
+				const [prevColumn, prevRow] = path[path.length - 1];
+				const dx = column - prevColumn;
+				const dy = row - prevRow;
+				if (column === 0 || column === numColumns - 1) {
+					if (row > 0 && dy !== 1) {
+						possibleDirs.push(Direction.UP);
+					}
+					if (row < numRows - 1 && dy !== -1) {
+						possibleDirs.push(Direction.DOWN);
+					}
+				}
+				if (row === 0 || row === numRows - 1) {
+					if (column > 0 && dx !== 1) {
+						possibleDirs.push(Direction.LEFT);
+					}
+					if (column < numColumns - 1 && dx !== -1) {
+						possibleDirs.push(Direction.RIGHT);
+					}
+				}
+			}
+			numOptions = possibleDirs.length;
 		}
 
 		if (numOptions === 0) {
@@ -409,7 +419,7 @@ function walk(explored) {
 		}
 		if (row === -1) {
 			shiftDown(explored, path, preferredPath);
-			row++;
+			row = 0;
 			startRow++;
 			maxRow++;
 		} else if (row === numRows) {

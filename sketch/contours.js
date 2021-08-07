@@ -267,7 +267,7 @@ export default function Contours() {
 
 		const distributionLabels = new Map();
 		distributionLabels.set('positionX', ['Left', 'Centre-Left', 'Centre', 'Centre-Right', 'Right']);
-		distributionLabels.set('positionY', ['Top', 'Middle', 'Bottom']);
+		distributionLabels.set('positionY', ['Bottom', 'Middle', 'Top']);
 		distributionLabels.set('strength', ['Weak', 'Medium Weak', 'Medium', 'Medium Strong', 'Strong']);
 		distributionLabels.set('saturations', ['Low', 'Medium Low', 'Medium', 'Medium High', 'High']);
 		distributionLabels.set('displaceAmount', ['Small', 'Medium Small', 'Medium', 'Large', 'Largest']);

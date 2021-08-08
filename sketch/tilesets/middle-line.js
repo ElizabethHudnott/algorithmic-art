@@ -99,7 +99,7 @@ const shapesMap = new Map();
 	shapesMap.set('0248', new ShapeSet(null, [1, 2], [0, 2, 1], [1, 0]));
 }
 
-class MiddleLineTile extends TileType {
+export default class MiddleLineTile extends TileType {
 	/**
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
 	 * Second 4 digits: straight lines: up, right, down, left
@@ -108,8 +108,9 @@ class MiddleLineTile extends TileType {
 	constructor(str, minConnections, maxConnections, checkSpecialConstraints) {
 		const connections = new Map();
 		const defaultColors = new Map();
-		const colorMap = new Map();
+		const colorMap = new Map();		// Maps colours to sets of ports
 		const usedPorts = new Set();
+		// Step 1: Figure out which ports share the same colour.
 		// Second four characters represent horizontal and vertical lines
 		for (let i = 0; i < 4; i++) {
 			const color = parseInt(str[i + 4]);
@@ -134,12 +135,6 @@ class MiddleLineTile extends TileType {
 					mapping = new Set();
 					colorMap.set(color, mapping);
 				}
-				const source = i * 4 + 2;
-				if (!usedPorts.has(source)) {
-					mapping.add(source);
-					usedPorts.add(source);
-					defaultColors.set(source, color - 1);
-				}
 				const destination = ((i + 1) * 4 + 2) % 16;
 				if (!usedPorts.has(destination)) {
 					mapping.add(destination);
@@ -148,18 +143,34 @@ class MiddleLineTile extends TileType {
 				}
 			}
 		}
+		for (let i = 0; i < 4; i++) {
+			const color = parseInt(str[i]);
+			if (str[i] !== '0') {
+				let mapping = colorMap.get(color);
+				const source = i * 4 + 2;
+				if (!usedPorts.has(source)) {
+					mapping.add(source);
+					usedPorts.add(source);
+					defaultColors.set(source, color - 1);
+				}
+			}
+		}
+		// Step 2: Mark ports with the same colour as connected.
 		for (let [color, ports] of colorMap.entries()) {
-			for (let port1 of ports) {
-				if (ports.size === 1) {
-					connections.set(port1, new Set());
-				} else {
+			const portsIter = ports.values();
+			if (ports.size === 1) {
+				connections.set(portsIter.next().value, new Set());
+			} else {
+				let result;
+				while ((result = portsIter.next()) && !result.done) {
+					const port1 = result.value;
+					let destinations = connections.get(port1);
+					if (destinations === undefined) {
+						destinations = new Set();
+						connections.set(port1, destinations);
+					}
 					for (let port2 of ports) {
 						if (port1 !== port2) {
-							let destinations = connections.get(port1);
-							if (destinations === undefined) {
-								destinations = new Set();
-								connections.set(port1, destinations);
-							}
 							destinations.add(port2);
 						}
 					}
@@ -187,31 +198,36 @@ class MiddleLineTile extends TileType {
 		}
 
 		let connectedUp = false, connectedRight = false, connectedDown = false, connectedLeft = false;
+		let canConnectUp = false, canConnectRight = false, canConnectDown = false, canConnectLeft = false;
 		let notConnectedUp = true, notConnectedRight = true, notConnectedDown = true, notConnectedLeft = true;
 		let tile, outcome;
 		if (hasUpOutput) {
 			[tile, outcome] = tileMapLookup(map, x, y - 1, width, height);
-			connectedUp = outcome !== Placement.TILE || tile.hasPort(10);
+			connectedUp = outcome === Placement.TILE && tile.hasPort(10);
+			canConnectUp = connectedUp || outcome !== Placement.TILE;
 			notConnectedUp = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(10));
 		}
 		if (hasRightOutput) {
 			[tile, outcome] = tileMapLookup(map, x + 1, y, width, height);
-			connectedRight = outcome !== Placement.TILE || tile.hasPort(14);
+			connectedRight = outcome === Placement.TILE && tile.hasPort(14);
+			canConnectRight = connectedRight || outcome !== Placement.TILE;
 			notConnectedRight = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(14));
 		}
 		if (hasDownOutput) {
 			[tile, outcome] = tileMapLookup(map, x, y + 1, width, height);
-			connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
+			connectedDown = outcome === Placement.TILE && tile.hasPort(2);
+			canConnectDown = connectedDown || outcome !== Placement.TILE;
 			notConnectedDown = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(2));
 		}
 		if (hasLeftOutput) {
 			[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
-			connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
+			connectedLeft = outcome === Placement.TILE && tile.hasPort(6);
+			canConnectLeft = connectedLeft || outcome !== Placement.TILE;
 			notConnectedLeft = outcome === Placement.EMPTY || (outcome === Placement.TILE && !tile.hasPort(6));
 		}
 
 		if (!invert) {
-			return (connectedUp || connectedDown) && (connectedLeft || connectedRight);
+			return (canConnectUp || canConnectDown) && (canConnectLeft || canConnectRight);
 		}
 
 		if (connectedLeft || connectedRight) {
@@ -264,21 +280,52 @@ class MiddleLineTile extends TileType {
 		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
 	}
 
+	// Determines the colour of a diagonal line.
 	getLineColor(port1, port2, colors) {
-		const index1 = (port1 - 2) / 4;
-		const index2 = index1 + 4;
-		const index3 = (index1 + 3) % 4;
+		const thisIndex = (port1 - 2) / 4;
+		const orth2Index = (thisIndex + 1) % 4 + 4;
 		const str = this.str;
-		const designColor1 = str[index1];
-		const designColor2 = str[index2];
-		const designColor3 = str[index3];
-		if (
-			(designColor2 !== '0' && designColor2 !== designColor1) ||
-			(designColor3 !== '0' && designColor3 !== designColor1)
-		) {
-			return colors.get(port2);
+		const thisColor = str[thisIndex];
+		const orth2Color = str[orth2Index];
+
+		if (orth2Color !== '0' && thisColor !== orth2Color) {
+			const orth1Index = thisIndex + 4;
+			const orth1Color = str[orth1Index];
+			const prevDiagonalIndex = (thisIndex + 3) % 4;
+			const prevDiagonalColor = str[prevDiagonalIndex];
+			if (
+				(orth1Color !== '0' && orth1Color !== thisColor) ||
+				(orth1Color === '0' && prevDiagonalColor !== '0' && prevDiagonalColor !== thisColor)
+			) {
+				// Hemmed in at both ends
+
+				const orth3Index = (thisIndex + 2) % 4 + 4;
+				const orth3Color = str[orth3Index];
+				const nextDiagonalIndex = (thisIndex + 1) % 4;
+				const nextDiagonalColor = str[nextDiagonalIndex];
+				if (thisColor === orth3Color || (orth3Color === '0' && thisColor === nextDiagonalColor)) {
+					return colors.get((orth3Index - 4) * 4 + 2);
+				}
+				const orth4Index = (thisIndex + 3) % 4 + 4;
+				const orth4Color = str[orth4Index];
+				const otherDiagonalIndex = (thisIndex + 2) % 4;
+				const otherDiagonalColor = str[otherDiagonalIndex];
+				if (
+					thisColor === orth4Color ||
+					(orth4Color === '0' && (thisColor === otherDiagonalColor ||
+						(thisColor === prevDiagonalColor && otherDiagonalColor === '0')
+					))
+				) {
+					return colors.get((orth4Index - 4) * 4 + 2);
+				}
+
+				return parseInt(thisColor) - 1;
+
+			} else {
+				return colors.get(port1);
+			}
 		} else {
-			return colors.get(port1);
+			return colors.get(port2);
 		}
 	}
 
@@ -512,47 +559,3 @@ class MiddleLineTile extends TileType {
 	}
 
 }
-
-const diamondConnections = new Map();
-diamondConnections.set( 2, new Set([6, 10, 14]));
-diamondConnections.set( 6, new Set([2, 10, 14]));
-diamondConnections.set(10, new Set([2,  6, 14]));
-diamondConnections.set(14, new Set([2,  6, 10]));
-const diamondColors = new Map();
-diamondColors.set(2, 5);
-diamondColors.set(6, 5);
-diamondColors.set(10, 5);
-diamondColors.set(14, 5);
-
-class Diamond extends TileType {
-	constructor(minConnections, maxConnections, checkSpecialConstraints) {
-		super(diamondConnections, minConnections, maxConnections, checkSpecialConstraints);
-		this.preview = new Tile(this, diamondColors);
-	}
-
-	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
-		if (this.minConnections < 2) {
-			return true;
-		}
-		let connectedUp = false, connectedRight = false, connectedDown = false, connectedLeft = false;
-		let [tile, outcome] = tileMapLookup(map, x, y - 1, width, height);
-		connectedUp = outcome !== Placement.TILE || tile.hasPort(10);
-		[tile, outcome] = tileMapLookup(map, x + 1, y, width, height);
-		connectedRight = outcome !== Placement.TILE || tile.hasPort(14);
-		[tile, outcome] = tileMapLookup(map, x, y + 1, width, height);
-		connectedDown = outcome !== Placement.TILE || tile.hasPort(2);
-		[tile, outcome] = tileMapLookup(map, x - 1, y, width, height);
-		connectedLeft = outcome !== Placement.TILE || tile.hasPort(6);
-		let satisfied = (connectedUp || connectedDown) && (connectedLeft || connectedRight);
-		if (invert) {
-			satisfied = !satisfied;
-		}
-		return satisfied;
-	}
-
-	draw(context, tile, left, top, width, height, lineWidthH, lineWidthV, shear, generator) {
-
-	}
-}
-
-export {MiddleLineTile, Diamond};

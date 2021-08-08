@@ -1,5 +1,5 @@
 import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform, ConstraintLogic} from './tilesets/common.js';
-import {MiddleLineTile, Diamond as PipeDiamond} from './tilesets/middle-line.js';
+import MiddleLineTile from './tilesets/middle-line.js';
 
 export default function TruchetTiles() {
 	const me = this;

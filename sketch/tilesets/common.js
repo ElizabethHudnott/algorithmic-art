@@ -260,6 +260,12 @@ function checkTiling(tileMap, x, y, width, height) {
 			return false;
 		}
 	}
+	tile = tileMap[y][x + 1];
+	if (tile !== undefined) {
+		if (!tile.permittedTiling(tileMap, x + 1, y, width, height, -1, 0)) {
+			return false;
+		}
+	}
 	return true;
 }
 

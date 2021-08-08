@@ -44,6 +44,28 @@ export default function TruchetTiles() {
 
 		drawPreview();
 
+		{
+			const div = optionsDoc.getElementById('tiles-design-div');
+			let widgetSize;
+			const observer = new ResizeObserver(function (entries) {
+				for (let entry of entries) {
+					if (entry.target === div) {
+						if (widgetSize === undefined) {
+							widgetSize = entry.contentRect.height - designCanvas.height;
+							return;
+						}
+						const size = Math.trunc(entry.contentRect.height);
+						previewWidth = size - widgetSize;
+						previewHeight = size;
+						designCanvas.width = previewWidth;
+						designCanvas.height = previewHeight;
+						drawPreview();
+					}
+				}
+			});
+			observer.observe(div);
+		}
+
 		function showTile() {
 			drawPreview();
 			document.getElementById('tiles-tile-num').value = currentTileNum;
@@ -665,7 +687,6 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			upperAttempts = previousRowAttempts[cellX];
 			let permitted, leftPermitted;
 			let changeLeft, changeUpper;
-			if (cellX === this.debugX && cellY === this.debugY) debugger;
 			do {
 				const oldLeftTile = tileMapRow[cellX - 1];
 				let tile;

@@ -667,8 +667,9 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 			let attempts, leftAttempts, upperAttempts;
 			leftAttempts = currentRowAttempts[cellX - 1];
 			upperAttempts = previousRowAttempts[cellX];
-			let permitted, leftPermitted = true;
+			let permitted, leftPermitted;
 			let changeLeft, changeUpper;
+			if (cellX === this.debugX && cellY === this.debugY) debugger;
 			do {
 				const oldLeftTile = tileMapRow[cellX - 1];
 				let tile;
@@ -689,6 +690,8 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 							tileMapRow[cellX - 1] = leftTile;
 							leftPermitted = checkTiling(tileMap, cellX - 1, cellY, cellsAcrossCanvas, cellsDownCanvas);
 						} while (!leftPermitted && leftAttempts.size < numTileTypes);
+					} else {
+						leftPermitted = true;
 					}
 				} while (changeLeft && leftPermitted);
 				changeUpper = !permitted && upperAttempts !== undefined && upperAttempts.size < numTileTypes;
@@ -704,7 +707,7 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 						const upperTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, upperAttempts, this.colorMode);
 						tileMap[cellY - 1][cellX] = upperTile;
 						permitted = checkTiling(tileMap, cellX, cellY - 1, cellsAcrossCanvas, cellsDownCanvas);
-						if (cellX > 0) {
+						if (permitted && cellX > 0) {
 							do {
 								const leftTile = chooseTile(this.tileTypes, tileCDF, tileFrequenciesTotal, leftAttempts, this.colorMode);
 								tileMapRow[cellX - 1] = leftTile;
@@ -860,3 +863,8 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	}
 }
 
+TruchetTiles.logTiles = function (tileMap, x, y) {
+	console.log('This:' + tileMap[y][x].tileType.str);
+	if (x > 0) console.log('Left:' + tileMap[y][x - 1].tileType.str);
+	if (y > 0) console.log('Up:' + tileMap[y - 1][x].tileType.str);
+}

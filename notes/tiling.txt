@@ -1,3 +1,5 @@
+Adjust tile probabilities according to tiles already placed?
+
 Terminology
 	Edge matching puzzle
 

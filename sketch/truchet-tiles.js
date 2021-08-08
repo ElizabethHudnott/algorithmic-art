@@ -569,12 +569,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const shear = new Array(3);
 	shear[0] = this.shear[0] * cellWidth;
 	shear[1] = this.shear[1] * cellWidth - shear[0];
-	const totalShearX = shear[0] + shear[1];
 	shear[2] = this.shear[2] * cellHeight;
 	shear[3] = this.shear[3] * cellHeight - shear[2];
-	const totalShearY = shear[2] + shear[3];
-	let minX = -totalShearX * cellsDownCanvas;
-	let minY = -totalShearY * cellsAcrossCanvas;
+	let minX = -(shear[0] + shear[1]) * cellsDownCanvas;
+	let minY = -(shear[2] + shear[3]) * cellsAcrossCanvas;
 	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth) + 1;
 	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight) + 1;
 	minX = Math.min(minX, 0);
@@ -603,8 +601,6 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	const numTileTypes = this.tileTypes.length;
 
 	const tileMap = new Array(cellsDownCanvas);
-	const lineWidth1 = Math.max(Math.round(this.strokeRatio1 * cellWidth), 1);
-	const lineWidth2 = Math.max(Math.round(this.strokeRatio2 * cellHeight), 1);
 
 	let gapProbability = this.gapProbability;
 	let blankSpacing = gapProbability === 0 ? 0 : Math.max(Math.trunc(1 / gapProbability), 1);
@@ -813,12 +809,30 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		} // For each y
 	} // End of colour flowing
 
+	this.drawTiles(context, tileMap, cellWidth, cellHeight, minX, minY, shear);
+}
+
+TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHeight, minX = 0, minY = 0, shear = [0, 0, 0, 0]) {
+	const cellsDownCanvas = tileMap.length;
+	const cellsAcrossCanvas = tileMap[0].length;
+	const totalShearX = shear[0] + shear[1];
+	const totalShearY = shear[2] + shear[3];
+	const lineWidth1 = Math.max(Math.round(this.strokeRatio1 * cellWidth), 1);
+	const lineWidth2 = Math.max(Math.round(this.strokeRatio2 * cellHeight), 1);
+
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
+		if (tileMapRow === undefined) {
+			break;
+		}
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const x = minX + cellX * cellWidth + cellY * totalShearX;
 			const y = minY + cellY * cellHeight + cellX * totalShearY;
-			tileMapRow[cellX].draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this);
+			const tile = tileMapRow[cellX];
+			if (tile === undefined) {
+				break;
+			}
+			tile.draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this);
 		}
 	}
 
@@ -861,10 +875,4 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 		context.strokeStyle = rgba(gridIntensity, gridIntensity, gridIntensity, this.gridOpacity);
 		context.stroke();
 	}
-}
-
-TruchetTiles.logTiles = function (tileMap, x, y) {
-	console.log('This:' + tileMap[y][x].tileType.str);
-	if (x > 0) console.log('Left:' + tileMap[y][x - 1].tileType.str);
-	if (y > 0) console.log('Up:' + tileMap[y - 1][x].tileType.str);
 }

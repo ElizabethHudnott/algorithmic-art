@@ -45,9 +45,19 @@ export default function TruchetTiles() {
 		drawPreview();
 
 		{
+			let mouseIsDown = false;
 			const div = optionsDoc.getElementById('tiles-design-div');
+			div.addEventListener('mousedown', function (event) {
+				mouseIsDown = true;
+			});
+			div.addEventListener('mouseup', function (event) {
+				mouseIsDown = false;
+			});
 			let widgetSize;
 			const observer = new ResizeObserver(function (entries) {
+				if (!mouseIsDown) {
+					return;
+				}
 				for (let entry of entries) {
 					if (entry.target === div) {
 						if (widgetSize === undefined) {

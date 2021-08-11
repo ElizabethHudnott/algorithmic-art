@@ -19,7 +19,7 @@ export default class DiagonalLineTile extends TileType {
 
 	//TODO add .preview, .mutate()
 
-	draw(context, tile, left, top, width, height, lineWidthBack, lineWidthFore, shear, generator) {
+	draw(context, tile, left, top, width, height, lineWidthBack, lineWidthFore, shear, generator, tileMap, cellX, cellY) {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
 		const lWidthBackT = Math.trunc(lineWidthBack / 2);
 		const lWidthBackB = Math.ceil(lineWidthBack / 2);

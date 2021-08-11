@@ -111,17 +111,19 @@ class TileType {
 				}
 			}
 		}
-		if (this.minConnections === 1 && offScreenConnections && maxPossibleConnections < 2) {
-			return !affected;
-		} else {
-			const localConnectivityOK =
-				maxPossibleConnections >= this.minConnections &&
-				minPossibleConnections <= this.maxConnections;
-			const checkSpecial = this.checkSpecialConstraints;
-			const specialConstraintsOK = checkSpecial === ConstraintLogic.DONT_CARE ||
-				this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, checkSpecial === ConstraintLogic.FALSE);
-			return (localConnectivityOK && specialConstraintsOK) || !affected;
+		if (!affected) {
+			return true;
 		}
+		if (this.minConnections === 1 && offScreenConnections && maxPossibleConnections < 2) {
+			return false;
+		}
+		const localConnectivityOK =
+			maxPossibleConnections >= this.minConnections &&
+			minPossibleConnections <= this.maxConnections;
+		const checkSpecial = this.checkSpecialConstraints;
+		const specialConstraintsOK = checkSpecial === ConstraintLogic.DONT_CARE ||
+			this.specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, checkSpecial === ConstraintLogic.FALSE);
+		return (localConnectivityOK && specialConstraintsOK);
 	}
 
 	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
@@ -182,8 +184,8 @@ class Tile {
 		return this.tileType.ports();
 	}
 
-	draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator) {
-		this.tileType.draw(context, this, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator);
+	draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator, tileMap, cellX, cellY) {
+		this.tileType.draw(context, this, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, generator, tileMap, cellX, cellY);
 	}
 
 }

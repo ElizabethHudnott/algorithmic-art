@@ -64,7 +64,7 @@ export default function TruchetTiles() {
 							widgetSize = entry.contentRect.height - designCanvas.height;
 							return;
 						}
-						const size = Math.trunc(entry.contentRect.height);
+						const size = Math.trunc(Math.min(entry.contentRect.height, div.parentElement.clientWidth));
 						previewWidth = size - widgetSize;
 						previewHeight = size;
 						designCanvas.width = previewWidth;
@@ -433,16 +433,15 @@ export default function TruchetTiles() {
 		return optionsDoc;
 	});
 
-	// this.tileTypes = [new DiagonalLineTile('0'), new DiagonalLineTile('1')];
 	this.tileTypes = [
-		new MiddleLineTile('000033300', 3, 4, ConstraintLogic.TRUE),	// T-shape to the right
-		new MiddleLineTile('000004440', 3, 4, ConstraintLogic.TRUE),	// T-shape downwards
-		new MiddleLineTile('000010110', 3, 4, ConstraintLogic.TRUE),	// T-shape to the left
-		new MiddleLineTile('000022020', 3, 4, ConstraintLogic.TRUE),	// T-shape upwards
-		new MiddleLineTile('100000001', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper right
-		new MiddleLineTile('020000002', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower right
-		new MiddleLineTile('003000004', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower left
-		new MiddleLineTile('000400008', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
+		new MiddleLineTile('000033300f', 3, 4, ConstraintLogic.TRUE),	// T-shape to the right
+		new MiddleLineTile('000004440f', 3, 4, ConstraintLogic.TRUE),	// T-shape downwards
+		new MiddleLineTile('000010110f', 3, 4, ConstraintLogic.TRUE),	// T-shape to the left
+		new MiddleLineTile('000022020f', 3, 4, ConstraintLogic.TRUE),	// T-shape upwards
+		new MiddleLineTile('100000001f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper right
+		new MiddleLineTile('020000002f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower right
+		new MiddleLineTile('003000004f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower left
+		new MiddleLineTile('000400008f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
 	];
 
 	this.tileFrequencies = [6, 6, 6, 6, 6, 6, 6, 6];
@@ -863,7 +862,7 @@ TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHe
 			if (tile === undefined) {
 				break;
 			}
-			tile.draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this);
+			tile.draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this, tileMap, cellX, cellY);
 		}
 	}
 

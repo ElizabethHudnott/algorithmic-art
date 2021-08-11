@@ -104,6 +104,7 @@ export default class MiddleLineTile extends TileType {
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
 	 * Second 4 digits: straight lines: up, right, down, left
 	 * Ninth digit bits: 1 = upper right, 2 = lower right, 4 = lower left, 8 = upper left
+	 * Tenth digit bits: semicircles 1 = above, 2 = right, 4 = down, 8 = left
 	 */
 	constructor(str, minConnections, maxConnections, checkSpecialConstraints) {
 		const connections = new Map();
@@ -179,21 +180,29 @@ export default class MiddleLineTile extends TileType {
 		}
 		super(connections, minConnections, maxConnections, checkSpecialConstraints);
 		this.curved = parseInt(str[8], 16);
+		this.stubs = parseInt(str[9], 16);
 		this.str = str;
 		this.preview = new Tile(this, defaultColors);
 	}
 
 	specialConstraintsSatisfied(map, x, y, width, height, minPossibleConnections, maxPossibleConnections, invert) {
+		if (maxPossibleConnections !== 2) {
+			/* 90 degree condition is either always satisfied or can never be satisfied,
+			 * so ignore it.
+			 */
+			return true;
+		}
+
 		const hasUpOutput = this.hasPort(2);
 		const hasRightOutput = this.hasPort(6);
 		const hasDownOutput = this.hasPort(10);
 		const hasLeftOutput = this.hasPort(14);
 
 		if (
-			this.minConnections < 2 ||
 			(!hasUpOutput && !hasDownOutput) ||
 			(!hasLeftOutput && !hasRightOutput)
 		) {
+			// Condition can never be satisfied, so ignore it.
 			return true;
 		}
 
@@ -239,6 +248,19 @@ export default class MiddleLineTile extends TileType {
 		}
 	}
 
+	drawPreview(context, width, height, lineWidth1, lineWidth2, generator) {
+		const hMargin = Math.ceil(Math.min(lineWidth2 / 2, width / 8));
+		const vMargin = Math.ceil(Math.min(lineWidth1 / 2, height / 8));
+		const innerWidth = width - 2 * hMargin;
+		const innerHeight = height - 2 * vMargin;
+		lineWidth1 = Math.max(Math.round(lineWidth1 * innerWidth / width), 1);
+		lineWidth2 = Math.max(Math.round(lineWidth2 * innerHeight / height), 1);
+		context.fillStyle = '#999';
+		context.clearRect(0, 0, width, height);
+		context.fillRect(hMargin, vMargin, innerWidth, innerHeight);
+		this.draw(context, this.preview, hMargin, vMargin, innerWidth, innerHeight, lineWidth1, lineWidth2, [0, 0, 0, 0], generator);
+	}
+
 	mutate(x, y, previewWidth, previewHeight, lineWidthH, lineWidthV, color) {
 		const halfWidth = previewWidth / 2;
 		const halfHeight = previewHeight / 2;
@@ -256,10 +278,12 @@ export default class MiddleLineTile extends TileType {
 		} else {
 			index = y < halfHeight ? 0 : 1;
 		}
+		const oldStr = this.str;
 		let curved = this.curved;
+		let stubs = this.stubs;
 		// By default transition not present to straight or to a new colour.
 		let newChar = String(color + 1);
-		if (this.str[index] !== '0' && this.str[index] === newChar) {
+		if (oldStr[index] !== '0' && oldStr[index] === newChar) {
 			if (index < 4) {
 				const wasCurved = (curved & (1 << index)) !== 0;
 				if (wasCurved) {
@@ -268,24 +292,28 @@ export default class MiddleLineTile extends TileType {
 					curved = curved - (1 << index);
 				} else {
 					// Transition straight to curved.
-					newChar = this.str[index];
+					newChar = oldStr[index];
 					curved = curved + (1 << index);
 				}
 			} else {
-				// Transition straight to not present.
+				// Transition straight to no present.
 				newChar = '0';
 			}
 		}
-		const newStr = this.str.slice(0, index) + newChar + this.str.slice(index + 1, 8) + curved.toString(16) + this.str.slice(9);
+		const newStr = oldStr.slice(0, index) + newChar + oldStr.slice(index + 1, 8) +
+			curved.toString(16) + stubs.toString(16);
 		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
 	}
 
 	// Determines the colour of a diagonal line.
 	getLineColor(port1, port2, colors) {
 		const thisIndex = (port1 - 2) / 4;
-		const orth2Index = (thisIndex + 1) % 4 + 4;
 		const str = this.str;
 		const thisColor = str[thisIndex];
+		if (thisColor === '0') {
+			return undefined;
+		}
+		const orth2Index = (thisIndex + 1) % 4 + 4;
 		const orth2Color = str[orth2Index];
 
 		if (orth2Color !== '0' && thisColor !== orth2Color) {
@@ -333,7 +361,7 @@ export default class MiddleLineTile extends TileType {
 	 * @param {number} lineWidthH The distance from left to right across a vertical line.
 	 * @param {number} lineWidthV The distance from top to bottom across a horizontal line.
 	 */
-	draw(context, tile, left, top, width, height, lineWidthH, lineWidthV, shear, generator) {
+	draw(context, tile, left, top, width, height, lineWidthH, lineWidthV, shear, generator, tileMap, cellX, cellY) {
 		const transform = coordinateTransform.bind(null, left, top, width, height, shear);
 		const CENTRE = Math.trunc(width / 2);
 		const MIDDLE = Math.trunc(height / 2);
@@ -380,7 +408,48 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.topX], portionV[shapes.topYLeft]));
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.topYRight]));
 			context.lineTo(...transform(LINE_RIGHT, 0));
-			context.fillStyle = generator.getColor(tile.getColor(2));
+			const color = tile.getColor(2);
+			if (
+				(this.stubs & 1) === 1 &&
+				(tileMap === undefined || (cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10)))
+			) {
+				if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
+					// Top-to-right has the same colour.
+					if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
+						// Left-to-top has the same colour too.
+						context.arcTo(
+							...transform(CENTRE, -gradient2 * lineWidthLR),
+							...transform(LINE_LEFT, 0),
+							lineWidthLR
+						);
+					} else {
+						context.arcTo(
+							...transform(LINE_LEFT, -gradient2 * lineWidthH),
+							...transform(LINE_LEFT, 0),
+							lineWidthLR
+						);
+					}
+				} else if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
+					// Left-to-top has the same colour.
+					context.arcTo(
+						...transform(LINE_RIGHT, -gradient2 * lineWidthH),
+						...transform(LINE_LEFT, 0),
+						lineWidthLR
+					);
+				} else {
+					context.bezierCurveTo(
+						...transform(LINE_RIGHT, -C * lineWidthLR),
+						...transform(CENTRE + C * lineWidthLR, -lineWidthLR),
+						...transform(CENTRE, -lineWidthLR)
+					);
+					context.bezierCurveTo(
+						...transform(CENTRE - C * lineWidthLR, -lineWidthLR),
+						...transform(LINE_LEFT, -C * lineWidthLR),
+						...transform(LINE_LEFT, 0)
+					);
+				}
+			}
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
@@ -391,7 +460,48 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.bottomX], portionV[shapes.bottomYLeft]));
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.bottomYRight]));
 			context.lineTo(...transform(LINE_RIGHT, height));
-			context.fillStyle = generator.getColor(tile.getColor(10));
+			const color = tile.getColor(10);
+			if (
+				(this.stubs & 4) === 4 &&
+				(tileMap === undefined || (cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2)))
+			) {
+				if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
+					// Bottom-to-left has the same colour.
+					if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
+						// Right-to-bottom has the same colour too.
+						context.arcTo(
+							...transform(CENTRE, height + gradient2 * lineWidthLR),
+							...transform(LINE_LEFT, height),
+							lineWidthLR
+						);
+					} else {
+						context.arcTo(
+							...transform(LINE_RIGHT, height + gradient2 * lineWidthH),
+							...transform(LINE_LEFT, height),
+							lineWidthLR
+						);
+					}
+				} else if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
+					// Right-to-bottom has the same colour.
+					context.arcTo(
+						...transform(LINE_LEFT, height + gradient2 * lineWidthH),
+						...transform(LINE_LEFT, height),
+						lineWidthLR
+					);
+				} else {
+					context.bezierCurveTo(
+						...transform(LINE_RIGHT, height + C * lineWidthLR),
+						...transform(CENTRE + C * lineWidthLR, height + lineWidthLR),
+						...transform(CENTRE, height + lineWidthLR)
+					);
+					context.bezierCurveTo(
+						...transform(CENTRE - C * lineWidthLR, height + lineWidthLR),
+						...transform(LINE_LEFT, height + C * lineWidthLR),
+						...transform(LINE_LEFT, height)
+					);
+				}
+			}
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
@@ -402,7 +512,48 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.leftXTop], portionV[shapes.leftY]));
 			context.lineTo(...transform(portionH[shapes.leftXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(0, LINE_BOTTOM));
-			context.fillStyle = generator.getColor(tile.getColor(14));
+			const color = tile.getColor(14);
+			if (
+				(this.stubs & 8) === 8 &&
+				(tileMap === undefined || (cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6)))
+			) {
+				if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
+					// Left-to-top has the same colour.
+					if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
+						// Bottom-to-left has the same colour too.
+						context.arcTo(
+							...transform(-lineWidthTB / gradient2, MIDDLE),
+							...transform(0, LINE_TOP),
+							lineWidthTB
+						);
+					} else {
+						context.arcTo(
+							...transform(-lineWidthV / gradient2, LINE_BOTTOM),
+							...transform(0, LINE_TOP),
+							lineWidthTB
+						);
+					}
+				} else if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
+					// Bottom-to-left has the same colour.
+					context.arcTo(
+						...transform(-lineWidthV / gradient2, LINE_TOP),
+						...transform(0, LINE_TOP),
+						lineWidthTB
+					);
+				} else {
+					context.bezierCurveTo(
+						...transform(-C * lineWidthTB, LINE_BOTTOM),
+						...transform(-lineWidthTB, MIDDLE + C * lineWidthTB),
+						...transform(-lineWidthTB, MIDDLE)
+					);
+					context.bezierCurveTo(
+						...transform(-lineWidthTB, MIDDLE - C * lineWidthTB),
+						...transform(-C * lineWidthTB, LINE_TOP),
+						...transform(0, LINE_TOP)
+					);
+				}
+			}
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
@@ -413,7 +564,48 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.rightXTop], portionV[shapes.rightY]));
 			context.lineTo(...transform(portionH[shapes.rightXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(width, LINE_BOTTOM));
-			context.fillStyle = generator.getColor(tile.getColor(6));
+			const color = tile.getColor(6);
+			if (
+				(this.stubs & 2) === 2 &&
+				(tileMap === undefined || (cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14)))
+			) {
+				if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
+					// Right-to-bottom has the same colour.
+					if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
+						// Top-to-right has the same colour too.
+						context.arcTo(
+							...transform(width + lineWidthTB / gradient2, MIDDLE),
+							...transform(width, LINE_TOP),
+							lineWidthTB
+						);
+					} else {
+						context.arcTo(
+							...transform(width + lineWidthV / gradient2, LINE_TOP),
+							...transform(width, LINE_TOP),
+							lineWidthTB
+						);
+					}
+				} else if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
+					// Top-to-right has the same colour.
+					context.arcTo(
+						...transform(width + lineWidthV / gradient2, LINE_BOTTOM),
+						...transform(width, LINE_TOP),
+						lineWidthTB
+					);
+				} else {
+					context.bezierCurveTo(
+						...transform(width + C * lineWidthTB, LINE_BOTTOM),
+						...transform(width + lineWidthTB, MIDDLE + C * lineWidthTB),
+						...transform(width + lineWidthTB, MIDDLE)
+					);
+					context.bezierCurveTo(
+						...transform(width + lineWidthTB, MIDDLE - C * lineWidthTB),
+						...transform(width + C * lineWidthTB, LINE_TOP),
+						...transform(width, LINE_TOP)
+					);
+				}
+			}
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 

@@ -26,6 +26,7 @@ export default function TruchetTiles() {
 		listenSlider('tiles-gap-probability', 'gapProbability');
 		listenSlider('tiles-grid-opacity', 'gridOpacity');
 		listenSlider('tiles-grid-color', 'gridColor');
+		listenSlider('tiles-overlap', 'overlap');
 
 		let editColorIndex = 0;
 		let designColorIndex = 0;
@@ -43,6 +44,10 @@ export default function TruchetTiles() {
 		}
 
 		drawPreview();
+
+		$(optionsDoc.getElementById('tiles-inventory-tab')).on('shown.bs.tab', function (event) {
+			drawPreview();
+		});
 
 		{
 			let mouseIsDown = false;
@@ -450,6 +455,9 @@ export default function TruchetTiles() {
 	this.strokeRatio1 = 0.25;
 	this.strokeRatio2 = 0.25;
 
+	// Length of line caps (0..0.5)
+	this.overlap = 0.25;
+
 	// Probability of a cell being left blank
 	this.gapProbability = 0;
 
@@ -495,7 +503,7 @@ export default function TruchetTiles() {
 
 TruchetTiles.prototype.animatable = {
 	'continuous': [
-		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'gapProbability',
+		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'overlap', 'gapProbability',
 		'colors', 'flowProbability',
 		'sideLength', 'cellAspect', 'gridColor', 'gridOpacity', 'gridWidth', 'shear',
 	],

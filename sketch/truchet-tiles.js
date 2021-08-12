@@ -40,6 +40,7 @@ export default function TruchetTiles() {
 		function drawPreview() {
 			const lineWidth1 = Math.round(Math.max(me.strokeRatio1 * previewWidth, 1));
 			const lineWidth2 = Math.round(Math.max(me.strokeRatio2 * previewHeight, 1));
+			designContext.clearRect(0, 0, previewWidth, previewHeight);
 			me.tileTypes[currentTileNum].drawPreview(designContext, previewWidth, previewHeight, lineWidth1, lineWidth2, me);
 		}
 

@@ -135,7 +135,6 @@ class TileType {
 	}
 
 	drawPreview(context, width, height, lineWidth1, lineWidth2, generator) {
-		context.clearRect(0, 0, width, height);
 		this.draw(context, this.preview, 0, 0, width, height, lineWidth1, lineWidth2, [0, 0, 0, 0], generator);
 	}
 

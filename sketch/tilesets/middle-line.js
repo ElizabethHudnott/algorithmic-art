@@ -256,7 +256,6 @@ export default class MiddleLineTile extends TileType {
 		lineWidth1 = Math.max(Math.round(lineWidth1 * innerWidth / width), 1);
 		lineWidth2 = Math.max(Math.round(lineWidth2 * innerHeight / height), 1);
 		context.fillStyle = '#999';
-		context.clearRect(0, 0, width, height);
 		context.fillRect(hMargin, vMargin, innerWidth, innerHeight);
 		this.draw(context, this.preview, hMargin, vMargin, innerWidth, innerHeight, lineWidth1, lineWidth2, [0, 0, 0, 0], generator);
 	}

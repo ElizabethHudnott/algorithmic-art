@@ -414,6 +414,7 @@ export default class MiddleLineTile extends TileType {
 					x, y
 				);
 				context.lineTo(...transform(LINE_RIGHT, 0));
+				context.bezierCurveTo(
 					...transform(LINE_RIGHT, C * LINE_BOTTOM),
 					...transform(C * LINE_RIGHT, LINE_BOTTOM),
 					...transform(0, LINE_BOTTOM)

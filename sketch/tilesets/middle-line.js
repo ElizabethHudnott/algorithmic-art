@@ -403,6 +403,145 @@ export default class MiddleLineTile extends TileType {
 		const LINE_BOTTOM = MIDDLE + lineWidthTB;
 		const portionV = [LINE_TOP, MIDDLE, LINE_BOTTOM];
 
+		if (leftToTop) {
+			context.beginPath();
+			context.moveTo(...transform(0, LINE_TOP));
+			const [x, y] = transform(LINE_LEFT, 0);
+			if ((this.curved & 8) === 8) {
+				context.bezierCurveTo(
+					...transform(C * LINE_LEFT, LINE_TOP),
+					...transform(LINE_LEFT, C * LINE_TOP),
+					x, y
+				);
+				context.lineTo(...transform(LINE_RIGHT, 0));
+					...transform(LINE_RIGHT, C * LINE_BOTTOM),
+					...transform(C * LINE_RIGHT, LINE_BOTTOM),
+					...transform(0, LINE_BOTTOM)
+				);
+			} else {
+				context.lineTo(x, y);
+				if (topToCentre) {
+					context.lineTo(...transform(LINE_LEFT, lineWidthH * gradient));
+				} else {
+					context.lineTo(...transform(LINE_RIGHT, 0));
+				}
+				if (leftToCentre) {
+					context.lineTo(...transform(lineWidthV / gradient, LINE_TOP));
+				} else if (bottomToLeft) {
+					context.lineTo(...transform((lineWidthV / 2) / gradient2, MIDDLE));
+				} else {
+					context.lineTo(...transform(0, LINE_BOTTOM));
+				}
+			}
+			context.fillStyle = generator.getColor(tile.getLineColor(14, 2));
+			context.fill();
+		}
+
+		if (bottomToLeft) {
+			context.beginPath();
+			context.moveTo(...transform(LINE_LEFT, height));
+			const [x, y] = transform(0, LINE_BOTTOM);
+			if ((this.curved & 4) === 4) {
+				context.bezierCurveTo(
+					...transform(LINE_LEFT, height - C * (height / 2 - lineWidthTB)),
+					...transform(C * LINE_LEFT, LINE_BOTTOM),
+					x, y
+				);
+				context.lineTo(...transform(0, LINE_TOP));
+				context.bezierCurveTo(
+					...transform(C * LINE_RIGHT, LINE_TOP),
+					...transform(LINE_RIGHT, height - C * (height / 2 + lineWidthTB)),
+					...transform(LINE_RIGHT, height),
+				);
+			} else {
+				context.lineTo(x, y);
+				if (leftToCentre) {
+					context.lineTo(...transform(lineWidthV / gradient, LINE_BOTTOM));
+				} else {
+					context.lineTo(...transform(0, LINE_TOP));
+				}
+				if (bottomToCentre) {
+					context.lineTo(...transform(LINE_LEFT, height - lineWidthH * gradient));
+				} else if (rightToBottom) {
+					context.lineTo(...transform(CENTRE, height - lineWidthH / 2 * gradient2));
+				} else {
+					context.lineTo(...transform(LINE_RIGHT, height));
+				}
+			}
+			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
+			context.fill();
+		}
+
+		if (rightToBottom) {
+			context.beginPath();
+			context.moveTo(...transform(width, LINE_BOTTOM));
+			const [x, y] = transform(LINE_RIGHT, height);
+			if ((this.curved & 2) === 2) {
+				context.bezierCurveTo(
+					...transform(width - C * (width / 2 - lineWidthLR), LINE_BOTTOM),
+					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthTB)),
+					x, y
+				);
+				context.lineTo(...transform(LINE_LEFT, height));
+				context.bezierCurveTo(
+					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthTB)),
+					...transform(width - C * (width / 2 + lineWidthLR), LINE_TOP),
+					...transform(width, LINE_TOP)
+				);
+			} else {
+				context.lineTo(x, y);
+				if (bottomToCentre) {
+					context.lineTo(...transform(LINE_RIGHT, height - lineWidthH * gradient));
+				} else {
+					context.lineTo(...transform(LINE_LEFT, height));
+				}
+				if (rightToCentre) {
+					context.lineTo(...transform(width - lineWidthV / gradient, LINE_BOTTOM));
+				} else if (topToRight) {
+					context.lineTo(...transform(width - (lineWidthV / 2) / gradient2, MIDDLE));
+				} else {
+					context.lineTo(...transform(width, LINE_TOP));
+				}
+			}
+			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
+			context.fill();
+		}
+
+		if (topToRight) {
+			context.beginPath()
+			context.moveTo(...transform(LINE_RIGHT, 0));
+			const [x, y] = transform(width, LINE_TOP);
+			if ((this.curved & 1) === 1) {
+				context.bezierCurveTo(
+					...transform(LINE_RIGHT, C * LINE_TOP),
+					...transform(width - C * (width / 2 - lineWidthLR), LINE_TOP),
+					x, y
+				);
+				context.lineTo(...transform(width, LINE_BOTTOM));
+				context.bezierCurveTo(
+					...transform(width - C * (width / 2 + lineWidthLR), LINE_BOTTOM),
+					...transform(LINE_LEFT, C * LINE_BOTTOM),
+					...transform(LINE_LEFT, 0)
+				);
+			} else {
+				context.lineTo(x, y);
+				if (rightToCentre) {
+					context.lineTo(...transform(width - lineWidthV / gradient, LINE_TOP));
+				} else {
+					context.lineTo(...transform(width, LINE_BOTTOM));
+				}
+				if (topToCentre) {
+					context.lineTo(...transform(LINE_RIGHT, lineWidthH * gradient));
+				} else if (leftToTop) {
+					context.lineTo(...transform(CENTRE, lineWidthH / 2 * gradient2));
+				} else {
+					context.lineTo(...transform(LINE_LEFT, 0));
+				}
+			}
+			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
+			context.fill();
+		}
+
 		if (topToCentre) {
 			context.beginPath();
 			context.moveTo(...transform(LINE_LEFT, 0));
@@ -611,146 +750,6 @@ export default class MiddleLineTile extends TileType {
 			context.fill();
 		}
 
-		if (leftToTop) {
-			context.beginPath();
-			context.moveTo(...transform(0, LINE_TOP));
-			const [x, y] = transform(LINE_LEFT, 0);
-			if ((this.curved & 8) === 8) {
-				context.bezierCurveTo(
-					...transform(C * LINE_LEFT, LINE_TOP),
-					...transform(LINE_LEFT, C * LINE_TOP),
-					x, y
-				);
-				context.lineTo(...transform(LINE_RIGHT, 0));
-				context.bezierCurveTo(
-					...transform(LINE_RIGHT, C * LINE_BOTTOM),
-					...transform(C * LINE_RIGHT, LINE_BOTTOM),
-					...transform(0, LINE_BOTTOM)
-				);
-			} else {
-				context.lineTo(x, y);
-				if (topToCentre) {
-					context.lineTo(...transform(LINE_LEFT, lineWidthH * gradient));
-				} else {
-					context.lineTo(...transform(LINE_RIGHT, 0));
-				}
-				if (leftToCentre) {
-					context.lineTo(...transform(lineWidthV / gradient, LINE_TOP));
-				} else if (bottomToLeft) {
-					context.lineTo(...transform((lineWidthV / 2) / gradient2, MIDDLE));
-				} else {
-					context.lineTo(...transform(0, LINE_BOTTOM));
-				}
-			}
-			context.fillStyle = generator.getColor(tile.getLineColor(14, 2));
-			context.fill();
-		}
-
-		if (bottomToLeft) {
-			context.beginPath();
-			context.moveTo(...transform(LINE_LEFT, height));
-			const [x, y] = transform(0, LINE_BOTTOM);
-			if ((this.curved & 4) === 4) {
-				context.bezierCurveTo(
-					...transform(LINE_LEFT, height - C * (height / 2 - lineWidthTB)),
-					...transform(C * LINE_LEFT, LINE_BOTTOM),
-					x, y
-				);
-				context.lineTo(...transform(0, LINE_TOP));
-				context.bezierCurveTo(
-					...transform(C * LINE_RIGHT, LINE_TOP),
-					...transform(LINE_RIGHT, height - C * (height / 2 + lineWidthTB)),
-					...transform(LINE_RIGHT, height),
-				);
-			} else {
-				context.lineTo(x, y);
-				if (leftToCentre) {
-					context.lineTo(...transform(lineWidthV / gradient, LINE_BOTTOM));
-				} else {
-					context.lineTo(...transform(0, LINE_TOP));
-				}
-				if (bottomToCentre) {
-					context.lineTo(...transform(LINE_LEFT, height - lineWidthH * gradient));
-				} else if (rightToBottom) {
-					context.lineTo(...transform(CENTRE, height - lineWidthH / 2 * gradient2));
-				} else {
-					context.lineTo(...transform(LINE_RIGHT, height));
-				}
-			}
-			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
-			context.fill();
-		}
-
-		if (rightToBottom) {
-			context.beginPath();
-			context.moveTo(...transform(width, LINE_BOTTOM));
-			const [x, y] = transform(LINE_RIGHT, height);
-			if ((this.curved & 2) === 2) {
-				context.bezierCurveTo(
-					...transform(width - C * (width / 2 - lineWidthLR), LINE_BOTTOM),
-					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthTB)),
-					x, y
-				);
-				context.lineTo(...transform(LINE_LEFT, height));
-				context.bezierCurveTo(
-					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthTB)),
-					...transform(width - C * (width / 2 + lineWidthLR), LINE_TOP),
-					...transform(width, LINE_TOP)
-				);
-			} else {
-				context.lineTo(x, y);
-				if (bottomToCentre) {
-					context.lineTo(...transform(LINE_RIGHT, height - lineWidthH * gradient));
-				} else {
-					context.lineTo(...transform(LINE_LEFT, height));
-				}
-				if (rightToCentre) {
-					context.lineTo(...transform(width - lineWidthV / gradient, LINE_BOTTOM));
-				} else if (topToRight) {
-					context.lineTo(...transform(width - (lineWidthV / 2) / gradient2, MIDDLE));
-				} else {
-					context.lineTo(...transform(width, LINE_TOP));
-				}
-			}
-			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
-			context.fill();
-		}
-
-		if (topToRight) {
-			context.beginPath()
-			context.moveTo(...transform(LINE_RIGHT, 0));
-			const [x, y] = transform(width, LINE_TOP);
-			if ((this.curved & 1) === 1) {
-				context.bezierCurveTo(
-					...transform(LINE_RIGHT, C * LINE_TOP),
-					...transform(width - C * (width / 2 - lineWidthLR), LINE_TOP),
-					x, y
-				);
-				context.lineTo(...transform(width, LINE_BOTTOM));
-				context.bezierCurveTo(
-					...transform(width - C * (width / 2 + lineWidthLR), LINE_BOTTOM),
-					...transform(LINE_LEFT, C * LINE_BOTTOM),
-					...transform(LINE_LEFT, 0)
-				);
-			} else {
-				context.lineTo(x, y);
-				if (rightToCentre) {
-					context.lineTo(...transform(width - lineWidthV / gradient, LINE_TOP));
-				} else {
-					context.lineTo(...transform(width, LINE_BOTTOM));
-				}
-				if (topToCentre) {
-					context.lineTo(...transform(LINE_RIGHT, lineWidthH * gradient));
-				} else if (leftToTop) {
-					context.lineTo(...transform(CENTRE, lineWidthH / 2 * gradient2));
-				} else {
-					context.lineTo(...transform(LINE_LEFT, 0));
-				}
-			}
-			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
-			context.fill();
-		}
-
-	}
+	} // end of method
 
 }

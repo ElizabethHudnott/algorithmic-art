@@ -180,7 +180,6 @@ export default class MiddleLineTile extends TileType {
 		}
 		super(connections, minConnections, maxConnections, checkSpecialConstraints);
 		this.curved = parseInt(str[8], 16);
-		this.stubs = parseInt(str[9], 16);
 		this.str = str;
 		this.preview = new Tile(this, defaultColors);
 	}
@@ -279,7 +278,6 @@ export default class MiddleLineTile extends TileType {
 		}
 		const oldStr = this.str;
 		let curved = this.curved;
-		let stubs = this.stubs;
 		// By default transition not present to straight or to a new colour.
 		let newChar = String(color + 1);
 		if (oldStr[index] !== '0' && oldStr[index] === newChar) {
@@ -299,8 +297,7 @@ export default class MiddleLineTile extends TileType {
 				newChar = '0';
 			}
 		}
-		const newStr = oldStr.slice(0, index) + newChar + oldStr.slice(index + 1, 8) +
-			curved.toString(16) + stubs.toString(16);
+		const newStr = oldStr.slice(0, index) + newChar + oldStr.slice(index + 1, 8) + curved.toString(16);
 		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
 	}
 
@@ -369,8 +366,10 @@ export default class MiddleLineTile extends TileType {
 		const gradient = height / width;
 		const gradient2 = (height + lineWidthV) / (width + lineWidthH);
 
-		const overlapX = generator.overlap * (width - lineWidthH);
-		const overlapY = generator.overlap * (height - lineWidthV);
+		const overlapTop = generator.overlap[0] * (height - lineWidthV);
+		const overlapRight = generator.overlap[1] * (width - lineWidthH);
+		const overlapBottom = generator.overlap[2] * (height - lineWidthV);
+		const overlapLeft = generator.overlap[3] * (width - lineWidthH);
 
 		const topToRight = this.str[0] !== '0';
 		const rightToBottom = this.str[1] !== '0';
@@ -380,15 +379,15 @@ export default class MiddleLineTile extends TileType {
 		const rightToCentre = this.str[5] !== '0';
 		const bottomToCentre = this.str[6] !== '0';
 		const leftToCentre = this.str[7] !== '0';
-		let topStub = this.stubs & 1;
-		let rightStub = this.stubs & 2;
-		let bottomStub = this.stubs & 4;
-		let leftStub = this.stubs & 8;
+		let topStub = true;
+		let rightStub = true;
+		let bottomStub = true;
+		let leftStub = true;
 		if (tileMap !== undefined) {
-			topStub &&= cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10);
-			rightStub &&= cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14);
-			bottomStub &&= cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2);
-			leftStub &&= cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6);
+			topStub = cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10);
+			rightStub = cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14);
+			bottomStub = cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2);
+			leftStub = cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6);
 		}
 
 		const matchingColors = [0, 0, 0, 0];
@@ -436,13 +435,13 @@ export default class MiddleLineTile extends TileType {
 					} else {
 						// Curved left, curved right or different colour
 						context.bezierCurveTo(
-							...transform(LINE_LEFT, -C * overlapY),
-							...transform(CENTRE - C * lineWidthLR, -overlapY),
-							...transform(CENTRE, -overlapY)
+							...transform(LINE_LEFT, -C * overlapTop),
+							...transform(CENTRE - C * lineWidthLR, -overlapTop),
+							...transform(CENTRE, -overlapTop)
 						);
 						context.bezierCurveTo(
-							...transform(CENTRE + C * lineWidthLR, -overlapY),
-							...transform(LINE_RIGHT, -C * overlapY),
+							...transform(CENTRE + C * lineWidthLR, -overlapTop),
+							...transform(LINE_RIGHT, -C * overlapTop),
 							...transform(LINE_RIGHT, 0)
 						);
 					}
@@ -633,13 +632,13 @@ export default class MiddleLineTile extends TileType {
 					);
 				} else {
 					context.bezierCurveTo(
-						...transform(LINE_RIGHT, -C * overlapY),
-						...transform(CENTRE + C * lineWidthLR, -overlapY),
-						...transform(CENTRE, -overlapY)
+						...transform(LINE_RIGHT, -C * overlapTop),
+						...transform(CENTRE + C * lineWidthLR, -overlapTop),
+						...transform(CENTRE, -overlapTop)
 					);
 					context.bezierCurveTo(
-						...transform(CENTRE - C * lineWidthLR, -overlapY),
-						...transform(LINE_LEFT, -C * overlapY),
+						...transform(CENTRE - C * lineWidthLR, -overlapTop),
+						...transform(LINE_LEFT, -C * overlapTop),
 						...transform(LINE_LEFT, 0)
 					);
 				}
@@ -682,13 +681,13 @@ export default class MiddleLineTile extends TileType {
 					);
 				} else {
 					context.bezierCurveTo(
-						...transform(LINE_RIGHT, height + C * overlapY),
-						...transform(CENTRE + C * lineWidthLR, height + overlapY),
-						...transform(CENTRE, height + overlapY)
+						...transform(LINE_RIGHT, height + C * overlapBottom),
+						...transform(CENTRE + C * lineWidthLR, height + overlapBottom),
+						...transform(CENTRE, height + overlapBottom)
 					);
 					context.bezierCurveTo(
-						...transform(CENTRE - C * lineWidthLR, height + overlapY),
-						...transform(LINE_LEFT, height + C * overlapY),
+						...transform(CENTRE - C * lineWidthLR, height + overlapBottom),
+						...transform(LINE_LEFT, height + C * overlapBottom),
 						...transform(LINE_LEFT, height)
 					);
 				}
@@ -731,13 +730,13 @@ export default class MiddleLineTile extends TileType {
 					);
 				} else {
 					context.bezierCurveTo(
-						...transform(-C * overlapX, LINE_BOTTOM),
-						...transform(-overlapX, MIDDLE + C * lineWidthTB),
-						...transform(-overlapX, MIDDLE)
+						...transform(-C * overlapLeft, LINE_BOTTOM),
+						...transform(-overlapLeft, MIDDLE + C * lineWidthTB),
+						...transform(-overlapLeft, MIDDLE)
 					);
 					context.bezierCurveTo(
-						...transform(-overlapX, MIDDLE - C * lineWidthTB),
-						...transform(-C * overlapX, LINE_TOP),
+						...transform(-overlapLeft, MIDDLE - C * lineWidthTB),
+						...transform(-C * overlapLeft, LINE_TOP),
 						...transform(0, LINE_TOP)
 					);
 				}
@@ -780,13 +779,13 @@ export default class MiddleLineTile extends TileType {
 					);
 				} else {
 					context.bezierCurveTo(
-						...transform(width + C * overlapX, LINE_BOTTOM),
-						...transform(width + overlapX, MIDDLE + C * lineWidthTB),
-						...transform(width + overlapX, MIDDLE)
+						...transform(width + C * overlapRight, LINE_BOTTOM),
+						...transform(width + overlapRight, MIDDLE + C * lineWidthTB),
+						...transform(width + overlapRight, MIDDLE)
 					);
 					context.bezierCurveTo(
-						...transform(width + overlapX, MIDDLE - C * lineWidthTB),
-						...transform(width + C * overlapX, LINE_TOP),
+						...transform(width + overlapRight, MIDDLE - C * lineWidthTB),
+						...transform(width + C * overlapRight, LINE_TOP),
 						...transform(width, LINE_TOP)
 					);
 				}

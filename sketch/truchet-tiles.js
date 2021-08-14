@@ -23,10 +23,20 @@ export default function TruchetTiles() {
 			});
 		}
 
+		function listenSliderArray(idPrefix, property, index) {
+			optionsDoc.getElementById(idPrefix + '-' + index).addEventListener('input', function (event) {
+				me[property][index] = parseFloat(this.value);
+				generateBackground(0);
+			});
+		}
+
 		listenSlider('tiles-gap-probability', 'gapProbability');
 		listenSlider('tiles-grid-opacity', 'gridOpacity');
 		listenSlider('tiles-grid-color', 'gridColor');
-		listenSlider('tiles-overlap', 'overlap');
+
+		for (let i = 0; i < 4; i++) {
+			listenSliderArray('tiles-overlap', 'overlap', i);
+		}
 
 		let editColorIndex = 0;
 		let designColorIndex = 0;
@@ -440,14 +450,14 @@ export default function TruchetTiles() {
 	});
 
 	this.tileTypes = [
-		new MiddleLineTile('000033300f', 3, 4, ConstraintLogic.TRUE),	// T-shape to the right
-		new MiddleLineTile('000004440f', 3, 4, ConstraintLogic.TRUE),	// T-shape downwards
-		new MiddleLineTile('000010110f', 3, 4, ConstraintLogic.TRUE),	// T-shape to the left
-		new MiddleLineTile('000022020f', 3, 4, ConstraintLogic.TRUE),	// T-shape upwards
-		new MiddleLineTile('100000001f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper right
-		new MiddleLineTile('020000002f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower right
-		new MiddleLineTile('003000004f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower left
-		new MiddleLineTile('000400008f', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
+		new MiddleLineTile('000033300', 3, 4, ConstraintLogic.TRUE),	// T-shape to the right
+		new MiddleLineTile('000004440', 3, 4, ConstraintLogic.TRUE),	// T-shape downwards
+		new MiddleLineTile('000010110', 3, 4, ConstraintLogic.TRUE),	// T-shape to the left
+		new MiddleLineTile('000022020', 3, 4, ConstraintLogic.TRUE),	// T-shape upwards
+		new MiddleLineTile('100000001', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper right
+		new MiddleLineTile('020000002', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower right
+		new MiddleLineTile('003000004', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, lower left
+		new MiddleLineTile('000400008', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
 	];
 
 	this.tileFrequencies = [6, 6, 6, 6, 6, 6, 6, 6];
@@ -457,7 +467,7 @@ export default function TruchetTiles() {
 	this.strokeRatio2 = 0.25;
 
 	// Length of line caps (0..0.5)
-	this.overlap = 0.25;
+	this.overlap = [0.25, 0.25, 0.25, 0.25];
 
 	// Probability of a cell being left blank
 	this.gapProbability = 0;

@@ -369,8 +369,8 @@ export default class MiddleLineTile extends TileType {
 		const gradient = height / width;
 		const gradient2 = (height + lineWidthV) / (width + lineWidthH);
 
-		const overlapX = generator.overlap * (width - lineWidthLR);
-		const overlapY = generator.overlap * (height - lineWidthTB);
+		const overlapX = generator.overlap * (width - lineWidthH);
+		const overlapY = generator.overlap * (height - lineWidthV);
 
 		const topToRight = this.str[0] !== '0';
 		const rightToBottom = this.str[1] !== '0';
@@ -380,6 +380,16 @@ export default class MiddleLineTile extends TileType {
 		const rightToCentre = this.str[5] !== '0';
 		const bottomToCentre = this.str[6] !== '0';
 		const leftToCentre = this.str[7] !== '0';
+		let topStub = this.stubs & 1;
+		let rightStub = this.stubs & 2;
+		let bottomStub = this.stubs & 4;
+		let leftStub = this.stubs & 8;
+		if (tileMap !== undefined) {
+			topStub &&= cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10);
+			rightStub &&= cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14);
+			bottomStub &&= cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2);
+			leftStub &&= cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6);
+		}
 
 		const matchingColors = [0, 0, 0, 0];
 		for (let i = 0; i < 4; i++) {
@@ -404,6 +414,7 @@ export default class MiddleLineTile extends TileType {
 		const portionV = [LINE_TOP, MIDDLE, LINE_BOTTOM];
 
 		if (leftToTop) {
+			const color = tile.getLineColor(14, 2);
 			context.beginPath();
 			context.moveTo(...transform(0, LINE_TOP));
 			const [x, y] = transform(LINE_LEFT, 0);
@@ -413,6 +424,29 @@ export default class MiddleLineTile extends TileType {
 					...transform(LINE_LEFT, C * LINE_TOP),
 					x, y
 				);
+
+				if (topStub) {
+					if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
+						// Curved left, not curved right, same colour
+						context.arcTo(
+							...transform(LINE_LEFT, -gradient2 * lineWidthH),
+							...transform(LINE_RIGHT, 0),
+							lineWidthLR
+						);
+					} else {
+						// Curved left, curved right or different colour
+						context.bezierCurveTo(
+							...transform(LINE_LEFT, -C * overlapY),
+							...transform(CENTRE - C * lineWidthLR, -overlapY),
+							...transform(CENTRE, -overlapY)
+						);
+						context.bezierCurveTo(
+							...transform(CENTRE + C * lineWidthLR, -overlapY),
+							...transform(LINE_RIGHT, -C * overlapY),
+							...transform(LINE_RIGHT, 0)
+						);
+					}
+				}
 				context.lineTo(...transform(LINE_RIGHT, 0));
 				context.bezierCurveTo(
 					...transform(LINE_RIGHT, C * LINE_BOTTOM),
@@ -424,6 +458,28 @@ export default class MiddleLineTile extends TileType {
 				if (topToCentre) {
 					context.lineTo(...transform(LINE_LEFT, lineWidthH * gradient));
 				} else {
+					if (topStub) {
+						if (tile.getLineColor(2, 6) === color) {
+							if ((this.curved & 1) === 0) {
+								// Not curved left, not curved right
+								context.arcTo(
+									...transform(CENTRE, -gradient2 * lineWidthLR),
+									...transform(LINE_RIGHT, 0),
+									lineWidthLR
+								);
+							} else {
+								// Not curved left, curved right
+								context.arcTo(
+									...transform(LINE_RIGHT, -gradient2 * lineWidthH),
+									...transform(LINE_RIGHT, 0),
+									lineWidthLR
+								);
+							}
+						} else if ((this.curved & 1) === 0) {
+							// Different colours
+
+						}
+					}
 					context.lineTo(...transform(LINE_RIGHT, 0));
 				}
 				if (leftToCentre) {
@@ -434,7 +490,7 @@ export default class MiddleLineTile extends TileType {
 					context.lineTo(...transform(0, LINE_BOTTOM));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.getLineColor(14, 2));
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
@@ -551,10 +607,7 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.topYRight]));
 			context.lineTo(...transform(LINE_RIGHT, 0));
 			const color = tile.getColor(2);
-			if (
-				(this.stubs & 1) === 1 &&
-				(tileMap === undefined || (cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10)))
-			) {
+			if (topStub) {
 				if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
 					// Top-to-right has the same colour.
 					if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
@@ -603,10 +656,7 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(LINE_RIGHT, portionV[shapes.bottomYRight]));
 			context.lineTo(...transform(LINE_RIGHT, height));
 			const color = tile.getColor(10);
-			if (
-				(this.stubs & 4) === 4 &&
-				(tileMap === undefined || (cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2)))
-			) {
+			if (bottomStub) {
 				if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
 					// Bottom-to-left has the same colour.
 					if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
@@ -655,10 +705,7 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.leftXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(0, LINE_BOTTOM));
 			const color = tile.getColor(14);
-			if (
-				(this.stubs & 8) === 8 &&
-				(tileMap === undefined || (cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6)))
-			) {
+			if (leftStub) {
 				if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
 					// Left-to-top has the same colour.
 					if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
@@ -707,10 +754,7 @@ export default class MiddleLineTile extends TileType {
 			context.lineTo(...transform(portionH[shapes.rightXBottom], LINE_BOTTOM));
 			context.lineTo(...transform(width, LINE_BOTTOM));
 			const color = tile.getColor(6);
-			if (
-				(this.stubs & 2) === 2 &&
-				(tileMap === undefined || (cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14)))
-			) {
+			if (rightStub) {
 				if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
 					// Right-to-bottom has the same colour.
 					if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {

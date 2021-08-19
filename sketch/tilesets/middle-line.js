@@ -364,7 +364,9 @@ export default class MiddleLineTile extends TileType {
 		const lineWidthLR = lineWidthH / 2;		// Half of the line width left or right
 		const lineWidthTB = lineWidthV / 2;		// Half of the line width top or bottom
 		const gradient = height / width;
-		const gradient2 = (height + lineWidthV) / (width + lineWidthH);
+		const longGradient = (height + lineWidthV) / (width + lineWidthH);
+		const shortGradient = (height - lineWidthV) / (width - lineWidthH);
+
 
 		const overlapTop = generator.overlap[0] * (height - lineWidthV);
 		const overlapRight = generator.overlap[1] * (width - lineWidthH);
@@ -428,7 +430,7 @@ export default class MiddleLineTile extends TileType {
 					if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
 						// Curved left, not curved right, same colour
 						context.arcTo(
-							...transform(LINE_LEFT, -gradient2 * lineWidthH),
+							...transform(LINE_LEFT, -shortGradient * lineWidthH),
 							...transform(LINE_RIGHT, 0),
 							lineWidthLR
 						);
@@ -458,25 +460,20 @@ export default class MiddleLineTile extends TileType {
 					context.lineTo(...transform(LINE_LEFT, lineWidthH * gradient));
 				} else {
 					if (topStub) {
-						if (tile.getLineColor(2, 6) === color) {
-							if ((this.curved & 1) === 0) {
-								// Not curved left, not curved right
-								context.arcTo(
-									...transform(CENTRE, -gradient2 * lineWidthLR),
-									...transform(LINE_RIGHT, 0),
-									lineWidthLR
-								);
-							} else {
-								// Not curved left, curved right
-								context.arcTo(
-									...transform(LINE_RIGHT, -gradient2 * lineWidthH),
-									...transform(LINE_RIGHT, 0),
-									lineWidthLR
-								);
-							}
-						} else if ((this.curved & 1) === 0) {
-							// Different colours
-
+						if ((this.curved & 1) === 0) {
+							// Not curved left, not curved right
+							context.arcTo(
+								...transform(CENTRE, -shortGradient * lineWidthLR),
+								...transform(LINE_RIGHT, 0),
+								lineWidthLR
+							);
+						} else {
+							// Not curved left, curved right
+							context.arcTo(
+								...transform(LINE_RIGHT, -shortGradient * lineWidthH),
+								...transform(LINE_RIGHT, 0),
+								lineWidthLR * 0.9
+							);
 						}
 					}
 					context.lineTo(...transform(LINE_RIGHT, 0));
@@ -484,7 +481,7 @@ export default class MiddleLineTile extends TileType {
 				if (leftToCentre) {
 					context.lineTo(...transform(lineWidthV / gradient, LINE_TOP));
 				} else if (bottomToLeft) {
-					context.lineTo(...transform((lineWidthV / 2) / gradient2, MIDDLE));
+					context.lineTo(...transform((lineWidthV / 2) / longGradient, MIDDLE));
 				} else {
 					context.lineTo(...transform(0, LINE_BOTTOM));
 				}
@@ -494,6 +491,7 @@ export default class MiddleLineTile extends TileType {
 		}
 
 		if (bottomToLeft) {
+			const color = tile.getLineColor(10, 14);
 			context.beginPath();
 			context.moveTo(...transform(LINE_LEFT, height));
 			const [x, y] = transform(0, LINE_BOTTOM);
@@ -503,6 +501,28 @@ export default class MiddleLineTile extends TileType {
 					...transform(C * LINE_LEFT, LINE_BOTTOM),
 					x, y
 				);
+				if (leftStub) {
+					if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
+						// Curved bottom, not curved top, same colour
+						context.arcTo(
+							...transform(-lineWidthV / shortGradient, LINE_BOTTOM),
+							...transform(0, LINE_TOP),
+							lineWidthTB
+						);
+					} else {
+						// Curved bottom, curved top or different colour
+						context.bezierCurveTo(
+							...transform(-C * overlapLeft, LINE_BOTTOM),
+							...transform(-overlapLeft, MIDDLE + C * lineWidthTB),
+							...transform(-overlapLeft, MIDDLE)
+						);
+						context.bezierCurveTo(
+							...transform(-overlapLeft, MIDDLE - C * lineWidthTB),
+							...transform(-C * overlapLeft, LINE_TOP),
+							...transform(0, LINE_TOP)
+						);
+					}
+				}
 				context.lineTo(...transform(0, LINE_TOP));
 				context.bezierCurveTo(
 					...transform(C * LINE_RIGHT, LINE_TOP),
@@ -514,21 +534,39 @@ export default class MiddleLineTile extends TileType {
 				if (leftToCentre) {
 					context.lineTo(...transform(lineWidthV / gradient, LINE_BOTTOM));
 				} else {
+					if (leftStub) {
+						if ((this.curved & 8) === 0) {
+							// Not curved top, not curved bottom
+							context.arcTo(
+								...transform(-lineWidthTB / shortGradient, MIDDLE),
+								...transform(0, LINE_TOP),
+								lineWidthTB
+							);
+						} else {
+							// Curved top, not curved bottom
+							context.arcTo(
+								...transform(-lineWidthV / shortGradient, LINE_TOP),
+								...transform(0, LINE_TOP),
+								lineWidthTB * 0.9
+							);
+						}
+					}
 					context.lineTo(...transform(0, LINE_TOP));
 				}
 				if (bottomToCentre) {
 					context.lineTo(...transform(LINE_LEFT, height - lineWidthH * gradient));
 				} else if (rightToBottom) {
-					context.lineTo(...transform(CENTRE, height - lineWidthH / 2 * gradient2));
+					context.lineTo(...transform(CENTRE, height - lineWidthH / 2 * longGradient));
 				} else {
 					context.lineTo(...transform(LINE_RIGHT, height));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.getLineColor(10, 14));
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
 		if (rightToBottom) {
+			const color = tile.getLineColor(6, 10);
 			context.beginPath();
 			context.moveTo(...transform(width, LINE_BOTTOM));
 			const [x, y] = transform(LINE_RIGHT, height);
@@ -538,6 +576,29 @@ export default class MiddleLineTile extends TileType {
 					...transform(LINE_RIGHT, height - C * (height / 2 - lineWidthTB)),
 					x, y
 				);
+
+				if (bottomStub) {
+					if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
+						// Curved right, not curved left, same colour
+						context.arcTo(
+							...transform(LINE_RIGHT, height + shortGradient * lineWidthH),
+							...transform(LINE_LEFT, height),
+							lineWidthLR
+						);
+					} else {
+						// Curved left, curved right or different colour
+						context.bezierCurveTo(
+							...transform(LINE_RIGHT, height + C * overlapBottom),
+							...transform(CENTRE + C * lineWidthLR, height + overlapBottom),
+							...transform(CENTRE, height + overlapBottom)
+						);
+						context.bezierCurveTo(
+							...transform(CENTRE - C * lineWidthLR, height + overlapBottom),
+							...transform(LINE_LEFT, height + C * overlapBottom),
+							...transform(LINE_LEFT, height)
+						);
+					}
+				}
 				context.lineTo(...transform(LINE_LEFT, height));
 				context.bezierCurveTo(
 					...transform(LINE_LEFT, height - C * (height / 2 + lineWidthTB)),
@@ -549,21 +610,39 @@ export default class MiddleLineTile extends TileType {
 				if (bottomToCentre) {
 					context.lineTo(...transform(LINE_RIGHT, height - lineWidthH * gradient));
 				} else {
+					if (bottomStub) {
+						if ((this.curved & 4) === 0) {
+							// Not curved left, not curved right
+							context.arcTo(
+								...transform(CENTRE, height + shortGradient * lineWidthLR),
+								...transform(LINE_LEFT, height),
+								lineWidthLR
+							);
+						} else {
+							// Curved left, not curved right
+							context.arcTo(
+								...transform(LINE_LEFT, height + shortGradient * lineWidthH),
+								...transform(LINE_LEFT, height),
+								lineWidthLR * 0.9
+							);
+						}
+					}
 					context.lineTo(...transform(LINE_LEFT, height));
 				}
 				if (rightToCentre) {
 					context.lineTo(...transform(width - lineWidthV / gradient, LINE_BOTTOM));
 				} else if (topToRight) {
-					context.lineTo(...transform(width - (lineWidthV / 2) / gradient2, MIDDLE));
+					context.lineTo(...transform(width - (lineWidthV / 2) / longGradient, MIDDLE));
 				} else {
 					context.lineTo(...transform(width, LINE_TOP));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.getLineColor(6, 10));
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
 		if (topToRight) {
+			const color = tile.getLineColor(2, 6);
 			context.beginPath()
 			context.moveTo(...transform(LINE_RIGHT, 0));
 			const [x, y] = transform(width, LINE_TOP);
@@ -573,6 +652,28 @@ export default class MiddleLineTile extends TileType {
 					...transform(width - C * (width / 2 - lineWidthLR), LINE_TOP),
 					x, y
 				);
+				if (rightStub) {
+					if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
+						// Curved top, not curved bottom, same colour
+						context.arcTo(
+							...transform(width + lineWidthV / shortGradient, LINE_TOP),
+							...transform(width, LINE_BOTTOM),
+							lineWidthTB
+						);
+					} else {
+						// Curved top, curved bottom or different colour
+						context.bezierCurveTo(
+							...transform(width + C * overlapRight, LINE_TOP),
+							...transform(width + overlapRight, MIDDLE - C * lineWidthTB),
+							...transform(width + overlapRight, MIDDLE)
+						);
+						context.bezierCurveTo(
+							...transform(width + overlapRight, MIDDLE + C * lineWidthTB),
+							...transform(width + C * overlapRight, LINE_BOTTOM),
+							...transform(width, LINE_BOTTOM)
+						);
+					}
+				}
 				context.lineTo(...transform(width, LINE_BOTTOM));
 				context.bezierCurveTo(
 					...transform(width - C * (width / 2 + lineWidthLR), LINE_BOTTOM),
@@ -584,17 +685,34 @@ export default class MiddleLineTile extends TileType {
 				if (rightToCentre) {
 					context.lineTo(...transform(width - lineWidthV / gradient, LINE_TOP));
 				} else {
+					if (rightStub) {
+						if ((this.curved & 2) === 0) {
+							// Not curved top, not curved bottom
+							context.arcTo(
+								...transform(width + lineWidthTB / shortGradient, MIDDLE),
+								...transform(width, LINE_BOTTOM),
+								lineWidthTB
+							);
+						} else {
+							// Curved bottom, not curved top
+							context.arcTo(
+								...transform(width + lineWidthV / shortGradient, LINE_BOTTOM),
+								...transform(width, LINE_BOTTOM),
+								lineWidthTB * 0.9
+							);
+						}
+					}
 					context.lineTo(...transform(width, LINE_BOTTOM));
 				}
 				if (topToCentre) {
 					context.lineTo(...transform(LINE_RIGHT, lineWidthH * gradient));
 				} else if (leftToTop) {
-					context.lineTo(...transform(CENTRE, lineWidthH / 2 * gradient2));
+					context.lineTo(...transform(CENTRE, lineWidthH / 2 * longGradient));
 				} else {
 					context.lineTo(...transform(LINE_LEFT, 0));
 				}
 			}
-			context.fillStyle = generator.getColor(tile.getLineColor(2, 6));
+			context.fillStyle = generator.getColor(color);
 			context.fill();
 		}
 
@@ -612,13 +730,13 @@ export default class MiddleLineTile extends TileType {
 					if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
 						// Left-to-top has the same colour too.
 						context.arcTo(
-							...transform(CENTRE, -gradient2 * lineWidthLR),
+							...transform(CENTRE, -shortGradient * lineWidthLR),
 							...transform(LINE_LEFT, 0),
 							lineWidthLR
 						);
 					} else {
 						context.arcTo(
-							...transform(LINE_LEFT, -gradient2 * lineWidthH),
+							...transform(LINE_LEFT, -shortGradient * lineWidthH),
 							...transform(LINE_LEFT, 0),
 							lineWidthLR
 						);
@@ -626,7 +744,7 @@ export default class MiddleLineTile extends TileType {
 				} else if ((this.curved & 8) === 0 && tile.getLineColor(14, 2) === color) {
 					// Left-to-top has the same colour.
 					context.arcTo(
-						...transform(LINE_RIGHT, -gradient2 * lineWidthH),
+						...transform(LINE_RIGHT, -shortGradient * lineWidthH),
 						...transform(LINE_LEFT, 0),
 						lineWidthLR
 					);
@@ -661,13 +779,13 @@ export default class MiddleLineTile extends TileType {
 					if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
 						// Right-to-bottom has the same colour too.
 						context.arcTo(
-							...transform(CENTRE, height + gradient2 * lineWidthLR),
+							...transform(CENTRE, height + shortGradient * lineWidthLR),
 							...transform(LINE_LEFT, height),
 							lineWidthLR
 						);
 					} else {
 						context.arcTo(
-							...transform(LINE_RIGHT, height + gradient2 * lineWidthH),
+							...transform(LINE_RIGHT, height + shortGradient * lineWidthH),
 							...transform(LINE_LEFT, height),
 							lineWidthLR
 						);
@@ -675,7 +793,7 @@ export default class MiddleLineTile extends TileType {
 				} else if ((this.curved & 2) === 0 && tile.getLineColor(6, 10) === color) {
 					// Right-to-bottom has the same colour.
 					context.arcTo(
-						...transform(LINE_LEFT, height + gradient2 * lineWidthH),
+						...transform(LINE_LEFT, height + shortGradient * lineWidthH),
 						...transform(LINE_LEFT, height),
 						lineWidthLR
 					);
@@ -710,13 +828,13 @@ export default class MiddleLineTile extends TileType {
 					if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
 						// Bottom-to-left has the same colour too.
 						context.arcTo(
-							...transform(-lineWidthTB / gradient2, MIDDLE),
+							...transform(-lineWidthTB / shortGradient, MIDDLE),
 							...transform(0, LINE_TOP),
 							lineWidthTB
 						);
 					} else {
 						context.arcTo(
-							...transform(-lineWidthV / gradient2, LINE_BOTTOM),
+							...transform(-lineWidthV / shortGradient, LINE_BOTTOM),
 							...transform(0, LINE_TOP),
 							lineWidthTB
 						);
@@ -724,7 +842,7 @@ export default class MiddleLineTile extends TileType {
 				} else if ((this.curved & 4) === 0 && tile.getLineColor(10, 14) === color) {
 					// Bottom-to-left has the same colour.
 					context.arcTo(
-						...transform(-lineWidthV / gradient2, LINE_TOP),
+						...transform(-lineWidthV / shortGradient, LINE_TOP),
 						...transform(0, LINE_TOP),
 						lineWidthTB
 					);
@@ -759,13 +877,13 @@ export default class MiddleLineTile extends TileType {
 					if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
 						// Top-to-right has the same colour too.
 						context.arcTo(
-							...transform(width + lineWidthTB / gradient2, MIDDLE),
+							...transform(width + lineWidthTB / shortGradient, MIDDLE),
 							...transform(width, LINE_TOP),
 							lineWidthTB
 						);
 					} else {
 						context.arcTo(
-							...transform(width + lineWidthV / gradient2, LINE_TOP),
+							...transform(width + lineWidthV / shortGradient, LINE_TOP),
 							...transform(width, LINE_TOP),
 							lineWidthTB
 						);
@@ -773,7 +891,7 @@ export default class MiddleLineTile extends TileType {
 				} else if ((this.curved & 1) === 0 && tile.getLineColor(2, 6) === color) {
 					// Top-to-right has the same colour.
 					context.arcTo(
-						...transform(width + lineWidthV / gradient2, LINE_BOTTOM),
+						...transform(width + lineWidthV / shortGradient, LINE_BOTTOM),
 						...transform(width, LINE_TOP),
 						lineWidthTB
 					);

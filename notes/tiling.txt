@@ -13,6 +13,11 @@ Anchor points:
 13				7
 12	11	10	9	8
 
+Different line widths on left and right sides of a tile, top and bottom?
+	Min and max line widths
+	Line width on the right side of one tile matches the line width on the left side of the next
+		Or not?
+
 3 or 4 lines meeting at the corners of several tiles
 	Use probabilities to decide whether to use 1, 2, 3 or 4 colours (flow / don't flow)
 
@@ -48,6 +53,7 @@ Choose a selection of tiles
 Tile Sets Variants
 	Draw / Don't draw path outlines
 	Round off the ends of lines by drawing into a neighbouring cell (or don't)
+		Or have square overlapping areas
 
 Colour Assignment
 	Colours don't necessarily have to flow, can be contrasting instead
@@ -66,7 +72,6 @@ Colour Assignment
 			* N must be at least 2 if the flow probability isn't 1
 	"A or B" style connections
 		E.g. For Tile Set 7 it should be able to connect a semicircle with just one quarter circle
-	Option to have the colours in the palette organized into contrasting pairs so the same colours always contrast each other.
 
 Filled Tile Sets
 	Background colour flows like the other colours (or isn't used at all)

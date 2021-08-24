@@ -623,17 +623,10 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	shear[3] = this.shear[3] * cellHeight - shear[2];
 	let minX = -(shear[0] + shear[1]) * cellsDownCanvas;
 	let minY = -(shear[2] + shear[3]) * cellsAcrossCanvas;
-	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth) + 1;
-	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight) + 1;
-	minX = Math.min(minX, 0);
-	minY = Math.min(minY, 0);
-	//Chevrons
-	if (shear[0] > 0) {
-		minX--;
-	}
-	if (shear[2] > 0) {
-		minY--;
-	}
+	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth) + 2;
+	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight) + 2;
+	minX = Math.min(minX, -cellWidth);
+	minY = Math.min(minY, -cellHeight);
 
 	const tileFrequencies = this.tileFrequencies;
 	let tileFrequenciesTotal = 0;

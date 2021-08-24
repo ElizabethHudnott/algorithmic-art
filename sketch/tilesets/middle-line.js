@@ -1,5 +1,15 @@
-import {TileType, Tile, BLANK_TILE, coordinateTransform, Placement, tileMapLookup} from './common.js';
+import {TileType, Tile, BLANK_TILE, coordinateTransform, Placement, Transform, tileMapLookup} from './common.js';
 const C = 0.551915024494;
+
+const strTransform = new Array(8);
+strTransform[Transform.ID]	= 			[0, 1, 2, 3, 4, 5, 6, 7];
+strTransform[Transform.FLIP_H] = 		[3, 2, 1, 0, 4, 7, 6, 5];
+strTransform[Transform.FLIP_V] =		[1, 0, 3, 2, 6, 5, 4, 7];
+strTransform[Transform.FlIP_B] =		[2, 3, 0, 1, 6, 7, 4, 5];
+strTransform[Transform.ROTATE] =		[3, 0, 1, 2, 7, 4, 5, 6];
+strTransform[Transform.ROT_FLIP_H] =	[2, 1, 0, 3, 7, 6, 5, 4];
+strTransform[Transform.ROT_FLIP_V] =	[0, 3, 2, 1, 5, 4, 7, 6];
+strTransform[Transform.ROT_FLIP_B] =	[1, 2, 3, 0, 5, 6, 7, 4];
 
 class ShapeSet {
 	constructor(top, right, bottom, left) {
@@ -301,6 +311,31 @@ export default class MiddleLineTile extends TileType {
 		return new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
 	}
 
+	transform(transform, transformedTypes) {
+		const transformData = strTransform[transform];
+		const str = this.str;
+		let newStr = '';
+		let curved = 0;
+		for (let i = 0; i < 4; i++) {
+			const originalIndex = transformData[i];
+			newStr += str[originalIndex];
+			const wasCurved = (this.curved & (1 << originalIndex)) !== 0;
+			curved |= wasCurved << i;
+		}
+		for (let i = 4; i < 8; i++) {
+			const originalIndex = transformData[i];
+			newStr += str[originalIndex];
+		}
+		newStr += curved.toString(16);
+		const extendedStr = newStr + this.minConnections + this.maxConnections + Number(this.checkSpecialConstraints);
+		let transformedType = transformedTypes.get(extendedStr);
+		if (transformedType === undefined) {
+			transformedType = new MiddleLineTile(newStr, this.minConnections, this.maxConnections, this.checkSpecialConstraints);
+			transformedTypes.set(extendedStr, transformedType);
+		}
+		return transformedType;
+	}
+
 	// Determines the colour of a diagonal line.
 	getLineColor(port1, port2, colors) {
 		const thisIndex = (port1 - 2) / 4;
@@ -386,10 +421,14 @@ export default class MiddleLineTile extends TileType {
 		let bottomStub = true;
 		let leftStub = true;
 		if (tileMap !== undefined) {
-			topStub = cellY > 0 && !tileMap[cellY - 1][cellX].hasPort(10);
-			rightStub = cellX < tileMap[0].length - 1 && !tileMap[cellY][cellX + 1].hasPort(14);
-			bottomStub = cellY < tileMap.length - 1 && !tileMap[cellY + 1][cellX].hasPort(2);
-			leftStub = cellX > 0 && !tileMap[cellY][cellX - 1].hasPort(6);
+			const maxX = tileMap[0].length - 1;
+			const maxY = tileMap.length - 1;
+			const interiorX = cellX > 0 && cellX < maxX;
+			const interiorY = cellY > 0 && cellY < maxY;
+			topStub = interiorY && !tileMap[cellY - 1][cellX].hasPort(10);
+			rightStub = interiorX && !tileMap[cellY][cellX + 1].hasPort(14);
+			bottomStub = interiorY && !tileMap[cellY + 1][cellX].hasPort(2);
+			leftStub = interiorX && !tileMap[cellY][cellX - 1].hasPort(6);
 		}
 
 		const matchingColors = [0, 0, 0, 0];

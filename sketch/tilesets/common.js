@@ -40,6 +40,17 @@ const ConstraintLogic = Object.freeze({
 	DONT_CARE: 2,
 });
 
+const Transform = Object.freeze({
+	ID: 0,
+	FLIP_H: 1,
+	FLIP_B: 2,
+	FLIP_V: 3,
+	ROT_FLIP_H: 4,
+	ROT_FLIP_B: 5,
+	ROT_FLIP_V: 6,
+	ROTATE: 7,
+});
+
 function tileMapLookup(map, x, y, width, height) {
 	if (x < 0 || x >= width || y < 0 || y >= height) {
 		return [undefined, Placement.OFF_SCREEN];
@@ -289,5 +300,5 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 
 export {
 	TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile,
-	coordinateTransform, Placement, ConstraintLogic, tileMapLookup
+	coordinateTransform, Placement, ConstraintLogic, Transform, tileMapLookup
 };

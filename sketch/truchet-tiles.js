@@ -252,6 +252,56 @@ export default function TruchetTiles() {
 			generateBackground(0);
 		});
 
+		function parseGridPattern(input, property) {
+			if (!input.checkValidity()) {
+				return;
+			}
+			const str = input.value.trim();
+			const values = [];
+			if (str === '') {
+				values.push(1);
+			} else {
+				let i = 0;
+				do {
+					let char = str[i];
+					if (char === '0') {
+						values.push(0);
+						i++;
+						continue;
+					}
+					const sign = char === '+' ? 1 : -1;
+					i++;
+					char = str[i];
+					if (char >= '1' && char <= '9') {
+						let magnitude = '';
+						do {
+							magnitude += char;
+							i++;
+							char = str[i];
+						} while (char >= '0' && char <= '9');
+						let j = magnitude.length - 1;
+						while (magnitude[j] === '0') {
+							i--;
+							j--;
+						}
+						values.push(sign * parseInt(magnitude) * 10 ** -magnitude.length);
+					} else {
+						values.push(sign);
+					}
+				} while (i < str.length);
+			}
+			me[property] = values;
+			generateBackground(0);
+		}
+
+		optionsDoc.getElementById('tiles-grid-row-pattern').addEventListener('input', function (event) {
+			parseGridPattern(this, 'shearXMultipliers');
+		});
+
+		optionsDoc.getElementById('tiles-grid-col-pattern').addEventListener('input', function (event) {
+			parseGridPattern(this, 'shearYMultipliers');
+		});
+
 		optionsDoc.getElementById('tiles-color-mode').addEventListener('input', function (event) {
 			const section = document.getElementById('tiles-color-flow');
 			if (this.value === 'r') {
@@ -510,6 +560,9 @@ export default function TruchetTiles() {
 	 */
 	this.shear = [0, 0, 0, 0];
 
+	this.shearXMultipliers = [1];
+	this.shearYMultipliers = [1];
+
 }
 
 TruchetTiles.prototype.animatable = {
@@ -517,6 +570,7 @@ TruchetTiles.prototype.animatable = {
 		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'overlap', 'gapProbability',
 		'colors', 'flowProbability',
 		'sideLength', 'cellAspect', 'gridColor', 'gridOpacity', 'gridWidth', 'shear',
+		'shearXMultipliers', 'shearYMultipliers',
 	],
 	'stepped': [
 		'tileTypes',
@@ -621,8 +675,16 @@ TruchetTiles.prototype.generate = function* (context, canvasWidth, canvasHeight,
 	shear[1] = this.shear[1] * cellWidth - shear[0];
 	shear[2] = this.shear[2] * cellHeight;
 	shear[3] = this.shear[3] * cellHeight - shear[2];
-	let minX = -(shear[0] + shear[1]) * cellsDownCanvas;
-	let minY = -(shear[2] + shear[3]) * cellsAcrossCanvas;
+	const totalShearX = shear[0] + shear[1];
+	let minX = 0;
+	for (let j = 0; j < cellsDownCanvas; j++) {
+		minX -= totalShearX * this.shearXMultipliers[j % this.shearXMultipliers.length];
+	}
+	const totalShearY = shear[2] + shear[3];
+	let minY = 0;
+	for (let i = 0; i < cellsAcrossCanvas; i++) {
+		minY -= totalShearY * this.shearYMultipliers[i % this.shearYMultipliers.length];
+	}
 	cellsAcrossCanvas += Math.ceil(Math.abs(minX) / cellWidth) + 2;
 	cellsDownCanvas += Math.ceil(Math.abs(minY) / cellHeight) + 2;
 	minX = Math.min(minX, -cellWidth);
@@ -859,59 +921,90 @@ TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHe
 	const cellsAcrossCanvas = tileMap[0].length;
 	const totalShearX = shear[0] + shear[1];
 	const totalShearY = shear[2] + shear[3];
-	const lineWidth1 = Math.max(Math.round(this.strokeRatio1 * cellWidth), 1);
-	const lineWidth2 = Math.max(Math.round(this.strokeRatio2 * cellHeight), 1);
+	const lineWidthH = Math.max(Math.round(this.strokeRatio1 * cellWidth), 1);
+	const lineWidthV = Math.max(Math.round(this.strokeRatio2 * cellHeight), 1);
+	const localShear = [0, 0, 0, 0];
+	let sumShearX = 0, sumShearY = 0;
 
 	for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 		const tileMapRow = tileMap[cellY];
 		if (tileMapRow === undefined) {
 			break;
 		}
+		const shearXMultiplier = this.shearXMultipliers[cellY % this.shearXMultipliers.length];
+		localShear[0] = shear[0] * shearXMultiplier;
+		localShear[1] = shear[1] * shearXMultiplier;
+
+		sumShearY = 0;
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-			const x = minX + cellX * cellWidth + cellY * totalShearX;
-			const y = minY + cellY * cellHeight + cellX * totalShearY;
+			const shearYMultiplier = this.shearYMultipliers[cellX % this.shearYMultipliers.length];
+			localShear[2] = shear[2] * shearYMultiplier;
+			localShear[3] = shear[3] * shearYMultiplier;
+
+			const x = minX + cellX * cellWidth + sumShearX;
+			const y = minY + cellY * cellHeight + sumShearY;
 			const tile = tileMapRow[cellX];
 			if (tile === undefined) {
 				break;
 			}
-			tile.draw(context, x, y, cellWidth, cellHeight, lineWidth1, lineWidth2, shear, this, tileMap, cellX, cellY);
+			tile.draw(context, x, y, cellWidth, cellHeight, lineWidthH, lineWidthV, localShear, this, tileMap, cellX, cellY);
+			sumShearY += totalShearY * shearYMultiplier;
 		}
+		sumShearX += totalShearX * shearXMultiplier;
 	}
 
 	if (this.gridWidth > 0) {
 		// TODO handle different anchor points
 		context.beginPath();
-		const halfLineWidth1 = lineWidth1 / 2;
-		const halfLineWidth2 = lineWidth2 / 2;
 		const halfCellWidth = cellWidth / 2;
 		const halfCellHeight = cellHeight / 2;
 		context.lineWidth = this.gridWidth;
 		if (this.gridWidth % 2 === 1) {
 			context.translate(0.5, 0.5);
 		}
+		// Horizontal lines
+		sumShearX = 0;
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
-			let x = Math.round(minX + cellY * totalShearX);
+			const shearXMultiplier = this.shearXMultipliers[cellY % this.shearXMultipliers.length];
+			localShear[0] = shear[0] * shearXMultiplier;
+			localShear[1] = shear[1] * shearXMultiplier;
+			sumShearY = 0;
+			let x = Math.round(minX + sumShearX);
 			let y = Math.round(minY + (cellY + 1) * cellHeight);
 			context.moveTo(x, y);
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
-				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
-				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth - halfLineWidth1, cellHeight));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, halfCellWidth + halfLineWidth1, cellHeight));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
+				const shearYMultiplier = this.shearYMultipliers[cellX % this.shearYMultipliers.length];
+				localShear[2] = shear[2] * shearYMultiplier;
+				localShear[3] = shear[3] * shearYMultiplier;
+				x = minX + cellX * cellWidth + sumShearX;
+				y = minY + cellY * cellHeight + sumShearY;
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, halfCellWidth, cellHeight));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight));
+				sumShearY += totalShearY * shearYMultiplier;
 			}
+			sumShearX += totalShearX * shearXMultiplier;
 		}
+		// Vertical lines
+		sumShearY = 0;
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
+			const shearYMultiplier = this.shearYMultipliers[cellX % this.shearYMultipliers.length];
+			localShear[2] = shear[2] * shearYMultiplier;
+			localShear[3] = shear[3] * shearYMultiplier;
+			sumShearX = 0;
 			let x = Math.round(minX + (cellX + 1) * cellWidth);
-			let y = Math.round(minY + cellX * totalShearY);
+			let y = Math.round(minY + sumShearY);
 			context.moveTo(x, y);
 			for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
-				x = Math.round(minX + cellX * cellWidth + cellY * totalShearX);
-				y = Math.round(minY + cellY * cellHeight + cellX * totalShearY);
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight - halfLineWidth2));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, halfCellHeight + halfLineWidth2));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, shear, cellWidth, cellHeight));
+				const shearXMultiplier = this.shearXMultipliers[cellY % this.shearXMultipliers.length];
+				localShear[0] = shear[0] * shearXMultiplier;
+				localShear[1] = shear[1] * shearXMultiplier;
+				x = minX + cellX * cellWidth + sumShearX;
+				y = minY + cellY * cellHeight + sumShearY;
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, halfCellHeight));
+				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight));
+				sumShearX += totalShearX * shearXMultiplier;
 			}
+			sumShearY += totalShearY * shearYMultiplier;
 		}
 		const gridIntensity = this.gridColor;
 		context.strokeStyle = rgba(gridIntensity, gridIntensity, gridIntensity, this.gridOpacity);

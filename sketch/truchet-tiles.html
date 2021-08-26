@@ -301,14 +301,28 @@
 			</div>
 		</div>
 		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-grid-row-pattern">
+				Row Pattern
+			</label>
+			<div class="col-3">
+				<input class="form-control form-control-sm" pattern="^\s*(0|[+\-]\d*)*\s*$" id="tiles-grid-row-pattern" value="+">
+			</div>
+			<label class="col-3 col-form-label col-form-label-sm" for="tiles-grid-col-pattern">
+				Column Pattern
+			</label>
+			<div class="col-3">
+				<input class="form-control form-control-sm" pattern="^\s*(0|[+\-]\d*)*\s*$" id="tiles-grid-col-pattern" value="+">
+			</div>
+		</div>
+		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-grid-opacity">
-				Grid Opacity
+				Opacity
 			</label>
 			<div class="col-3">
 				<input type="range" min="0" max="1" step="0.04" value="0" class="form-control-range mt-2" id="tiles-grid-opacity">
 			</div>
 			<label class="col-3 second-col col-form-label col-form-label-sm" for="tiles-grid-color">
-				Grid Colour
+				Colour
 			</label>
 			<div class="col-3">
 				<input type="range" min="0" max="255" value="100" class="form-control-range mt-2" id="tiles-grid-color">
@@ -316,7 +330,7 @@
 		</div>
 		<div class="form-row form-group">
 			<label class="col-3 col-form-label col-form-label-sm" for="tiles-grid-width">
-				Grid Line Width
+				Line Width
 			</label>
 			<div class="col-3">
 				<input type="number" min="0" value="1" class="form-control form-control-sm" id="tiles-grid-width">

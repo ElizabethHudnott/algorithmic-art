@@ -1,4 +1,4 @@
-import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform, ConstraintLogic} from './tilesets/common.js';
+import {Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile, coordinateTransform, weightedPoint, ConstraintLogic} from './tilesets/common.js';
 import MiddleLineTile from './tilesets/middle-line.js';
 
 export default function TruchetTiles() {
@@ -302,6 +302,30 @@ export default function TruchetTiles() {
 			parseGridPattern(this, 'shearYMultipliers');
 		});
 
+		optionsDoc.getElementById('tiles-grid-width').addEventListener('input', function (event) {
+			const value = parseInt(this.value);
+			if (value >= 0) {
+				me.gridWidth = value;
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('tiles-grid-spacing-x').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 1) {
+				me.gridSpacingX = value;
+				generateBackground(0);
+			}
+		});
+
+		optionsDoc.getElementById('tiles-grid-spacing-y').addEventListener('input', function (event) {
+			const value = parseFloat(this.value);
+			if (value >= 1) {
+				me.gridSpacingY = value;
+				generateBackground(0);
+			}
+		});
+
 		optionsDoc.getElementById('tiles-color-mode').addEventListener('input', function (event) {
 			const section = document.getElementById('tiles-color-flow');
 			if (this.value === 'r') {
@@ -488,14 +512,6 @@ export default function TruchetTiles() {
 		opacitySlider.addEventListener('pointerup', redraw);
 		opacitySlider.addEventListener('keyup', redraw);
 
-		optionsDoc.getElementById('tiles-grid-width').addEventListener('input', function (event) {
-			const value = parseInt(this.value);
-			if (value >= 0) {
-				me.gridWidth = value;
-				generateBackground(0);
-			}
-		});
-
 		return optionsDoc;
 	});
 
@@ -551,6 +567,8 @@ export default function TruchetTiles() {
 	this.gridColor = 100;
 	this.gridOpacity = 0;
 	this.gridWidth = 1;
+	this.gridSpacingX = 1;
+	this.gridSpacingY = 1;
 
 	/*Shearing. Normal range of values is 0-1.
 	 * Element 0: X displacement for the middle
@@ -569,8 +587,9 @@ TruchetTiles.prototype.animatable = {
 	'continuous': [
 		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'overlap', 'gapProbability',
 		'colors', 'flowProbability',
-		'sideLength', 'cellAspect', 'gridColor', 'gridOpacity', 'gridWidth', 'shear',
-		'shearXMultipliers', 'shearYMultipliers',
+		'sideLength', 'cellAspect', 'gridColor',
+		'gridOpacity', 'gridWidth', 'gridSpacingX', 'gridSpacingY',
+		'shear', 'shearXMultipliers', 'shearYMultipliers',
 	],
 	'stepped': [
 		'tileTypes',
@@ -958,12 +977,17 @@ TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHe
 		context.beginPath();
 		const halfCellWidth = cellWidth / 2;
 		const halfCellHeight = cellHeight / 2;
+		const lineWidthLR = lineWidthH / 2;
+		const lineWidthTB = lineWidthV / 2;
 		context.lineWidth = this.gridWidth;
 		if (this.gridWidth % 2 === 1) {
 			context.translate(0.5, 0.5);
 		}
 		// Horizontal lines
 		sumShearX = 0;
+		let prevPoints = new Array(cellsAcrossCanvas * 4 + 1);
+		prevPoints.fill([0, 0]);
+
 		for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 			const shearXMultiplier = this.shearXMultipliers[cellY % this.shearXMultipliers.length];
 			localShear[0] = shear[0] * shearXMultiplier;
@@ -971,21 +995,50 @@ TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHe
 			sumShearY = 0;
 			let x = Math.round(minX + sumShearX);
 			let y = Math.round(minY + (cellY + 1) * cellHeight);
-			context.moveTo(x, y);
+			const points = new Array(cellsAcrossCanvas * 4 + 1);
+			points[0] = [x, y];
+			const mod = cellY % this.gridSpacingY;
+			const weight = 1 - mod;
+			context.moveTo(...weightedPoint(prevPoints[0], points[0], weight));
 			for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 				const shearYMultiplier = this.shearYMultipliers[cellX % this.shearYMultipliers.length];
 				localShear[2] = shear[2] * shearYMultiplier;
 				localShear[3] = shear[3] * shearYMultiplier;
 				x = minX + cellX * cellWidth + sumShearX;
 				y = minY + cellY * cellHeight + sumShearY;
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, halfCellWidth, cellHeight));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight));
+				const lineLeft = coordinateTransform(x, y, cellWidth, cellHeight, localShear, halfCellWidth - lineWidthLR, cellHeight);
+				const centre = coordinateTransform(x, y, cellWidth, cellHeight, localShear, halfCellWidth, cellHeight);
+				const lineRight = coordinateTransform(x, y, cellWidth, cellHeight, localShear, halfCellWidth + lineWidthLR, cellHeight);
+				const right = coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight);
+				points[cellX * 4 + 1] = lineLeft;
+				points[cellX * 4 + 2] = centre;
+				points[cellX * 4 + 3] = lineRight;
+				points[cellX * 4 + 4] = right;
+				if (mod >= 0 && mod < 1) {
+					if (cellY < cellsDownCanvas - 1) {
+						const thisTile = tileMap[cellY][cellX];
+						const bottomTile = tileMap[cellY + 1][cellX];
+						if ((!thisTile.hasPort(10)) ^ (!bottomTile.hasPort(2))) {
+							context.lineTo(...weightedPoint(prevPoints[cellX * 4 + 2], centre, weight));
+						} else {
+							context.lineTo(...weightedPoint(prevPoints[cellX * 4 + 1], lineLeft, weight));
+							context.lineTo(...weightedPoint(prevPoints[cellX * 4 + 3], lineRight, weight));
+						}
+					} else {
+						context.lineTo(...weightedPoint(prevPoints[cellX * 4 + 2], centre, weight));
+					}
+					context.lineTo(...weightedPoint(prevPoints[cellX * 4 + 4], right, weight));
+				}
 				sumShearY += totalShearY * shearYMultiplier;
 			}
 			sumShearX += totalShearX * shearXMultiplier;
+			prevPoints = points;
 		}
 		// Vertical lines
 		sumShearY = 0;
+		prevPoints = new Array(cellsDownCanvas * 4 + 1);
+		prevPoints.fill([0, 0]);
+
 		for (let cellX = 0; cellX < cellsAcrossCanvas; cellX++) {
 			const shearYMultiplier = this.shearYMultipliers[cellX % this.shearYMultipliers.length];
 			localShear[2] = shear[2] * shearYMultiplier;
@@ -993,18 +1046,44 @@ TruchetTiles.prototype.drawTiles = function (context, tileMap, cellWidth, cellHe
 			sumShearX = 0;
 			let x = Math.round(minX + (cellX + 1) * cellWidth);
 			let y = Math.round(minY + sumShearY);
-			context.moveTo(x, y);
+			const points = new Array(cellsDownCanvas * 4 + 1);
+			points[0] = [x, y];
+			const mod = cellX % this.gridSpacingX;
+			const weight = 1 - mod;
+			context.moveTo(...weightedPoint(prevPoints[0], points[0], weight));
 			for (let cellY = 0; cellY < cellsDownCanvas; cellY++) {
 				const shearXMultiplier = this.shearXMultipliers[cellY % this.shearXMultipliers.length];
 				localShear[0] = shear[0] * shearXMultiplier;
 				localShear[1] = shear[1] * shearXMultiplier;
 				x = minX + cellX * cellWidth + sumShearX;
 				y = minY + cellY * cellHeight + sumShearY;
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, halfCellHeight));
-				context.lineTo(...coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight));
+				const lineTop = coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, halfCellHeight - lineWidthTB);
+				const middle = coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, halfCellHeight);
+				const lineBottom = coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, halfCellHeight + lineWidthTB);
+				const bottom = coordinateTransform(x, y, cellWidth, cellHeight, localShear, cellWidth, cellHeight);
+				points[cellY * 4 + 1] = lineTop;
+				points[cellY * 4 + 2] = middle;
+				points[cellY * 4 + 3] = lineBottom;
+				points[cellY * 4 + 4] = bottom;
+				if (mod >= 0 && mod < 1) {
+					if (cellX < cellsAcrossCanvas - 1) {
+						const thisTile = tileMap[cellY][cellX];
+						const rightTile = tileMap[cellY][cellX + 1];
+						if ((!thisTile.hasPort(6)) ^ (!rightTile.hasPort(14))) {
+							context.lineTo(...weightedPoint(prevPoints[cellY * 4 + 2], middle, weight));
+						} else {
+							context.lineTo(...weightedPoint(prevPoints[cellY * 4 + 1], lineTop, weight));
+							context.lineTo(...weightedPoint(prevPoints[cellY * 4 + 3], lineBottom, weight));
+						}
+					} else {
+						context.lineTo(...weightedPoint(prevPoints[cellY * 4 + 2], middle, weight));
+					}
+					context.lineTo(...weightedPoint(prevPoints[cellY * 4 + 4], bottom, weight));
+				}
 				sumShearX += totalShearX * shearXMultiplier;
 			}
 			sumShearY += totalShearY * shearYMultiplier;
+			prevPoints = points;
 		}
 		const gridIntensity = this.gridColor;
 		context.strokeStyle = rgba(gridIntensity, gridIntensity, gridIntensity, this.gridOpacity);

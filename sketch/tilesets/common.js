@@ -298,7 +298,13 @@ function coordinateTransform(xReference, yReference, width, height, shear, relat
 	return [xReference + transformedX, yReference + transformedY];
 }
 
+function weightedPoint(p1, p2, weight) {
+	const x = Math.round(p1[0] * (1 - weight) + p2[0] * weight);
+	const y = Math.round(p1[1] * (1 - weight) + p2[1] * weight);
+	return [x, y];
+}
+
 export {
 	TileType, Tile, BLANK_TILE, POSSIBLE_CONNECTIONS, checkTiling, chooseTile,
-	coordinateTransform, Placement, ConstraintLogic, Transform, tileMapLookup
+	coordinateTransform, weightedPoint, Placement, ConstraintLogic, Transform, tileMapLookup
 };

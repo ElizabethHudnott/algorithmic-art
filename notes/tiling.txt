@@ -27,6 +27,7 @@ Colours
 		Normally fixed hue (except when fading between hues at a junction)
 		Hue or saturation or brightness or opacity varies between chosen minimum and maximum value (or no variation at all)
 	OR across the width of a line (shaded like a pipe)
+	Option to have the colours in the palette organized into contrasting pairs so the same colours always paired with each other on a tile
 
 Multiple layers
 	Background tile patterns

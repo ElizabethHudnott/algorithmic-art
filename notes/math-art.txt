@@ -8,7 +8,6 @@ Service Worker
 
 Add PayPal donation link
 * Force preview animation mode (when not for a video) if excessive computation time used.
-Bug signature background doesn't follow background image
 Bug: dragging position slider doesn't leave background permanently transitioned
 Bug: Can't drag underneath modals, etc.
 Bug: lose drag selection when dragging outside the window
@@ -30,7 +29,6 @@ Logo
 Save As button
 Anonymize button
 Add credits
-Add URL to signature
 Responsiveness issues
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider

@@ -1,13 +1,6 @@
 {
 	"sketches": [
 		{
-			"title": "Truchet Tiles",
-			"url": "truchet-tiles.js",
-			"thumbnail": "truchet-tiles.webp",
-			"author": "Elizabeth Hudnott",
-			"keywords": ["tiles", "tiling", "tessellation"]
-		},
-		{
 			"title": "Cellular Automata",
 			"url": "cellular-automata.js",
 			"thumbnail": "cellular-automata.webp",
@@ -55,6 +48,13 @@
 			"thumbnail": "sierpinski-carpet.webp",
 			"author": "Elizabeth Hudnott",
 			"keywords": ["fractals", "recursion", "squares"]
+		},
+		{
+			"title": "Truchet Tiles",
+			"url": "truchet-tiles.js",
+			"thumbnail": "truchet-tiles.webp",
+			"author": "Elizabeth Hudnott",
+			"keywords": ["tiles", "tiling", "tessellation"]
 		},
 		{
 			"title": "Spirograph",

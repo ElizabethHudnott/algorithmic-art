@@ -410,7 +410,7 @@ export default function GraphingCalculator() {
 	this.shearDirection = []; // Per shape & per subpath
 	this.closePath = [];	// Per shape, per subpath
 	this.lineWidth = [];	// Per shape
-	this.lineJoin = [];		// Per shape
+	this.roundedPen = [];	// Per shape
 	this.dash = [];			// Per shape
 	this.strokeColor = [];	// Per shape
 	this.fillColor = [];	// Per shape
@@ -901,13 +901,13 @@ export default function GraphingCalculator() {
 			}
 		});
 
-		function setLineJoin(event) {
-			me.lineJoin[shapeNum] = this.value;
+		function setPenShape(event) {
+			me.roundedPen[shapeNum] = this.value === 'round';
 			generateBackground(0);
 		}
 
-		for (let element of optionsDoc.querySelectorAll('input[name="calc-line-join"]')) {
-			element.addEventListener('input', setLineJoin);
+		for (let element of optionsDoc.querySelectorAll('input[name="calc-pen-shape"]')) {
+			element.addEventListener('input', setPenShape);
 		}
 
 		const strokeColorInput = optionsDoc.getElementById('calc-stroke-color');
@@ -1048,7 +1048,10 @@ GraphingCalculator.prototype.animatable = {
 		'minorAxisMajorGridlines'
 	],
 	stepped: [
-		'closePath', 'lineWidth', 'dash', 'fillRule', 'clip'
+		'lineWidth', 'dash'
+	],
+	nominalArray: [
+		'closePath', 'clip', 'fillRule'
 	],
 	pairedContinuous: [
 		['max', 'min']	// min catches up to max.
@@ -1092,7 +1095,7 @@ GraphingCalculator.prototype.addShape = function (index) {
 	this.shearDirection.splice(index, 0, [0]);
 	this.closePath.splice(index, 0, []);
 	this.lineWidth.splice(index, 0, 3);
-	this.lineJoin.splice(index, 0, 'round');
+	this.roundedPen.splice(index, 0, true);
 	this.dash.splice(index, 0, [1, 0]);
 	this.strokeColor.splice(index, 0, '#000000ff');
 	this.fillColor.splice(index, 0, '#ff00808c');
@@ -1252,14 +1255,15 @@ GraphingCalculator.prototype.generate = function* (context, canvasWidth, canvasH
 
 		const lineWidth = this.lineWidth[shapeNum];
 		context.lineWidth = lineWidth / (scale * shapeScale);
-		const lineJoin = this.lineJoin[shapeNum];
-		context.lineJoin = lineJoin;
+		const roundedPen = this.roundedPen[shapeNum];
 		let dash = this.dash[shapeNum];
-		if (lineJoin === 'round') {
+		if (roundedPen) {
 			dash = dash.slice();
 			adjustLineDash(dash, lineWidth);
+			context.lineJoin = 'round';
 			context.lineCap = 'round';
 		} else {
+			context.lineJoin = 'bevel';
 			context.lineCap = 'butt';
 		}
 		const numDashLengths = dash.length;

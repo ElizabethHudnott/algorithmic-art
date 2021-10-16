@@ -774,9 +774,12 @@ SierpinskiCarpet.prototype.animatable = {
 		'colors', 'foreOpacities', 'imageOpacity'
 	],
 	stepped: [
-		'recursive', 'cutouts', 'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
+		'cutoutDepth', 'maxDepth', 'centreDepth', 'globalCentreDepth',
 		'patternDepth', 'compositionOp', 'blendDepth', 'filling', 'patternLocations',
 		'patternedCentre', 'emphasis', 'blendFilling', 'opacityEnable'
+	],
+	nominalArray: [
+		'recursive', 'cutouts'
 	]
 };
 

@@ -1,0 +1,73 @@
+Inputs
+	Data files
+		MIDI
+		CSV
+			optional headings
+			optional time indices (first column)
+			min and max values for each column (clip output below/above these values)
+
+	Devices
+		MIDI devices
+			key presses, CCs RPNs, NRPNs, program changes, pitch bend
+		computer keyboard
+		mouse movement and buttons
+		gamepads
+		dance mats
+		hand gestures (webcam/Kinect)
+		microphone
+			clapping? whistling?
+		touchscreen
+		accelerometer
+
+	Key presses
+		Single key or a chord
+			On a specific bank-program number combination
+				Program number + bank number * 128
+		Trigger all matching rules if they modify different parameters
+		When two rules modify the same parameter then ones involving more keys take precedence over ones with fewer keys
+			Rules with same number of keys: one higher up in the list takes precedence
+		Key/button press modes:
+			Press-hold-release with velocity
+			Press-hold-release without velocity
+
+Parameter changes
+	"min" value when the key combination is released /  CC set to 0
+		"min" value is the same as the starting frame value
+	"max" value when the key is pressed with maximum velocity / CC set to 127
+		can optionally ignore velocity information and always use the maximum
+		"max" can be numerically less than "min" => upside down envelope
+
+	Envelope parameters are configured as part of the input set up on a per program basis but can be changed using particular CC messages (as per General MIDI Level 2)
+
+	attack-hold-release (both linear) for integer parameters
+	ADSR (exponential attack, decay & release) for float parameters
+
+Parameter data types
+	boolean
+		can be inverted with respect to key down state
+	string
+		has a key press value and a key release value
+	integer
+	float
+	RGBA colour
+	arrays
+		modifies a subarray
+		starting index to modify
+		"min" and "max" values are arrays
+		pad with zeros, false or black if an array needs to be extended
+
+Table of keypresses
+	Sketch offers a number of named events
+	Input config maps a range of notes to an event name and event parameter value
+	Sketch can read a bank-program number combination's envelope parameters
+
+	Table
+		Bank-program number combination
+		Event name
+		Parameter value
+		Note number relative to the lowest in the range
+		Velocity
+		Time struck
+		Time released
+	Same note can appear more than once if struck in quick succession (causes immediate release)
+	Sketch deletes entries when they are no longer needed

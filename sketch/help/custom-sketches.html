@@ -35,13 +35,13 @@
 		<main>
 			<h1>Writing The Code</h1>
 			<p>
-				This article discusses creating your own generative art sketches that take advantage of the <a href="../../index.html">environment</a> I've created. The code template you will need to follow is shown below.
+				This article discusses creating your own generative art sketches in JavaScript that take advantage of the <a href="../../index.html">environment</a> I've created. The code template you'll need to follow is shown below.
 			</p>
 			<p>
 				Each sketch has a title, which appears in GUI elements. You can populate the <code>helpFile</code> property with a URL directing the environment towards a HTML file containing help information.
 			</p>
 			<p>
-				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during early development stages, but usually you will want to include it, unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix so as to avoid name clashes with elements that are part of the environment itself. For example, in my <a href="../../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
+				The <code>optionsDocument</code> property is technically optional and it's useful to omit it during early development stages. But usually you'll want to include it, unless your intention is to deliberately create a static sketch without adjustable parameters. In another file, create an interface for adjusting the parameters using <abbr>HTML</abbr> and <a href="https://getbootstrap.com">Bootstrap</a>. Be sure to give your element IDs a short prefix so as to avoid name clashes with elements that are part of the environment itself. For example, in my <a href="../../index.html?gen=julia-set">Julia Set</a> sketch I give each element an ID beginning with the prefix <code>julia-</code>.
 			</p>
 			<p>
 				The rest of the code comes in three significant sections.
@@ -51,10 +51,10 @@
 					Event handlers inside the callback to <code>downloadFile()</code> which link the <abbr>HTML</abbr> to the JavaScript properties that represent the sketch's parameterization.
 				</li>
 				<li>
-					The <code>animatable</code> property, which is a declarative description of how the sketch can be animated.
+					The <code>animatable</code> property, which describes how the sketch can be animated.
 				</li>
 				<li>
-					Code that draws the sketch on the screen, which is contained inside the <code>generate()</code> method.
+					The code that draws the sketch on the screen, which is contained inside the <code>generate()</code> method.
 				</li>
 			</ol>
 			<div class="codebox codebox-long" id="js-template"></div>

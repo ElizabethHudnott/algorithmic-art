@@ -584,16 +584,18 @@ export default function TruchetTiles() {
 }
 
 TruchetTiles.prototype.animatable = {
-	'continuous': [
+	continuous: [
 		'tileFrequencies', 'strokeRatio1', 'strokeRatio2', 'overlap', 'gapProbability',
 		'colors', 'flowProbability',
 		'sideLength', 'cellAspect', 'gridColor',
 		'gridOpacity', 'gridWidth', 'gridSpacingX', 'gridSpacingY',
 		'shear', 'shearXMultipliers', 'shearYMultipliers',
 	],
-	'stepped': [
-		'tileTypes',
+	stepped: [
 		'colorMode', 'numColors', 'colorGroupSize',
+	],
+	nominalArray: [
+		'tileTypes'
 	]
 };
 

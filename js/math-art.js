@@ -888,8 +888,9 @@ function hasRandomness(enabled) {
 			this.continuous = new Map();
 			this.stepped = new Map();
 			this.pairedContinuous = new Map();
-			this.xy = new Map();
 			this.pairedStepped = new Map();
+			this.xy = new Map();
+			this.nominalArrays = new Map();
 			if (arguments.length === 0) {
 				// Used by the frameDataFromObject function
 				this.backgroundColor = '#ffffff';
@@ -928,6 +929,15 @@ function hasRandomness(enabled) {
 						this.pairedContinuous.set(property2, value2);
 					}
 				}
+				const pairedStepped = animatable.pairedStepped;
+				if (pairedStepped !== undefined) {
+					for (let [property1, property2] of pairedStepped) {
+						const value1 = deepArrayCopy(generator[property1]);
+						const value2 = deepArrayCopy(generator[property2]);
+						this.pairedStepped.set(property1, value1);
+						this.pairedStepped.set(property2, value2);
+					}
+				}
 				const xy = animatable.xy;
 				if (xy !== undefined) {
 					for (let [property1, property2] of xy) {
@@ -937,13 +947,11 @@ function hasRandomness(enabled) {
 						this.xy.set(property2, value2);
 					}
 				}
-				const pairedStepped = animatable.pairedStepped;
-				if (pairedStepped !== undefined) {
-					for (let [property1, property2] of pairedStepped) {
-						const value1 = deepArrayCopy(generator[property1]);
-						const value2 = deepArrayCopy(generator[property2]);
-						this.pairedStepped.set(property1, value1);
-						this.pairedStepped.set(property2, value2);
+				const nominalArray = animatable.nominalArray;
+				if (nominalArray !== undefined) {
+					for (let property of nominalArray) {
+						const value = deepArrayCopy(generator[property]);
+						this.nominalArrays.set(property, value);
 					}
 				}
 			}
@@ -1666,9 +1674,9 @@ function hasRandomness(enabled) {
 		if (hasTween) {
 			gen.tween = parseFloat(animPositionSlider.value);
 		}
-		calcTweenData();
 		signatureChanged = true;
 		progressiveBackgroundGen(0);
+		calcTweenData();
 
 		// Create new options dialog
 		container.innerHTML = '';
@@ -1763,8 +1771,8 @@ function hasRandomness(enabled) {
 				} else {
 					endFrame = startFrame;
 				}
-				calcTweenData();
 				progressiveBackgroundGen(0);
+				calcTweenData();
 				displaySeed();
 				animPositionSlider.value = 0;
 				updateAnimPositionReadout(0);
@@ -2200,6 +2208,118 @@ function hasRandomness(enabled) {
 		}
 	}
 
+
+	class NominalArrayInterpolator {
+
+		constructor (startValue, endValue) {
+			const toSet = [];
+			const toClear = [];
+			const numStart = startValue.length;
+			const numEnd = endValue.length;
+			let minLength;
+			if (numStart >= numEnd) {
+				this.numDelete = numStart - numEnd;
+				this.numAdd = 0;
+				minLength = numEnd;
+			} else {
+				this.numDelete = 0;
+				this.numAdd = numEnd - numStart;
+				minLength = numStart;
+			}
+			const truthy = startValue[0] || endValue[0] || true;
+			let lastSet;
+			for (let i = 0; i < minLength; i++) {
+				const initiallyOn = startValue[i] == truthy;
+				const finallyOn = endValue[i] == truthy;
+				if (finallyOn && !initiallyOn) {
+					toSet.push(i);
+					lastSet = i;
+				} else if (startValue[i] !== endValue[i]) {
+					toClear.push(i);
+				}
+			}
+			this.toSet = toSet;
+			this.toClear = toClear;
+		}
+
+		interpolate(startValue, endValue, tween, loop) {
+			let numAdd = this.numAdd;
+			let numDelete = this.numDelete;
+			let initialArray = startValue, finalArray = endValue;
+			let reverse = false;
+			if (loop) {
+				if (tween > 0.5) {
+					tween -= 0.5;
+					reverse = true;
+					numAdd = this.numDelete;
+					numDelete = this.numAdd;
+					initialArray = endValue;
+					finalArray = startValue;
+				}
+				tween *= 2;
+			}
+
+			const toSet = this.toSet;
+			const toClear = this.toClear;
+			const numSteps = numDelete + numAdd + toSet.length + toClear.length;
+			let step = Math.trunc((numSteps + 1) * tween);
+			let value;
+
+			// Handle deletions first
+			const numDelete2 = Math.min(numDelete, step);
+			if (!reverse && numDelete2 > 0) {
+				value = initialArray.slice(0, -numDelete2);
+				step -= numDelete2;
+			} else {
+				value = initialArray.slice();
+			}
+
+			// Handle insertions next when in the forward stage of a loop
+			const startLength = value.length;
+			if (loop && !reverse) {
+				numAdd = Math.min(numAdd, step);
+				const currentLength = startLength + numAdd;
+				for (let i = startLength; i < currentLength; i++) {
+					value[i] = endValue[i];
+				}
+				step -= numAdd;
+			}
+
+			// Handle setting values to true when going forward / clearing when looping back
+			const numSet = Math.min(step, toSet.length);
+			for (let i = 0; i < numSet; i++) {
+				const index = toSet[i];
+				value[index] = finalArray[index];
+			}
+			step -= numSet;
+
+			// Handle clearing values when going forward / setting to true when looping back
+			const numClear = Math.min(step, toClear.length);
+			for (let i = 0; i < numClear; i++) {
+				const index = toClear[i];
+				value[index] = finalArray[index];
+			}
+
+			// Handle insertions last if not looping and changes in length last when going in the
+			// reverse direction
+			if (!loop || reverse) {
+				step -= numClear;
+
+				const currentLength = startLength + Math.min(numAdd, step);
+				for (let i = startLength; i < currentLength; i++) {
+					value[i] = finalArray[i];
+				}
+				if (reverse) {
+					numDelete = Math.min(numDelete, step);
+					value.splice(currentLength - numDelete, numDelete);
+				}
+			}
+
+			return value;
+		}
+
+	}
+
 	class TweenData {
 
 		constructor(generator, startFrame, endFrame, width, height) {
@@ -2210,7 +2330,7 @@ function hasRandomness(enabled) {
 
 			this.calcSize(startFrame, endFrame, width, height);
 
-			// Map x property name to the calculated value.
+			// XY: Map x property name to the calculated value.
 			this.radii = new Map();
 			this.startTheta = new Map();
 			this.centreX1 = new Map();
@@ -2218,32 +2338,46 @@ function hasRandomness(enabled) {
 			this.centreX2 = new Map();
 			this.centreY2 = new Map();
 
-			if (generator.animatable === undefined || generator.animatable.xy === undefined) {
+			this.nominalArrays = new Map();
+
+			const animatable = generator.animatable;
+			if (animatable === undefined) {
 				return;
 			}
 
-			const startXY = startFrame.xy;
-			const endXY = endFrame.xy;
+			if (animatable.xy !== undefined) {
+				const startXY = startFrame.xy;
+				const endXY = endFrame.xy;
 
-			for (let [keyX, keyY] of generator.animatable.xy) {
-				const startX = startXY.get(keyX);
-				const startY = startXY.get(keyY);
-				const endX = endXY.get(keyX);
-				const endY = endXY.get(keyY);
-				const centreX1 = (startX + 3 * endX) / 4;
-				const centreY1 = (startY + 3 * endY) / 4;
-				const centreX2 = (3 * startX + endX) / 4;
-				const centreY2 = (3 * startY + endY) / 4;
-				const distX = endX - startX;
-				const distY = endY - startY;
-				const r = Math.hypot(distX, distY) / 4;
-				const theta = Math.atan2(distY, distX);
-				this.radii.set(keyX, r);
-				this.startTheta.set(keyX, theta);
-				this.centreX1.set(keyX, centreX1);
-				this.centreY1.set(keyX, centreY1);
-				this.centreX2.set(keyX, centreX2);
-				this.centreY2.set(keyX, centreY2);
+				for (let [keyX, keyY] of animatable.xy) {
+					const startX = startXY.get(keyX);
+					const startY = startXY.get(keyY);
+					const endX = endXY.get(keyX);
+					const endY = endXY.get(keyY);
+					const centreX1 = (startX + 3 * endX) / 4;
+					const centreY1 = (startY + 3 * endY) / 4;
+					const centreX2 = (3 * startX + endX) / 4;
+					const centreY2 = (3 * startY + endY) / 4;
+					const distX = endX - startX;
+					const distY = endY - startY;
+					const r = Math.hypot(distX, distY) / 4;
+					const theta = Math.atan2(distY, distX);
+					this.radii.set(keyX, r);
+					this.startTheta.set(keyX, theta);
+					this.centreX1.set(keyX, centreX1);
+					this.centreY1.set(keyX, centreY1);
+					this.centreX2.set(keyX, centreX2);
+					this.centreY2.set(keyX, centreY2);
+				}
+			}
+
+			if (animatable.nominalArray !== undefined) {
+				for (let key of animatable.nominalArray) {
+					const startValue = startFrame.nominalArrays.get(key);
+					const endValue = endFrame.nominalArrays.get(key);
+					const interpolator = new NominalArrayInterpolator(startValue, endValue);
+					this.nominalArrays.set(key, interpolator);
+				}
 			}
 		}
 
@@ -2268,6 +2402,15 @@ function hasRandomness(enabled) {
 			const x = r * Math.cos(theta) + centreX;
 			const y = r * Math.sin(theta) + centreY;
 			return [x, y];
+		}
+
+		interpolateNominalArrays(generator, startFrame, endFrame, tween, loop) {
+			for (let [key, interpolator] of this.nominalArrays.entries()) {
+				const startValue = startFrame.nominalArrays.get(key);
+				const endValue = endFrame.nominalArrays.get(key);
+				const value = interpolator.interpolate(startValue, endValue, tween, loop);
+				generator[key] = value;
+			}
 		}
 
 	}
@@ -2357,9 +2500,13 @@ function hasRandomness(enabled) {
 			const endValue = endFrame.stepped.get(property);
 			generator[property] = interpolateStep(startValue, endValue, tween, loop);
 		}
-		if (generator.animatable) {
-			const xy = generator.animatable.xy;
-			if (xy !== undefined && startFrame !== endFrame) {
+		const animatable = generator.animatable;
+		if (startFrame !== endFrame && animatable !== undefined) {
+			interpolatePairs('pairedContinuous', false, tween, loop);
+			interpolatePairs('pairedStepped', true, tween, loop);
+
+			const xy = animatable.xy;
+			if (xy !== undefined) {
 				if (loop) {
 					if (tween <= 0.5) {
 						for (let property of startFrame.xy.keys()) {
@@ -2384,8 +2531,7 @@ function hasRandomness(enabled) {
 
 			}
 
-			interpolatePairs('pairedContinuous', false, tween, loop);
-			interpolatePairs('pairedStepped', true, tween, loop);
+			tweenData.interpolateNominalArrays(generator, startFrame, endFrame, tween, loop);
 		}
 		if ('tween' in generator) {
 			generator.tween = tweenPrime;

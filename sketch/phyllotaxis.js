@@ -300,7 +300,7 @@ export default function Phyllotaxis() {
 			if (field === 'all') {
 				me.continuousMod.fill(value);
 			} else {
-				me.colorMod[parseInt(field)] = value;
+				me.continuousMod[parseInt(field)] = value;
 			}
 			generateBackground(2);
 		});
@@ -958,6 +958,19 @@ Phyllotaxis.prototype.angularColor = function (r, degrees, n, property, range, m
 	return [output, modification * this.hueModeIntensity];
 };
 
+Phyllotaxis.prototype.steppedColor = function (property, value) {
+	if (this.continuousMod[property]) {
+		return value;
+	} else {
+		const steps = this.colorMod[property];
+		if (steps <= 1) {
+			return 0;
+		} else {
+			return Math.trunc(value * steps) / (steps - 1);
+		}
+	}
+}
+
 /**
  *	Preview levels:
  *		0	Produce a full and accurate drawing.
@@ -989,7 +1002,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 		const scale = this.scale ** (exponent / 0.5) / (maxR ** (2 * exponent - 1));
 		const petalSize = this.petalSize;
 		const petalEnlargement = this.petalEnlargement;
-		const petalVariation = this.petalVariation / 100;
+		const petalVariation = this.petalVariation * this.petalVariation / 10000;
 		const bidirectional = this.direction === 0;
 		const direction = bidirectional ? 1 : this.direction;
 		const maxPetals = preview === 1 ? Math.min(benchmark / 2, this.maxPetals) : this.maxPetals;
@@ -1148,7 +1161,7 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			wobbleSize * Math.sin(point.n * this.wobbleFrequency / 100);
 
 		const degrees = Math.abs(theta) / Math.PI * 180;
-		const radialValue = (r * r) / lastRSquared;
+		const radialValue = (r / maxDrawnR + (r * r) / lastRSquared) / 2;
 		let hue = this.hueMin;
 		let saturation = this.saturationMin;
 		let lightness = this.lightnessMin;
@@ -1160,10 +1173,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			[hue, colorModification] = this.angularColor(r, degrees, i, 0, hueRange, this.hueMin);
 			break;
 		case 'rad':
-			hue = this.hueMin + hueRange * radialValue;
+			hue = this.hueMin + hueRange * this.steppedColor(0, radialValue);
 			break;
 		case 'rnd':
-			hue = this.hueMin + hueRange * random.next();
+			hue = this.hueMin + hueRange * this.steppedColor(0, random.next());
 			break;
 		}
 
@@ -1172,10 +1185,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			saturation = this.angularColor(r, degrees, i, 1, saturationRange, this.saturationMin)[0];
 			break;
 		case 'rad':
-			saturation = this.saturationMin + saturationRange * radialValue;
+			saturation = this.saturationMin + saturationRange * this.steppedColor(1, radialValue);
 			break;
 		case 'rnd':
-			saturation = this.saturationMin + saturationRange * random.next();
+			saturation = this.saturationMin + saturationRange * this.steppedColor(1, random.next());
 			break;
 		}
 
@@ -1184,10 +1197,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			lightness = this.angularColor(r, degrees, i, 2, lightnessRange, this.lightnessMin)[0];
 			break;
 		case 'rad':
-			lightness = this.lightnessMin + lightnessRange * radialValue;
+			lightness = this.lightnessMin + lightnessRange * this.steppedColor(2, radialValue);
 			break;
 		case 'rnd':
-			lightness = this.lightnessMin + lightnessRange * random.next();
+			lightness = this.lightnessMin + lightnessRange * this.steppedColor(2, random.next());
 			break;
 		}
 
@@ -1196,10 +1209,10 @@ Phyllotaxis.prototype.generate = function* (context, canvasWidth, canvasHeight, 
 			opacity = this.angularColor(r, degrees, i, 3, opacityRange, this.opacityMin)[0];
 			break;
 		case 'rad':
-			opacity = this.opacityMin + opacityRange * radialValue;
+			opacity = this.opacityMin + opacityRange * this.steppedColor(3, radialValue);
 			break;
 		case 'rnd':
-			opacity = this.opacityMin + opacityRange * random.next();
+			opacity = this.opacityMin + opacityRange * this.steppedColor(3, random.next());
 			break;
 		}
 

@@ -438,16 +438,6 @@ function matchLuma(rgba1, rgb2) {
 	];
 }
 
-/** Optional chaining polyfill
- */
-function optional(obj, property) {
-	if (obj === undefined || obj === null) {
-		return undefined;
-	} else {
-		return obj[property];
-	}
-}
-
 function idToProperty(id, hasPrefix) {
 	const words = id.split('-');
 	if (hasPrefix) {

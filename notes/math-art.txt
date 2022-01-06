@@ -1,5 +1,9 @@
 desynchronized canvas?
-Phyllotaxis: Make colour tab the default
+Phyllotaxis
+	Petal shape
+		allow continuum between ellipse and rectangle?
+		trapezium?
+
 Carpet: Allow negative overlap
 
 Environment
@@ -28,7 +32,6 @@ Logo
 
 Save As button
 Anonymize button
-Add credits
 Responsiveness issues
 Static image rotation for non-animatable sketches
 	Use to speed up rotation slider
@@ -41,6 +44,7 @@ Gallery
 	Share to: Facebook*, YouTube*, Instagram*, Tumblr, Twitter, Pinterest, DeviantArt?
 Progressive Web App
 Tiling rotation mode
+Filters for backgrounds?
 
 Low Priority
 ------------

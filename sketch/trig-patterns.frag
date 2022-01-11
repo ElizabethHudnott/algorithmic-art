@@ -1,4 +1,17 @@
 
+const vec3 gamma = vec3(0.299, 0.587, 0.114);
+
+const mat4 yuvaToRGBAMat = mat4(
+	1.0, (1.0 - gamma.r - gamma.b) / gamma.g, 1.0, 0.0,
+	0.0, gamma.b * (gamma.b - 1.0) / gamma.g, 1.0 - gamma.b, 0.0,
+	1.0 - gamma.r, gamma.r * (gamma.r - 1.0) / gamma.g, 0.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+);
+
+vec4 yuvaToRGBA(float y, float b, float r, float a) {
+	return yuvaToRGBAMat * vec4(y, b, r, a);
+}
+
 float colorComputation(float difference, float sum, float modulus, float threshold) {
 	float differenceMod = mod(difference, modulus) - 0.75 * modulus;
 	float sumMod = mod(sum, modulus) - 0.75 * modulus;
@@ -10,7 +23,7 @@ void main() {
 	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom;
 
-	float wave = sin(x / divisor + offsetX * PI) + cos(y / divisor + offsetY * PI);
+	float wave = sin(x / 40.0 + offsetX) + cos(y / 40.0 + offsetY);
 	float s = sin(wave);
 	float c = cos(wave);
 	float difference = abs(x * c + y * s);

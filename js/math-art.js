@@ -814,7 +814,7 @@ function hasRandomness(enabled) {
 		drawSignatureWhenReady(contextualInfo, true);
 	}
 
-	function progressiveBackgroundGen(preview, afterProc) {
+	function progressiveBackgroundGen(preview = 0, afterProc = undefined) {
 		document.body.classList.add('cursor-progress');
 		const context = drawingContext.twoD;
 		restoreCanvas(context);

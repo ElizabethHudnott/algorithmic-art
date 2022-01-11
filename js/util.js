@@ -362,7 +362,7 @@ function canonicalForm(value) {
 }
 
 function rgbToLuma(r, g, b) {
-	return (r * 0.213 + g * 0.715 + b * 0.072) / 255;
+	return (r * 0.2126 + g * 0.7152 + b * 0.0722) / 255;
 }
 
 /**

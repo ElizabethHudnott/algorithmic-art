@@ -1,18 +1,19 @@
 
-const vec3 gamma = vec3(0.299, 0.587, 0.114);
+const vec3 gamma = vec3(0.2126, 0.7152, 0.0722);
 
 const mat4 yuvaToRGBAMat = mat4(
-	1.0, (1.0 - gamma.r - gamma.b) / gamma.g, 1.0, 0.0,
-	0.0, gamma.b * (gamma.b - 1.0) / gamma.g, 1.0 - gamma.b, 0.0,
-	1.0 - gamma.r, gamma.r * (gamma.r - 1.0) / gamma.g, 0.0, 0.0,
-	0.0, 0.0, 0.0, 1.0
+	1.0,					1.0,	1.0,	0.0,
+	0.0,					2.0 * gamma.b / gamma.g * (gamma.b - 1.0),		2.0 - 2.0 * gamma.b,	0.0,
+	2.0 - 2.0 * gamma.r,	2.0 * gamma.r / gamma.g * (gamma.r - 1.0),		0.0,					0.0,
+	0.0,					0.0,											0.0,					1.0
 );
 
-vec4 yuvaToRGBA(float y, float b, float r, float a) {
-	return yuvaToRGBAMat * vec4(y, b, r, a);
+vec4 yuvaToRGBA(float luminosity, float blue, float red, float alpha) {
+	return yuvaToRGBAMat * vec4(luminosity, blue, red, alpha);
 }
 
 float colorComputation(float difference, float sum, float modulus, float threshold) {
+	threshold = (threshold / 10000.0 + 0.125) * modulus * modulus;
 	float differenceMod = mod(difference, modulus) - 0.75 * modulus;
 	float sumMod = mod(sum, modulus) - 0.75 * modulus;
 	float sumSquares = differenceMod * differenceMod + sumMod * sumMod;
@@ -29,10 +30,21 @@ void main() {
 	float difference = abs(x * c + y * s);
 	float switchedSum = abs(y * c + x * s);
 
-	float red = colorComputation(difference, switchedSum, modulii[0], thresholds[0]);
-	float green = colorComputation(difference, switchedSum, modulii[1], thresholds[1]);
-	float blue = colorComputation(difference, switchedSum, modulii[2], thresholds[2]);
+	float multiplier = 1.0;
+	float luminosity = 1.0;
+	float red = 0.0;
+	float blue = 0.0;
 
-	fragColor = vec4(red, green, blue, 1.0);
+	for (int i = 0; i < bitDepth; i += 2) {
+		blue += multiplier * colorComputation(difference, switchedSum, modulii[i], thresholds[i]);
+		red += multiplier * colorComputation(difference, switchedSum, modulii[i + 1], thresholds[i + 1]);
+		multiplier *= 2.0;
+	}
+
+	float maxValue = multiplier - 1.0;
+	blue = blue / maxValue - 0.5;
+	red = red / maxValue - 0.5;
+
+	fragColor = yuvaToRGBA(luminosity, blue, red, 1.0);
 
 }

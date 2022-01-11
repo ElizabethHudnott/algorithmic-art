@@ -28,13 +28,17 @@ export default function TrigPatterns() {
 
 	this.offsetX = 0;
 	this.offsetY = 0;
-	this.zoom = 2;
-	this.modulii = [90, 112, 200];
-	this.thresholds = [1024, 2304, 5625];
+	this.zoom = 1.8;
+	this.modulii = [90, 112, 200, 134];
+	this.thresholds = [100, 587, 156, 412];
+	this.bitDepth = 4;
 }
 
 TrigPatterns.prototype.animatable = {
 	continuous: [
 		'zoom', 'offsetX', 'offsetY', 'modulii', 'thresholds',
+	],
+	stepped: [
+		'bitDepth',
 	],
 }

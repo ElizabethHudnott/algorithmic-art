@@ -4,8 +4,6 @@ Phyllotaxis
 		allow continuum between ellipse and rectangle?
 		trapezium?
 
-Carpet: Allow negative overlap
-
 Environment
 -----------
 Service Worker

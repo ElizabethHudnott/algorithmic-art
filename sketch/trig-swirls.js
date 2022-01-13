@@ -1,9 +1,10 @@
 export default function TrigPatterns() {
 	const me = this;
 	this.title = 'Trigonometry Patterns';
+	this.helpFile = 'help/trig-swirls.html';
 	this.isShader = true;
 
-	this.optionsDocument = downloadFile('trig-patterns.html', 'document').then(function (optionsDoc) {
+	this.optionsDocument = downloadFile('trig-swirls.html', 'document').then(function (optionsDoc) {
 
 		optionsDoc.getElementById('trig-offset-x').addEventListener('input', function (event) {
 			setBgProperty(me, 'offsetX', parseFloat(this.value) * TWO_PI);

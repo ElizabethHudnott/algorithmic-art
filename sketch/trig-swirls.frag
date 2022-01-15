@@ -1,16 +1,20 @@
 
-const vec3 gamma = vec3(0.2126, 0.7152, 0.0722);
+const float CROOT_EPSILON = 6.0 / 29.0;
+const float KAPPA = 24389.0 / 27.0;
 
-const mat4 yuvaToRGBAMat = mat4(
-	1.0,					1.0,	1.0,	0.0,
-	0.0,					2.0 * gamma.b / gamma.g * (gamma.b - 1.0),		2.0 - 2.0 * gamma.b,	0.0,
-	2.0 - 2.0 * gamma.r,	2.0 * gamma.r / gamma.g * (gamma.r - 1.0),		0.0,					0.0,
-	0.0,					0.0,											0.0,					1.0
-);
-
-vec4 yuvaToRGBA(float luminosity, float blue, float red, float alpha) {
-	return yuvaToRGBAMat * vec4(luminosity, blue, red, alpha);
+float fInverse(float v) {
+	if (v > CROOT_EPSILON) {
+		return v * v * v;
+	} else {
+		return (v * 116.0 - 16.0) / KAPPA;
+	}
 }
+
+const mat3 xyzToRGB = mat3(
+	+3.24081240, -0.96924302, +0.055638398,
+	-1.53730845, +1.87596630, -0.204007461,
+	-0.49858652, +0.04155503, +1.057129570
+);
 
 float colorComputation(float difference, float sum, float modulus, float threshold) {
 	threshold = (threshold / 10000.0 + 0.125) * modulus * modulus;
@@ -31,7 +35,7 @@ void main() {
 	float switchedSum = abs(y * c + x * s);
 
 	float multiplier = 1.0;
-	float luminosity = 1.0;
+	float luminosity = 50.0;
 	float red = 0.0;
 	float blue = 0.0;
 
@@ -42,9 +46,21 @@ void main() {
 	}
 
 	float maxValue = multiplier - 1.0;
-	blue = blue / maxValue - 0.5;
-	red = red / maxValue - 0.5;
+	red = (red / maxValue * 256.0) - 128.0;
+	blue = (blue / maxValue * 256.0) - 128.0;
 
-	fragColor = yuvaToRGBA(luminosity, blue, red, 1.0);
+	float fy = (luminosity + 16.0) / 116.0;
+	float fx = (red / 500.0) + fy;
+	float fz = fy - (blue / 200.0);
+
+	vec3 xyz = vec3(
+		fInverse(fx) * 0.95044922,
+		luminosity > 8.0 ? fy * fy * fy : luminosity / KAPPA,
+		fInverse(fz) * 1.08891665
+	);
+
+	vec3 rgb = max(xyzToRGB * xyz, vec3(0.0));
+	fragColor.rgb = pow(rgb, vec3(1.0 / gamma));
+	fragColor.a = 1.0;
 
 }

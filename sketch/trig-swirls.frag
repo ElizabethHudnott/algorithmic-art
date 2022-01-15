@@ -8,12 +8,8 @@ const mat4 yuvaToRGBAMat = mat4(
 	0.0,					0.0,											0.0,					1.0
 );
 
-vec4 yuvaToRGBA(float luminosity, float blue, float red, float alpha) {
-	return yuvaToRGBAMat * vec4(luminosity, blue, red, alpha);
-}
-
 float colorComputation(float difference, float sum, float modulus, float threshold) {
-	threshold = (threshold / 10000.0 + 0.125) * modulus * modulus;
+	threshold = threshold * modulus * modulus;
 	float differenceMod = mod(difference, modulus) - 0.75 * modulus;
 	float sumMod = mod(sum, modulus) - 0.75 * modulus;
 	float sumSquares = differenceMod * differenceMod + sumMod * sumMod;
@@ -30,21 +26,49 @@ void main() {
 	float difference = abs(x * c + y * s);
 	float switchedSum = abs(y * c + x * s);
 
-	float multiplier = 1.0;
-	float luminosity = 1.0;
-	float red = 0.0;
-	float blue = 0.0;
-
-	for (int i = 0; i < bitDepth; i += 2) {
-		blue += multiplier * colorComputation(difference, switchedSum, modulii[i], thresholds[i]);
-		red += multiplier * colorComputation(difference, switchedSum, modulii[i + 1], thresholds[i + 1]);
-		multiplier *= 2.0;
+	float luminosity = 0.0;
+	float multiplier;
+	if (luminosityDepth > 0) {
+		multiplier = 2.0;
+		for (int i = luminosityDepth - 1; i >= 0; i--) {
+			luminosity += multiplier * colorComputation(difference, switchedSum, luminosityModulii[i], luminosityThresholds[i]);
+			multiplier *= 2.0;
+		}
+		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
+	} else {
+		luminosity = 0.75;
 	}
 
-	float maxValue = multiplier - 1.0;
-	blue = blue / maxValue - 0.5;
-	red = red / maxValue - 0.5;
+	float red = 0.0;
+	if (redDepth > 0) {
+		multiplier = 1.0;
+		for (int i = redDepth - 1; i >= 0; i--) {
+			red += multiplier * colorComputation(difference, switchedSum, redModulii[i], redThresholds[i]);
+			multiplier *= 2.0;
+		}
+		red = red / (multiplier - 1.0) - 0.5;
+	}
 
-	fragColor = yuvaToRGBA(luminosity, blue, red, 1.0);
+	float blue = 0.0;
+	if (blueDepth > 0) {
+		multiplier = 1.0;
+		for (int i = blueDepth - 1; i >= 0; i--) {
+			blue += multiplier * colorComputation(difference, switchedSum, blueModulii[i], blueThresholds[i]);
+			multiplier *= 2.0;
+		}
+		blue = blue / (multiplier - 1.0) - 0.5;
+	}
+
+	float brightness = max(abs(red), abs(blue));
+	if (luminosity >= brightness) {
+		luminosity = (luminosity - brightness) / (1.0 - brightness);
+	} else {
+		brightness = luminosity / brightness;
+		red *= brightness;
+		blue *= brightness;
+		luminosity = 0.0;
+	}
+
+	fragColor = yuvaToRGBAMat * vec4(luminosity, blue, red, 1.0);
 
 }

@@ -1,6 +1,6 @@
 export default function TrigPatterns() {
 	const me = this;
-	this.title = 'Trigonometry Patterns';
+	this.title = 'Trigonometry Swirls';
 	this.helpFile = 'help/trig-swirls.html';
 	this.isShader = true;
 
@@ -30,16 +30,28 @@ export default function TrigPatterns() {
 	this.offsetX = 0;
 	this.offsetY = 0;
 	this.zoom = 1.8;
-	this.modulii = [90, 112, 200, 134];
-	this.thresholds = [100, 587, 156, 412];
-	this.bitDepth = 4;
+	this.luminosityModulii = [90, 0];
+	// [0..1] / 10 + 0.125
+	this.luminosityThresholds = [0.1264, 0];
+	this.luminosityDepth = 1;
+
+	this.redModulii = [112, 0];
+	this.redThresholds = [0.1837, 0];
+	this.redDepth = 1;
+
+	this.blueModulii = [200, 0];
+	this.blueThresholds = [0.1406, 0];
+	this.blueDepth = 1;
 }
 
 TrigPatterns.prototype.animatable = {
 	continuous: [
-		'zoom', 'offsetX', 'offsetY', 'modulii', 'thresholds',
+		'offsetX', 'offsetY', 'zoom',
+		'luminosityModulii', 'luminosityThresholds',
+		'redModulii', 'redThresholds',
+		'blueModulii', 'blueThresholds',
 	],
 	stepped: [
-		'bitDepth',
+		'luminosityDepth', 'redDepth', 'blueDepth',
 	],
 }

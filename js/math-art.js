@@ -164,9 +164,6 @@ function hasRandomness(enabled) {
 			return typeName;
 		}
 
-		/**
-		 * @param {boolean} isArrayElement	true if we're setting a single element inside an array.
-		 */
 		assignValue(gl, location, value) {
 			const category = this.category;
 			const isArray = this.length !== undefined;

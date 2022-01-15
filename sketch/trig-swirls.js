@@ -2,6 +2,7 @@ export default function TrigPatterns() {
 	const me = this;
 	this.title = 'Trigonometry Swirls';
 	this.helpFile = 'help/trig-swirls.html';
+	this.backgroundColor = [0, 0, 0];
 	this.isShader = true;
 
 	this.optionsDocument = downloadFile('trig-swirls.html', 'document').then(function (optionsDoc) {

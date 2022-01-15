@@ -13,6 +13,7 @@ float colorComputation(float difference, float sum, float modulus, float thresho
 	float differenceMod = mod(difference, modulus) - 0.75 * modulus;
 	float sumMod = mod(sum, modulus) - 0.75 * modulus;
 	float sumSquares = differenceMod * differenceMod + sumMod * sumMod;
+	// return max((threshold - sumSquares) / threshold, 0.0);
 	return sumSquares < threshold ? 1.0 : 0.0;
 }
 
@@ -26,19 +27,8 @@ void main() {
 	float difference = abs(x * c + y * s);
 	float switchedSum = abs(y * c + x * s);
 
-	float luminosity = 0.0;
+	bool transparent = false;
 	float multiplier;
-	if (luminosityDepth > 0) {
-		multiplier = 2.0;
-		for (int i = luminosityDepth - 1; i >= 0; i--) {
-			luminosity += multiplier * colorComputation(difference, switchedSum, luminosityModulii[i], luminosityThresholds[i]);
-			multiplier *= 2.0;
-		}
-		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
-	} else {
-		luminosity = 0.75;
-	}
-
 	float red = 0.0;
 	if (redDepth > 0) {
 		multiplier = 1.0;
@@ -46,6 +36,7 @@ void main() {
 			red += multiplier * colorComputation(difference, switchedSum, redModulii[i], redThresholds[i]);
 			multiplier *= 2.0;
 		}
+		transparent = red < 0.5;
 		red = red / (multiplier - 1.0) - 0.5;
 	}
 
@@ -56,7 +47,26 @@ void main() {
 			blue += multiplier * colorComputation(difference, switchedSum, blueModulii[i], blueThresholds[i]);
 			multiplier *= 2.0;
 		}
+		transparent = transparent && blue < 0.5;
 		blue = blue / (multiplier - 1.0) - 0.5;
+	}
+
+
+	float luminosity = 0.0;
+	float alpha = 1.0;
+	if (luminosityDepth > 0) {
+		multiplier = 2.0;
+		for (int i = luminosityDepth - 1; i >= 0; i--) {
+			luminosity += multiplier * colorComputation(difference, switchedSum, luminosityModulii[i], luminosityThresholds[i]);
+			multiplier *= 2.0;
+		}
+		transparent = transparent && luminosity < 1.0;
+		if (transparent) {
+			alpha = 2.0 * luminosity / multiplier;
+		}
+		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
+	} else {
+		luminosity = 0.75;
 	}
 
 	float brightness = max(abs(red), abs(blue));
@@ -68,7 +78,6 @@ void main() {
 		blue *= brightness;
 		luminosity = 0.0;
 	}
-
-	fragColor = yuvaToRGBAMat * vec4(luminosity, blue, red, 1.0);
+	fragColor = yuvaToRGBAMat * vec4(luminosity, blue, red, alpha);
 
 }

@@ -3732,6 +3732,26 @@ function hasRandomness(enabled) {
 		}
 	});
 
+	const pictureWidths = new Map();
+	pictureWidths.set('px', [1920, 1366, 1280, 1024, 640]);
+	pictureWidths.set('in', [5, 6, 7, 8, 10, 12, 16, 18, 20, 24, 30, 36, 40, 60]);
+	pictureWidths.set('mm', [85, 148, 210, 297, 420, 594, 841, 1189]);
+
+	const pictureHeights = new Map();
+	pictureHeights.set('px', [1080, 768, 720, 480, 360]);
+	pictureHeights.set('in', [4, 5, 6, 8, 12, 16, 18, 20, 24, 30, 36, 40]);
+	pictureHeights.set('mm', [55, 105, 148, 210, 297, 420, 594, 841]);
+
+	const paperSizeNames = new Map();
+	paperSizeNames.set('85x55', 'Business Card');
+	paperSizeNames.set('148x105', 'A6 (Postcard)');
+	paperSizeNames.set('210x148', 'A5');
+	paperSizeNames.set('297x210', 'A4');
+	paperSizeNames.set('420x297', 'A3');
+	paperSizeNames.set('594x420', 'A2');
+	paperSizeNames.set('841x594', 'A1');
+	paperSizeNames.set('1189x841', 'A0');
+
 	document.getElementById('btn-render-pic').addEventListener('click', function (event) {
 		const downloadModal = document.getElementById('save-pic-modal');
 		const background = queryChecked(downloadModal, 'paper-type');

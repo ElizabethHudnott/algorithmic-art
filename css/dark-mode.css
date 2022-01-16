@@ -3,12 +3,17 @@
 	--form-color: hsl(220, 25%, 11%);
 }
 
+a {
+	color: hsl(225, 100%, 40%);
+}
+
 .btn-black, #toolbar-main, .modal-floating .modal-body>.nav-tabs {
 	background-color: var(--darkslate);
 }
 
 .bg-black, .form-control, .modal-body, .nav-tabs a.nav-link {
 	background-color: black;
+	text-shadow: none;
 }
 
 input[type="color"], .input-group-text {
@@ -26,6 +31,10 @@ input[type="color"], .form-control, .input-group-text {
 
 .btn-form:hover {
 	color: white;
+}
+
+.card-body {
+	background-color: black;
 }
 
 .form-control-range {
@@ -76,6 +85,25 @@ input[type="color"], .form-control, .input-group-text {
 
 .nav-tabs {
 	background-color: transparent;
+}
+
+.nav-tabs a.nav-link {
+	border-color: #666;
+}
+
+.nav-tabs .nav-link:hover {
+	background-color: hsl(210, 50%, 50%);
+	color: unset;
+}
+
+.nav-tabs .nav-link.active {
+	background-color: hsl(210, 50%, 30%);
+	border-color: #999;
+}
+
+.nav-tabs .nav-link.active:hover {
+	background-color: hsl(210, 50%, 50%);
+	border-color: #ddd;
 }
 
 #rotation-sizing-row .form-check {

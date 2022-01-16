@@ -751,17 +751,17 @@
 					<div class="col-auto pl-0">
 						<select id="pic-resolution-units" class="form-control form-control-sm">
 							<option value="px">pixels</option>
-							<option value="cm">cm</option>
 							<option value="in">in</option>
+							<option value="mm">mm</option>
 						</select>
 					</div>
 				</div>
-				<div class="form-row form-group">
+				<div class="form-row form-group collapse">
 					<label class="col-3 col-form-label col-form-label-sm" for="pic-dpi">
 						DPI
 					</label>
 					<div class="col-3">
-						<input type="number" min="50" step="50" value="300" disabled class="form-control form-control-sm" id="pic-dpi">
+						<input type="number" min="50" step="50" value="300" class="form-control form-control-sm" id="pic-dpi">
 					</div>
 				</div>
 				<div class="form-row form-group">
@@ -804,6 +804,49 @@
 								Create an image as if the window was the this size
 							</label>
 						</div>
+						<div>
+							<small class="form-text text-muted">
+								Tip: Leave either the width or the height empty to minimize distortion caused by resizing.
+							</small>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group" id="pic-same-orientation" hidden>
+					<div class="col-3 col-form-label col-form-label-sm">
+						Orientation
+					</div>
+					<div class="col-8">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-rotation" id="pic-rotation-0" value="0">
+							<label class="form-check-label small" for="pic-rotation-0">
+								As is
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-rotation" id="pic-rotation-180" value="180">
+							<label class="form-check-label small" for="pic-rotation-180">
+								Upside down
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-row form-group" id="pic-other-orientation" hidden>
+					<div class="col-3 col-form-label col-form-label-sm">
+						Orientation
+					</div>
+					<div class="col-8">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-rotation" id="pic-rotation-90" value="90">
+							<label class="form-check-label small" for="pic-rotation-90">
+								Clockwise rotation
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="pic-rotation" id="pic-rotation-270" value="270">
+							<label class="form-check-label small" for="pic-rotation-270">
+								Anticlockwise rotation
+							</label>
+						</div>
 					</div>
 				</div>
 				<div class="form-row form-group">
@@ -832,7 +875,7 @@
 					<div class="col-1">
 						<img src="img/record.png" width="16" height="16" loading="lazy" alt="Rendering" id="rendering-indicator">
 					</div>
-					<div class="col-auto col-form-label col-form-label-sm" id="pic-progreess">
+					<div class="col-auto col-form-label col-form-label-sm" id="pic-progress">
 					</div>
 				</div>
 				<div class="form-row form-group">
@@ -924,7 +967,7 @@
 						</dl>
 
 						<h5>Getting Involved</h5>
-						<p>If you find anything broken then please report it on <a href="https://github.com/mathematical-art/mathematical-art.github.io/issues" target="_blank" rel="noopener"> GitHub</a>. Feel free to make suggestions for future enhancements there too. I hope you enjoy the site, whether your interests are art, maths, entertainment, relaxing visual stimuli, or something else. If you want to and are able to then please consider supporting my work via <a href="https://www.patreon.com/bePatron?u=23440273">Patreon</a> or by sharing a link on social media.</p>
+						<p>If you find anything broken then please report it on <a href="https://github.com/mathematical-art/mathematical-art.github.io/issues" target="_blank" rel="noopener"> GitHub</a>. Feel free to make suggestions for future enhancements there too. I hope you enjoy the site, whether your interests are art, maths, entertainment, relaxing visual stimuli, or something else. If you want to and are able to then please consider supporting my work via <a href="https://www.patreon.com/bePatron?u=23440273" target="_blank" rel="noopener">Patreon</a> or by sharing a link on social media.</p>
 
 						<h5 id="licence">Licence Agreement</h5>
 						<p>This website may be used without charge subject to the following conditions.</p>

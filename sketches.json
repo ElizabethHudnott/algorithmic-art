@@ -50,10 +50,11 @@
 			"keywords": ["fractals", "recursion", "squares"]
 		},
 		{
-			"title": "Trigonometric Swirls",
+			"title": "Trigonometry Swirls",
 			"url": "trig-swirls.js",
+			"thumbnail": "trig-swirls.webp",
 			"author": "Elizabeth Hudnott",
-			"keywords": ["BBC Micro", "BASIC", "trigonometry", "swirls"]
+			"keywords": ["BBC Micro", "BASIC", "trigonometry", "concentric"]
 
 		},
 		{

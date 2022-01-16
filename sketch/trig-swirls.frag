@@ -8,13 +8,14 @@ const mat4 yuvaToRGBAMat = mat4(
 	0.0,					0.0,											0.0,					1.0
 );
 
-float colorComputation(float difference, float sum, float modulus, float threshold) {
+float colorComputation(float difference, float sum, float modulus, float threshold, int steps) {
 	threshold = threshold * modulus * modulus;
 	float differenceMod = mod(difference, modulus) - 0.75 * modulus;
 	float sumMod = mod(sum, modulus) - 0.75 * modulus;
 	float sumSquares = differenceMod * differenceMod + sumMod * sumMod;
-	// return max((threshold - sumSquares) / threshold, 0.0);
-	return sumSquares < threshold ? 1.0 : 0.0;
+	float value = max((threshold - sumSquares) / threshold, 0.0);
+	float floatSteps = float(steps);
+	return ceil(value * floatSteps) / floatSteps;
 }
 
 void main() {
@@ -33,7 +34,7 @@ void main() {
 	if (redDepth > 0) {
 		multiplier = 1.0;
 		for (int i = redDepth - 1; i >= 0; i--) {
-			red += multiplier * colorComputation(difference, switchedSum, redModulii[i], redThresholds[i]);
+			red += multiplier * colorComputation(difference, switchedSum, redModulii[i], redThresholds[i], redSteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = red < 0.5;
@@ -44,7 +45,7 @@ void main() {
 	if (blueDepth > 0) {
 		multiplier = 1.0;
 		for (int i = blueDepth - 1; i >= 0; i--) {
-			blue += multiplier * colorComputation(difference, switchedSum, blueModulii[i], blueThresholds[i]);
+			blue += multiplier * colorComputation(difference, switchedSum, blueModulii[i], blueThresholds[i], blueSteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = transparent && blue < 0.5;
@@ -57,12 +58,13 @@ void main() {
 	if (luminosityDepth > 0) {
 		multiplier = 2.0;
 		for (int i = luminosityDepth - 1; i >= 0; i--) {
-			luminosity += multiplier * colorComputation(difference, switchedSum, luminosityModulii[i], luminosityThresholds[i]);
+			luminosity += multiplier *
+				colorComputation(difference, switchedSum, luminosityModulii[i], luminosityThresholds[i], luminositySteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = transparent && luminosity < 1.0;
 		if (transparent) {
-			alpha = 2.0 * luminosity / multiplier;
+			alpha = luminosity;
 		}
 		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
 	} else {

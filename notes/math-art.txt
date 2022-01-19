@@ -1,4 +1,4 @@
-desynchronized canvas?
+Panning
 Phyllotaxis
 	Petal shape
 		allow continuum between ellipse and rectangle?
@@ -24,6 +24,7 @@ Bug: need to load & save loop + full rotation options as part of the document
 Finish dark mode
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
+desynchronized canvas?
 Epilepsy warning
 Logo
 	add to notifications

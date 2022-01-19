@@ -1,24 +1,109 @@
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="trig-offset-x">
-		X
-	</label>
-	<div class="col-9">
-		<input type="range" min="0" max="1" step="0.004" value="0" class="form-control-range mt-2" id="trig-offset-x">
+<ul class="nav nav-tabs mb-3" role="tablist">
+	<li class="nav-item" role="presentation">
+		<a class="nav-link active" id="swirl-geometry-tab" data-toggle="tab" href="#swirl-geometry" role="tab" aria-controls="swirl-geometry" aria-selected="true">
+			Geometry
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="swirl-luminosity-tab" data-toggle="tab" href="#swirl-luminosity" role="tab" aria-controls="swirl-luminosity" aria-selected="false">
+			Luminosity
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="swirl-red-tab" data-toggle="tab" href="#swirl-red" role="tab" aria-controls="swirl-red" aria-selected="false">
+			Cyan⬌Red
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="swirl-blue-tab" data-toggle="tab" href="#swirl-blue" role="tab" aria-controls="swirl-blue" aria-selected="false">
+			Yellow⬌Blue
+		</a>
+	</li>
+</ul>
+
+<div class="tab-content">
+	<div class="tab-pane active" id="swirl-geometry" role="tabpanel" aria-labelledby="swirl-geometry-tab">
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-offset-x">
+				Offset X
+			</label>
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-offset-x">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="swirl-offset-x" title="Reset x-offset">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-offset-y">
+				Offset Y
+			</label>
+			<div class="col-7">
+				<input type="range" min="-1" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-offset-y">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="swirl-offset-y" title="Reset y-offset">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-zoom">
+				Zoom
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.5" step="0.1" value="1.8" class="form-control form-control-sm" id="swirl-zoom">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-translate-x">
+				Translate X
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.01" value="0" class="form-control form-control-sm" id="swirl-translate-x">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="swirl-translate-y">
+				Translate Y
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.01" value="0" class="form-control form-control-sm" id="swirl-translate-y">
+			</div>
+		</div>
 	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="trig-offset-y">
-		Y
-	</label>
-	<div class="col-9">
-		<input type="range" min="0" max="1" step="0.004" value="0" class="form-control-range mt-2" id="trig-offset-y">
+
+	<div class="tab-pane" id="swirl-luminosity" role="tabpanel" aria-labelledby="swirl-luminosity-tab">
+		<div class="form-row form-group">
+			<label class="col-2 col-form-label col-form-label-sm" for="swirl-luminosity-depth">
+				Number of Swirls
+			</label>
+			<div class="col-3">
+				<input type="number" min="0" max="3" value="1" class="form-control form-control-sm" id="swirl-luminosity-depth">
+			</div>
+		</div>
+		<table>
+			<tr>
+				<th class="col-2">Modulus</th>
+				<th class="col-8">Subtraction &amp; Threshold</th>
+				<th class="col-2">Steps</th>
+			</tr>
+			<tr>
+				<td>
+					<input type="number" min="5" step="5" value="90" class="form-control form-control-sm" id="swirl-luminosity-modulus-0">
+				</td>
+				<td>
+					<input type="range" min="0" max="1" step="0.002" value="0.75" class="form-control-range" id="swirl-luminosity-shift-0"><br>
+
+				</td>
+			</tr>
+		</table>
 	</div>
-</div>
-<div class="form-row form-group">
-	<label class="col-3 col-form-label col-form-label-sm" for="trig-zoom">
-		Zoom
-	</label>
-	<div class="col-3">
-		<input type="number" min="0.5" step="0.1" value="1.8" class="form-control form-control-sm" id="trig-zoom">
+
+	<div class="tab-pane" id="swirl-red" role="tabpanel" aria-labelledby="swirl-red-tab">
 	</div>
+
+	<div class="tab-pane" id="swirl-blue" role="tabpanel" aria-labelledby="swirl-blue-tab">
+	</div>
+
 </div>

@@ -158,8 +158,13 @@ function clearComboboxesOnFocus() {
 		}
 	}
 
+	function keyup() {
+		this.savedValue = this.value;
+	}
+
 	const comboboxes = document.querySelectorAll('input[list]');
 	for (let combobox of comboboxes) {
+		combobox.addEventListener('keyup', keyup);
 		combobox.addEventListener('focus', clear);
 		combobox.addEventListener('blur', restore);
 	}

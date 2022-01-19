@@ -49,7 +49,7 @@ export default function TrigPatterns() {
 	this.luminosityThresholds = [0.1011, 0.1, 0.1];
 	this.luminosityDepth = 1;
 	this.luminositySteps = [171, 1, 1];	// 1..171
-	this.luminosityOffset = 0;			// -1/2..29/31
+	this.luminosityOffset = 0;			// -0.6..29/31
 
 	this.redModulii = [115, 2, 2];
 	this.redShift = [0.75, 0.75, 0.75];	 // 0..1
@@ -64,6 +64,8 @@ export default function TrigPatterns() {
 	this.blueDepth = 1;
 	this.blueSteps = [1, 1, 1];			// 1..255
 	this.blueOffset = 0;				// -0.5..0.5
+
+	this.alphaThreshold = 0;
 }
 
 TrigPatterns.prototype.animatable = {
@@ -72,11 +74,12 @@ TrigPatterns.prototype.animatable = {
 		'luminosityModulii', 'luminosityThresholds',
 		'redModulii', 'redThresholds',
 		'blueModulii', 'blueThresholds',
-		'luminosityOffset', 'redOffset', 'blueOffset',
 		'luminosityShift', 'redShift', 'blueShift',
+		'luminositySteps', 'redSteps', 'blueSteps',
+		'luminosityOffset', 'redOffset', 'blueOffset',
+		'alphaThreshold',
 	],
 	stepped: [
 		'luminosityDepth', 'redDepth', 'blueDepth',
-		'luminositySteps', 'redSteps', 'blueSteps',
 	],
 }

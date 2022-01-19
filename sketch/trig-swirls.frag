@@ -8,29 +8,30 @@ const mat4 yuvaToRGBAMat = mat4(
 	0.0,					0.0,											0.0,					1.0
 );
 
-float colorComputation(float difference, float sum, float modulus, float shift, float threshold, int steps) {
+float colorComputation(float difference, float sum, float modulus, float shift, float threshold, float steps) {
 	threshold = threshold * (3.0 * abs(0.5 - shift) + 0.5) * modulus * modulus;
 	float differenceMod = mod(difference, modulus) - shift * modulus;
 	float sumMod = mod(sum, modulus) - shift * modulus;
 	float sumSquares = differenceMod * differenceMod + sumMod * sumMod;
 	float value = max((threshold - sumSquares) / threshold, 0.0);
-	float floatSteps = float(steps);
-	return ceil(value * floatSteps) / floatSteps;
+	return ceil(value * steps) / steps;
 }
 
 void main() {
-	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom + translateX * canvasWidth;
+	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom - translateX * canvasWidth;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY * canvasHeight;
 
-	float wave = sin(x / 40.0 + offsetX) + cos(y / 40.0 + offsetY);
+	float wave = sin(x / 40.0 - offsetX) + cos(y / 40.0 + offsetY);
 	float s = sin(wave);
 	float c = cos(wave);
 	float difference = abs(x * c + y * s);
 	float switchedSum = abs(y * c + x * s);
 
-	bool transparent = false;
+	bool transparent = true;
 	float multiplier;
 	float red = 0.0;
+	float minRed;
+	float maxValue;
 	if (redDepth > 0) {
 		multiplier = 1.0;
 		for (int i = redDepth - 1; i >= 0; i--) {
@@ -39,11 +40,14 @@ void main() {
 			multiplier *= 2.0;
 		}
 		transparent = red < 0.5;
-		red = red / (multiplier - 1.0) - 0.5;
+		maxValue = multiplier - 1.0;
+		red = red / maxValue - 0.5;
+		minRed = 1.0 / maxValue;
 	}
 	red = clamp(red + redOffset, -0.5, 0.5);
 
 	float blue = 0.0;
+	float minBlue;
 	if (blueDepth > 0) {
 		multiplier = 1.0;
 		for (int i = blueDepth - 1; i >= 0; i--) {
@@ -52,12 +56,13 @@ void main() {
 			multiplier *= 2.0;
 		}
 		transparent = transparent && blue < 0.5;
-		blue = blue / (multiplier - 1.0) - 0.5;
+		maxValue = multiplier - 1.0;
+		blue = blue / maxValue - 0.5;
+		minBlue = 1.0 / maxValue;
 	}
 	blue = clamp(blue + blueOffset, -0.5, 0.5);
 
 	float luminosity = 0.0;
-	float alpha = 1.0;
 	if (luminosityDepth > 0) {
 		multiplier = 2.0;
 		for (int i = luminosityDepth - 1; i >= 0; i--) {
@@ -66,18 +71,20 @@ void main() {
 					luminosityShift[i], luminosityThresholds[i], luminositySteps[i]);
 			multiplier *= 2.0;
 		}
-		transparent = transparent && luminosity < 1.0;
-		if (transparent) {
-			alpha = luminosity;
-		}
+		transparent = transparent && luminosity <= alphaThreshold * (multiplier - 2.0);
 		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
 	} else {
-		luminosity = 0.5;
-		if (transparent) {
-			alpha = 0.0;
-		}
+		luminosity = 0.6;
 	}
 	luminosity = clamp(luminosity + luminosityOffset, 0.0, 1.0);
+
+	float alpha = 1.0;
+	if (transparent) {
+		alpha = max(
+			redDepth  > 0 ? (red + 0.5) / minRed : 0.0,
+			blueDepth > 0 ? (blue + 0.5) / minBlue : 0.0
+		);
+	}
 
 	float brightness = max(abs(red), abs(blue));
 	if (luminosity >= brightness) {

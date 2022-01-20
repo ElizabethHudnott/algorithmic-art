@@ -7,15 +7,35 @@ export default function TrigPatterns() {
 
 	this.optionsDocument = downloadFile('trig-swirls.html', 'document').then(function (optionsDoc) {
 
-		optionsDoc.getElementById('swirl-offset-x').addEventListener('input', function (event) {
-			setBgProperty(me, 'offsetX', parseFloat(this.value) * TWO_PI);
+		function updatePhaseX() {
+			const turns = parseInt(document.getElementById('swirl-phase-x-turns').value) || 0;
+			let sign = Math.sign(turns);
+			if (sign === 0) {
+				sign = 1;
+			}
+			const fraction = parseFloat(document.getElementById('swirl-phase-x').value);
+			const value = sign * (Math.abs(turns) + fraction) * TWO_PI;
+			setBgProperty(me, 'phaseX', value);
 			generateBackground(0);
-		});
+		}
 
-		optionsDoc.getElementById('swirl-offset-y').addEventListener('input', function (event) {
-			setBgProperty(me, 'offsetY', parseFloat(this.value) * TWO_PI);
+		optionsDoc.getElementById('swirl-phase-x').addEventListener('input', updatePhaseX);
+		optionsDoc.getElementById('swirl-phase-x-turns').addEventListener('input', updatePhaseX);
+
+		function updatePhaseY() {
+			const turns = parseInt(document.getElementById('swirl-phase-y-turns').value) || 0;
+			let sign = Math.sign(turns);
+			if (sign === 0) {
+				sign = 1;
+			}
+			const fraction = parseFloat(document.getElementById('swirl-phase-y').value);
+			const value = sign * (Math.abs(turns) + fraction) * TWO_PI;
+			setBgProperty(me, 'phaseY', value);
 			generateBackground(0);
-		});
+		}
+
+		optionsDoc.getElementById('swirl-phase-y').addEventListener('input', updatePhaseY);
+		optionsDoc.getElementById('swirl-phase-y-turns').addEventListener('input', updatePhaseY);
 
 		optionsDoc.getElementById('swirl-zoom').addEventListener('input', function (event) {
 			const value = parseFloat(this.value);
@@ -26,20 +46,26 @@ export default function TrigPatterns() {
 		});
 
 		optionsDoc.getElementById('swirl-translate-x').addEventListener('input', function (event) {
-			setBgProperty(me, 'translateX', parseFloat(this.value) / 1.8);
-			generateBackground(0);
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'translateX', value);
+				generateBackground(0);
+			}
 		});
 
 		optionsDoc.getElementById('swirl-translate-y').addEventListener('input', function (event) {
-			setBgProperty(me, 'translateY', parseFloat(this.value) / 1.8);
-			generateBackground(0);
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				setBgProperty(me, 'translateY', value);
+				generateBackground(0);
+			}
 		});
 
 		return optionsDoc;
 	});
 
-	this.offsetX = 0;
-	this.offsetY = 0;
+	this.phaseX = 0;
+	this.phaseY = 0;
 	this.zoom = 1.8;
 	this.translateX = 0;
 	this.translateY = 0;
@@ -70,7 +96,7 @@ export default function TrigPatterns() {
 
 TrigPatterns.prototype.animatable = {
 	continuous: [
-		'offsetX', 'offsetY', 'zoom', 'translateX', 'translateY',
+		'phaseX', 'phaseY', 'zoom', 'translateX', 'translateY',
 		'luminosityModulii', 'luminosityThresholds',
 		'redModulii', 'redThresholds',
 		'blueModulii', 'blueThresholds',

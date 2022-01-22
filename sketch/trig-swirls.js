@@ -61,6 +61,21 @@ export default function TrigPatterns() {
 			}
 		});
 
+		function setDepth(event) {
+			const value = parseFloat(this.value);
+			const intValue = Math.ceil(value);
+			if (intValue >= 0 && intValue <= 3) {
+				const words = this.id.split('-');
+				const channel = words[1];
+				for (let i = 0; i < 3; i++) {
+					const row = $('#swirl-' + channel + '-plane-' + i);
+					row.collapse(i + 1 <= intValue ? 'show' : 'hide');
+				}
+				setBgProperty(me, channel + 'Depth', value);
+				generateBackground(0);
+			}
+		}
+
 		function setModulus(event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
@@ -90,9 +105,24 @@ export default function TrigPatterns() {
 			generateBackground(0);
 		}
 
-		optionsDoc.getElementById('swirl-luminosity-modulus-0').addEventListener('input', setModulus);
-		optionsDoc.getElementById('swirl-luminosity-shift-0').addEventListener('input', setShift);
-		optionsDoc.getElementById('swirl-luminosity-threshold-0').addEventListener('input', setThreshold);
+		function setSteps(event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				const words = this.id.split('-');
+				const channel = words[1];
+				const bitplane = words[3];
+				setBgPropertyElement(me, channel + 'Steps', bitplane, value);
+				generateBackground(0);
+			}
+		}
+
+		optionsDoc.getElementById('swirl-luminosity-depth').addEventListener('input', setDepth);
+		for (let i = 0; i < 3; i++) {
+			optionsDoc.getElementById('swirl-luminosity-modulus-' + i).addEventListener('input', setModulus);
+			optionsDoc.getElementById('swirl-luminosity-shift-' + i).addEventListener('input', setShift);
+			optionsDoc.getElementById('swirl-luminosity-threshold-' + i).addEventListener('input', setThreshold);
+			optionsDoc.getElementById('swirl-luminosity-steps-' + i).addEventListener('input', setSteps);
+		}
 
 		return optionsDoc;
 	});
@@ -107,7 +137,7 @@ export default function TrigPatterns() {
 	this.luminosityShift = [0.63, 0.63, 0.63];
 	this.luminosityThreshold = [0.1, 0.1, 0.1];
 	this.luminosityDepth = 1;
-	this.luminositySteps = [171, 1, 1];
+	this.luminositySteps = [43, 1, 1];
 	this.luminosityOffset = 0;
 
 	this.redModulus = [110, 100, 100];

@@ -93,17 +93,44 @@
 		</div>
 		<table>
 			<tr>
-				<th class="col-2">Modulus</th>
+				<th class="col-2 pb-1">Modulus</th>
 				<th class="col-8">Subtraction &amp; Threshold</th>
 				<th class="col-2">Steps</th>
 			</tr>
-			<tr>
-				<td>
+			<tr class="collapse show" id="swirl-luminosity-plane-0">
+				<td class="pb-5">
 					<input type="number" min="5" step="5" value="90" class="form-control form-control-sm" id="swirl-luminosity-modulus-0">
 				</td>
-				<td>
+				<td class="pb-5">
 					<input type="range" min="0" max="1" step="0.0025" value="0.63" class="form-control-range" id="swirl-luminosity-shift-0"><br>
 					<input type="range" min="0" max="1" step="0.004" value="0.1" class="form-control-range" id="swirl-luminosity-threshold-0">
+				</td>
+				<td class="pb-5">
+					<input type="number" min="1" value="43" class="form-control form-control-sm" id="swirl-luminosity-steps-0">
+				</td>
+			</tr>
+			<tr class="collapse" id="swirl-luminosity-plane-1">
+				<td class="pb-5">
+					<input type="number" min="5" step="5" value="100" class="form-control form-control-sm" id="swirl-luminosity-modulus-1">
+				</td>
+				<td class="pb-5">
+					<input type="range" min="0" max="1" step="0.0025" value="0.63" class="form-control-range" id="swirl-luminosity-shift-1"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.1" class="form-control-range" id="swirl-luminosity-threshold-1">
+				</td>
+				<td class="pb-5">
+					<input type="number" min="1" value="1" class="form-control form-control-sm" id="swirl-luminosity-steps-1">
+				</td>
+			</tr>
+			<tr class="collapse" id="swirl-luminosity-plane-2">
+				<td>
+					<input type="number" min="5" step="5" value="100" class="form-control form-control-sm" id="swirl-luminosity-modulus-2">
+				</td>
+				<td>
+					<input type="range" min="0" max="1" step="0.0025" value="0.63" class="form-control-range" id="swirl-luminosity-shift-2"><br>
+					<input type="range" min="0" max="1" step="0.004" value="0.1" class="form-control-range" id="swirl-luminosity-threshold-2">
+				</td>
+				<td>
+					<input type="number" min="1" value="1" class="form-control form-control-sm" id="swirl-luminosity-steps-2">
 				</td>
 			</tr>
 		</table>

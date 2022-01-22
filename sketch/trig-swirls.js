@@ -61,6 +61,29 @@ export default function TrigPatterns() {
 			}
 		});
 
+		function setModulus(event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				const words = this.id.split('-');
+				const channel = words[1];
+				const bitplane = words[3];
+				setBgPropertyElement(me, channel + 'Modulii', bitplane, value);
+				generateBackground(0);
+			}
+		}
+
+		function setShift(event) {
+			const value = parseFloat(this.value);
+			const words = this.id.split('-');
+			const channel = words[1];
+			const bitplane = words[3];
+			setBgPropertyElement(me, channel + 'Shift', bitplane, value);
+			generateBackground(0);
+		}
+
+		optionsDoc.getElementById('swirl-luminosity-modulii-0').addEventListener('input', setModulus);
+		optionsDoc.getElementById('swirl-luminosity-shift-0').addEventListener('input', setShift);
+
 		return optionsDoc;
 	});
 
@@ -70,21 +93,21 @@ export default function TrigPatterns() {
 	this.translateX = 0;
 	this.translateY = 0;
 
-	this.luminosityModulii = [90, 2, 2];
-	this.luminosityShift = [0.75, 0.75, 0.75];	// 0..1
+	this.luminosityModulii = [90, 100, 100];
+	this.luminosityShift = [0.75, 0.75, 0.75];	// -0.4..1.4
 	this.luminosityThresholds = [0.1011, 0.1, 0.1];
 	this.luminosityDepth = 1;
-	this.luminositySteps = [171, 1, 1];	// 1..171
-	this.luminosityOffset = 0;			// -0.6..29/31
+	this.luminositySteps = [171, 1, 1];
+	this.luminosityOffset = 0;
 
-	this.redModulii = [115, 2, 2];
+	this.redModulii = [115, 100, 100];
 	this.redShift = [0.75, 0.75, 0.75];	 // 0..1
 	this.redThresholds = [0.1469, 0.1, 0.1];
 	this.redDepth = 1;
 	this.redSteps = [1, 1, 1];			// 1..255
 	this.redOffset = 0;					// -0.5..0.5
 
-	this.blueModulii = [200, 2, 2];
+	this.blueModulii = [200, 100, 100];
 	this.blueShift = [0.75, 0.75, 0.75]; // 0..1
 	this.blueThresholds = [0.1125, 0.1, 0.1];
 	this.blueDepth = 1;

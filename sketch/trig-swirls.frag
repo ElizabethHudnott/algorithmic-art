@@ -9,6 +9,9 @@ const mat4 yuvaToRGBAMat = mat4(
 );
 
 float colorComputation(float difference, float sum, float modulus, float shift, float threshold, float steps) {
+	float minShift = -1.8 * threshold - 0.28;
+	float maxShift = 1.0 - minShift;
+	shift = minShift + shift * (maxShift - minShift);
 	threshold = threshold * (3.0 * abs(0.5 - shift) + 0.5) * modulus * modulus;
 	float differenceMod = mod(difference, modulus) - shift * modulus;
 	float sumMod = mod(sum, modulus) - shift * modulus;

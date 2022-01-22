@@ -67,7 +67,7 @@ export default function TrigPatterns() {
 				const words = this.id.split('-');
 				const channel = words[1];
 				const bitplane = words[3];
-				setBgPropertyElement(me, channel + 'Modulii', bitplane, value);
+				setBgPropertyElement(me, channel + 'Modulus', bitplane, value);
 				generateBackground(0);
 			}
 		}
@@ -81,8 +81,18 @@ export default function TrigPatterns() {
 			generateBackground(0);
 		}
 
-		optionsDoc.getElementById('swirl-luminosity-modulii-0').addEventListener('input', setModulus);
+		function setThreshold(event) {
+			const value = parseFloat(this.value);
+			const words = this.id.split('-');
+			const channel = words[1];
+			const bitplane = words[3];
+			setBgPropertyElement(me, channel + 'Threshold', bitplane, value);
+			generateBackground(0);
+		}
+
+		optionsDoc.getElementById('swirl-luminosity-modulus-0').addEventListener('input', setModulus);
 		optionsDoc.getElementById('swirl-luminosity-shift-0').addEventListener('input', setShift);
+		optionsDoc.getElementById('swirl-luminosity-threshold-0').addEventListener('input', setThreshold);
 
 		return optionsDoc;
 	});
@@ -93,26 +103,26 @@ export default function TrigPatterns() {
 	this.translateX = 0;
 	this.translateY = 0;
 
-	this.luminosityModulii = [90, 100, 100];
-	this.luminosityShift = [0.75, 0.75, 0.75];	// -0.4..1.4
-	this.luminosityThresholds = [0.1011, 0.1, 0.1];
+	this.luminosityModulus = [90, 100, 100];
+	this.luminosityShift = [0.63, 0.63, 0.63];
+	this.luminosityThreshold = [0.1, 0.1, 0.1];
 	this.luminosityDepth = 1;
 	this.luminositySteps = [171, 1, 1];
 	this.luminosityOffset = 0;
 
-	this.redModulii = [115, 100, 100];
-	this.redShift = [0.75, 0.75, 0.75];	 // 0..1
-	this.redThresholds = [0.1469, 0.1, 0.1];
+	this.redModulus = [110, 100, 100];
+	this.redShift = [0.6175, 0.63, 0.63];
+	this.redThreshold = [0.152, 0.1, 0.1];
 	this.redDepth = 1;
-	this.redSteps = [1, 1, 1];			// 1..255
-	this.redOffset = 0;					// -0.5..0.5
+	this.redSteps = [1, 1, 1];
+	this.redOffset = 0;
 
-	this.blueModulii = [200, 100, 100];
-	this.blueShift = [0.75, 0.75, 0.75]; // 0..1
-	this.blueThresholds = [0.1125, 0.1, 0.1];
+	this.blueModulus = [200, 100, 100];
+	this.blueShift = [0.6275, 0.75, 0.75];
+	this.blueThreshold = [0.112, 0.1, 0.1];
 	this.blueDepth = 1;
-	this.blueSteps = [1, 1, 1];			// 1..255
-	this.blueOffset = 0;				// -0.5..0.5
+	this.blueSteps = [1, 1, 1];
+	this.blueOffset = 0;
 
 	this.alphaThreshold = 0;
 }
@@ -120,9 +130,9 @@ export default function TrigPatterns() {
 TrigPatterns.prototype.animatable = {
 	continuous: [
 		'phaseX', 'phaseY', 'zoom', 'translateX', 'translateY',
-		'luminosityModulii', 'luminosityThresholds',
-		'redModulii', 'redThresholds',
-		'blueModulii', 'blueThresholds',
+		'luminosityModulus', 'luminosityThreshold',
+		'redModulus', 'redThreshold',
+		'blueModulus', 'blueThreshold',
 		'luminosityShift', 'redShift', 'blueShift',
 		'luminositySteps', 'redSteps', 'blueSteps',
 		'luminosityOffset', 'redOffset', 'blueOffset',

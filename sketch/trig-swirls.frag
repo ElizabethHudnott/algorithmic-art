@@ -38,8 +38,8 @@ void main() {
 	if (redDepth > 0) {
 		multiplier = 1.0;
 		for (int i = redDepth - 1; i >= 0; i--) {
-			red += multiplier * colorComputation(difference, switchedSum, redModulii[i],
-				redShift[i], redThresholds[i], redSteps[i]);
+			red += multiplier * colorComputation(difference, switchedSum, redModulus[i],
+				redShift[i], redThreshold[i], redSteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = red < 0.5;
@@ -54,8 +54,8 @@ void main() {
 	if (blueDepth > 0) {
 		multiplier = 1.0;
 		for (int i = blueDepth - 1; i >= 0; i--) {
-			blue += multiplier * colorComputation(difference, switchedSum, blueModulii[i],
-				blueShift[i], blueThresholds[i], blueSteps[i]);
+			blue += multiplier * colorComputation(difference, switchedSum, blueModulus[i],
+				blueShift[i], blueThreshold[i], blueSteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = transparent && blue < 0.5;
@@ -70,8 +70,8 @@ void main() {
 		multiplier = 2.0;
 		for (int i = luminosityDepth - 1; i >= 0; i--) {
 			luminosity += multiplier *
-				colorComputation(difference, switchedSum, luminosityModulii[i],
-					luminosityShift[i], luminosityThresholds[i], luminositySteps[i]);
+				colorComputation(difference, switchedSum, luminosityModulus[i],
+					luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
 			multiplier *= 2.0;
 		}
 		transparent = transparent && luminosity <= alphaThreshold * (multiplier - 2.0);

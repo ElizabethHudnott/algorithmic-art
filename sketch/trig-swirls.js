@@ -63,13 +63,14 @@ export default function TrigPatterns() {
 
 		function setDepth(event) {
 			const value = parseFloat(this.value);
-			const intValue = Math.ceil(value);
-			if (intValue >= 0 && intValue <= 3) {
+			if (value >= 0 && Math.ceil(value) <= 3) {
 				const words = this.id.split('-');
 				const channel = words[1];
+				let row = $('#swirl-' + channel + '-headings');
+				row.children().children().collapse(value > 0 ? 'show' : 'hide');
 				for (let i = 0; i < 3; i++) {
-					const row = $('#swirl-' + channel + '-plane-' + i);
-					row.collapse(i + 1 <= intValue ? 'show' : 'hide');
+					row = $('#swirl-' + channel + '-plane-' + i);
+					row.children().children().collapse(value > i ? 'show' : 'hide');
 				}
 				setBgProperty(me, channel + 'Depth', value);
 				generateBackground(0);

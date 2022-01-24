@@ -24,10 +24,13 @@ void main() {
 	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom - translateX / 1.8 * canvasWidth;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;
 
-	float wave = sin(x / 40.0 - phaseX) + cos(y / 40.0 + phaseY);
+	float wave =
+		amplitudeX * sin(x / (40.0 * stretchX) - phaseX) +
+		amplitudeY * cos(y / (40.0 * stretchY) + phaseY);
+
 	float s = sin(wave);
 	float c = cos(wave);
-	float difference = abs(x * c + y * s);
+	float difference = abs(x * c - y * s);
 	float switchedSum = abs(y * c + x * s);
 
 	bool transparent = true;

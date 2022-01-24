@@ -23,6 +23,55 @@
 
 <div class="tab-content">
 	<div class="tab-pane active" id="swirl-geometry" role="tabpanel" aria-labelledby="swirl-geometry-tab">
+		<div class="form-row mb-2">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-amplitude-y">
+				Amplitude X
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="1" class="form-control form-control-sm" id="swirl-amplitude-y">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="swirl-amplitude-x">
+				Amplitude Y
+			</label>
+			<div class="col-3">
+				<input type="number" step="0.05" value="1" class="form-control form-control-sm" id="swirl-amplitude-x">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<div class="col-3"></div>
+			<div class="col-3">
+				<button class="btn btn-form btn-sm w-100" id="swirl-looser">
+					Looser
+				</button>
+			</div>
+			<div class="col-3">
+				<button class="btn btn-form btn-sm w-100" id="swirl-tighter">
+					Tighter
+				</button>
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-stretch-x">
+				Stretch X
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.03" step="0.03" value="1" class="form-control form-control-sm" id="swirl-stretch-x">
+			</div>
+			<label class="col-3 second-col col-form-label col-form-label-sm" for="swirl-stretch-y">
+				Stretch Y
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.03" step="0.03" value="1" class="form-control form-control-sm" id="swirl-stretch-y">
+			</div>
+		</div>
+		<div class="form-row form-group">
+			<label class="col-3 col-form-label col-form-label-sm" for="swirl-zoom">
+				Zoom
+			</label>
+			<div class="col-3">
+				<input type="number" min="0.5" step="0.1" value="1.8" class="form-control form-control-sm" id="swirl-zoom">
+			</div>
+		</div>
 		<table class="form-row form-group d-table">
 			<tr>
 				<td class="col-3"></td>
@@ -72,14 +121,6 @@
 				<input type="number" step="0.01" value="0" class="form-control form-control-sm" id="swirl-translate-y">
 			</div>
 		</div>
-		<div class="form-row form-group">
-			<label class="col-3 col-form-label col-form-label-sm" for="swirl-zoom">
-				Zoom
-			</label>
-			<div class="col-3">
-				<input type="number" min="0.5" step="0.1" value="1.8" class="form-control form-control-sm" id="swirl-zoom">
-			</div>
-		</div>
 	</div>
 
 	<div class="tab-pane" id="swirl-luminosity" role="tabpanel" aria-labelledby="swirl-luminosity-tab">
@@ -114,7 +155,7 @@
 					</div>
 				</td>
 				<td>
-					<input type="number" min="1" value="43" class="form-control form-control-sm collapse show mb-5" id="swirl-luminosity-steps-0">
+					<input type="number" min="1" max="170" value="43" class="form-control form-control-sm collapse show mb-5" id="swirl-luminosity-steps-0">
 				</td>
 			</tr>
 			<tr id="swirl-luminosity-plane-1">
@@ -128,7 +169,7 @@
 					</div>
 				</td>
 				<td>
-					<input type="number" min="1" value="1" class="form-control form-control-sm collapse mb-5" id="swirl-luminosity-steps-1">
+					<input type="number" min="1" max="73" value="1" class="form-control form-control-sm collapse mb-5" id="swirl-luminosity-steps-1">
 				</td>
 			</tr>
 			<tr id="swirl-luminosity-plane-2">
@@ -142,10 +183,23 @@
 					</div>
 				</td>
 				<td>
-					<input type="number" min="1" value="1" class="form-control form-control-sm collapse mb-3" id="swirl-luminosity-steps-2">
+					<input type="number" min="1" max="34" value="1" class="form-control form-control-sm collapse mb-3" id="swirl-luminosity-steps-2">
 				</td>
 			</tr>
 		</table>
+		<div class="form-row">
+			<label class="col-2 col-form-label col-form-label-sm" for="swirl-luminosity-offset">
+				Constant
+			</label>
+			<div class="col-8">
+				<input type="range" min="-1" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-luminosity-offset">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="swirl-luminosity-offset" title="Reset luminosity offset">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
 	</div>
 
 	<div class="tab-pane" id="swirl-red" role="tabpanel" aria-labelledby="swirl-red-tab">

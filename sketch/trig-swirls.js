@@ -7,6 +7,31 @@ export default function TrigPatterns() {
 
 	this.optionsDocument = downloadFile('trig-swirls.html', 'document').then(function (optionsDoc) {
 
+		function sliderInput(event) {
+			const property = idToProperty(this.id, true);
+			const value = parseFloat(this.value);
+			setBgProperty(me, property, value);
+			generateBackground(0);
+		}
+
+		function numericInput(event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				const property = idToProperty(this.id, true);
+				setBgProperty(me, property, value);
+				generateBackground(0);
+			}
+		}
+
+		function positiveInput(event) {
+			const value = parseFloat(this.value);
+			if (value > 0) {
+				const property = idToProperty(this.id, true);
+				setBgProperty(me, property, value);
+				generateBackground(0);
+			}
+		}
+
 		function updatePhaseX() {
 			const turns = parseInt(document.getElementById('swirl-phase-x-turns').value) || 0;
 			let sign = Math.sign(turns);
@@ -37,29 +62,35 @@ export default function TrigPatterns() {
 		optionsDoc.getElementById('swirl-phase-y').addEventListener('input', updatePhaseY);
 		optionsDoc.getElementById('swirl-phase-y-turns').addEventListener('input', updatePhaseY);
 
-		optionsDoc.getElementById('swirl-zoom').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (value > 0) {
-				setBgProperty(me, 'zoom', value);
-				generateBackground(0);
-			}
+		optionsDoc.getElementById('swirl-amplitude-x').addEventListener('input', numericInput);
+		optionsDoc.getElementById('swirl-amplitude-y').addEventListener('input', numericInput);
+
+		optionsDoc.getElementById('swirl-looser').addEventListener('click', function (event) {
+			me.amplitudeX -= 0.05;
+			me.amplitudeY -= 0.05;
+			document.getElementById('swirl-amplitude-x').value = me.amplitudeX.toFixed(2);
+			document.getElementById('swirl-amplitude-y').value = me.amplitudeY.toFixed(2);
+			setBgProperty(me, 'amplitudeX');
+			setBgProperty(me, 'amplitudeY');
+			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('swirl-translate-x').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'translateX', value);
-				generateBackground(0);
-			}
+		optionsDoc.getElementById('swirl-tighter').addEventListener('click', function (event) {
+			me.amplitudeX += 0.05;
+			me.amplitudeY += 0.05;
+			document.getElementById('swirl-amplitude-x').value = me.amplitudeX.toFixed(2);
+			document.getElementById('swirl-amplitude-y').value = me.amplitudeY.toFixed(2);
+			setBgProperty(me, 'amplitudeX');
+			setBgProperty(me, 'amplitudeY');
+			generateBackground(0);
 		});
 
-		optionsDoc.getElementById('swirl-translate-y').addEventListener('input', function (event) {
-			const value = parseFloat(this.value);
-			if (Number.isFinite(value)) {
-				setBgProperty(me, 'translateY', value);
-				generateBackground(0);
-			}
-		});
+		optionsDoc.getElementById('swirl-stretch-x').addEventListener('input', positiveInput);
+		optionsDoc.getElementById('swirl-stretch-y').addEventListener('input', positiveInput);
+		optionsDoc.getElementById('swirl-zoom').addEventListener('input', positiveInput);
+
+		optionsDoc.getElementById('swirl-translate-x').addEventListener('input', numericInput);
+		optionsDoc.getElementById('swirl-translate-y').addEventListener('input', numericInput);
 
 		function setDepth(event) {
 			const value = parseFloat(this.value);
@@ -124,13 +155,18 @@ export default function TrigPatterns() {
 			optionsDoc.getElementById('swirl-luminosity-threshold-' + i).addEventListener('input', setThreshold);
 			optionsDoc.getElementById('swirl-luminosity-steps-' + i).addEventListener('input', setSteps);
 		}
+		optionsDoc.getElementById('swirl-luminosity-offset').addEventListener('input', sliderInput);
 
 		return optionsDoc;
 	});
 
+	this.amplitudeX = 1;
+	this.amplitudeY = 1;
 	this.phaseX = 0;
 	this.phaseY = 0;
 	this.zoom = 1.8;
+	this.stretchX = 1;
+	this.stretchY = 1;
 	this.translateX = 0;
 	this.translateY = 0;
 
@@ -160,7 +196,8 @@ export default function TrigPatterns() {
 
 TrigPatterns.prototype.animatable = {
 	continuous: [
-		'phaseX', 'phaseY', 'zoom', 'translateX', 'translateY',
+		'amplitudeX', 'amplitudeY', 'phaseX', 'phaseY',
+		'zoom', 'stretchX', 'stretchY', 'translateX', 'translateY',
 		'luminosityModulus', 'luminosityThreshold',
 		'redModulus', 'redThreshold',
 		'blueModulus', 'blueThreshold',

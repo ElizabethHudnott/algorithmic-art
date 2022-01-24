@@ -654,7 +654,7 @@ Contours.prototype.randomize = function () {
 			let displaceAngle = (bin + random.next()) / NUM_ANGLES;
 			displaceAngle = displaceAngle * TWO_PI - Math.PI / 6;
 			displaceGradient[i] = Math.tan(displaceAngle);
-			if (displaceAngle > Math.PI / 2 && displaceAngle < 1.5 * Math.PI) {
+			if (displaceAngle > HALF_PI && displaceAngle < 3 * HALF_PI) {
 				displaceAmount[i] *= -1;
 			}
 		}

@@ -23,6 +23,19 @@ export default function TrigPatterns() {
 			}
 		}
 
+		function numericElementInput(event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				let id = this.id;
+				const strIndex = id.lastIndexOf('-');
+				const index = id.slice(strIndex + 1);
+				id = id.slice(0, strIndex);
+				const property = idToProperty(id, true);
+				setBgPropertyElement(me, property, index, value);
+				generateBackground(0);
+			}
+		}
+
 		function positiveInput(event) {
 			const value = parseFloat(this.value);
 			if (value > 0) {
@@ -62,6 +75,38 @@ export default function TrigPatterns() {
 		optionsDoc.getElementById('swirl-phase-y').addEventListener('input', updatePhaseY);
 		optionsDoc.getElementById('swirl-phase-y-turns').addEventListener('input', updatePhaseY);
 
+		function updatePhaseElement() {
+			let id = this.id;
+			let strIndex;
+			if (id.slice(-6) === '-turns') {
+				strIndex = id.lastIndexOf('-', id.length - 7);
+			} else {
+				strIndex = id.lastIndexOf('-');
+			}
+			const index = parseInt(id.slice(strIndex + 1));
+			id = id.slice(0, strIndex);
+
+			const turns = parseInt(document.getElementById(id + '-' + index + '-turns').value) || 0;
+			let sign = Math.sign(turns);
+			if (sign === 0) {
+				sign = 1;
+			}
+			const fraction = parseFloat(document.getElementById(id + '-' + index).value);
+			const value = sign * (Math.abs(turns) + fraction) * TWO_PI;
+			const property = idToProperty(id, true);
+			setBgPropertyElement(me, property, index, value);
+			generateBackground(0);
+		}
+
+		optionsDoc.getElementById('swirl-phase-0').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-phase-0-turns').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-phase-1').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-phase-1-turns').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-sum-angle-0').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-sum-angle-0-turns').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-sum-angle-1').addEventListener('input', updatePhaseElement);
+		optionsDoc.getElementById('swirl-sum-angle-1-turns').addEventListener('input', updatePhaseElement);
+
 		optionsDoc.getElementById('swirl-amplitude-x').addEventListener('input', numericInput);
 		optionsDoc.getElementById('swirl-amplitude-y').addEventListener('input', numericInput);
 
@@ -91,6 +136,13 @@ export default function TrigPatterns() {
 
 		optionsDoc.getElementById('swirl-translate-x').addEventListener('input', numericInput);
 		optionsDoc.getElementById('swirl-translate-y').addEventListener('input', numericInput);
+
+		optionsDoc.getElementById('swirl-amplitude-0').addEventListener('input', numericElementInput);
+		optionsDoc.getElementById('swirl-amplitude-1').addEventListener('input', numericElementInput);
+		optionsDoc.getElementById('swirl-frequency-0').addEventListener('input', numericElementInput);
+		optionsDoc.getElementById('swirl-frequency-1').addEventListener('input', numericElementInput);
+		optionsDoc.getElementById('swirl-sum-magnitude-0').addEventListener('input', numericElementInput);
+		optionsDoc.getElementById('swirl-sum-magnitude-1').addEventListener('input', numericElementInput);
 
 		function setDepth(event) {
 			const value = parseFloat(this.value);
@@ -170,6 +222,12 @@ export default function TrigPatterns() {
 	this.translateX = 0;
 	this.translateY = 0;
 
+	this.amplitude = [1, 1];
+	this.frequency = [1, 1];
+	this.phase = [0, 0];
+	this.sumMagnitude = [1.41, 1.41];
+	this.sumAngle = [-Math.PI / 4, Math.PI / 4];
+
 	this.luminosityModulus = [90, 100, 100];
 	this.luminosityShift = [0.63, 0.63, 0.63];
 	this.luminosityThreshold = [0.1, 0.1, 0.1];
@@ -198,6 +256,8 @@ TrigPatterns.prototype.animatable = {
 	continuous: [
 		'amplitudeX', 'amplitudeY', 'phaseX', 'phaseY',
 		'zoom', 'stretchX', 'stretchY', 'translateX', 'translateY',
+		'amplitude', 'frequency', 'phase', 'sumMagnitude', 'sumAngle',
+
 		'luminosityModulus', 'luminosityThreshold',
 		'redModulus', 'redThreshold',
 		'blueModulus', 'blueThreshold',

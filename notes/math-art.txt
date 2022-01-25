@@ -6,8 +6,9 @@ Phyllotaxis
 
 Environment
 -----------
-Service Worker
-
+Bug: Video needs to be centred when rescaled
+Bug: Signature flickers between dark and light in videos
+WebCodecs API
 Add PayPal donation link
 * Force preview animation mode (when not for a video) if excessive computation time used.
 Bug: dragging position slider doesn't leave background permanently transitioned
@@ -25,6 +26,7 @@ Finish dark mode
 Performance: remove transparency & shadow when dragging sliders (including playback slider)?
 Bug: WebGL canvas not resizing (needs different field of view)
 desynchronized canvas?
+Service Worker
 Epilepsy warning
 Logo
 	add to notifications

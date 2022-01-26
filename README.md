@@ -4,13 +4,16 @@ This project is a collection of computer art sketches which draw simple geometri
 
 The web app currently includes the following sketches.
 
-* 10 PRINT ([10print.org](https://10print.org/))
 * One-Dimensional celluar automata
 * Circle packing
+* Contour plotting
 * Graphing calculator
 * Julia & Mandelbrot sets
 * Phyllotaxis (spirals)
 * Sierpinski carpet fractal
+* Trigonometry swirls
+* Tiling
+* Spirograph
 
 More sketches will be added later.
 

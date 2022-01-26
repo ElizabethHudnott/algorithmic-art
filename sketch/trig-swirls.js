@@ -200,14 +200,28 @@ export default function TrigPatterns() {
 			}
 		}
 
-		optionsDoc.getElementById('swirl-luminosity-depth').addEventListener('input', setDepth);
-		for (let i = 0; i < 3; i++) {
-			optionsDoc.getElementById('swirl-luminosity-modulus-' + i).addEventListener('input', setModulus);
-			optionsDoc.getElementById('swirl-luminosity-shift-' + i).addEventListener('input', setShift);
-			optionsDoc.getElementById('swirl-luminosity-threshold-' + i).addEventListener('input', setThreshold);
-			optionsDoc.getElementById('swirl-luminosity-steps-' + i).addEventListener('input', setSteps);
+		function setWeight(event) {
+			const value = parseFloat(this.value);
+			if (Number.isFinite(value)) {
+				const words = this.id.split('-');
+				const channel = words[1];
+				const bitplane = words[3];
+				setBgPropertyElement(me, channel + 'Weight', bitplane, value);
+				generateBackground(0);
+			}
 		}
-		optionsDoc.getElementById('swirl-luminosity-offset').addEventListener('input', sliderInput);
+
+		for (let quality of ['luminosity', 'red']) {
+			optionsDoc.getElementById('swirl-' + quality + '-depth').addEventListener('input', setDepth);
+			for (let i = 0; i < 3; i++) {
+				optionsDoc.getElementById('swirl-' + quality +'-modulus-' + i).addEventListener('input', setModulus);
+				optionsDoc.getElementById('swirl-' + quality +'-shift-' + i).addEventListener('input', setShift);
+				optionsDoc.getElementById('swirl-' + quality +'-threshold-' + i).addEventListener('input', setThreshold);
+				optionsDoc.getElementById('swirl-' + quality +'-steps-' + i).addEventListener('input', setSteps);
+				optionsDoc.getElementById('swirl-' + quality +'-weight-' + i).addEventListener('input', setWeight);
+			}
+			optionsDoc.getElementById('swirl-' + quality +'-offset').addEventListener('input', sliderInput);
+		}
 
 		return optionsDoc;
 	});
@@ -228,13 +242,15 @@ export default function TrigPatterns() {
 	this.sumMagnitude = [1.41, 1.41];
 	this.sumAngle = [-Math.PI / 4, Math.PI / 4];
 
+	this.luminosityWeight = [4, 2, 1];
 	this.luminosityModulus = [90, 100, 100];
 	this.luminosityShift = [0.63, 0.63, 0.63];
 	this.luminosityThreshold = [0.1, 0.1, 0.1];
 	this.luminosityDepth = 1;
 	this.luminositySteps = [43, 1, 1];
-	this.luminosityOffset = 0;
+	this.luminosityOffset = 0.332;
 
+	this.redWeight = [4, 2, 1];
 	this.redModulus = [110, 100, 100];
 	this.redShift = [0.6175, 0.63, 0.63];
 	this.redThreshold = [0.152, 0.1, 0.1];
@@ -242,6 +258,7 @@ export default function TrigPatterns() {
 	this.redSteps = [1, 1, 1];
 	this.redOffset = 0;
 
+	this.blueWeight = [4, 2, 1];
 	this.blueModulus = [200, 100, 100];
 	this.blueShift = [0.6275, 0.75, 0.75];
 	this.blueThreshold = [0.112, 0.1, 0.1];
@@ -249,7 +266,8 @@ export default function TrigPatterns() {
 	this.blueSteps = [1, 1, 1];
 	this.blueOffset = 0;
 
-	this.alphaThreshold = 0;
+	this.greenChromaThreshold = -0.4;
+	this.greenLumaThreshold = 0.336;
 }
 
 TrigPatterns.prototype.animatable = {
@@ -258,13 +276,15 @@ TrigPatterns.prototype.animatable = {
 		'zoom', 'stretchX', 'stretchY', 'translateX', 'translateY',
 		'amplitude', 'frequency', 'phase', 'sumMagnitude', 'sumAngle',
 
+		'luminosityWeight', 'redWeight', 'blueWeight',
 		'luminosityModulus', 'luminosityThreshold',
 		'redModulus', 'redThreshold',
 		'blueModulus', 'blueThreshold',
 		'luminosityShift', 'redShift', 'blueShift',
 		'luminositySteps', 'redSteps', 'blueSteps',
 		'luminosityOffset', 'redOffset', 'blueOffset',
-		'alphaThreshold',
+
+		'greenChromaThreshold', 'greenLumaThreshold',
 	],
 	stepped: [
 		'luminosityDepth', 'redDepth', 'blueDepth',

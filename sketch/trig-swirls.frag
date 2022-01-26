@@ -39,62 +39,72 @@ void main() {
 		x * s * cos(sumAngle[1]) +  y * c * sin(sumAngle[1])
 	);
 
-	bool transparent = true;
-	float multiplier;
 	float red = 0.0;
-	float minRed;
-	float maxValue;
-	if (redDepth > 0) {
-		multiplier = 1.0;
-		for (int i = redDepth - 1; i >= 0; i--) {
-			red += multiplier * colorComputation(sum, switchedSum, redModulus[i],
-				redShift[i], redThreshold[i], redSteps[i]);
-			multiplier *= 2.0;
+	float maxValue = 0.0;
+	for (int i = 0; i < redDepth; i++) {
+
+		float weight = redWeight[i];
+		if (weight > 0.0) {
+			maxValue += weight;
 		}
-		transparent = red < 0.5;
-		maxValue = multiplier - 1.0;
-		red = red / maxValue - 0.5;
-		minRed = 1.0 / maxValue;
+
+		red += weight * colorComputation(sum, switchedSum, redModulus[i],
+			redShift[i], redThreshold[i], redSteps[i]);
+
 	}
-	red = clamp(red + redOffset, -0.5, 0.5);
+	if (maxValue > 0.0) {
+		float absOffset = abs(redOffset);
+		red = (red / maxValue) * (1.0 - absOffset) + absOffset - 0.5 + min(redOffset, 0.0);
+	}
+	bool transparent = red < greenChromaThreshold;
 
 	float blue = 0.0;
-	float minBlue;
-	if (blueDepth > 0) {
-		multiplier = 1.0;
-		for (int i = blueDepth - 1; i >= 0; i--) {
-			blue += multiplier * colorComputation(sum, switchedSum, blueModulus[i],
-				blueShift[i], blueThreshold[i], blueSteps[i]);
-			multiplier *= 2.0;
+	maxValue = 0.0;
+	for (int i = 0; i < blueDepth; i++) {
+
+		float weight = blueWeight[i];
+		if (weight > 0.0) {
+			maxValue += weight;
 		}
-		transparent = transparent && blue < 0.5;
-		maxValue = multiplier - 1.0;
-		blue = blue / maxValue - 0.5;
-		minBlue = 1.0 / maxValue;
+
+		blue += weight * colorComputation(sum, switchedSum, blueModulus[i],
+			blueShift[i], blueThreshold[i], blueSteps[i]);
+
 	}
-	blue = clamp(blue + blueOffset, -0.5, 0.5);
+	if (maxValue > 0.0) {
+		float absOffset = abs(blueOffset);
+		blue = (blue / maxValue) * (1.0 - absOffset) + absOffset - 0.5 + min(blueOffset, 0.0);
+	}
+	transparent = transparent && blue < greenChromaThreshold;
 
 	float luminosity = 0.0;
 	if (luminosityDepth > 0) {
-		multiplier = 2.0;
-		for (int i = luminosityDepth - 1; i >= 0; i--) {
-			luminosity += multiplier *
-				colorComputation(sum, switchedSum, luminosityModulus[i],
-					luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
-			multiplier *= 2.0;
+		maxValue = 0.0;
+		for (int i = 0; i < luminosityDepth; i++) {
+
+			float weight = luminosityWeight[i];
+			if (weight > 0.0) {
+				maxValue += weight;
+			}
+
+			luminosity += weight * colorComputation(sum, switchedSum, luminosityModulus[i],
+				luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
+
 		}
-		transparent = transparent && luminosity <= alphaThreshold * (multiplier - 2.0);
-		luminosity = (luminosity + 1.0) / (multiplier - 1.0);
+		if (maxValue > 0.0) {
+			float absOffset = abs(luminosityOffset);
+			luminosity = (luminosity / maxValue) * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
+		}
+		transparent = transparent && luminosity < greenLumaThreshold;
 	} else {
 		luminosity = 0.6;
 	}
-	luminosity = clamp(luminosity + luminosityOffset, 0.0, 1.0);
 
 	float alpha = 1.0;
 	if (transparent) {
 		alpha = max(
-			redDepth  > 0 ? (red + 0.5) / minRed : 0.0,
-			blueDepth > 0 ? (blue + 0.5) / minBlue : 0.0
+			redDepth  > 0 ? (red + 0.5) / (greenChromaThreshold + 0.5) : 0.0,
+			blueDepth > 0 ? (blue + 0.5) / (greenChromaThreshold + 0.5) : 0.0
 		);
 	}
 

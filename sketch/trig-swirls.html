@@ -378,7 +378,7 @@
 				</td>
 			</tr>
 		</table>
-		<div class="form-row">
+		<div class="form-row form-group">
 			<label class="col-2 col-form-label col-form-label-sm" for="swirl-red-offset">
 				Constant
 			</label>
@@ -391,9 +391,111 @@
 				</button>
 			</div>
 		</div>
+		<fieldset>
+			<legend>Green Elimination</legend>
+			<div class="form-row">
+				<label class="col-3 col-form-label col-form-label-sm" for="swirl-green-chroma-threshold">
+					Colour Threshold
+				</label>
+				<div class="col-3">
+					<input type="range" min="0.004" max="1" step="0.004" value="0.5" id="swirl-green-chroma-threshold" class="form-control-range mt-2">
+				</div>
+				<label class="col-3 col-form-label col-form-label-sm" for="swirl-green-luma-threshold">
+					Luma Threshold
+				</label>
+				<div class="col-3">
+					<input type="range" min="0" max="1.004" step="0.004" value="0.004" id="swirl-green-luma-threshold" class="form-control-range mt-2">
+				</div>
+			</div>
+		</fieldset>
 	</div>
 
 	<div class="tab-pane" id="swirl-blue" role="tabpanel" aria-labelledby="swirl-blue-tab">
+		<div class="form-row my-4">
+			<label class="col-auto col-form-label col-form-label-sm" for="swirl-blue-depth">
+				Number of Swirls
+			</label>
+			<div class="col-auto">
+				<input type="number" min="0" max="3" value="1" class="form-control form-control-sm" id="swirl-blue-depth">
+			</div>
+		</div>
+		<table>
+			<tr id="swirl-blue-headings">
+				<th class="col-2 pb-1 align-bottom">
+					<div class="collapse show">Modulus</div>
+				</th>
+				<th class="col-8 pb-1 align-bottom">
+					<div class="collapse show">Subtraction &amp; Threshold</div>
+				</th>
+				<th class="col-2 pb-1 px-2">
+					<div class="collapse show">Steps &amp; Weight</div>
+				</th>
+			</tr>
+			<tr id="swirl-blue-plane-0">
+				<td>
+					<input type="number" min="5" step="5" value="110" class="form-control form-control-sm collapse show mb-5" id="swirl-blue-modulus-0">
+				</td>
+				<td>
+					<div class="collapse show mx-2 mb-5">
+						<input type="range" min="0" max="1" step="0.0025" value="0.6175" class="form-control-range" id="swirl-blue-shift-0"><br>
+						<input type="range" min="0" max="1" step="0.004" value="0.152" class="form-control-range" id="swirl-blue-threshold-0">
+					</div>
+				</td>
+				<td class="px-0">
+					<div class="collapse show mb-5">
+						<input type="number" min="1" max="255" value="1" class="form-control form-control-sm" id="swirl-blue-steps-0"><br>
+						<input type="number" value="4" class="form-control form-control-sm" id="swirl-blue-weight-0">
+					</div>
+				</td>
+			</tr>
+			<tr id="swirl-blue-plane-1">
+				<td>
+					<input type="number" min="5" step="5" value="100" class="form-control form-control-sm collapse mb-5" id="swirl-blue-modulus-1">
+				</td>
+				<td>
+					<div class="collapse mx-2 mb-5">
+						<input type="range" min="0" max="1" step="0.0025" value="0.63" class="form-control-range" id="swirl-blue-shift-1"><br>
+						<input type="range" min="0" max="1" step="0.004" value="0.1" class="form-control-range" id="swirl-blue-threshold-1">
+					</div>
+				</td>
+				<td class="px-0">
+					<div class="collapse mb-5">
+						<input type="number" min="1" max="255" value="1" class="form-control form-control-sm" id="swirl-blue-steps-1"><br>
+						<input type="number" value="2" class="form-control form-control-sm" id="swirl-blue-weight-1">
+					</div>
+				</td>
+			</tr>
+			<tr id="swirl-blue-plane-2">
+				<td>
+					<input type="number" min="5" step="5" value="100" class="form-control form-control-sm collapse mb-4" id="swirl-blue-modulus-2">
+				</td>
+				<td>
+					<div class="collapse mx-2 mb-4">
+						<input type="range" min="0" max="1" step="0.0025" value="0.63" class="form-control-range" id="swirl-blue-shift-2"><br>
+						<input type="range" min="0" max="1" step="0.004" value="0.1" class="form-control-range" id="swirl-blue-threshold-2">
+					</div>
+				</td>
+				<td class="px-0">
+					<div class="collapse mb-4">
+						<input type="number" min="1" max="255" value="1" class="form-control form-control-sm" id="swirl-blue-steps-2"><br>
+						<input type="number" value="1" class="form-control form-control-sm" id="swirl-blue-weight-2">
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div class="form-row">
+			<label class="col-2 col-form-label col-form-label-sm" for="swirl-blue-offset">
+				Constant
+			</label>
+			<div class="col-8">
+				<input type="range" min="-1" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-blue-offset">
+			</div>
+			<div class="col-2">
+				<button type="button" class="btn btn-light py-0" data-reset="swirl-blue-offset" title="Reset red offset">
+					<img src="../img/cross.png" alt="Reset">
+				</button>
+			</div>
+		</div>
 	</div>
 
 </div>

@@ -39,8 +39,9 @@ void main() {
 		x * s * cos(sumAngle[1]) +  y * c * sin(sumAngle[1])
 	);
 
-	float red = 0.0;
+	float red;
 	float maxValue = 0.0;
+	bool transparent = true;
 	for (int i = 0; i < redDepth; i++) {
 
 		float weight = redWeight[i];
@@ -53,12 +54,15 @@ void main() {
 
 	}
 	if (maxValue > 0.0) {
+		red = red / maxValue;
+		transparent = red < greenChromaThreshold;
 		float absOffset = abs(redOffset);
-		red = (red / maxValue) * (1.0 - absOffset) + absOffset - 0.5 + min(redOffset, 0.0);
+		red = red * (1.0 - absOffset) + absOffset - 0.5 + min(redOffset, 0.0);
+	} else {
+		red = clamp(redOffset, -0.5, 0.5);
 	}
-	bool transparent = red < greenChromaThreshold;
 
-	float blue = 0.0;
+	float blue;
 	maxValue = 0.0;
 	for (int i = 0; i < blueDepth; i++) {
 
@@ -72,40 +76,34 @@ void main() {
 
 	}
 	if (maxValue > 0.0) {
+		blue = blue / maxValue;
+		transparent = transparent && blue < greenChromaThreshold;
 		float absOffset = abs(blueOffset);
-		blue = (blue / maxValue) * (1.0 - absOffset) + absOffset - 0.5 + min(blueOffset, 0.0);
-	}
-	transparent = transparent && blue < greenChromaThreshold;
-
-	float luminosity = 0.0;
-	if (luminosityDepth > 0) {
-		maxValue = 0.0;
-		for (int i = 0; i < luminosityDepth; i++) {
-
-			float weight = luminosityWeight[i];
-			if (weight > 0.0) {
-				maxValue += weight;
-			}
-
-			luminosity += weight * colorComputation(sum, switchedSum, luminosityModulus[i],
-				luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
-
-		}
-		if (maxValue > 0.0) {
-			float absOffset = abs(luminosityOffset);
-			luminosity = (luminosity / maxValue) * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
-		}
-		transparent = transparent && luminosity < greenLumaThreshold;
+		blue = blue * (1.0 - absOffset) + absOffset - 0.5 + min(blueOffset, 0.0);
 	} else {
-		luminosity = 0.6;
+		blue = clamp(blueOffset, -0.5, 0.5);
 	}
 
-	float alpha = 1.0;
-	if (transparent) {
-		alpha = max(
-			redDepth  > 0 ? (red + 0.5) / (greenChromaThreshold + 0.5) : 0.0,
-			blueDepth > 0 ? (blue + 0.5) / (greenChromaThreshold + 0.5) : 0.0
-		);
+	float luminosity;
+	maxValue = 0.0;
+	for (int i = 0; i < luminosityDepth; i++) {
+
+		float weight = luminosityWeight[i];
+		if (weight > 0.0) {
+			maxValue += weight;
+		}
+
+		luminosity += weight * colorComputation(sum, switchedSum, luminosityModulus[i],
+			luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
+
+	}
+	if (maxValue > 0.0) {
+		luminosity = luminosity / maxValue;
+		transparent = transparent && luminosity < greenLumaThreshold;
+		float absOffset = abs(luminosityOffset);
+		luminosity = luminosity * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
+	} else {
+		luminosity = clamp(0.6 + luminosityOffset, 0.0, 1.0);
 	}
 
 	float brightness = max(abs(red), abs(blue));
@@ -117,6 +115,7 @@ void main() {
 		blue *= brightness;
 		luminosity = 0.0;
 	}
+	float alpha = transparent ? 0.0 : 1.0;
 	fragColor = yuvaToRGBAMat * vec4(luminosity, blue, red, alpha);
 
 }

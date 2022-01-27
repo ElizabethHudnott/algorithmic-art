@@ -211,7 +211,7 @@ export default function TrigPatterns() {
 			}
 		}
 
-		for (let quality of ['luminosity', 'red']) {
+		for (let quality of ['luminosity', 'red', 'blue']) {
 			optionsDoc.getElementById('swirl-' + quality + '-depth').addEventListener('input', setDepth);
 			for (let i = 0; i < 3; i++) {
 				optionsDoc.getElementById('swirl-' + quality +'-modulus-' + i).addEventListener('input', setModulus);
@@ -222,6 +222,9 @@ export default function TrigPatterns() {
 			}
 			optionsDoc.getElementById('swirl-' + quality +'-offset').addEventListener('input', sliderInput);
 		}
+
+		optionsDoc.getElementById('swirl-green-chroma-threshold').addEventListener('input', sliderInput);
+		optionsDoc.getElementById('swirl-green-luma-threshold').addEventListener('input', sliderInput);
 
 		return optionsDoc;
 	});
@@ -266,8 +269,8 @@ export default function TrigPatterns() {
 	this.blueSteps = [1, 1, 1];
 	this.blueOffset = 0;
 
-	this.greenChromaThreshold = -0.4;
-	this.greenLumaThreshold = 0.336;
+	this.greenChromaThreshold = 0.5;
+	this.greenLumaThreshold = 0.004;
 }
 
 TrigPatterns.prototype.animatable = {

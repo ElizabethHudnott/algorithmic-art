@@ -20,6 +20,30 @@ float colorComputation(float sum, float sum2, float modulus, float shift, float 
 	return ceil(value * steps) / steps;
 }
 
+float triangle(float theta) {
+	float s = sign(theta);
+	theta = mod(abs(theta) + 0.5 * PI, 2.0 * PI);
+	float value;
+	if (theta <= PI) {
+		value = 2.0 / PI * theta - 1.0;
+	} else {
+		value = 1.0 - 2.0 / PI * (theta - PI);
+	}
+	return s * value;
+}
+
+float sawtooth(float theta) {
+	float s = sign(theta);
+	float value = mod(abs(theta) + 0.5 * PI, 2.0 * PI) / PI - 1.0;
+	return s * value;
+}
+
+float square(float theta) {
+	float s = theta < 0.0 ? -1.0 : 1.0;
+	theta = mod(abs(theta), 2.0 * PI);
+	return s * (theta < PI ? 1.0 : -1.0);
+}
+
 void main() {
 	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom - translateX / 1.8 * canvasWidth;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;

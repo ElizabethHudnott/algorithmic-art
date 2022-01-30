@@ -20,6 +20,16 @@ float colorComputation(float sum, float sum2, float modulus, float shift, float 
 	return ceil(value * steps) / steps;
 }
 
+float expTriangle(float base, float theta) {
+	float s = sign(theta);
+	theta = mod(abs(theta) + PI * log(0.5 * base + 0.5) / log(base), 2.0 * PI);
+	if (theta > PI) {
+		theta = 2.0 * PI - theta;
+	}
+	float value = 2.0 * (pow(base, theta / PI) - 1.0) / (base - 1.0) - 1.0;
+	return s * value;
+}
+
 float triangle(float theta) {
 	float s = sign(theta);
 	theta = mod(abs(theta) + 0.5 * PI, 2.0 * PI);
@@ -34,7 +44,7 @@ float triangle(float theta) {
 
 float sawtooth(float theta) {
 	float s = sign(theta);
-	float value = mod(abs(theta) + 0.5 * PI, 2.0 * PI) / PI - 1.0;
+	float value = 1.0 - mod(abs(theta), 2.0 * PI) / PI;
 	return s * value;
 }
 
@@ -44,16 +54,54 @@ float square(float theta) {
 	return s * (theta < PI ? 1.0 : -1.0);
 }
 
+float sigmoid(float theta, float wave) {
+	float s= sign(theta);
+	theta = mod(abs(theta), 2.0 * PI);
+	const float split = 0.859375;
+	float stepWidth = min(wave / split, 1.0);
+	float lesserPeak = PI * (1.0 - stepWidth);
+	float step;
+	if (theta <= lesserPeak) {
+		step = 1.0;
+	} else if (theta >= PI * (1.0 + stepWidth)) {
+		step = -1.0;
+	} else {
+		step = 1.0 - 2.0 * smoothstep(0.0, 1.0, (theta - lesserPeak) / (2.0 * stepWidth * PI));
+	}
+	if (wave <= split) {
+		return s * step;
+	} else {
+		return s * mix(step, 1.0 - theta / PI, (wave - split) / (1.0 - split));
+	}
+}
+
+float waveform(float wave, float theta) {
+	int intWave = int(wave);
+	float fraction = fract(wave);
+	switch (intWave) {
+	case 0:
+		return expTriangle(4.0 - 3.0 * fraction, theta);
+	case 1:
+		return mix(triangle(theta), sin(theta), fraction);
+	case 2:
+		return mix(sin(theta), square(theta), fraction);
+	case 3:
+		return sigmoid(theta, (1.0 + 2.0 * sqrt(fraction)) / 3.0);
+	case 4:
+		return sawtooth(theta);
+	}
+}
+
 void main() {
 	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom - translateX / 1.8 * canvasWidth;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;
 
 	float wave =
-		amplitudeX * sin(x / (40.0 * stretchX) - phaseX) +
-		amplitudeY * cos(y / (40.0 * stretchY) + phaseY);
+		amplitudeX * waveform(waveformX, x / (40.0 * stretchX) - phaseX) +
+		amplitudeY * waveform(waveformY, y / (40.0 * stretchY) + phaseY);
 
-	float s = amplitude[0] * sin(frequency[0] * wave + phase[0]);
-	float c = amplitude[1] * cos(frequency[1] * wave + phase[1]);
+	float s = amplitude[0] * waveform(waveforms[0], frequency[0] * wave + phase[0]);
+	float c = amplitude[1] * waveform(waveforms[1], frequency[1] * wave + phase[1]);
 
 	float sum = sumMagnitude[0] * abs(
 		x * c * cos(sumAngle[0]) +  y * s * sin(sumAngle[0])

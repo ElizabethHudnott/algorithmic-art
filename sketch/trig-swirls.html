@@ -1,7 +1,12 @@
 <ul class="nav nav-tabs mb-3" role="tablist">
 	<li class="nav-item" role="presentation">
-		<a class="nav-link active" id="swirl-geometry-tab" data-toggle="tab" href="#swirl-geometry" role="tab" aria-controls="swirl-geometry" aria-selected="true">
-			Geometry
+		<a class="nav-link active" id="swirl-waves-tab" data-toggle="tab" href="#swirl-waves" role="tab" aria-controls="swirl-waves" aria-selected="true">
+			Waves
+		</a>
+	</li>
+	<li class="nav-item" role="presentation">
+		<a class="nav-link" id="swirl-shapes-tab" data-toggle="tab" href="#swirl-shapes" role="tab" aria-controls="swirl-shapes" aria-selected="false">
+			Shapes
 		</a>
 	</li>
 	<li class="nav-item" role="presentation">
@@ -22,7 +27,7 @@
 </ul>
 
 <div class="tab-content">
-	<div class="tab-pane active" id="swirl-geometry" role="tabpanel" aria-labelledby="swirl-geometry-tab">
+	<div class="tab-pane active" id="swirl-waves" role="tabpanel" aria-labelledby="swirl-waves-tab">
 		<details open>
 			<summary class="mb-3">Amplitudes &amp; Frequencies</summary>
 			<div class="form-row mb-2">
@@ -163,7 +168,7 @@
 						</label>
 					</td>
 					<td class="px-1">
-						<input type="range" min="0" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-phase-y">
+						<input type="range" min="0" max="1" step="0.004" value="0.252" class="form-control-range mt-2" id="swirl-phase-y">
 					</td>
 					<td class="px-1">
 						<input type="number" value="0" class="form-control form-control-sm" id="swirl-phase-y-turns">
@@ -189,7 +194,7 @@
 						</label>
 					</td>
 					<td class="px-1">
-						<input type="range" min="0" max="1" step="0.004" value="0" class="form-control-range mt-2" id="swirl-phase-1">
+						<input type="range" min="0" max="1" step="0.004" value="0.252" class="form-control-range mt-2" id="swirl-phase-1">
 					</td>
 					<td class="px-1">
 						<input type="number" value="0" class="form-control form-control-sm" id="swirl-phase-1-turns">
@@ -223,6 +228,25 @@
 				</tr>
 			</table>
 		</details>
+	</div>
+
+	<div class="tab-pane" id="swirl-shapes" role="tabpanel" aria-labelledby="swirl-shapes-tab">
+		<div class="form-row form-group">
+			<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-x-int">
+				X
+			</label>
+			<div class="col-2">
+				<select id="swirl-shape-x-int" class="form-control form-control-sm">
+					<option value="0">ExpTri</option>
+					<option value="1">Tri</option>
+					<option value="2" selected>Sin</option>
+					<option value="3">Square</option>
+				</select>
+			</div>
+			<div class="col-6">
+				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-x-frac">
+			</div>
+		</div>
 	</div>
 
 	<div class="tab-pane" id="swirl-luminosity" role="tabpanel" aria-labelledby="swirl-luminosity-tab">

@@ -232,7 +232,7 @@ export default function TrigPatterns() {
 	this.amplitudeX = 1;
 	this.amplitudeY = 1;
 	this.phaseX = 0;
-	this.phaseY = 0;
+	this.phaseY = 0.504 * Math.PI;
 	this.zoom = 1.8;
 	this.stretchX = 1;
 	this.stretchY = 1;
@@ -241,9 +241,13 @@ export default function TrigPatterns() {
 
 	this.amplitude = [1, 1];
 	this.frequency = [1, 1];
-	this.phase = [0, 0];
+	this.phase = [0, 0.504 * Math.PI];
 	this.sumMagnitude = [1.41, 1.41];
 	this.sumAngle = [-Math.PI / 4, Math.PI / 4];
+
+	this.waveformX = 2;
+	this.waveformY = 2;
+	this.waveforms = [2, 2];
 
 	this.luminosityWeight = [4, 2, 1];
 	this.luminosityModulus = [90, 100, 100];
@@ -271,6 +275,7 @@ export default function TrigPatterns() {
 
 	this.greenChromaThreshold = 0.5;
 	this.greenLumaThreshold = 0.004;
+
 }
 
 TrigPatterns.prototype.animatable = {
@@ -278,6 +283,8 @@ TrigPatterns.prototype.animatable = {
 		'amplitudeX', 'amplitudeY', 'phaseX', 'phaseY',
 		'zoom', 'stretchX', 'stretchY', 'translateX', 'translateY',
 		'amplitude', 'frequency', 'phase', 'sumMagnitude', 'sumAngle',
+
+		'waveformX', 'waveformY', 'waveforms',
 
 		'luminosityWeight', 'redWeight', 'blueWeight',
 		'luminosityModulus', 'luminosityThreshold',

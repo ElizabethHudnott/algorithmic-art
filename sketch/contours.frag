@@ -32,15 +32,15 @@ float distanceMetric(float x1, float y1, float x2, float y2) {
 }
 
 vec4 colorFunc(int n, float scaledForce, float wave) {
-	float a = wave * (scaledForce * baseBrightness[0] + (1.0 - scaledForce) * baseBrightness[2]);
-	float aPrime = (1.0 - wave) * (scaledForce * baseBrightness[1] + (1.0 - scaledForce) * baseBrightness[3]);
-	float b = scaledForce * (wave * baseBrightness[0] + (1.0 - wave) * baseBrightness[1]);
+	float a = wave * mix(baseBrightness[2], baseBrightness[0], scaledForce);
+	float aPrime =  (1.0 - wave) * mix(baseBrightness[3], baseBrightness[1], scaledForce);
+	float b = scaledForce * mix(baseBrightness[1], baseBrightness[0], wave);
 	float aDesaturation = 1.0 - minSaturation;
 	float aPrimeDesaturation = 1.0 - abs(backgroundSaturation);
 	float bDesaturation = 1.0 - baseSaturation;
-	float aNew = a  + (1.0 - a) * min(b * bDesaturation + aPrime * aPrimeDesaturation, 1.0);
-	float aPrimeNew = aPrime + (1.0 - aPrime) * min(a * aDesaturation + b * bDesaturation, 1.0);
-	float bNew = b  + (1.0 - b) * min(a * aDesaturation + aPrime * aPrimeDesaturation, 1.0);
+	float aNew = mix(min(b * bDesaturation + aPrime * aPrimeDesaturation, 1.0), 1.0, a);
+	float aPrimeNew = mix(min(a * aDesaturation + b * bDesaturation, 1.0), 1.0, aPrime);
+	float bNew = mix(min(a * aDesaturation + aPrime * aPrimeDesaturation, 1.0), 1.0, b);
 
 	switch (n) {
 	case 0:
@@ -143,7 +143,7 @@ void main() {
 		if (finalPointScale == 0.0) {
 			finalPointScale = 1.0;
 		}
-		finalPointScale = explosion + finalPointScale * (1.0 - explosion);
+		finalPointScale = mix(finalPointScale, 1.0, explosion);
 	} else {
 		numPoints = min(numPoints, 5);
 		finalPointScale = 1.0;
@@ -265,7 +265,7 @@ void main() {
 	} else if (waveLightness <= 1.0) {
 		waveLightnessPrime = waveLightness * colorPortion;
 	} else if (waveLightness > 1.0) {
-		waveLightnessPrime = colorPortion + (1.0 - colorPortion) * (waveLightness - 1.0);
+		waveLightnessPrime = mix(waveLightness - 1.0, 1.0, colorPortion);
 	}
 
 	float rawLightness = maxLightness * (waveLightnessPrime * wave + 1.0 - waveLightnessPrime);
@@ -294,8 +294,6 @@ void main() {
 	fragColor += baseColorFrac * colorFunc(upperBaseColor, scaledForce, wave);
 	float pixelBaseIntensity = max(baseIntensity, (1.0 - gradient) * backgroundOpacity);
 	fragColor *= pixelBaseIntensity;
-	fragColor.a =
-		backgroundOpacity * (1.0 - baseIntensity) +
-		baseIntensity * (backgroundOpacity + (1.0 - backgroundOpacity) * wave);
+	fragColor.a = mix(backgroundOpacity, mix(wave, 1.0, backgroundOpacity), baseIntensity);
 	fragColor += (1.0 - pixelBaseIntensity) * color;
 }

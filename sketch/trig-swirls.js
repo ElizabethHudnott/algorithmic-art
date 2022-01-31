@@ -144,6 +144,58 @@ export default function TrigPatterns() {
 		optionsDoc.getElementById('swirl-sum-magnitude-0').addEventListener('input', numericElementInput);
 		optionsDoc.getElementById('swirl-sum-magnitude-1').addEventListener('input', numericElementInput);
 
+		function setShapeFraction(event) {
+			const dimension = this.id.split('-')[2];
+			const integer = parseInt(document.getElementById('swirl-shape-' + dimension + '-int').value);
+			const fraction = parseFloat(document.getElementById('swirl-shape-' + dimension + '-frac').value);
+			const property = 'waveform' + dimension.toUpperCase();
+			setBgProperty(me, property, integer + fraction);
+			generateBackground(0);
+		}
+
+		function setShapeInteger(event) {
+			const value = parseInt(this.value);
+			const nextOption = this.querySelector('option[value="' + String(value + 1) + '"]');
+			const label = nextOption === null ? 'Square' : nextOption.innerHTML;
+			const dimension = this.id.split('-')[2];
+			document.getElementById('swirl-shape-' + dimension + '-label').innerHTML = label;
+
+			document.getElementById('swirl-shape-' + dimension + '-frac').value = 0;
+			const property = 'waveform' + dimension.toUpperCase();
+			setBgProperty(me, property, parseInt(this.value));
+			generateBackground(0);
+		}
+
+		function setShapeElementFraction(event) {
+			const index = parseInt(this.id.split('-')[2]);
+			const integer = parseInt(document.getElementById('swirl-shape-' + index + '-int').value);
+			const fraction = parseFloat(document.getElementById('swirl-shape-' + index + '-frac').value);
+			setBgPropertyElement(me, 'waveforms', index, integer + fraction);
+			generateBackground(0);
+		}
+
+		function setShapeElementInteger(event) {
+			const value = parseInt(this.value);
+			const nextOption = this.querySelector('option[value="' + String(value + 1) + '"]');
+			const label = nextOption === null ? 'ExpSaw' : nextOption.innerHTML;
+			const index = parseInt(this.id.split('-')[2]);
+			document.getElementById('swirl-shape-' + index + '-label').innerHTML = label;
+
+			document.getElementById('swirl-shape-' + index + '-frac').value = 0;
+			setBgPropertyElement(me, 'waveforms', index, parseInt(this.value));
+			generateBackground(0);
+		}
+
+		optionsDoc.getElementById('swirl-shape-x-int').addEventListener('input', setShapeInteger);
+		optionsDoc.getElementById('swirl-shape-x-frac').addEventListener('input', setShapeFraction);
+		optionsDoc.getElementById('swirl-shape-y-int').addEventListener('input', setShapeInteger);
+		optionsDoc.getElementById('swirl-shape-y-frac').addEventListener('input', setShapeFraction);
+
+		optionsDoc.getElementById('swirl-shape-0-int').addEventListener('input', setShapeElementInteger);
+		optionsDoc.getElementById('swirl-shape-0-frac').addEventListener('input', setShapeElementFraction);
+		optionsDoc.getElementById('swirl-shape-1-int').addEventListener('input', setShapeElementInteger);
+		optionsDoc.getElementById('swirl-shape-1-frac').addEventListener('input', setShapeElementFraction);
+
 		function setDepth(event) {
 			const value = parseFloat(this.value);
 			if (value >= 0 && Math.ceil(value) <= 3) {

@@ -119,7 +119,7 @@ float waveform2(float wave, float theta) {
 	case 2:
 		return squarish(theta, sqrt(fraction));
 	case 3:
-		return sigmoid(theta, (1.0 + 2.0 * sqrt(fraction)) / 3.0);
+		return sigmoid(theta, sqrt(fraction));
 	case 4:
 		return sawtooth(theta);
 	}
@@ -130,11 +130,11 @@ void main() {
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;
 
 	float wave =
-		amplitudeX * waveform(waveformX, x / (40.0 * stretchX) - phaseX) +
-		amplitudeY * waveform(waveformY, y / (40.0 * stretchY) + phaseY);
+		amplitude[0] * waveform(waveforms[0], x / (40.0 * stretchX) - phase[0]) +
+		amplitude[1] * waveform(waveforms[1], y / (40.0 * stretchY) + phase[1]);
 
-	float s = amplitude[0] * waveform2(waveforms[0], frequency[0] * wave + phase[0]);
-	float c = amplitude[1] * waveform2(waveforms[1], frequency[1] * wave + phase[1]);
+	float s = amplitude[2] * waveform2(waveforms[2], frequency[0] * wave + phase[2]);
+	float c = amplitude[3] * waveform2(waveforms[3], frequency[1] * wave + phase[3]);
 
 	float sum = sumMagnitude[0] * abs(
 		x * c * cos(sumAngle[0]) +  y * s * sin(sumAngle[0])

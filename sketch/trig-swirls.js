@@ -45,37 +45,7 @@ export default function TrigPatterns() {
 			}
 		}
 
-		function updatePhaseX() {
-			const turns = parseInt(document.getElementById('swirl-phase-x-turns').value) || 0;
-			let sign = Math.sign(turns);
-			if (sign === 0) {
-				sign = 1;
-			}
-			const fraction = parseFloat(document.getElementById('swirl-phase-x').value);
-			const value = sign * (Math.abs(turns) + fraction) * TWO_PI;
-			setBgProperty(me, 'phaseX', value);
-			generateBackground(0);
-		}
-
-		optionsDoc.getElementById('swirl-phase-x').addEventListener('input', updatePhaseX);
-		optionsDoc.getElementById('swirl-phase-x-turns').addEventListener('input', updatePhaseX);
-
-		function updatePhaseY() {
-			const turns = parseInt(document.getElementById('swirl-phase-y-turns').value) || 0;
-			let sign = Math.sign(turns);
-			if (sign === 0) {
-				sign = 1;
-			}
-			const fraction = parseFloat(document.getElementById('swirl-phase-y').value);
-			const value = sign * (Math.abs(turns) + fraction) * TWO_PI;
-			setBgProperty(me, 'phaseY', value);
-			generateBackground(0);
-		}
-
-		optionsDoc.getElementById('swirl-phase-y').addEventListener('input', updatePhaseY);
-		optionsDoc.getElementById('swirl-phase-y-turns').addEventListener('input', updatePhaseY);
-
-		function updatePhaseElement() {
+		function updatePhase() {
 			let id = this.id;
 			let strIndex;
 			if (id.slice(-6) === '-turns') {
@@ -98,35 +68,59 @@ export default function TrigPatterns() {
 			generateBackground(0);
 		}
 
-		optionsDoc.getElementById('swirl-phase-0').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-phase-0-turns').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-phase-1').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-phase-1-turns').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-sum-angle-0').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-sum-angle-0-turns').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-sum-angle-1').addEventListener('input', updatePhaseElement);
-		optionsDoc.getElementById('swirl-sum-angle-1-turns').addEventListener('input', updatePhaseElement);
+		function setShapeFraction(event) {
+			const index = parseInt(this.id.split('-')[2]);
+			const integer = parseInt(document.getElementById('swirl-shape-' + index + '-int').value);
+			const fraction = parseFloat(document.getElementById('swirl-shape-' + index + '-frac').value);
+			setBgPropertyElement(me, 'waveforms', index, integer + fraction);
+			generateBackground(0);
+		}
 
-		optionsDoc.getElementById('swirl-amplitude-x').addEventListener('input', numericInput);
-		optionsDoc.getElementById('swirl-amplitude-y').addEventListener('input', numericInput);
+		function setShapeInteger(event) {
+			const value = parseInt(this.value);
+			const nextOption = this.querySelector('option[value="' + String(value + 1) + '"]');
+			const index = parseInt(this.id.split('-')[2]);
+			let label
+			if (nextOption === null) {
+				label = index < 2 ? 'Sqr' : 'ExpSaw';
+			} else {
+				label = nextOption.innerHTML;
+			}
+			document.getElementById('swirl-shape-' + index + '-label').innerHTML = label;
+
+			document.getElementById('swirl-shape-' + index + '-frac').value = 0;
+			setBgPropertyElement(me, 'waveforms', index, parseInt(this.value));
+			generateBackground(0);
+		}
+
+		for (let i = 0; i < 4; i++) {
+			optionsDoc.getElementById('swirl-amplitude-' + i).addEventListener('input', numericElementInput);
+			optionsDoc.getElementById('swirl-phase-' + i).addEventListener('input', updatePhase);
+			optionsDoc.getElementById('swirl-phase-' + i + '-turns').addEventListener('input', updatePhase);
+			optionsDoc.getElementById('swirl-shape-' + i + '-int').addEventListener('input', setShapeInteger);
+			optionsDoc.getElementById('swirl-shape-' + i + '-frac').addEventListener('input', setShapeFraction);
+		}
+
+		optionsDoc.getElementById('swirl-sum-angle-0').addEventListener('input', updatePhase);
+		optionsDoc.getElementById('swirl-sum-angle-0-turns').addEventListener('input', updatePhase);
+		optionsDoc.getElementById('swirl-sum-angle-1').addEventListener('input', updatePhase);
+		optionsDoc.getElementById('swirl-sum-angle-1-turns').addEventListener('input', updatePhase);
 
 		optionsDoc.getElementById('swirl-looser').addEventListener('click', function (event) {
-			me.amplitudeX -= 0.05;
-			me.amplitudeY -= 0.05;
-			document.getElementById('swirl-amplitude-x').value = me.amplitudeX.toFixed(2);
-			document.getElementById('swirl-amplitude-y').value = me.amplitudeY.toFixed(2);
-			setBgProperty(me, 'amplitudeX');
-			setBgProperty(me, 'amplitudeY');
+			me.amplitude[0] -= 0.05;
+			me.amplitude[1] -= 0.05;
+			document.getElementById('swirl-amplitude-0').value = me.amplitude[0].toFixed(2);
+			document.getElementById('swirl-amplitude-1').value = me.amplitude[1].toFixed(2);
+			setBgProperty(me, 'amplitude');
 			generateBackground(0);
 		});
 
 		optionsDoc.getElementById('swirl-tighter').addEventListener('click', function (event) {
-			me.amplitudeX += 0.05;
-			me.amplitudeY += 0.05;
-			document.getElementById('swirl-amplitude-x').value = me.amplitudeX.toFixed(2);
-			document.getElementById('swirl-amplitude-y').value = me.amplitudeY.toFixed(2);
-			setBgProperty(me, 'amplitudeX');
-			setBgProperty(me, 'amplitudeY');
+			me.amplitude[0] += 0.05;
+			me.amplitude[1] += 0.05;
+			document.getElementById('swirl-amplitude-0').value = me.amplitude[0].toFixed(2);
+			document.getElementById('swirl-amplitude-1').value = me.amplitude[1].toFixed(2);
+			setBgProperty(me, 'amplitude');
 			generateBackground(0);
 		});
 
@@ -137,64 +131,10 @@ export default function TrigPatterns() {
 		optionsDoc.getElementById('swirl-translate-x').addEventListener('input', numericInput);
 		optionsDoc.getElementById('swirl-translate-y').addEventListener('input', numericInput);
 
-		optionsDoc.getElementById('swirl-amplitude-0').addEventListener('input', numericElementInput);
-		optionsDoc.getElementById('swirl-amplitude-1').addEventListener('input', numericElementInput);
 		optionsDoc.getElementById('swirl-frequency-0').addEventListener('input', numericElementInput);
 		optionsDoc.getElementById('swirl-frequency-1').addEventListener('input', numericElementInput);
 		optionsDoc.getElementById('swirl-sum-magnitude-0').addEventListener('input', numericElementInput);
 		optionsDoc.getElementById('swirl-sum-magnitude-1').addEventListener('input', numericElementInput);
-
-		function setShapeFraction(event) {
-			const dimension = this.id.split('-')[2];
-			const integer = parseInt(document.getElementById('swirl-shape-' + dimension + '-int').value);
-			const fraction = parseFloat(document.getElementById('swirl-shape-' + dimension + '-frac').value);
-			const property = 'waveform' + dimension.toUpperCase();
-			setBgProperty(me, property, integer + fraction);
-			generateBackground(0);
-		}
-
-		function setShapeInteger(event) {
-			const value = parseInt(this.value);
-			const nextOption = this.querySelector('option[value="' + String(value + 1) + '"]');
-			const label = nextOption === null ? 'Square' : nextOption.innerHTML;
-			const dimension = this.id.split('-')[2];
-			document.getElementById('swirl-shape-' + dimension + '-label').innerHTML = label;
-
-			document.getElementById('swirl-shape-' + dimension + '-frac').value = 0;
-			const property = 'waveform' + dimension.toUpperCase();
-			setBgProperty(me, property, parseInt(this.value));
-			generateBackground(0);
-		}
-
-		function setShapeElementFraction(event) {
-			const index = parseInt(this.id.split('-')[2]);
-			const integer = parseInt(document.getElementById('swirl-shape-' + index + '-int').value);
-			const fraction = parseFloat(document.getElementById('swirl-shape-' + index + '-frac').value);
-			setBgPropertyElement(me, 'waveforms', index, integer + fraction);
-			generateBackground(0);
-		}
-
-		function setShapeElementInteger(event) {
-			const value = parseInt(this.value);
-			const nextOption = this.querySelector('option[value="' + String(value + 1) + '"]');
-			const label = nextOption === null ? 'ExpSaw' : nextOption.innerHTML;
-			const index = parseInt(this.id.split('-')[2]);
-			document.getElementById('swirl-shape-' + index + '-label').innerHTML = label;
-
-			document.getElementById('swirl-shape-' + index + '-frac').value = 0;
-			setBgPropertyElement(me, 'waveforms', index, parseInt(this.value));
-			generateBackground(0);
-		}
-
-		optionsDoc.getElementById('swirl-shape-x-int').addEventListener('input', setShapeInteger);
-		optionsDoc.getElementById('swirl-shape-x-frac').addEventListener('input', setShapeFraction);
-		optionsDoc.getElementById('swirl-shape-y-int').addEventListener('input', setShapeInteger);
-		optionsDoc.getElementById('swirl-shape-y-frac').addEventListener('input', setShapeFraction);
-
-		optionsDoc.getElementById('swirl-shape-0-int').addEventListener('input', setShapeElementInteger);
-		optionsDoc.getElementById('swirl-shape-0-frac').addEventListener('input', setShapeElementFraction);
-		optionsDoc.getElementById('swirl-shape-1-int').addEventListener('input', setShapeElementInteger);
-		optionsDoc.getElementById('swirl-shape-1-frac').addEventListener('input', setShapeElementFraction);
 
 		function setDepth(event) {
 			const value = parseFloat(this.value);
@@ -281,25 +221,20 @@ export default function TrigPatterns() {
 		return optionsDoc;
 	});
 
-	this.amplitudeX = 1;
-	this.amplitudeY = 1;
-	this.phaseX = 0;
-	this.phaseY = 0.504 * Math.PI;
 	this.zoom = 1.8;
 	this.stretchX = 1;
 	this.stretchY = 1;
 	this.translateX = 0;
 	this.translateY = 0;
 
-	this.amplitude = [1, 1];
+	this.amplitude = [1, 1, 1, 1];
 	this.frequency = [1, 1];
-	this.phase = [0, 0.504 * Math.PI];
+	this.phase = [0, 0.504 * Math.PI, 0, 0.504 * Math.PI];
+	this.waveforms = [2, 2, 2, 2];
+
 	this.sumMagnitude = [1.41, 1.41];
 	this.sumAngle = [-Math.PI / 4, Math.PI / 4];
 
-	this.waveformX = 2;
-	this.waveformY = 2;
-	this.waveforms = [2, 2];
 
 	this.luminosityWeight = [4, 2, 1];
 	this.luminosityModulus = [90, 100, 100];
@@ -332,11 +267,9 @@ export default function TrigPatterns() {
 
 TrigPatterns.prototype.animatable = {
 	continuous: [
-		'amplitudeX', 'amplitudeY', 'phaseX', 'phaseY',
 		'zoom', 'stretchX', 'stretchY', 'translateX', 'translateY',
 		'amplitude', 'frequency', 'phase', 'sumMagnitude', 'sumAngle',
-
-		'waveformX', 'waveformY', 'waveforms',
+		'waveforms',
 
 		'luminosityWeight', 'redWeight', 'blueWeight',
 		'luminosityModulus', 'luminosityThreshold',

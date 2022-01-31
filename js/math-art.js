@@ -225,14 +225,14 @@ function hasRandomness(enabled) {
 					return new GLType(GLTypeCategory.MATRIX, 'f', dim2, dim1);
 				} else {
 					// Array of vectors
-					return new GLType(GLTypeCategory.VECTOR, glBaseType(example[0][0]), dim2, 1, dim1);
+					return new GLType(GLTypeCategory.VECTOR, glBaseType(example[0][0], isInteger), dim2, 1, dim1);
 				}
 			} else if (dim1 < 5) {
 				// Vector
 				return glTypes.get(glBaseType(example[0], isInteger) + 'vec' + dim1);
 			} else {
 				// Array of scalars
-				return new GLType(GLTypeCategory.SCALAR, glBaseType(example[0]), 1, 1, dim1);
+				return new GLType(GLTypeCategory.SCALAR, glBaseType(example[0], isInteger), 1, 1, dim1);
 			}
 		} else {
 			return glTypes.get(glBaseType(example, isInteger));
@@ -259,6 +259,15 @@ function hasRandomness(enabled) {
 					str += 'uniform ' + typeName + ' ' + property + ';\n';
 				}
 			}
+			const nominalArray = animatable.nominalArray;
+			if (nominalArray !== undefined) {
+				for (let property of nominalArray) {
+					const value = generator[property];
+					const typeName = inferGLType(value, true).toString();
+					str += 'uniform ' + typeName + ' ' + property + ';\n';
+				}
+			}
+
 			const pairedContinuous = animatable.pairedContinuous;
 			if (pairedContinuous !== undefined) {
 				for (let [property1, property2] of pairedContinuous) {
@@ -465,6 +474,13 @@ function hasRandomness(enabled) {
 						types.set(property, inferGLType(generator[property], true));
 					}
 				}
+				const nominalArray = animatable.nominalArray;
+				if (nominalArray !== undefined) {
+					for (let property of nominalArray) {
+						types.set(property, inferGLType(generator[property], true));
+					}
+				}
+
 				const pairedContinuous = animatable.pairedContinuous;
 				if (pairedContinuous !== undefined) {
 					for (let [property1, property2] of pairedContinuous) {

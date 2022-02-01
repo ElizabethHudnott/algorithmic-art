@@ -231,6 +231,7 @@ export default function TrigPatterns() {
 	this.frequency = [1, 1];
 	this.phase = [0, 0.504 * Math.PI, 0, 0.504 * Math.PI];
 	this.waveforms = [2, 2, 2, 2];
+	this.pixelated = [960, 540, 1024, 1024];
 
 	this.sumMagnitude = [1.41, 1.41];
 	this.sumAngle = [-Math.PI / 4, Math.PI / 4];
@@ -282,6 +283,7 @@ TrigPatterns.prototype.animatable = {
 		'greenChromaThreshold', 'greenLumaThreshold',
 	],
 	stepped: [
+		'pixelated',
 		'luminosityDepth', 'redDepth', 'blueDepth',
 	],
 }

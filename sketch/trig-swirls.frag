@@ -87,42 +87,56 @@ float sigmoid(float theta, float wave) {
 	}
 }
 
-float waveform(float wave, float theta) {
+float waveform(float wave, float theta, int steps) {
 	int intWave = int(wave);
 	float fraction = fract(wave);
+	float fSteps = float(steps);
+	float value;
 	switch (intWave) {
 	case 0:
-		return expTriangle(4.0 - 3.0 * fraction, theta);
+		value = expTriangle(4.0 - 3.0 * fraction, theta);
+		break;
 	case 1:
-		return mix(triangle(theta), sin(theta), fraction);
+		value = mix(triangle(theta), sin(theta), fraction);
+		break;
 	case 2:
-		return mix(sin(theta), 1.0 - theta / PI, fraction);
+		value = mix(sin(theta), 1.0 - theta / PI, fraction);
+		break;
 	case 3:
 		if (fraction == 0.0) {
-			return 1.0 - theta / PI;
+			value = 1.0 - theta / PI;
 		} else {
-			return sigmoid(theta, 1.0 - sqrt(fraction));
+			value = sigmoid(theta, 1.0 - sqrt(fraction));
 		}
+		break;
 	case 4:
-		return sigmoid(theta, 0.0);
+		value = sigmoid(theta, 0.0);
 	}
+	return round(value * fSteps) / fSteps;
 }
 
-float waveform2(float wave, float theta) {
+float waveform2(float wave, float theta, int steps) {
 	int intWave = int(wave);
 	float fraction = fract(wave);
+	float fSteps = float(steps);
+	float value;
 	switch (intWave) {
 	case 0:
-		return expTriangle(4.0 - 3.0 * fraction, theta);
+		value = expTriangle(4.0 - 3.0 * fraction, theta);
+		break;
 	case 1:
-		return mix(triangle(theta), sin(theta), fraction);
+		value = mix(triangle(theta), sin(theta), fraction);
+		break;
 	case 2:
-		return squarish(theta, sqrt(fraction));
+		value = squarish(theta, sqrt(fraction));
+		break;
 	case 3:
-		return sigmoid(theta, sqrt(fraction));
+		value = sigmoid(theta, sqrt(fraction));
+		break;
 	case 4:
-		return sawtooth(theta);
+		value = sawtooth(theta);
 	}
+	return round(value * fSteps) / fSteps;
 }
 
 void main() {
@@ -130,11 +144,11 @@ void main() {
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;
 
 	float wave =
-		amplitude[0] * waveform(waveforms[0], x / (40.0 * stretchX) - phase[0]) +
-		amplitude[1] * waveform(waveforms[1], y / (40.0 * stretchY) + phase[1]);
+		amplitude[0] * waveform(waveforms[0], x / (40.0 * stretchX) - phase[0], pixelated[0]) +
+		amplitude[1] * waveform(waveforms[1], y / (40.0 * stretchY) + phase[1], pixelated[1]);
 
-	float s = amplitude[2] * waveform2(waveforms[2], frequency[0] * wave + phase[2]);
-	float c = amplitude[3] * waveform2(waveforms[3], frequency[1] * wave + phase[3]);
+	float s = amplitude[2] * waveform2(waveforms[2], frequency[0] * wave + phase[2], pixelated[2]);
+	float c = amplitude[3] * waveform2(waveforms[3], frequency[1] * wave + phase[3], pixelated[3]);
 
 	float sum = sumMagnitude[0] * abs(
 		x * c * cos(sumAngle[0]) +  y * s * sin(sumAngle[0])

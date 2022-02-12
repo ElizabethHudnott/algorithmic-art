@@ -93,12 +93,41 @@ export default function TrigPatterns() {
 			generateBackground(0);
 		}
 
+		function togglePixelation(event) {
+			const index = parseInt(this.id.slice(-1));
+			const control = document.getElementById('swirl-pixelated-' + index);
+			let value;
+			if (this.checked) {
+				value = parseInt(control.value);
+				if (!(value > 0)) {
+					value = 30;
+					control.value = 30;
+				}
+			} else {
+				value = 1<<24;
+			}
+			control.disabled = !this.checked;
+			setBgPropertyElement(me, 'pixelated', index, value);
+			generateBackground(0);
+		}
+
+		function setPixelatedSteps(event) {
+			const value = parseInt(this.value);
+			if (value > 0) {
+				const index = parseInt(this.id.slice(-1));
+				setBgPropertyElement(me, 'pixelated', index, value);
+				generateBackground(0);
+			}
+		}
+
 		for (let i = 0; i < 4; i++) {
 			optionsDoc.getElementById('swirl-amplitude-' + i).addEventListener('input', numericElementInput);
 			optionsDoc.getElementById('swirl-phase-' + i).addEventListener('input', updatePhase);
 			optionsDoc.getElementById('swirl-phase-' + i + '-turns').addEventListener('input', updatePhase);
 			optionsDoc.getElementById('swirl-shape-' + i + '-int').addEventListener('input', setShapeInteger);
 			optionsDoc.getElementById('swirl-shape-' + i + '-frac').addEventListener('input', setShapeFraction);
+			optionsDoc.getElementById('swirl-pixelated-toggle-' + i).addEventListener('input', togglePixelation);
+			optionsDoc.getElementById('swirl-pixelated-' + i).addEventListener('input', setPixelatedSteps);
 		}
 
 		optionsDoc.getElementById('swirl-sum-angle-0').addEventListener('input', updatePhase);
@@ -231,7 +260,7 @@ export default function TrigPatterns() {
 	this.frequency = [1, 1];
 	this.phase = [0, 0.504 * Math.PI, 0, 0.504 * Math.PI];
 	this.waveforms = [2, 2, 2, 2];
-	this.pixelated = [960, 540, 1024, 1024];
+	this.pixelated = [1<<24, 1<<24, 1<<24, 1<<24];
 
 	this.sumMagnitude = [1.41, 1.41];
 	this.sumAngle = [-Math.PI / 4, Math.PI / 4];

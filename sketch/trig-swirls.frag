@@ -59,7 +59,7 @@ float squarish(float theta, float wave) {
 	float value;
 	if (theta <= 0.5 * PI) {
 		float limit = 0.5 * PI * (1.0 - max(2.0 * (wave - 0.5), 0.0));
-		value = theta >= limit ? 1.0 : sine;
+		value = theta >= limit ? 1.0 : mix(sine, 1.0, max(2.0 * wave - 1.0, 0.0));
 	} else {
 		value = mix(sine, 1.0, min(2.0 * wave, 1.0));
 	}

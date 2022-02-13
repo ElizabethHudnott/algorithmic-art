@@ -161,9 +161,12 @@ void main() {
 	float red;
 	float maxValue = 0.0;
 	bool transparent = true;
-	for (int i = 0; i < redDepth; i++) {
+	int depth = int(redDepth);
+	float depthFraction = mod(redDepth, 1.0);
+	float weight;
+	for (int i = 0; i < depth; i++) {
 
-		float weight = redWeight[i];
+		weight = redWeight[i];
 		if (weight > 0.0) {
 			maxValue += weight;
 		}
@@ -172,6 +175,13 @@ void main() {
 			redShift[i], redThreshold[i], redSteps[i]);
 
 	}
+	weight = redWeight[depth];
+	if (weight > 0.0) {
+		maxValue += depthFraction * weight;
+	}
+	red += depthFraction * weight * colorComputation(sum, switchedSum, redModulus[depth],
+		redShift[depth], redThreshold[depth], redSteps[depth]);
+
 	if (maxValue > 0.0) {
 		red = red / maxValue;
 		transparent = red < greenChromaThreshold;
@@ -183,7 +193,9 @@ void main() {
 
 	float blue;
 	maxValue = 0.0;
-	for (int i = 0; i < blueDepth; i++) {
+	depth = int(blueDepth);
+	depthFraction = mod(blueDepth, 1.0);
+	for (int i = 0; i < depth; i++) {
 
 		float weight = blueWeight[i];
 		if (weight > 0.0) {
@@ -194,6 +206,13 @@ void main() {
 			blueShift[i], blueThreshold[i], blueSteps[i]);
 
 	}
+	weight = blueWeight[depth];
+	if (weight > 0.0) {
+		maxValue += depthFraction * weight;
+	}
+	blue += depthFraction * weight * colorComputation(sum, switchedSum, blueModulus[depth],
+		blueShift[depth], blueThreshold[depth], blueSteps[depth]);
+
 	if (maxValue > 0.0) {
 		blue = blue / maxValue;
 		transparent = transparent && blue < greenChromaThreshold;
@@ -205,7 +224,9 @@ void main() {
 
 	float luminosity;
 	maxValue = 0.0;
-	for (int i = 0; i < luminosityDepth; i++) {
+	depth = int(luminosityDepth);
+	depthFraction = mod(luminosityDepth, 1.0);
+	for (int i = 0; i < depth; i++) {
 
 		float weight = luminosityWeight[i];
 		if (weight > 0.0) {
@@ -216,6 +237,14 @@ void main() {
 			luminosityShift[i], luminosityThreshold[i], luminositySteps[i]);
 
 	}
+	weight = luminosityWeight[depth];
+	if (weight > 0.0) {
+		maxValue += depthFraction * weight;
+	}
+	luminosity += depthFraction * weight * colorComputation(sum, switchedSum,
+		luminosityModulus[depth], luminosityShift[depth], luminosityThreshold[depth],
+		luminositySteps[depth]);
+
 	if (maxValue > 0.0) {
 		luminosity = luminosity / maxValue;
 		transparent = transparent && luminosity < greenLumaThreshold;

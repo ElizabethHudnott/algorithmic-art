@@ -301,6 +301,7 @@ TrigPatterns.prototype.animatable = {
 		'amplitude', 'frequency', 'phase', 'sumMagnitude', 'sumAngle',
 		'waveforms',
 
+		'redDepth', 'luminosityDepth', 'blueDepth',
 		'luminosityWeight', 'redWeight', 'blueWeight',
 		'luminosityModulus', 'luminosityThreshold',
 		'redModulus', 'redThreshold',
@@ -313,6 +314,5 @@ TrigPatterns.prototype.animatable = {
 	],
 	stepped: [
 		'pixelated',
-		'luminosityDepth', 'redDepth', 'blueDepth',
 	],
 }

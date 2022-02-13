@@ -2,4 +2,27 @@
 	<p>
 		<span class="sketch-title">Trigonometry Swirls</span> is inspired by a <a href="https://twitter.com/bbcmicrobot/status/1473062768857149441" target="_blank" rel="noopener">BBC Micro program</a> written by Eben Upton in BASIC.
 	</p>
+	<p>
+		This sketch combines several mathematical operations to produce the swirls.
+	</p>
+	<ol>
+		<li>
+			Periodic functions, such as sine and cosine.
+		</li>
+		<li>
+			Summation of two periodic functions. For example, let <span class="math">w&nbsp;= sin(x)&nbsp;+ cos(y)</span>.
+		</li>
+		<li>
+			Using the output of periodic functions as the input to another periodic function, for example, <span class="math">x&nbsp;&times; cos(w)</span>.
+		</li>
+		<li>
+			Remainder after division (which is another form of repetition) and a cut-off value are used to generate one bit of colour information, that is a yes/no decision about how a pixel should be coloured. Several different divisors and thresholds can be combined to build more complex colouring patterns by layering individual pictures.
+		</li>
+	</ol>
+	<p>
+		This sketch uses a modified YCbCr colour space to more effectively create interesting artscapes, as opposed to the red, green and blue or hue, saturation and lightness systems. Luminosity (or Luma or Y) defines how bright the colour is. My modified system combines true luminosity with brightness. In my modified system having no "luminosity" produces black, having 100% luminosity produces fluorescent colours as though you had a coloured lightbulb shining out of the screen. Fifty percent luminosity produces duller colours that are more like having a piece of coloured paper. The Cb axis has blue at one end of the scale and yellow at the other end. You can think of yellow as being like a negative amount of blue since yellow is created using equal amounts of red and green in the RGB system. Similarly, the Cr axis goes between cyan and red.
+	</p>
+	<p>
+		Each bit of colour information can be used to control luminosity or Cb or Cr. If you like then any of the three axes can be given more than one bit of information. For example, one bit of luminosity information divides the image into areas belonging to two categories, light and dark, but having two bits of luminosity information divides the image into four categories, light, medium-light, medium-dark and dark. Alternatively, instead of using multiple bits to create separate swirls you can increase the number of steps of colour gradation associated with a single swirl.
+	</p>
 </div>

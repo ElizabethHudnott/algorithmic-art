@@ -607,3 +607,7 @@ button.toolbar-btn:hover {
 	color: white;
 	text-decoration: none;
 }
+
+.math {
+	font-style: italic;
+}

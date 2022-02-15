@@ -158,7 +158,7 @@ void main() {
 		x * s * cos(sumAngle[1]) +  y * c * sin(sumAngle[1])
 	);
 
-	float red;
+	float red = 0.0;
 	float maxValue = 0.0;
 	bool transparent = true;
 	int depth = int(redDepth);
@@ -185,13 +185,17 @@ void main() {
 	if (maxValue > 0.0) {
 		red = red / maxValue;
 		transparent = red < greenChromaThreshold;
-		float absOffset = abs(redOffset);
-		red = red * (1.0 - absOffset) + absOffset - 0.5 + min(redOffset, 0.0);
+		if (depth > 0) {
+			float absOffset = abs(redOffset);
+			red = red * (1.0 - absOffset) + absOffset - 0.5 + min(redOffset, 0.0);
+		} else {
+			red = clamp(redOffset + depthFraction * (red - 0.5), -0.5, 0.5);
+		}
 	} else {
 		red = clamp(redOffset, -0.5, 0.5);
 	}
 
-	float blue;
+	float blue = 0.0;
 	maxValue = 0.0;
 	depth = int(blueDepth);
 	depthFraction = mod(blueDepth, 1.0);
@@ -216,13 +220,17 @@ void main() {
 	if (maxValue > 0.0) {
 		blue = blue / maxValue;
 		transparent = transparent && blue < greenChromaThreshold;
-		float absOffset = abs(blueOffset);
-		blue = blue * (1.0 - absOffset) + absOffset - 0.5 + min(blueOffset, 0.0);
+		if (depth > 0) {
+			float absOffset = abs(blueOffset);
+			blue = blue * (1.0 - absOffset) + absOffset - 0.5 + min(blueOffset, 0.0);
+		} else {
+			blue = clamp(blueOffset + depthFraction * (blue - 0.5), -0.5, 0.5);
+		}
 	} else {
 		blue = clamp(blueOffset, -0.5, 0.5);
 	}
 
-	float luminosity;
+	float luminosity = 0.0;
 	maxValue = 0.0;
 	depth = int(luminosityDepth);
 	depthFraction = mod(luminosityDepth, 1.0);
@@ -248,10 +256,14 @@ void main() {
 	if (maxValue > 0.0) {
 		luminosity = luminosity / maxValue;
 		transparent = transparent && luminosity < greenLumaThreshold;
-		float absOffset = abs(luminosityOffset);
-		luminosity = luminosity * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
+		if (depth > 0) {
+			float absOffset = abs(luminosityOffset);
+			luminosity = luminosity * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
+		} else {
+			luminosity = clamp(mix(0.55, luminosity, depthFraction) + luminosityOffset, 0.0, 1.0);
+		}
 	} else {
-		luminosity = clamp(0.6 + luminosityOffset, 0.0, 1.0);
+		luminosity = clamp(0.55 + luminosityOffset, 0.0, 1.0);
 	}
 
 	float brightness = max(abs(red), abs(blue));

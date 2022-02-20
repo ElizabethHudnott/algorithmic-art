@@ -48,6 +48,12 @@ float sawtooth(float theta) {
 	return sgn * value;
 }
 
+float expSaw(float theta, float base) {
+	float oneOverB = 1.0 / base;
+	theta = mod(theta, 2.0 * PI);
+	return 2.0 * (pow(base, -0.5 * theta / PI) - oneOverB) / (1.0 - oneOverB) - 1.0;
+}
+
 float squarish(float theta, float wave) {
 	float sgn = sign(theta);
 	theta = mod(abs(theta), 2.0 * PI);
@@ -133,8 +139,15 @@ float waveform2(float wave, float theta, int steps) {
 	case 3:
 		value = sigmoid(theta, sqrt(fraction));
 		break;
-	case 4:
-		value = sawtooth(theta);
+	default:
+		if (intWave == 4 && fraction == 0.0) {
+			value = sawtooth(theta);
+		} else {
+			if (fraction == 0.0) {
+				fraction = 1.0;
+			}
+			value = expSaw(theta, 1.0 + pow(200.0, fraction));
+		}
 	}
 	return round(value * fSteps) / fSteps;
 }
@@ -260,10 +273,10 @@ void main() {
 			float absOffset = abs(luminosityOffset);
 			luminosity = luminosity * (1.0 - absOffset) + absOffset + min(luminosityOffset, 0.0);
 		} else {
-			luminosity = clamp(mix(0.55, luminosity, depthFraction) + luminosityOffset, 0.0, 1.0);
+			luminosity = clamp(mix(0.58, luminosity, depthFraction) + luminosityOffset, 0.0, 1.0);
 		}
 	} else {
-		luminosity = clamp(0.55 + luminosityOffset, 0.0, 1.0);
+		luminosity = clamp(0.58 + luminosityOffset, 0.0, 1.0);
 	}
 
 	float brightness = max(abs(red), abs(blue));

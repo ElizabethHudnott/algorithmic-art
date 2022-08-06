@@ -226,91 +226,107 @@
 						<input type="number" value="0" class="form-control form-control-sm" id="swirl-sum-angle-1-turns">
 					</td>
 				</tr>
+				<tr>
+					<td class="px-1">
+						<label class="col-form-label col-form-label-sm" for="swirl-rotation">
+							Rotation
+						</label>
+					</td>
+					<td class="px-1">
+						<input type="range" min="0" max="1" step="0.002" value="0" class="form-control-range mt-2" id="swirl-rotation">
+					</td>
+					<td class="px-1">
+						<input type="number" value="0" class="form-control form-control-sm" id="swirl-rotation-turns">
+					</td>
+				</tr>
 			</table>
 		</details>
 	</div>
 
 	<div class="tab-pane" id="swirl-shapes" role="tabpanel" aria-labelledby="swirl-shapes-tab">
-		<div class="form-row form-group">
-			<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-0-int">
-				X
-			</label>
-			<div class="col-2">
-				<select id="swirl-shape-0-int" class="form-control form-control-sm">
-					<option value="0">ExpTri</option>
-					<option value="1">Tri</option>
-					<option value="2" selected>Sine</option>
-					<option value="3">Linear</option>
-				</select>
+		<details open>
+			<summary class="mb-2">Waveforms</summary>
+			<div class="form-row form-group">
+				<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-0-int">
+					X
+				</label>
+				<div class="col-2">
+					<select id="swirl-shape-0-int" class="form-control form-control-sm">
+						<option value="0">ExpTri</option>
+						<option value="1">Tri</option>
+						<option value="2" selected>Sine</option>
+						<option value="3">Linear</option>
+					</select>
+				</div>
+				<div class="col-6">
+					<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-0-frac">
+				</div>
+				<div class="col-2 my-auto" id="swirl-shape-0-label">
+					Linear
+				</div>
 			</div>
-			<div class="col-6">
-				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-0-frac">
+			<div class="form-row form-group">
+				<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-1-int">
+					Y
+				</label>
+				<div class="col-2">
+					<select id="swirl-shape-1-int" class="form-control form-control-sm">
+						<option value="0">ExpTri</option>
+						<option value="1">Tri</option>
+						<option value="2" selected>Sine</option>
+						<option value="3">Linear</option>
+					</select>
+				</div>
+				<div class="col-6">
+					<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-1-frac">
+				</div>
+				<div class="col-2 my-auto" id="swirl-shape-1-label">
+					Linear
+				</div>
 			</div>
-			<div class="col-2 my-auto" id="swirl-shape-0-label">
-				Linear
+			<div class="form-row form-group">
+				<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-2-int">
+					1
+				</label>
+				<div class="col-2">
+					<select id="swirl-shape-2-int" class="form-control form-control-sm">
+						<option value="0">ExpTri</option>
+						<option value="1">Tri</option>
+						<option value="2" selected>Sine</option>
+						<option value="3">Sqr</option>
+						<option value="4">Saw</option>
+					</select>
+				</div>
+				<div class="col-6">
+					<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-2-frac">
+				</div>
+				<div class="col-2 my-auto" id="swirl-shape-2-label">
+					Sqr
+				</div>
 			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-1-int">
-				Y
-			</label>
-			<div class="col-2">
-				<select id="swirl-shape-1-int" class="form-control form-control-sm">
-					<option value="0">ExpTri</option>
-					<option value="1">Tri</option>
-					<option value="2" selected>Sine</option>
-					<option value="3">Linear</option>
-				</select>
+			<div class="form-row form-group">
+				<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-3-int">
+					2
+				</label>
+				<div class="col-2">
+					<select id="swirl-shape-3-int" class="form-control form-control-sm">
+						<option value="0">ExpTri</option>
+						<option value="1">Tri</option>
+						<option value="2" selected>Sine</option>
+						<option value="3">Sqr</option>
+						<option value="4">Saw</option>
+					</select>
+				</div>
+				<div class="col-6">
+					<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-3-frac">
+				</div>
+				<div class="col-2 my-auto" id="swirl-shape-3-label">
+					Sqr
+				</div>
 			</div>
-			<div class="col-6">
-				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-1-frac">
-			</div>
-			<div class="col-2 my-auto" id="swirl-shape-1-label">
-				Linear
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-2-int">
-				1
-			</label>
-			<div class="col-2">
-				<select id="swirl-shape-2-int" class="form-control form-control-sm">
-					<option value="0">ExpTri</option>
-					<option value="1">Tri</option>
-					<option value="2" selected>Sine</option>
-					<option value="3">Sqr</option>
-					<option value="4">Saw</option>
-				</select>
-			</div>
-			<div class="col-6">
-				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-2-frac">
-			</div>
-			<div class="col-2 my-auto" id="swirl-shape-2-label">
-				Sqr
-			</div>
-		</div>
-		<div class="form-row form-group">
-			<label class="col-2 col-form-label col-form-label-sm" for="swirl-shape-3-int">
-				2
-			</label>
-			<div class="col-2">
-				<select id="swirl-shape-3-int" class="form-control form-control-sm">
-					<option value="0">ExpTri</option>
-					<option value="1">Tri</option>
-					<option value="2" selected>Sine</option>
-					<option value="3">Sqr</option>
-					<option value="4">Saw</option>
-				</select>
-			</div>
-			<div class="col-6">
-				<input type="range" min="0" max="1" step="0.01" value="0" class="form-control-range mt-2" id="swirl-shape-3-frac">
-			</div>
-			<div class="col-2 my-auto" id="swirl-shape-3-label">
-				Sqr
-			</div>
-		</div>
-		<fieldset>
-			<legend>Rounding</legend>
+		</details>
+		<details open>
+			<summary class="mb-2">Rounding</summary>
 			<div class="form-row form-group">
 				<label class="col-2 col-form-label col-form-label-sm" for="swirl-pixelated-0">
 					X
@@ -374,7 +390,7 @@
 					</small>
 				</div>
 			</div>
-		</fieldset>
+		</details>
 	</div>
 
 	<div class="tab-pane" id="swirl-luminosity" role="tabpanel" aria-labelledby="swirl-luminosity-tab">

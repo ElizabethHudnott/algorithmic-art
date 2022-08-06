@@ -156,6 +156,14 @@ void main() {
 	float x = (gl_FragCoord.x - 0.5 * canvasWidth) / zoom - translateX / 1.8 * canvasWidth;
 	float y = (gl_FragCoord.y - 0.5 * canvasHeight) / zoom + translateY / 1.8 * canvasHeight;
 
+	{
+		float sine = sin(rotation);
+		float cosine = cos(rotation);
+		float oldX = x;
+		x = x * cosine - y * sine;
+		y = oldX * sine + y * cosine;
+	}
+
 	float wave =
 		amplitude[0] * waveform(waveforms[0], x / (40.0 * stretchX) - phase[0], pixelated[0]) +
 		amplitude[1] * waveform(waveforms[1], y / (40.0 * stretchY) + phase[1], pixelated[1]);

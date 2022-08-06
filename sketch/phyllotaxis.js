@@ -726,19 +726,19 @@ export default function Phyllotaxis() {
 
 	this.hueMin = 30;
 	this.hueMax = 30;
-	this.hueMode = 'rad';	// radial
+	this.hueMode = 'c';	// constant
 
 	this.saturationMin = 1;
 	this.saturationMax = 1;
-	this.saturationMode = 'rad';
+	this.saturationMode = 'c';
 
 	this.lightnessMin = 0.5;
 	this.lightnessMax = 0.5;
-	this.lightnessMode = 'rad';
+	this.lightnessMode = 'c';
 
 	this.opacityMin = 1;
 	this.opacityMax = 1;
-	this.opacityMode = 'rad';
+	this.opacityMode = 'c';
 
 	this.lighting = 0;
 	this.contrast = 0;

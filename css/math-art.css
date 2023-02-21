@@ -586,6 +586,7 @@ button.toolbar-btn:hover {
 	bottom: max(2vw, 22px);
 	right: max(2vw, 16px);
 	padding: 4px;
+	z-index: 2;
 }
 
 .patreon {

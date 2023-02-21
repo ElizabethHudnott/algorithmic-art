@@ -113,7 +113,7 @@ export default function TruchetTiles() {
 		optionsDoc.getElementById('tiles-add-tile').addEventListener('click', function (event) {
 			currentTileNum = me.tileTypes.length;
 			me.tileTypes[currentTileNum] = new MiddleLineTile('000000000', 1, 4, ConstraintLogic.DONT_CARE);
-			me.tileFrequencies[currentTileNum] = 6;
+			me.tileFrequencies[currentTileNum] = 12;
 			showTile();
 			document.getElementById('tiles-tile-num').max = currentTileNum;
 			document.getElementById('tiles-del-tile').disabled = false;
@@ -526,7 +526,7 @@ export default function TruchetTiles() {
 		new MiddleLineTile('000400008', 1, 4, ConstraintLogic.DONT_CARE),	// Curve, upper left
 	];
 
-	this.tileFrequencies = [6, 6, 6, 6, 6, 6, 6, 6];
+	this.tileFrequencies = [12, 12, 12, 12, 12, 12, 12, 12];
 
 	// Stroke widths as a proportion of the cell's width or height.
 	this.strokeRatio1 = 0.25;

@@ -126,7 +126,8 @@ function downloadFile(url, type) {
 }
 
 function darkMode() {
-	return matchMedia('(prefers-color-scheme: dark)').matches;
+	return false;
+	//return matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function focusFirst() {

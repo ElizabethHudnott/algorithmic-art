@@ -1,8 +1,13 @@
 Panning
 Phyllotaxis
 	Petal shape
-		allow continuum between ellipse and rectangle?
-		trapezium?
+		allow continuum between ellipse and rectangle
+		continuum between rectangle, trapezium and triangle
+
+Sierpinski Carpet
+	Move Editing mode into Colouring tab, rename to Colour
+	Filling options: circle, (warped) diamond, outlines
+	Filling positions: toggles like Structure tab
 
 Environment
 -----------

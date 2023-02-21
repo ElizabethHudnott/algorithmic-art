@@ -111,10 +111,10 @@ const shapesMap = new Map();
 
 export default class MiddleLineTile extends TileType {
 	/**
+	 * @param {string} str Encodes the tile's shape and colour mapping.
 	 * First 4 digits: diagonal lines: upper right quadrant, lower right, lower left, upper left
 	 * Second 4 digits: straight lines: up, right, down, left
-	 * Ninth digit bits: 1 = upper right, 2 = lower right, 4 = lower left, 8 = upper left
-	 * Tenth digit bits: semicircles 1 = above, 2 = right, 4 = down, 8 = left
+	 * Ninth digit bits: quarter circles 1 = up & right, 2 = right & down, 4 = down & left, 8 = left & up
 	 */
 	constructor(str, minConnections, maxConnections, checkSpecialConstraints) {
 		const connections = new Map();
@@ -303,7 +303,7 @@ export default class MiddleLineTile extends TileType {
 					curved = curved + (1 << index);
 				}
 			} else {
-				// Transition straight to no present.
+				// Transition straight to not present.
 				newChar = '0';
 			}
 		}
@@ -400,8 +400,7 @@ export default class MiddleLineTile extends TileType {
 		const lineWidthTB = lineWidthV / 2;		// Half of the line width top or bottom
 		const gradient = height / width;
 		const longGradient = (height + lineWidthV) / (width + lineWidthH);
-		const shortGradient = (height - lineWidthV) / (width - lineWidthH);
-
+		const shortGradient = Math.max(height - lineWidthV, 1) / Math.max(width - lineWidthH, 1);
 
 		const overlapTop = generator.overlap[0] * (height - lineWidthV);
 		const overlapRight = generator.overlap[1] * (width - lineWidthH);

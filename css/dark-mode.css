@@ -1,6 +1,6 @@
 :root {
 	--darkslate: hsl(220, 25%, 6%);
-	--form-color: hsl(220, 25%, 11%);
+	--form-color: hsl(220, 25%, 29%);
 }
 
 a {
@@ -67,12 +67,12 @@ input[type="color"], .form-control, .input-group-text {
 }
 
 .modal-content {
-	background-color: hsl(210, 50%, 15%, 0.8);
+	background-color: hsl(210, 50%, 18%, 0.8);
 	border-color: hsl(0, 0%, 9%, 0.8);
 }
 
 .modal-header {
-	background-color: hsl(210, 50%, 15%, 0.75);
+	background-color: hsl(210, 50%, 19%, 0.75);
 }
 
 .modal-header .close {

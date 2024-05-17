@@ -434,7 +434,7 @@ function matchLuma(rgba1, rgb2) {
 		white += (g - 255) * 0.715;
 	}
 	if (b > 255) {
-		white += b * 0.072;
+		white += (b - 255) * 0.072;
 	}
 	return [
 		Math.min(r + white, 255),

@@ -1,3 +1,9 @@
+New / Important Ideas
+	Add must/can/cannot link buttons for each edge
+	Add 4 buttons to opt-in to auto-generating rotated versions of the design
+		And flipped versions?
+	Require multiple colours when multiple colours are used in the tile designer
+
 Terminology
 	Edge matching puzzle
 
@@ -36,15 +42,15 @@ Tile 18 (cross)
 	Fill central circle with a random desaturated rainbow colour?
 
 Tile Sets
-	No.	Reference	Shape	Filled
-	0	Corners 	Line 	No
-	1	Corners 	Curve 	No
+	No.Reference	Shape	Filled
+	0	Corners 		Line 	No
+	1	Corners 		Curve	No
 	2	Middles		Line 	No
-	3	Middles		Curve 	No
-	4	Corners 	Line 	Yes*
-	5	Corners 	Curve 	Yes*
+	3	Middles		Curve	No
+	4	Corners 		Line 	Yes*
+	5	Corners 		Curve	Yes*
 	6	Middles		Line 	Yes+
-	7	Middles		Curve 	Yes+
+	7	Middles		Curve	Yes+
 	* The anchor points are actually the mid-points
 	+ The anchor points are actually the 1/3 and 2/3 points
 
@@ -62,8 +68,8 @@ Colour Assignment
 		Generally flow through a tile to another port / flow backwards from start point
 		Connections at tile corners (2 probability distributions)
 			Max Directions	Option 1	Option 2	Option 3
-			3				Straight 	Bent 		T-shape
-			4				Straight 	Bent 		Cross
+			3					Straight	Bent 		T-shape
+			4					Straight	Bent 		Cross
 	Modes
 		1 Flow / No flow
 		2 Same for each tile of the same type
@@ -83,7 +89,7 @@ Tsuro tiles
 	Anchor points joined in pairs
 
 Custom tileset
-	Uploaded from multiple graphics files
+	Uploaded from multiple graphics files (or a single 'sprite sheet')
 	Recolourable?
 
 Tile Selection Order
@@ -93,8 +99,8 @@ Tile Patterns
 	Fully random
 	Recursive
 	Specific pattern expressed by a code
-		Numbers and (lower case) letters: select which kind of tile (base 36)
-		Random tile type: R (capital)
+		Numbers and letters: select which kind of tile (base 36)
+		Random tile type: ?
 		Blank tile: space
 		Pattern separator: |
 	Randomly generated pattern code
@@ -156,11 +162,11 @@ Modifications to the Mode of repetition
 	Symmetry enforcement
 		Two shape fields:
 			F|0	No prescribed symmetry
-			F|1 Mirrored horizontally
+			F|1 	Mirrored horizontally
 			F|2	Mirrored horizontally and vertically
 			F|3	Mirrored vertically
-			T|0 Twofold rotational symmetry
-			T|1 Twofold rotational symmetry with horizontal mirroring
+			T|0 	Twofold rotational symmetry
+			T|1 	Twofold rotational symmetry with horizontal mirroring
 			T|2	Twofold rotational symmetry with vertical mirroring
 			T|3	Fourfold rotational symmetry
 		A field that controls symmetrical versus explicitly different colours
@@ -210,7 +216,7 @@ Animations
 		0 Raise tile (3D effect, increase shadow)
 		1 Rotate
 		2 Place tile down
-		3 Make minimum changes to the colours so that still flow properly
+		3 Make minimum changes to the colours so that they still flow properly
 			Quickly fade colour through black or white (nearest).
 
 	Building outwards from a single tile

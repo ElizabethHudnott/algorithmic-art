@@ -22,9 +22,11 @@ try {
 
 let unitsProcessed, yieldTime, benchmark;
 
+const redrawInterval = 1000 / 30;
+
 function calcBenchmark() {
 	const now = performance.now();
-	benchmark = Math.trunc(unitsProcessed / Math.max(now - yieldTime + 40, 1) * 40);
+	benchmark = Math.trunc(unitsProcessed / Math.max(now - yieldTime + redrawInterval, 1) * redrawInterval);
 	return now;
 }
 
@@ -739,7 +741,7 @@ function hasRandomness(enabled) {
 				if (backgroundRedraw === redraw) {
 					unitsProcessed = 0;
 					const startTime = performance.now();
-					yieldTime = startTime + 40;
+					yieldTime = startTime + redrawInterval;
 					done = redraw.next().done;
 					totalTime += performance.now() - startTime;
 					totalUnits += unitsProcessed;
@@ -747,7 +749,7 @@ function hasRandomness(enabled) {
 						restoreCanvas(context);
 						callback(contextualInfo);
 						if (totalUnits > 0) {
-							benchmark = Math.trunc(totalUnits / totalTime * 40);
+							benchmark = Math.trunc(totalUnits / totalTime * redrawInterval);
 						}
 						backgroundRedraw = undefined;
 						document.body.classList.remove('cursor-progress');
@@ -2606,7 +2608,7 @@ function hasRandomness(enabled) {
 			const redraw = generator.generate(context, renderWidth, renderHeight, preview);
 			let done;
 			do {
-				yieldTime = performance.now() + 40;
+				yieldTime = performance.now() + redrawInterval;
 				unitsProcessed = 0;
 				done = redraw.next().done;
 			} while (!done);
@@ -2632,7 +2634,7 @@ function hasRandomness(enabled) {
 			function render(time) {
 				if (capturer !== undefined) {
 					time = performance.now();
-				} else if (time - newAnimController.previousTime > 1000) {
+				} else if (time - newAnimController.previousTime > 400) {
 					console.log("Slow render!");
 				}
 				newAnimController.previousTime = time;
@@ -3421,7 +3423,7 @@ function hasRandomness(enabled) {
 		if (animController !== undefined) {
 			animController.startTween = tween;
 			animController.lastUIUpdate = tween;
-			animController.beginTime = performance.now();
+			animController.beginTime = document.timeline.currentTime + 1;
 			return;
 		}
 
